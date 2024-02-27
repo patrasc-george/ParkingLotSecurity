@@ -217,11 +217,17 @@ void algorithm::compareWithCentroid(const std::vector<cv::Vec4i>& lines, std::ve
 			secondLines.push_back(line);
 }
 
-cv::Vec4i algorithm::initialTerminalPoints(const std::vector<cv::Vec4i>& lines, const bool& direction)
+cv::Vec4i algorithm::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction)
 {
 	cv::Vec4i segment = lines[0];
-	for (const auto& line : lines)
+	for (auto& line : lines)
 	{
+		if (line[direction] > line[direction + 2])
+		{
+			std::swap(line[0], line[2]);
+			std::swap(line[1], line[3]);
+		}
+
 		if (line[direction] < segment[direction])
 		{
 			segment[0] = line[0];
@@ -237,13 +243,19 @@ cv::Vec4i algorithm::initialTerminalPoints(const std::vector<cv::Vec4i>& lines, 
 	return segment;
 }
 
-void algorithm::lineSorting(const cv::Mat& src, const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& sortedLines)
+bool algorithm::lineSorting(const cv::Mat& src, const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& sortedLines)
 {
 	std::vector<cv::Vec4i> verticalLines;
 	std::vector<cv::Vec4i> horizontalLines;
 	for (const auto& line : lines)
 	{
-		float slope = abs(line[3] - line[1]) / abs(line[2] - line[0]);
+		if (line[2] == line[0])
+		{
+			verticalLines.push_back(line);
+			continue;
+		}
+
+		float slope = abs(static_cast<float>(line[3]) - static_cast<float>(line[1])) / abs(static_cast<float>(line[2]) - static_cast<float>(line[0]));
 		float angle = atan(slope) * 180 / CV_PI;
 		float distanceOy = abs(90 - angle);
 		float distanceOx = abs(0 - angle);
@@ -259,13 +271,51 @@ void algorithm::lineSorting(const cv::Mat& src, const std::vector<cv::Vec4i>& li
 	std::vector<cv::Vec4i> topLines, bottomLines;
 	compareWithCentroid(horizontalLines, topLines, bottomLines, centroid, 1);
 
+	if (topLines.empty() || bottomLines.empty())
+		return false;
+
 	std::vector<cv::Vec4i> leftLines, rightLines;
 	compareWithCentroid(verticalLines, leftLines, rightLines, centroid, 0);
+
+	if (leftLines.empty() || rightLines.empty())
+		return false;
 
 	sortedLines.push_back(initialTerminalPoints(leftLines, 1));
 	sortedLines.push_back(initialTerminalPoints(topLines, 0));
 	sortedLines.push_back(initialTerminalPoints(rightLines, 1));
 	sortedLines.push_back(initialTerminalPoints(bottomLines, 0));
+
+	cv::Mat debug;
+	cv::cvtColor(src, debug, cv::COLOR_GRAY2BGR);
+	cv::copyMakeBorder(debug, debug, 5, 20, 5, 20, cv::BORDER_CONSTANT);
+	for (const cv::Vec4i& line : bottomLines) {
+		cv::Point start(line[0], line[1]);
+		cv::Point end(line[2], line[3]);
+		cv::line(debug, start, end, cv::Scalar(0, 0, 255), 1);
+	}
+
+	for (const cv::Vec4i& line : topLines) {
+		cv::Point start(line[0], line[1]);
+		cv::Point end(line[2], line[3]);
+		cv::line(debug, start, end, cv::Scalar(0, 255, 0), 1);
+	}
+	for (const cv::Vec4i& line : rightLines) {
+		cv::Point start(line[0], line[1]);
+		cv::Point end(line[2], line[3]);
+		cv::line(debug, start, end, cv::Scalar(255, 0, 0), 1);
+	}
+	for (const cv::Vec4i& line : leftLines) {
+		cv::Point start(line[0], line[1]);
+		cv::Point end(line[2], line[3]);
+		cv::line(debug, start, end, cv::Scalar(0, 255, 255), 1);
+	}
+
+	for (const auto& line : sortedLines)
+	{
+		cv::Point startPoint(line[0], line[1]);
+		cv::Point endPoint(line[2], line[3]);
+		cv::line(debug, startPoint, endPoint, cv::Scalar(255, 255, 0), 1);
+	}
 }
 
 cv::Point2f algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& line2)
@@ -286,29 +336,71 @@ cv::Point2f algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& lin
 	return cv::Point2f(x, y);
 }
 
-void algorithm::geometricTransformation(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour, const std::vector<cv::Point>& largestContour)
+void algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points)
+{
+	int minX = src.cols, minY = src.rows, maxX = 0, maxY = 0;
+
+	for (const auto& point : points)
+	{
+		minX = std::min(minX, static_cast<int>(point.x));
+		minY = std::min(minY, static_cast<int>(point.y));
+		maxX = std::max(maxX, static_cast<int>(point.x));
+		maxY = std::max(maxY, static_cast<int>(point.y));
+	}
+
+	int paddingUp = 0, paddingDown = 0, paddingLeft = 0, paddingRight = 0;
+
+	if (maxX > src.cols - 1)
+		paddingLeft = maxX - (src.cols - 1);
+	if (maxY > src.rows - 1)
+		paddingDown = maxY - (src.rows - 1);
+	if (minX < 0)
+		paddingRight = -minX;
+	if (minY < 0)
+		paddingUp = -minY;
+
+	for (auto& point : points)
+	{
+		if (point.x < 0)
+			point.x = paddingRight + point.x;
+
+		if (point.y < 0)
+			point.y = paddingUp + point.y;
+	}
+
+	cv::copyMakeBorder(src, dst, paddingUp, paddingDown, paddingLeft, paddingRight, cv::BORDER_CONSTANT);
+}
+
+bool algorithm::geometricTransformation(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour, const std::vector<cv::Point>& largestContour)
 {
 	cv::Mat erodedRegionContour;
 	cv::erode(regionContour, erodedRegionContour, cv::Mat());
 
 	cv::Mat edges = regionContour - erodedRegionContour;
 
-	cv::RotatedRect rotatedBBox = cv::minAreaRect(largestContour);
-	float minLineLenght = rotatedBBox.size.height * 0.8;
+	cv::copyMakeBorder(edges, edges, 8, 8, 8, 8, cv::BORDER_CONSTANT);
 
-	std::vector<cv::Vec4i> lines;
-	cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 20, minLineLenght, 70);
+	cv::RotatedRect rotatedBBox = cv::minAreaRect(largestContour);
+	float minLineLenght = rotatedBBox.size.height * 0.4;
+	float maxLineGap = rotatedBBox.size.height * 0.5;
 
 	std::vector<cv::Vec4i> sortedLines;
-	lineSorting(src, lines, sortedLines);
+	std::vector<cv::Vec4i> lines;
+	do {
+		cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 10, minLineLenght, maxLineGap);
+		minLineLenght--;
+	} while (!lineSorting(src, lines, sortedLines) && minLineLenght > 0);
 
 	std::vector<cv::Point2f> cornersCoordinates;
 	for (int i = 0; i < sortedLines.size(); i++)
 		cornersCoordinates.push_back(intersection(sortedLines[i], sortedLines[(i + 1) % 4]));
 
-	int height = cornersCoordinates[3].y - cornersCoordinates[1].y;
+	cv::Mat resizedSrc;
+	resizeToPoints(src, resizedSrc, cornersCoordinates);
+
+	int height = cornersCoordinates[3].y - cornersCoordinates[0].y;
 	int width = cornersCoordinates[1].x - cornersCoordinates[0].x;
-	dst = cv::Mat::zeros(cv::Size(width, height), src.type());
+	dst = cv::Mat::zeros(cv::Size(width, height), resizedSrc.type());
 
 	std::vector<cv::Point2f> finalCoordinates;
 	finalCoordinates.push_back(cv::Point2f(0, 0));
@@ -318,22 +410,25 @@ void algorithm::geometricTransformation(const cv::Mat& src, cv::Mat& dst, const 
 
 	cv::Mat perspectiveTransform = cv::getPerspectiveTransform(cornersCoordinates, finalCoordinates);
 
-	cv::Mat transformed = cv::Mat::zeros(cv::Size(width, height), src.type());;
-	cv::warpPerspective(src, transformed, perspectiveTransform, cv::Size(width, height));
+	cv::Mat transformed = cv::Mat::zeros(cv::Size(width, height), resizedSrc.type());;
+	cv::warpPerspective(resizedSrc, transformed, perspectiveTransform, cv::Size(width, height));
 
 	cv::threshold(transformed, dst, 0, 255, cv::THRESH_BINARY);
 
 	cv::Mat debug;
 	cv::cvtColor(edges, debug, cv::COLOR_GRAY2BGR);
+
 	for (const auto& point : cornersCoordinates)
-		cv::circle(debug, point, 1, cv::Scalar(0, 0, 255), -1);
+		cv::circle(debug, point, 2, cv::Scalar(0, 0, 255), -1);
+
+	return true;
 }
 
 bool algorithm::readText(const cv::Mat& src, std::string& text)
 {
 	tesseract::TessBaseAPI tess;
 	tess.Init(NULL, "DIN1451Mittelschrift", tesseract::OEM_DEFAULT);
-	tess.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+	//tess.SetVariable("tessedit_char_whitelist", "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 	tess.SetImage(src.data, src.cols, src.rows, 1, src.step);
 	text = tess.GetUTF8Text();
@@ -440,8 +535,10 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 			continue;
 
 		cv::Mat transformedConnectedComponent;
-		algorithm::geometricTransformation(denoiseConnectedComponent, transformedConnectedComponent, regionContour, largestContour);
+		if (!algorithm::geometricTransformation(denoiseConnectedComponent, transformedConnectedComponent, regionContour, largestContour))
+			continue;
 
+		cv::copyMakeBorder(transformedConnectedComponent, transformedConnectedComponent, 2, 2, 2, 2, cv::BORDER_CONSTANT);
 		std::string plate;
 		if (!algorithm::readText(transformedConnectedComponent, plate))
 			continue;

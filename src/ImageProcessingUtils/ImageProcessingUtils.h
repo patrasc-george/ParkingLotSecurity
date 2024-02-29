@@ -9,6 +9,17 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
+
+/**
+ * @class algorithm
+ * @brief Provides a collection of image processing functions.
+ *
+ * This class encapsulates a series of static functions designed for various image processing tasks,
+ * including color space conversion, binary thresholding, connected component analysis,
+ * geometric transformations, and text extraction using OCR. It aims to provide a toolkit
+ * for preprocessing images, detecting and extracting features, and performing post-processing
+ * operations such as drawing bounding boxes around detected regions.
+ */
 class algorithm
 {
 	/**
@@ -84,6 +95,95 @@ class algorithm
 	static bool heightBBox(const cv::Rect& roi, const float& min, const float& max);
 
 	/**
+	 * @brief Calculates the histogram of a given image.
+	 * @details This function computes the histogram of the source image. It identifies the range of pixel values and the total number of pixel intensity levels.
+	 * @param[in] src The source image for which the histogram is to be calculated.
+	 * @param[out] hist The output histogram, represented as a cv::Mat.
+	 */
+	static void histogram(const cv::Mat& src, cv::Mat& hist);
+
+	/**
+	 * @brief Calculates the cumulative histogram of a given histogram.
+	 * @details This function computes the cumulative histogram by summing up the pixel counts from the input histogram. The cumulative value at each bin represents the total count of pixels with intensity values up to that bin.
+	 * @param[in] hist The input histogram.
+	 * @param[out] cumulvativeHist The cumulative histogram, stored as a cv::Mat.
+	 */
+	static void cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHist);
+
+	/**
+	 * @brief Calculates a line from the minimum to maximum value of the cumulative histogram.
+	 * @details This function identifies the minimum and maximum values in the cumulative histogram and constructs a line connecting these two points.
+	 * @param[in] cumulvativeHist The cumulative histogram.
+	 * @param[out] line The calculated line, represented as a cv::Vec4f.
+	 */
+	static void histogramLine(const cv::Mat& cumulvativeHist, cv::Vec4f& line);
+
+	/**
+	 * @brief Calculates the distance of a point from a line.
+	 * @details This function computes the perpendicular distance of a given point from a specified line, using the line equation derived from the line's endpoints.
+	 * @param[in] x The x-coordinate of the point.
+	 * @param[in] y The y-coordinate of the point.
+	 * @param[in] line The line, represented as a cv::Vec4f.
+	 * @return The calculated distance as a float.
+	 */
+	static float distance(const float& x, const float& y, const cv::Vec4f& line);
+
+	/**
+	 * @brief Applies binary thresholding to an image.
+	 * @details This function creates a binary image from the source by setting pixels to white if their intensity exceeds a given threshold, and to black otherwise.
+	 * @param[in] src The source image to threshold.
+	 * @param[out] dst The destination binary image.
+	 * @param[in] threshold The intensity threshold.
+	 */
+	static void binaryThresholding(const cv::Mat& src, cv::Mat& dst, const int& threshold);
+
+	/**
+	 * @brief Applies triangle thresholding to an image.
+	 * @details This function calculates an optimal threshold based on the shape of the image histogram and uses it to convert the image to binary form.
+	 * @param[in] src The source image to threshold.
+	 * @param[out] dst The destination binary image.
+	 */
+	static void triangleThresholding(const cv::Mat& src, cv::Mat& dst);
+
+	/**
+	 * @brief Applies Sobel edge detection and thresholding to an image.
+	 * @details This function detects edges using the Sobel operator, calculates the magnitude and direction of gradients,
+	 * and applies triangle thresholding to the gradient magnitude.
+	 * @param[in] src The source image.
+	 * @param[out] dst The binary image after applying Sobel edge detection and thresholding.
+	 * @param[out] direction The gradient direction of each pixel.
+	 */
+	static void binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction);
+
+	/**
+	 * @brief Applies non-maximum suppression to an edge image.
+	 * @details This function thins out the edges in the input image by retaining only the maximum edge responses along the direction of the gradient,
+	 * effectively suppressing all the other non-maximal values.
+	 * @param[in] src The source edge image.
+	 * @param[out] dst The image after applying non-maximum suppression.
+	 * @param[in] direction The gradient direction of each pixel.
+	 */
+	static void nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& direction);
+
+	/**
+	 * @brief Calculates the morphological gradient of an image.
+	 * @details This function applies a morphological gradient operation to highlight the edges and fine details in the image.
+	 * It combines the results with Sobel edges and applies non-maximum suppression to refine the edge map.
+	 * @param[in] src The source image.
+	 * @param[out] dst The image after applying the morphological gradient and refining the edges.
+	 */
+	static void morphologicalGradient(const cv::Mat& src, cv::Mat& dst);
+
+	/**
+	 * @brief Performs a bitwise NAND operation between two images.
+	 * @details This function applies a bitwise NAND operation, effectively inverting a bitwise AND operation,
+	 * between the source image and an edges mask, setting pixels to zero where both input images have white pixels.
+	 * @param[in,out] src The source image to be modified.
+	 * @param[in] edges The edges image used for the NAND operation.
+	 */
+	static void bitwiseNand(cv::Mat& src, const cv::Mat& edges);
+
+	/**
 	 * @brief Finds and returns the largest contour from a vector of contours based on contour area.
 	 * @details This function iterates over a given set of contours, calculates the area for each, and identifies the largest contour.
 	 * @param[in] contours A vector containing multiple contours.
@@ -101,7 +201,7 @@ class algorithm
 	 * @param[out] largestContour The largest contour found in the source image.
 	 * @return The number of non-zero pixels in the masked destination image.
 	 */
-	static int insideContour(const cv::Mat& src, cv::Mat& dst, cv::Mat& regionContour, std::vector<cv::Point>& largestContour);
+	static int insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& edges, cv::Mat& regionContour, std::vector<cv::Point>& largestContour);
 
 	/**
 	 * @brief Calculates the height of a given contour.
@@ -192,7 +292,7 @@ class algorithm
 	 * @param[in] largestContour The largest contour identified in the source image.
 	 * @return A boolean value indicating the success of the transformation.
 	 */
-	static bool geometricTransformation(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour, const std::vector<cv::Point>& largestContour);
+	static bool geometricTransformation(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour, const std::vector<cv::Point>& largestContour, cv::Mat gray);
 
 	/**
 	 * @brief Extracts text from an image using OCR technology.
@@ -211,7 +311,7 @@ class algorithm
 	 * @param[out] dst The image on which bounding boxes will be drawn.
 	 * @param[in] roiConnectedComponents A vector of rectangles representing the regions of interest.
 	 */
-	static void drawBBoxes(cv::Mat& dst, std::vector<cv::Rect> roiConnectedComponents);
+	static void drawBBoxes(cv::Mat& dst, std::vector<cv::Rect>& roiConnectedComponents);
 
 	friend std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);
 };

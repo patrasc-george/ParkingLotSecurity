@@ -1,23 +1,5 @@
 ﻿#include "ImageProcessingUtils.h"
 
-#include <tesseract/baseapi.h>
-#include <leptonica/allheaders.h>
-
-void algorithm::getKernel(const cv::Mat& src, cv::Size& kernel, const float& percent = 0)
-{
-	kernel = cv::Size(src.rows * percent, src.cols * percent);
-
-	if (kernel.height < 3)
-		kernel.height = 3;
-	if (kernel.width < 3)
-		kernel.width = 3;
-
-	if (kernel.height % 2 == 0)
-		kernel.height--;
-	if (kernel.width % 2 == 0)
-		kernel.width--;
-}
-
 void algorithm::BGR2HSV(const cv::Mat& src, cv::Mat& dst)
 {
 	dst = cv::Mat(src.size(), CV_8UC3);
@@ -29,30 +11,30 @@ void algorithm::BGR2HSV(const cv::Mat& src, cv::Mat& dst)
 			double g = src.ptr<uchar>(y, x)[1] / 255.0;
 			double r = src.ptr<uchar>(y, x)[2] / 255.0;
 
-			double cmax = std::max(r, std::max(g, b));
-			double cmin = std::min(r, std::min(g, b));
-			double diff = cmax - cmin;
+			double max = std::max(b, std::max(g, r));
+			double min = std::min(b, std::min(g, r));
+			double difference = max - min;
 			double h, s;
 
-			if (cmax == cmin)
+			if (max == min)
 				h = 0;
-			else if (cmax == r)
-				h = fmod(60 * ((g - b) / diff) + 360, 360) / 2;
-			else if (cmax == g)
-				h = fmod(60 * ((b - r) / diff) + 120, 360) / 2;
-			else if (cmax == b)
-				h = fmod(60 * ((r - g) / diff) + 240, 360) / 2;
+			else if (max == r)
+				h = fmod(60 * ((g - b) / difference) + 360, 360) / 2;
+			else if (max == g)
+				h = fmod(60 * ((b - r) / difference) + 120, 360) / 2;
+			else if (max == b)
+				h = fmod(60 * ((r - g) / difference) + 240, 360) / 2;
 
-			if (cmax == 0)
+			if (max == 0)
 				s = 0;
 			else
-				s = (diff / cmax) * 255;
+				s = (difference / max) * 255;
 
-			double v = cmax * 255;
+			double v = max * 255;
 
-			dst.ptr<uchar>(y, x)[0] = static_cast<uchar>(h);
-			dst.ptr<uchar>(y, x)[1] = static_cast<uchar>(s);
-			dst.ptr<uchar>(y, x)[2] = static_cast<uchar>(v);
+			dst.ptr<uchar>(y, x)[0] = h;
+			dst.ptr<uchar>(y, x)[1] = s;
+			dst.ptr<uchar>(y, x)[2] = v;
 		}
 }
 
@@ -85,7 +67,7 @@ void algorithm::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::
 		areas.resize(newSize);
 }
 
-void algorithm::getRoi(const cv::Mat& stats, const int& label, cv::Rect& roi)
+void algorithm::getRoi(const cv::Mat& stats, cv::Rect& roi, const int& label)
 {
 	roi.x = stats.ptr<int>(label, cv::CC_STAT_LEFT)[0];
 	roi.y = stats.ptr<int>(label, cv::CC_STAT_TOP)[0];
@@ -106,6 +88,96 @@ bool algorithm::heightBBox(const cv::Rect& roi, const float& min = 0, const floa
 {
 	return roi.height > roi.width * min &&
 		roi.height < roi.width * max;
+}
+
+void algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const cv::Size& size, const float& percent = 0)
+{
+	int paddingX = src.width * percent;
+	if (paddingX < 3)
+		paddingX = 3;
+
+	int paddingY = src.height * percent;
+	if (paddingY < 3)
+		paddingY = 3;
+
+	dst.x = std::max(src.x - paddingX, 0);
+	dst.y = std::max(src.y - paddingY, 0);
+	dst.width = std::min(src.width + paddingX * 2, size.width - dst.x);
+	dst.height = std::min(src.height + paddingY * 2, size.height - dst.y);
+}
+
+void algorithm::blueToBlack(const cv::Mat& src, cv::Mat& dst)
+{
+	dst = src.clone();
+
+	for (int y = 0; y < src.rows; y++)
+		for (int x = 0; x < src.cols; x++)
+			if (src.ptr<uchar>(y, x)[0] > 100 && src.ptr<uchar>(y, x)[0] < 135 &&
+				src.ptr<uchar>(y, x)[1] > 100 &&
+				src.ptr<uchar>(y, x)[2] > 25 && src.ptr<uchar>(y, x)[2] < 230)
+			{
+				dst.ptr<uchar>(y, x)[0] = 0;
+				dst.ptr<uchar>(y, x)[1] = 0;
+				dst.ptr<uchar>(y, x)[2] = 0;
+			}
+}
+
+void algorithm::HSV2BGR(const cv::Mat& src, cv::Mat& dst)
+{
+	dst = cv::Mat(src.size(), CV_8UC3);
+
+	for (int y = 0; y < src.rows; y++)
+		for (int x = 0; x < src.cols; x++)
+		{
+			double h = src.ptr<uchar>(y, x)[0];
+			double s = src.ptr<uchar>(y, x)[1] / 255.0;
+			double v = src.ptr<uchar>(y, x)[2] / 255.0;
+
+			double chroma = s * v;
+			double scaledHue = h / 30.0;
+			double secondaryComponent = chroma * (1 - std::abs(fmod(scaledHue, 2) - 1));
+			double valueAdjustment = v - chroma;
+
+			double b, g, r;
+
+			switch (int(scaledHue))
+			{
+			case 0:
+				b = 0;
+				g = secondaryComponent;
+				r = chroma;
+				break;
+			case 1:
+				b = 0;
+				g = chroma;
+				r = secondaryComponent;
+				break;
+			case 2:
+				r = 0;
+				g = chroma;
+				b = secondaryComponent;
+				break;
+			case 3:
+				b = chroma;
+				g = secondaryComponent;
+				r = 0;
+				break;
+			case 4:
+				b = chroma;
+				g = 0;
+				r = secondaryComponent;
+				break;
+			default:
+				b = secondaryComponent;
+				g = 0;
+				r = chroma;
+				break;
+			}
+
+			dst.ptr<uchar>(y, x)[0] = (b + valueAdjustment) * 255;
+			dst.ptr<uchar>(y, x)[1] = (g + valueAdjustment) * 255;
+			dst.ptr<uchar>(y, x)[2] = (r + valueAdjustment) * 255;
+		}
 }
 
 void algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
@@ -211,51 +283,45 @@ void algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction
 	triangleThresholding(magnitude, dst);
 }
 
-void algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& direction)
+void algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& directions)
 {
-	cv::Mat paddedSrc;
-	cv::copyMakeBorder(src, paddedSrc, 6, 6, 6, 6, cv::BORDER_CONSTANT);
+	dst = cv::Mat::zeros(src.size(), CV_8UC1);
 
-	cv::Mat paddedDirection;
-	cv::copyMakeBorder(direction, paddedDirection, 6, 6, 6, 6, cv::BORDER_CONSTANT);
-
-	dst = cv::Mat::zeros(paddedSrc.size(), CV_8UC1);
-
-	for (int y = 2; y < paddedSrc.rows - 2; y++)
-		for (int x = 2; x < paddedSrc.cols - 2; x++)
+	for (int y = 2; y < src.rows - 2; y++)
+		for (int x = 2; x < src.cols - 2; x++)
 		{
-			float direction = fmod(paddedDirection.ptr<float>(y, x)[0], 180);
+			float direction = fmod(directions.ptr<float>(y, x)[0], 180);
 
-			uchar pixel = paddedSrc.ptr<uchar>(y, x)[0];
+			uchar pixel = src.ptr<uchar>(y, x)[0];
 			uchar pixel1, pixel2, pixel3, pixel4;
 
 			if ((direction >= 0 && direction < 22.5) || (direction >= 157.5 && direction <= 180))
 			{
-				pixel1 = paddedSrc.ptr<uchar>(y, x - 1)[0];
-				pixel2 = paddedSrc.ptr<uchar>(y, x - 2)[0];
-				pixel3 = paddedSrc.ptr<uchar>(y, x + 1)[0];
-				pixel4 = paddedSrc.ptr<uchar>(y, x + 2)[0];
+				pixel1 = src.ptr<uchar>(y, x - 1)[0];
+				pixel2 = src.ptr<uchar>(y, x - 2)[0];
+				pixel3 = src.ptr<uchar>(y, x + 1)[0];
+				pixel4 = src.ptr<uchar>(y, x + 2)[0];
 			}
 			else if (direction >= 22.5 && direction < 67.5)
 			{
-				pixel1 = paddedSrc.ptr<uchar>(y - 1, x - 1)[0];
-				pixel2 = paddedSrc.ptr<uchar>(y - 2, x - 2)[0];
-				pixel3 = paddedSrc.ptr<uchar>(y + 1, x + 1)[0];
-				pixel4 = paddedSrc.ptr<uchar>(y + 2, x + 2)[0];
+				pixel1 = src.ptr<uchar>(y - 1, x - 1)[0];
+				pixel2 = src.ptr<uchar>(y - 2, x - 2)[0];
+				pixel3 = src.ptr<uchar>(y + 1, x + 1)[0];
+				pixel4 = src.ptr<uchar>(y + 2, x + 2)[0];
 			}
 			else if (direction >= 67.5 && direction < 112.5)
 			{
-				pixel1 = paddedSrc.ptr<uchar>(y - 1, x)[0];
-				pixel2 = paddedSrc.ptr<uchar>(y - 2, x)[0];
-				pixel3 = paddedSrc.ptr<uchar>(y + 1, x)[0];
-				pixel4 = paddedSrc.ptr<uchar>(y + 2, x)[0];
+				pixel1 = src.ptr<uchar>(y - 1, x)[0];
+				pixel2 = src.ptr<uchar>(y - 2, x)[0];
+				pixel3 = src.ptr<uchar>(y + 1, x)[0];
+				pixel4 = src.ptr<uchar>(y + 2, x)[0];
 			}
 			else if (direction >= 112.5 && direction <= 157.5)
 			{
-				pixel1 = paddedSrc.ptr<uchar>(y - 1, x + 1)[0];
-				pixel2 = paddedSrc.ptr<uchar>(y - 2, x + 2)[0];
-				pixel3 = paddedSrc.ptr<uchar>(y + 1, x - 1)[0];
-				pixel4 = paddedSrc.ptr<uchar>(y + 2, x - 2)[0];
+				pixel1 = src.ptr<uchar>(y - 1, x + 1)[0];
+				pixel2 = src.ptr<uchar>(y - 2, x + 2)[0];
+				pixel3 = src.ptr<uchar>(y + 1, x - 1)[0];
+				pixel4 = src.ptr<uchar>(y + 2, x - 2)[0];
 			}
 
 			if (!(pixel < pixel1 || pixel <= pixel2 || pixel <= pixel3 || pixel <= pixel4))
@@ -263,7 +329,7 @@ void algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv
 		}
 }
 
-void algorithm::morphologicalGradient(const cv::Mat& src, cv::Mat& dst)
+void algorithm::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 {
 	cv::Mat sobel, direction;
 	binarySobel(src, sobel, direction);
@@ -304,101 +370,36 @@ void algorithm::getLargestContour(const std::vector<std::vector<cv::Point>>& con
 	}
 }
 
-int algorithm::insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& edges, cv::Mat& regionContour, std::vector<cv::Point>& largestContour)
+void algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const bool& opening = 0)
 {
-	cv::Mat triangle;
-	triangleThresholding(src, triangle);
-
 	cv::Mat otsu;
 	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
-	cv::copyMakeBorder(otsu, otsu, 6, 6, 6, 6, cv::BORDER_CONSTANT);
+	if (!edges.empty())
+	{
+		cv::Mat dilatedEdges;
+		cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(1, 3));
+		cv::dilate(edges, dilatedEdges, kernel);
+		bitwiseNand(otsu, dilatedEdges);
+	}
 
-	cv::Mat invertedOtsu = 255 - otsu;
+	if (opening)
+	{
+		int iterations = 1;
 
-	bitwiseNand(otsu, edges);
+		cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(1, 3));
+		cv::erode(otsu, otsu, kernel);
 
-	int iterations = 2;
-	int padding = iterations * 2;
-	cv::morphologyEx(otsu, otsu, cv::MORPH_OPEN, cv::Mat(), cv::Point(), iterations);
-	cv::copyMakeBorder(otsu, otsu, padding, 0, padding, 0, cv::BORDER_CONSTANT);
-	cv::Rect roi(0, 0, otsu.cols - padding, otsu.rows - padding);
-	otsu = otsu(roi);
+		cv::dilate(otsu, otsu, cv::Mat());
+	}
 
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(otsu, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	getLargestContour(contours, largestContour);
 
-	regionContour = cv::Mat::zeros(otsu.size(), otsu.type());
-	cv::drawContours(regionContour, std::vector<std::vector<cv::Point>>{largestContour}, 0, cv::Scalar(255), cv::FILLED);
-
-	dst = cv::Mat::zeros(invertedOtsu.size(), invertedOtsu.type());
-	invertedOtsu.copyTo(dst, regionContour);
-
-	return cv::countNonZero(dst);
-}
-
-bool compareAreas(const std::vector<cv::Point>& a, const std::vector<cv::Point>& b)
-{
-	return cv::contourArea(a) > cv::contourArea(b);
-}
-
-int algorithm::getContourHeight(const std::vector<cv::Point>& contour)
-{
-	int minY = contour[0].y;
-	int maxY = contour[0].y;
-
-	for (const cv::Point& point : contour)
-	{
-		minY = std::min(minY, point.y);
-		maxY = std::max(maxY, point.y);
-	}
-
-	return maxY - minY;
-}
-
-int algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
-{
-	std::vector<int> heights;
-	for (const auto& contour : contours)
-		heights.push_back(getContourHeight(contour));
-
-	std::sort(heights.begin(), heights.end());
-	return heights[heights.size() / 2];
-}
-
-bool algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent = 0)
-{
-	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(src, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	std::sort(contours.begin(), contours.end(), compareAreas);
-
-	if (contours.size() > 8)
-		contours.resize(8);
-
-	int median = medianHeight(contours);
-
-	for (int i = 0; i < contours.size(); i++)
-	{
-		int height = getContourHeight(contours[i]);
-		if (abs(median - height) > median * percent)
-		{
-			contours.erase(contours.begin() + i);
-			i--;
-		}
-	}
-
-	if (contours.size() < 4)
-		return false;
-
-	cv::Mat contoursRegion = cv::Mat::zeros(src.size(), src.type());
-	for (const auto& contour : contours)
-		cv::drawContours(contoursRegion, std::vector<std::vector<cv::Point>>{contour}, 0, cv::Scalar(255), cv::FILLED);
-
-	src.copyTo(dst, contoursRegion);
-
-	return cv::countNonZero(dst);
+	dst = cv::Mat::zeros(otsu.size(), otsu.type());
+	cv::drawContours(dst, std::vector<std::vector<cv::Point>>{largestContour}, 0, cv::Scalar(255), cv::FILLED);
 }
 
 void algorithm::compareWithCentroid(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec2i& centroid, const bool& direction)
@@ -439,7 +440,7 @@ cv::Vec4i algorithm::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const 
 	return segment;
 }
 
-bool algorithm::lineSorting(const cv::Mat& src, const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& sortedLines)
+bool algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, cv::Mat src)
 {
 	std::vector<cv::Vec4i> verticalLines;
 	std::vector<cv::Vec4i> horizontalLines;
@@ -462,7 +463,7 @@ bool algorithm::lineSorting(const cv::Mat& src, const std::vector<cv::Vec4i>& li
 			horizontalLines.push_back(line);
 	}
 
-	cv::Vec2i centroid = cv::Vec2f(src.cols / 2, src.rows / 2);
+	cv::Vec2i centroid = cv::Vec2f(size.width / 2, size.height / 2);
 
 	std::vector<cv::Vec4i> topLines, bottomLines;
 	compareWithCentroid(horizontalLines, topLines, bottomLines, centroid, 1);
@@ -481,10 +482,9 @@ bool algorithm::lineSorting(const cv::Mat& src, const std::vector<cv::Vec4i>& li
 	sortedLines.push_back(initialTerminalPoints(rightLines, 1));
 	sortedLines.push_back(initialTerminalPoints(bottomLines, 0));
 
-	//debug
+	//-------------------------------------------------------------------------
 	cv::Mat debug;
 	cv::cvtColor(src, debug, cv::COLOR_GRAY2BGR);
-	cv::copyMakeBorder(debug, debug, 5, 20, 5, 20, cv::BORDER_CONSTANT);
 	for (const cv::Vec4i& line : bottomLines) {
 		cv::Point start(line[0], line[1]);
 		cv::Point end(line[2], line[3]);
@@ -534,6 +534,41 @@ cv::Point2f algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& lin
 	return cv::Point2f(x, y);
 }
 
+bool algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour)
+{
+	cv::Mat erodedRegionContour;
+	cv::erode(src, erodedRegionContour, cv::Mat());
+
+	cv::Mat edges = src - erodedRegionContour;
+
+	cv::RotatedRect rotatedBBox = cv::minAreaRect(largestContour);
+	float minLineLenght = rotatedBBox.size.height * 0.4;
+	float maxLineGap = rotatedBBox.size.height * 0.5;
+
+	std::vector<cv::Vec4i> lines;
+	std::vector<cv::Vec4i> sortedLines;
+	do {
+		cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 10, minLineLenght, maxLineGap);
+		minLineLenght--;
+	} while (!lineSorting(sortedLines, lines, src.size(), edges) && minLineLenght > 0);
+
+	if (minLineLenght <= 0)
+		return false;
+
+	for (int i = 0; i < sortedLines.size(); i++)
+		quadrilateralCoordinates.push_back(intersection(sortedLines[i], sortedLines[(i + 1) % 4]));
+
+	//-------------------------------------------------------------------------
+	cv::Mat debug;
+	cv::cvtColor(edges, debug, cv::COLOR_GRAY2BGR);
+
+	for (const auto& point : quadrilateralCoordinates)
+		cv::circle(debug, point, 2, cv::Scalar(0, 0, 255), -1);
+	//-------------------------------------------------------------------------
+
+	return true;
+}
+
 void algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points)
 {
 	int minX = src.cols, minY = src.rows, maxX = 0, maxY = 0;
@@ -546,57 +581,36 @@ void algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv:
 		maxY = std::max(maxY, static_cast<int>(point.y));
 	}
 
-	int paddingUp = 0, paddingDown = 0, paddingLeft = 0, paddingRight = 0;
+	int paddingTop = 0, paddingBottom = 0, paddingRight = 0, paddingLeft = 0;
 
 	if (maxX > src.cols - 1)
-		paddingLeft = maxX - (src.cols - 1);
+		paddingRight = maxX - (src.cols - 1);
 	if (maxY > src.rows - 1)
-		paddingDown = maxY - (src.rows - 1);
+		paddingBottom = maxY - (src.rows - 1);
 	if (minX < 0)
-		paddingRight = -minX;
+		paddingLeft = -minX;
 	if (minY < 0)
-		paddingUp = -minY;
+		paddingTop = -minY;
 
 	for (auto& point : points)
 	{
 		if (point.x < 0)
-			point.x = paddingRight + point.x;
+			point.x = paddingLeft + point.x;
 
 		if (point.y < 0)
-			point.y = paddingUp + point.y;
+			point.y = paddingTop + point.y;
 	}
 
-	cv::copyMakeBorder(src, dst, paddingUp, paddingDown, paddingLeft, paddingRight, cv::BORDER_CONSTANT);
+	cv::copyMakeBorder(src, dst, paddingTop, paddingBottom, paddingLeft, paddingRight, cv::BORDER_CONSTANT);
 }
 
-bool algorithm::geometricTransformation(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour, const std::vector<cv::Point>& largestContour, cv::Mat gray)
+bool algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates)
 {
-	cv::Mat erodedRegionContour;
-	cv::erode(regionContour, erodedRegionContour, cv::Mat());
+	int height = quadrilateralCoordinates[3].y - quadrilateralCoordinates[0].y;
+	int width = quadrilateralCoordinates[1].x - quadrilateralCoordinates[0].x;
 
-	cv::Mat edges = regionContour - erodedRegionContour;
-
-	cv::RotatedRect rotatedBBox = cv::minAreaRect(largestContour);
-	float minLineLenght = rotatedBBox.size.height * 0.4;
-	float maxLineGap = rotatedBBox.size.height * 0.5;
-
-	std::vector<cv::Vec4i> sortedLines;
-	std::vector<cv::Vec4i> lines;
-	do {
-		cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 10, minLineLenght, maxLineGap);
-		minLineLenght--;
-	} while (!lineSorting(src, lines, sortedLines) && minLineLenght > 0);
-
-	std::vector<cv::Point2f> cornersCoordinates;
-	for (int i = 0; i < sortedLines.size(); i++)
-		cornersCoordinates.push_back(intersection(sortedLines[i], sortedLines[(i + 1) % 4]));
-
-	cv::Mat resizedSrc;
-	resizeToPoints(src, resizedSrc, cornersCoordinates);
-
-	int height = cornersCoordinates[3].y - cornersCoordinates[0].y;
-	int width = cornersCoordinates[1].x - cornersCoordinates[0].x;
-	dst = cv::Mat::zeros(cv::Size(width, height), resizedSrc.type());
+	if (height < 0 || width < 0)
+		return false;
 
 	std::vector<cv::Point2f> finalCoordinates;
 	finalCoordinates.push_back(cv::Point2f(0, 0));
@@ -604,78 +618,283 @@ bool algorithm::geometricTransformation(const cv::Mat& src, cv::Mat& dst, const 
 	finalCoordinates.push_back(cv::Point2f(width - 1, height - 1));
 	finalCoordinates.push_back(cv::Point2f(0, height - 1));
 
-	cv::Mat perspectiveTransform = cv::getPerspectiveTransform(cornersCoordinates, finalCoordinates);
+	cv::Mat perspectiveTransform = cv::getPerspectiveTransform(quadrilateralCoordinates, finalCoordinates);
 
-	cv::Mat transformed = cv::Mat::zeros(cv::Size(width, height), resizedSrc.type());;
-	cv::warpPerspective(resizedSrc, transformed, perspectiveTransform, cv::Size(width, height));
-
-	cv::threshold(transformed, dst, 0, 255, cv::THRESH_BINARY);
-
-	cv::copyMakeBorder(dst, dst, 6, 6, 6, 6, cv::BORDER_CONSTANT);
-
-	cv::Mat resizedGray;
-	resizeToPoints(gray, resizedGray, cornersCoordinates);
-	cv::warpPerspective(resizedGray, transformed, perspectiveTransform, cv::Size(width, height));
-
-	cv::Mat triangle;
-	cv::Mat otsu;
-	triangleThresholding(transformed, triangle);
-	cv::threshold(transformed, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-
-
-	//debug
-	cv::Mat debug;
-	cv::cvtColor(edges, debug, cv::COLOR_GRAY2BGR);
-
-	for (const auto& point : cornersCoordinates)
-		cv::circle(debug, point, 2, cv::Scalar(0, 0, 255), -1);
-	//-------------------------------------------------------------------------
+	dst = cv::Mat(cv::Size(width, height), src.type());
+	cv::warpPerspective(src, dst, perspectiveTransform, cv::Size(width, height));
 
 	return true;
 }
 
-bool algorithm::readText(const cv::Mat& src, std::string& text)
+void algorithm::paddingImage(const cv::Mat& src, cv::Mat& dst, const float& percent = 0, const cv::Scalar& value = cv::Scalar())
 {
-	tesseract::TessBaseAPI tess;
-	tess.Init(NULL, "DIN1451Mittelschrift", tesseract::OEM_DEFAULT);
-	tess.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+	int paddingX, paddingY;
 
-	tess.SetImage(src.data, src.cols, src.rows, 1, src.step);
-	text = tess.GetUTF8Text();
+	if (!percent)
+	{
+		paddingX = 1;
+		paddingY = 1;
+	}
+	else
+	{
+		paddingX = src.cols * percent;
+		paddingY = src.rows * percent;
+	}
 
-	text.erase(std::remove_if(text.begin(), text.end(), [](uchar x) { return std::isspace(x); }), text.end());
+	cv::copyMakeBorder(src, dst, paddingY, paddingY, paddingX, paddingX, cv::BORDER_CONSTANT, value);
+}
+
+bool algorithm::insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour)
+{
+	cv::Mat otsu;
+	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+	otsu = 255 - otsu;
+
+	dst = cv::Mat::zeros(otsu.size(), otsu.type());
+	otsu.copyTo(dst, regionContour);
+
+	return cv::countNonZero(dst);
+}
+
+bool compareAreas(const std::vector<cv::Point>& a, const std::vector<cv::Point>& b)
+{
+	return cv::contourArea(a) > cv::contourArea(b);
+}
+
+int algorithm::getContourHeight(const std::vector<cv::Point>& contour)
+{
+	int minY = contour[0].y;
+	int maxY = contour[0].y;
+
+	for (const cv::Point& point : contour)
+	{
+		minY = std::min(minY, point.y);
+		maxY = std::max(maxY, point.y);
+	}
+
+	return maxY - minY;
+}
+
+int algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
+{
+	std::vector<int> heights;
+	for (const auto& contour : contours)
+		heights.push_back(getContourHeight(contour));
+
+	std::sort(heights.begin(), heights.end());
+	return heights[heights.size() / 2];
+}
+
+bool algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent = 1)
+{
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(src, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	std::sort(contours.begin(), contours.end(), compareAreas);
+
+	if (contours.size() > 8)
+		contours.resize(8);
+
+	int median = medianHeight(contours);
+
+	for (int i = 0; i < contours.size(); i++)
+	{
+		int height = getContourHeight(contours[i]);
+		if (abs(median - height) > median * percent)
+		{
+			contours.erase(contours.begin() + i);
+			i--;
+		}
+	}
+
+	if (contours.size() < 6)
+		return false;
+
+	cv::Mat contoursRegion = cv::Mat::zeros(src.size(), src.type());
+	for (const auto& contour : contours)
+		cv::drawContours(contoursRegion, std::vector<std::vector<cv::Point>>{contour}, 0, cv::Scalar(255), cv::FILLED);
+
+	src.copyTo(dst, contoursRegion);
+
+	return cv::countNonZero(dst);
+}
+
+bool compareX(const cv::Rect& a, const cv::Rect& b)
+{
+	return a.x < b.x;
+}
+
+void algorithm::charsSeparation(const cv::Mat& src, std::vector<cv::Rect>& chars)
+{
+	cv::Mat stats;
+	std::vector<std::pair<int, int>> areas;
+	algorithm::getConnectedComponents(src, stats, areas);
+
+	for (const auto& area : areas)
+	{
+		cv::Rect roi;
+		int label = area.first;
+		algorithm::getRoi(stats, roi, label);
+
+		paddingRect(roi, roi, cv::Size(src.cols, src.rows), 0.1);
+
+		chars.push_back(roi);
+	}
+
+	std::sort(chars.begin(), chars.end(), compareX);
+}
+
+void algorithm::wordSeparation(const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& left, std::vector<cv::Rect>& middle, std::vector<cv::Rect>& right)
+{
+	int maxDistance = 0;
+	int firstIndex = 0;
+	for (int i = 0; i < chars.size() - 1; i++)
+	{
+		int distance = chars[i + 1].x - chars[i].x;
+		if (distance > maxDistance)
+		{
+			maxDistance = distance;
+			firstIndex = i;
+		}
+	}
+
+	int lastIndex = chars.size() - 3;
+	for (int i = 0; i < chars.size(); i++)
+	{
+		if (i <= firstIndex)
+			left.push_back(chars[i]);
+		else
+			if (i > firstIndex && i < lastIndex)
+				middle.push_back(chars[i]);
+			else
+				if (i >= lastIndex)
+					right.push_back(chars[i]);
+	}
+}
+
+void algorithm::getWord(const std::vector<cv::Rect>& chars, cv::Rect& word)
+{
+	cv::Point topLeft(chars[0].x, chars[0].y);
+	for (const auto& roi : chars)
+	{
+		if (roi.x < topLeft.x)
+			topLeft.x = roi.x;
+		if (roi.y < topLeft.y)
+			topLeft.y = roi.y;
+	}
+
+	cv::Point bottomRight(chars[0].x + chars[0].width, chars[0].y + chars[0].height);
+	for (const auto& roi : chars)
+	{
+		if (roi.x + roi.width > bottomRight.x)
+			bottomRight.x = roi.x + roi.width;
+		if (roi.y + roi.height > bottomRight.y)
+			bottomRight.y = roi.y + roi.height;
+	}
+
+	word.x = topLeft.x;
+	word.y = topLeft.y;
+	word.width = bottomRight.x - topLeft.x;
+	word.height = bottomRight.y - topLeft.y;
+}
+
+bool algorithm::print(tesseract::TessBaseAPI& tess, const bool& levelValue)
+{
+	std::string text = tess.GetUTF8Text();
 
 	if (text.empty() || std::all_of(text.begin(), text.end(), isspace))
 		return false;
 
 	tess.Recognize(0);
 	tesseract::ResultIterator* iterator = tess.GetIterator();
-	tesseract::PageIteratorLevel level = tesseract::RIL_BLOCK;
-	if (iterator != nullptr)
-	{
-		do
-		{
-			std::string word = iterator->GetUTF8Text(level);
-			float confidence = iterator->Confidence(level);
-			std::cout << word << confidence << std::endl;
-		} while (iterator->Next(level));
-	}
+	tesseract::PageIteratorLevel level;
+	if (levelValue)
+		level = tesseract::RIL_BLOCK;
+	else
+		level = tesseract::RIL_SYMBOL;
 
-	iterator = tess.GetIterator();
-	level = tesseract::RIL_SYMBOL;
-	if (iterator != nullptr)
+	std::string symbol = iterator->GetUTF8Text(level);
+	float confidence = iterator->Confidence(level);
+
+	if (levelValue)
+		symbol.erase(symbol.size() - 1, 1);
+	std::cout << symbol << " " << confidence << std::endl;
+
+	return true;
+}
+
+bool algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, const bool& charType)
+{
+	tesseract::TessBaseAPI tess;
+	tess.Init(NULL, "DIN1451Mittelschrift", tesseract::OEM_DEFAULT);
+
+	tess.SetVariable("load_bigram_dawg", "false");
+	tess.SetVariable("load_freq_dawg", "false");
+	tess.SetVariable("load_number_dawg", "false");
+	tess.SetVariable("load_punc_dawg", "false");
+	tess.SetVariable("load_system_dawg", "false");
+	tess.SetVariable("load_unambig_dawg", "false");
+	tess.SetVariable("load_word_dawg", "false");
+
+	if (charType)
+		tess.SetVariable("tessedit_char_whitelist", "0123456789");
+	else
+		tess.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+	tess.SetImage(src.data, src.cols, src.rows, 1, src.step);
+
+	cv::Rect word;
+	getWord(chars, word);
+
+	//-------------------------------------------------------------------------
+	cv::Mat debug;
+	cv::cvtColor(src, debug, cv::COLOR_GRAY2BGR);
+	for (const auto& rect : chars)
+		cv::rectangle(debug, rect, cv::Scalar(0, 255, 0), 1);
+	cv::rectangle(debug, word, cv::Scalar(0, 0, 255), 1);
+	//-------------------------------------------------------------------------
+
+	tess.SetRectangle(word.x, word.y, word.width, word.height);
+
+	//if (!print(tess, 1))
+	//	return false;
+	print(tess, 1);
+
+	for (const auto& roi : chars)
 	{
-		do
-		{
-			std::string symbol = iterator->GetUTF8Text(level);
-			float confidence = iterator->Confidence(level);
-			std::cout << symbol << " " << confidence << std::endl;
-		} while (iterator->Next(level));
+		tess.SetRectangle(roi.x, roi.y, roi.width, roi.height);
+
+		//if (!print(tess, 0))
+			//return false;
+		print(tess, 0);
+
+		text = text + tess.GetUTF8Text();
+		text.erase(text.size() - 1, 1);
 	}
 
 	std::cout << std::endl << std::endl;
 
 	return true;
+}
+
+bool algorithm::readText(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars)
+{
+	bool result = true;
+
+	std::vector<cv::Rect> left;
+	std::vector<cv::Rect> middle;
+	std::vector<cv::Rect> right;
+
+	wordSeparation(chars, left, middle, right);
+
+	if (!applyTesseract(src, text, left, 0))
+		result = false;
+	if (!applyTesseract(src, text, middle, 1))
+		result = false;
+	if (!applyTesseract(src, text, right, 0))
+		result = false;
+
+	return result;
 }
 
 void algorithm::drawBBoxes(cv::Mat& dst, std::vector<cv::Rect>& roiConnectedComponents)
@@ -693,27 +912,21 @@ void algorithm::drawBBoxes(cv::Mat& dst, std::vector<cv::Rect>& roiConnectedComp
 
 std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 {
-	cv::Mat srcBGR;
+	cv::Mat bgrSrc;
 	if (src.type() == CV_8UC4)
-		cv::cvtColor(src, srcBGR, cv::COLOR_BGRA2BGR);
+		cv::cvtColor(src, bgrSrc, cv::COLOR_BGRA2BGR);
 	else
-		srcBGR = src.clone();
+		bgrSrc = src.clone();
 
-	cv::Mat dstBGR = srcBGR.clone();
+	cv::Mat bgrDst = bgrSrc.clone();
 
-	cv::resize(srcBGR, srcBGR, cv::Size(srcBGR.cols / 2, srcBGR.rows / 2));
+	cv::resize(bgrSrc, bgrSrc, cv::Size(bgrSrc.cols / 2, bgrSrc.rows / 2));
 
-	cv::Rect roi(0, srcBGR.rows / 2, srcBGR.cols, srcBGR.rows / 2);
-	cv::Mat cropped = srcBGR(roi);
-
-	cv::Size kernel;
-	algorithm::getKernel(cropped, kernel, 0.01);
+	cv::Rect roi(0, bgrSrc.rows / 2, bgrSrc.cols, bgrSrc.rows / 2);
+	cv::Mat cropped = bgrSrc(roi);
 
 	cv::Mat gauss;
-	cv::GaussianBlur(cropped, gauss, kernel, 0);
-
-	cv::Mat gray;
-	cv::cvtColor(gauss, gray, cv::COLOR_BGR2GRAY);
+	cv::GaussianBlur(cropped, gauss, cv::Size(3, 3), 0);
 
 	cv::Mat hsv;
 	algorithm::BGR2HSV(gauss, hsv);
@@ -725,47 +938,76 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 	std::vector<std::pair<int, int>> areas;
 	algorithm::getConnectedComponents(binary, stats, areas, 10);
 
-	std::vector<cv::Rect> roiConnectedComponents;
 	std::string plates;
+	std::vector<cv::Rect> roiConnectedComponents;
 	for (int i = 0; i < areas.size(); i++)
 	{
 		cv::Rect roi;
 		int label = areas[i].first;
 
-		algorithm::getRoi(stats, label, roi);
+		algorithm::getRoi(stats, roi, label);
 
 		if (!algorithm::sizeBBox(cropped, roi, 0.01, 0.2) || !algorithm::heightBBox(roi, 0.2, 0.6))
 			continue;
 
-		cv::Mat grayConnectedComponent = gray(roi);
-		cv::Mat edges;
-		algorithm::morphologicalGradient(grayConnectedComponent, edges);
+		algorithm::paddingRect(roi, roi, cropped.size(), 0.05);
 
-		cv::Mat textConnectedComponent;
+		cv::Mat hsvConnectedComponent = hsv(roi);
+		algorithm::blueToBlack(hsvConnectedComponent, hsvConnectedComponent);
+
+		cv::Mat bgrConnectedComponent;
+		algorithm::HSV2BGR(hsvConnectedComponent, bgrConnectedComponent);
+
+		cv::Mat grayConnectedComponent;
+		cv::cvtColor(bgrConnectedComponent, grayConnectedComponent, cv::COLOR_BGR2GRAY);
+
+		cv::Mat edges;
+		algorithm::edgeDetection(grayConnectedComponent, edges);
+
 		cv::Mat regionContour;
 		std::vector<cv::Point> largestContour;
-		if (!algorithm::insideContour(grayConnectedComponent, textConnectedComponent, edges, regionContour, largestContour))
+		algorithm::roiContour(grayConnectedComponent, regionContour, largestContour, edges, 1);
+
+		std::vector<cv::Point2f> quadrilateralCoordinates;
+		if (!algorithm::cornersCoordinates(regionContour, quadrilateralCoordinates, largestContour))
+			continue;
+
+		cv::Mat resizedConnectedComponent;
+		algorithm::resizeToPoints(grayConnectedComponent, resizedConnectedComponent, quadrilateralCoordinates);
+
+		cv::Mat transformedConnectedComponent;
+		if (!algorithm::geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, quadrilateralCoordinates))
+			continue;
+
+		algorithm::paddingImage(transformedConnectedComponent, transformedConnectedComponent, 0, cv::Scalar(255));
+
+		cv::Mat first = regionContour.clone();
+		algorithm::roiContour(transformedConnectedComponent, regionContour, largestContour);
+
+		cv::Mat textConnectedComponent;
+		if (!algorithm::insideContour(transformedConnectedComponent, textConnectedComponent, regionContour))
 			continue;
 
 		cv::Mat denoiseConnectedComponent;
-		if (!algorithm::denoise(textConnectedComponent, denoiseConnectedComponent, 0.2))
+		if (!algorithm::denoise(textConnectedComponent, denoiseConnectedComponent, 0.1))
 			continue;
 
-		cv::Mat transformedConnectedComponent;
-		if (!algorithm::geometricTransformation(denoiseConnectedComponent, transformedConnectedComponent, regionContour, largestContour, grayConnectedComponent))
-			continue;
+		algorithm::paddingImage(denoiseConnectedComponent, denoiseConnectedComponent, 0.1);
+
+		std::vector<cv::Rect> chars;
+		algorithm::charsSeparation(denoiseConnectedComponent, chars);
 
 		std::string plate;
-		if (!algorithm::readText(transformedConnectedComponent, plate))
+		if (!algorithm::readText(denoiseConnectedComponent, plate, chars))
 			continue;
 
 		roiConnectedComponents.push_back(roi);
 		plates = plates + plate + " ";
 	}
 
-	algorithm::drawBBoxes(dstBGR, roiConnectedComponents);
+	algorithm::drawBBoxes(bgrDst, roiConnectedComponents);
 
-	cv::cvtColor(dstBGR, dst, cv::COLOR_BGR2RGB);
+	cv::cvtColor(bgrDst, dst, cv::COLOR_BGR2RGB);
 
 	return std::string();
 }

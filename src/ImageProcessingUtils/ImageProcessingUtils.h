@@ -8,7 +8,8 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
-
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
 
 /**
  * @class algorithm
@@ -22,16 +23,6 @@
  */
 class algorithm
 {
-	/**
-	 * @brief Calculates the size of the Gaussian kernel based on the source image dimensions and a percentage.
-	 * @details This function computes the dimensions of the Gaussian kernel as a percentage of the source image's dimensions.
-	 * It ensures that the kernel dimensions are odd numbers greater than or equal to 3.
-	 * @param[in] src The source image for which the kernel size is to be calculated.
-	 * @param[out] kernel The calculated size of the kernel.
-	 * @param[in] percent The percentage of the source image's dimensions to calculate the kernel size.
-	 */
-	static void getKernel(const cv::Mat& src, cv::Size& kernel, const float& percent);
-
 	/**
 	 * @brief Converts an image from BGR color space to HSV color space.
 	 * @details This function converts each pixel of the source image from BGR color space to HSV color space manually,
@@ -70,7 +61,7 @@ class algorithm
 	 * @param[in] label The label of the connected component whose bounding box is to be retrieved.
 	 * @param[out] roi The bounding box of the specified connected component.
 	 */
-	static void getRoi(const cv::Mat& stats, const int& label, cv::Rect& roi);
+	static void getRoi(const cv::Mat& stats, cv::Rect& roi, const int& label);
 
 	/**
 	 * @brief Checks if the size of the bounding box meets specified criteria relative to the source image size.
@@ -93,6 +84,12 @@ class algorithm
 	 * @return A boolean value indicating whether the bounding box meets the specified proportional criteria.
 	 */
 	static bool heightBBox(const cv::Rect& roi, const float& min, const float& max);
+
+	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const cv::Size& size, const float& percent);
+
+	static void blueToBlack(const cv::Mat& src, cv::Mat& dst);
+
+	static void HSV2BGR(const cv::Mat& src, cv::Mat& dst);
 
 	/**
 	 * @brief Calculates the histogram of a given image.
@@ -172,7 +169,7 @@ class algorithm
 	 * @param[in] src The source image.
 	 * @param[out] dst The image after applying the morphological gradient and refining the edges.
 	 */
-	static void morphologicalGradient(const cv::Mat& src, cv::Mat& dst);
+	static void edgeDetection(const cv::Mat& src, cv::Mat& dst);
 
 	/**
 	 * @brief Performs a bitwise NAND operation between two images.
@@ -191,17 +188,92 @@ class algorithm
 	 */
 	static void getLargestContour(const std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point>& largestContour);
 
+	static void roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const bool& opening);
+
 	/**
-	 * @brief Identifies and extracts the region inside the largest contour of a binary image.
-	 * @details This function applies binary thresholding, finds contours, identifies the largest contour,
-	 * and creates a binary mask representing the area inside it.
-	 * @param[in] src The source binary image.
-	 * @param[out] dst The destination image masked by the largest contour.
-	 * @param[out] regionContour The binary mask of the largest contour.
-	 * @param[out] largestContour The largest contour found in the source image.
-	 * @return The number of non-zero pixels in the masked destination image.
+	 * @brief Categorizes lines based on their position relative to a centroid.
+	 * @details This function divides lines into two groups based on whether their median point falls above or below
+	 * (or left/right) the centroid along the specified direction.
+	 * @param lines The vector of lines to be categorized.
+	 * @param firstLines Output vector for lines on one side of the centroid.
+	 * @param secondLines Output vector for lines on the opposite side of the centroid.
+	 * @param centroid The point representing the centroid for comparison.
+	 * @param direction The axis (0 for x, 1 for y) along which to compare the lines' positions to the centroid.
 	 */
-	static int insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& edges, cv::Mat& regionContour, std::vector<cv::Point>& largestContour);
+	static void compareWithCentroid(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec2i& centroid, const bool& direction);
+
+	/**
+	 * @brief Determines the initial and terminal points of a line segment representing the combined span of multiple lines.
+	 * @details This function processes a collection of lines,
+	 * identifying the furthest start and end points to represent them as a single extended line segment.
+	 * @param[in] lines A vector of line segments represented as Vec4i (start and end points).
+	 * @param[in] direction The index indicating whether to process the lines based on their x (0) or y (1) coordinates.
+	 * @return A Vec4i containing the start and end points of the extended line segment.
+	 */
+	static cv::Vec4i initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction);
+
+	/**
+	 * @brief Sorts lines into vertical or horizontal categories and further by their position relative to the image's centroid.
+	 * @details This function sorts lines based on their orientation (vertical or horizontal)
+	 * and spatial position (e.g., above or below the centroid) to facilitate further geometric analyses.
+	 * @param sortedLines Output vector for the sorted lines.
+	 * @param lines The vector of detected lines to sort.
+	 * @param size The size of the image for calculating the centroid.
+	 * @return Boolean indicating success of the sorting operation.
+	 */
+	static bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, cv::Mat src);
+
+	/**
+	 * @brief Calculates the intersection point of two line segments.
+	 * @details This function finds the point where two line segments intersect, using their linear equations derived from the segment endpoints.
+	 * @param[in] line1 The first line segment represented as Vec4i.
+	 * @param[in] line2 The second line segment represented as Vec4i.
+	 * @return The intersection point as a Point2f.
+	 */
+	static cv::Point2f intersection(const cv::Vec4i& line1, const cv::Vec4i& line2);
+
+	/**
+	 * @brief Calculates quadrilateral coordinates by finding intersections of sorted lines.
+	 * @details Uses Hough line detection and sorting to calculate the intersection points of the detected lines,
+	 * forming a quadrilateral that approximates a region of interest.
+	 * @param src The source image for context in calculating line intersections.
+	 * @param quadrilateralCoordinates Output vector for the coordinates of the quadrilateral.
+	 * @param largestContour The largest contour, used for defining the region of interest.
+	 * @return Boolean indicating whether the calculation was successful.
+	 */
+	static bool cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour);
+
+	/**
+	 * @brief Adjusts the source image's size based on a set of points, adding padding if necessary.
+	 * @details This function ensures that all points lie within the bounds of the image,
+	 * potentially adjusting the image size by adding padding where needed.
+	 * @param[in] src The original image.
+	 * @param[out] dst The resized image with padding added as required.
+	 * @param[in,out] points The points that must all be visible in the resized image. They are adjusted if padding is added.
+	 */
+	static void resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points);
+
+	/**
+	 * @brief Applies a geometric transformation to extract a quadrilateral region from the source image.
+	 * @details This function applies a perspective transformation to the source image
+	 * to extract and rectify a quadrilateral region defined by the given coordinates.
+	 * @param src The source image.
+	 * @param dst The destination image after applying the geometric transformation.
+	 * @param quadrilateralCoordinates The coordinates of the quadrilateral to be extracted.
+	 */
+	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates);
+
+	static void paddingImage(const cv::Mat& src, cv::Mat& dst, const float& percent, const cv::Scalar& value);
+
+	/**
+	 * @brief Determines if the specified region within a contour is non-empty.
+	 * @details Applies binary thresholding to identify and isolate regions within a specified contour, useful for filtering and analysis.
+	 * @param src The source image.
+	 * @param dst The destination binary image showing the region within the contour.
+	 * @param regionContour The contour defining the region of interest.
+	 * @return Boolean indicating whether the region within the contour is non-empty.
+	 */
+	static bool insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour);
 
 	/**
 	 * @brief Calculates the height of a given contour.
@@ -230,79 +302,17 @@ class algorithm
 	 */
 	static bool denoise(const cv::Mat& src, cv::Mat& dst, const float& percent);
 
-	/**
-	 * @brief Separates lines into two groups based on their relative position to a centroid.
-	 * @details This function categorizes lines based on whether they are above or
-	 * below (or left/right, depending on the direction) a specified centroid, facilitating geometric analyses.
-	 * @param[in] lines The lines to be categorized.
-	 * @param[out] firstLines The group of lines that are on one side of the centroid.
-	 * @param[out] secondLines The group of lines on the opposite side of the centroid.
-	 * @param[in] centroid The point representing the centroid used for comparison.
-	 * @param[in] direction The axis along which to compare the lines with the centroid (0 for x-axis, 1 for y-axis).
-	 */
-	static void compareWithCentroid(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec2i& centroid, const bool& direction);
+	static void charsSeparation(const cv::Mat& src, std::vector<cv::Rect>& chars);
 
-	/**
-	 * @brief Determines the initial and terminal points of a line segment representing the combined span of multiple lines.
-	 * @details This function processes a collection of lines,
-	 * identifying the furthest start and end points to represent them as a single extended line segment.
-	 * @param[in] lines A vector of line segments represented as Vec4i (start and end points).
-	 * @param[in] direction The index indicating whether to process the lines based on their x (0) or y (1) coordinates.
-	 * @return A Vec4i containing the start and end points of the extended line segment.
-	 */
-	static cv::Vec4i initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction);
+	static void wordSeparation(const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& left, std::vector<cv::Rect>& middle, std::vector<cv::Rect>& right);
 
-	/**
-	 * @brief Sorts line segments into vertical and horizontal groups and further categorizes them based on their position relative to the image centroid.
-	 * @details This function differentiates lines based on their orientation and spatial relation to the centroid,
-	 * assisting in the geometric structuring of image features.
-	 * @param[in] src The source image, used for determining the centroid.
-	 * @param[in] lines The unsorted line segments detected in the image.
-	 * @param[out] sortedLines The result of categorizing lines as either vertical or horizontal, then sorting them based on their relation to the centroid.
-	 * @return A boolean value indicating whether the sorting was successful.
-	 */
-	static bool lineSorting(const cv::Mat& src, const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& sortedLines);
+	static void getWord(const std::vector<cv::Rect>& chars, cv::Rect& word);
 
-	/**
-	 * @brief Calculates the intersection point of two line segments.
-	 * @details This function finds the point where two line segments intersect, using their linear equations derived from the segment endpoints.
-	 * @param[in] line1 The first line segment represented as Vec4i.
-	 * @param[in] line2 The second line segment represented as Vec4i.
-	 * @return The intersection point as a Point2f.
-	 */
-	static cv::Point2f intersection(const cv::Vec4i& line1, const cv::Vec4i& line2);
+	static bool print(tesseract::TessBaseAPI& tess, const bool& levelValue);
 
-	/**
-	 * @brief Adjusts the source image's size based on a set of points, adding padding if necessary.
-	 * @details This function ensures that all points lie within the bounds of the image,
-	 * potentially adjusting the image size by adding padding where needed.
-	 * @param[in] src The original image.
-	 * @param[out] dst The resized image with padding added as required.
-	 * @param[in,out] points The points that must all be visible in the resized image. They are adjusted if padding is added.
-	 */
-	static void resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points);
+	static bool applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, const bool& charType);
 
-	/**
-	 * @brief Applies geometric transformations to an image based on the analysis of its largest contour.
-	 * @details This function performs perspective correction and other transformations on an image segment identified by its largest contour,
-	 * optimizing it for further processing.
-	 * @param[in] src The source image.
-	 * @param[out] dst The image after applying geometric transformations.
-	 * @param[in] regionContour A binary mask of the region defined by the largest contour.
-	 * @param[in] largestContour The largest contour identified in the source image.
-	 * @return A boolean value indicating the success of the transformation.
-	 */
-	static bool geometricTransformation(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour, const std::vector<cv::Point>& largestContour, cv::Mat gray);
-
-	/**
-	 * @brief Extracts text from an image using OCR technology.
-	 * @details This function utilizes Tesseract OCR to identify and extract text from animage segment,
-	 * applying preprocessing as necessary to optimize OCR accuracy.
-	 * @param[in] src The source image prepared for text recognition.
-	 * @param[out] text The extracted text as a string.
-	 * @return A boolean value indicating whether text was successfully extracted.
-	 */
-	static bool readText(const cv::Mat& src, std::string& text);
+	static bool readText(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars);
 
 	/**
 	 * @brief Draws bounding boxes around specified regions on an image.
@@ -311,18 +321,9 @@ class algorithm
 	 * @param[out] dst The image on which bounding boxes will be drawn.
 	 * @param[in] roiConnectedComponents A vector of rectangles representing the regions of interest.
 	 */
-	static void drawBBoxes(cv::Mat& dst, std::vector<cv::Rect>& roiConnectedComponents);
+	static void drawBBoxes(cv::Mat& src, std::vector<cv::Rect>& roiConnectedComponents);
 
 	friend std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);
 };
 
-/**
- * @brief Extracts text from an image using Optical Character Recognition (OCR).
- * @details This function leverages Tesseract OCR to detect and extract text from an image.
- * It preprocesses the image to improve OCR accuracy, which includes conversion to grayscale, thresholding,
- * and potentially other enhancements before passing the image to the OCR engine.
- * @param[in] src The source image from which text needs to be extracted. This should be a cv::Mat object.
- * @param[in] preprocess Flag indicating whether to preprocess the image for better OCR results. Preprocessing includes noise reduction, binarization, etc.
- * @return A std::string containing the extracted text. If no text is detected or in case of an error, the returned string will be empty.
- */
 std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);

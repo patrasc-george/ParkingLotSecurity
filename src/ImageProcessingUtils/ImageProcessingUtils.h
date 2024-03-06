@@ -85,10 +85,33 @@ class algorithm
 	 */
 	static bool heightBBox(const cv::Rect& roi, const float& min, const float& max);
 
+	/**
+	 * @brief Adds padding to a source rectangle within the specified bounds.
+	 * @details Expands the source rectangle by a certain percentage of its size on all sides,
+	 * ensuring the expanded rectangle stays within the given size limits.
+	 * @param[in] src The source rectangle to be padded.
+	 * @param[out] dst The destination rectangle with padding applied.
+	 * @param[in] size The size limits within which the destination rectangle must fit.
+	 * @param[in] percent The percentage of the original size by which to expand the rectangle on each side. Defaults to 0 if not specified.
+	 */
 	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const cv::Size& size, const float& percent);
 
+	/**
+	 * @brief Converts pixels within a specific blue range to black in the source image.
+	 * @details This function clones the source image to the destination image and iterates over all pixels,
+	 * turning those within a specified blue color range to black. This can be used to highlight certain features in the image.
+	 * @param[in] src The source image to be processed.
+	 * @param[out] dst The destination image with specific blue pixels turned to black.
+	 */
 	static void blueToBlack(const cv::Mat& src, cv::Mat& dst);
 
+	/**
+	 * @brief Converts an image from HSV color space to BGR color space.
+	 * @details This function iterates over each pixel of the source HSV image,
+	 * converts it back to BGR color space using the HSV to RGB color conversion formula, and stores the result in the destination image.
+	 * @param[in] src The source image in HSV color space.
+	 * @param[out] dst The destination image in BGR color space.
+	 */
 	static void HSV2BGR(const cv::Mat& src, cv::Mat& dst);
 
 	/**
@@ -188,6 +211,17 @@ class algorithm
 	 */
 	static void getLargestContour(const std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point>& largestContour);
 
+	/**
+	 * @brief Identifies the largest contour in the source image and optionally applies morphological operations.
+	 * @details This function applies a binary Otsu threshold to the source image to facilitate contour detection. 
+	 * Optionally, if an edges image is provided, it performs a bitwise NAND operation with a dilated version of the edges to refine the result. 
+	 * Additionally, a morphological opening can be applied to reduce noise.
+	 * @param src The source image for contour extraction.
+	 * @param dst The destination image where the largest contour is drawn. It is a binary image with the largest contour filled.
+	 * @param largestContour Output vector of points representing the largest contour detected in the source image.
+	 * @param edges Optional parameter providing an edge-detected version of the source image. This is used to refine the contour detection process if provided.
+	 * @param opening Boolean flag indicating whether to perform a morphological opening on the thresholded image. Useful for removing small objects or noise.
+	 */
 	static void roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const bool& opening);
 
 	/**
@@ -263,6 +297,16 @@ class algorithm
 	 */
 	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates);
 
+	/**
+	 * @brief Adds padding to an image with specified padding thickness and value.
+	 * @details This function applies a uniform padding around the source image. 
+	 * The thickness of the padding is determined by a percentage of the image's dimensions. 
+	 * A default padding of 1 pixel is applied if the percentage is 0. The function supports custom padding values for flexibility.
+	 * @param src The source image to which padding will be applied.
+	 * @param dst The destination image with applied padding. It is larger than the source image according to the specified padding.
+	 * @param percent The percentage of the source image's dimensions to calculate the padding thickness. Default is 0, which applies a minimum padding of 1 pixel.
+	 * @param value The color value used for padding. Default is cv::Scalar(), which applies black padding.
+	 */
 	static void paddingImage(const cv::Mat& src, cv::Mat& dst, const float& percent, const cv::Scalar& value);
 
 	/**

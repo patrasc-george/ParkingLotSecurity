@@ -856,16 +856,13 @@ bool algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std:
 
 	tess.SetRectangle(word.x, word.y, word.width, word.height);
 
-	//if (!print(tess, 1))
-	//	return false;
 	print(tess, 1);
 
 	for (const auto& roi : chars)
 	{
 		tess.SetRectangle(roi.x, roi.y, roi.width, roi.height);
 
-		//if (!print(tess, 0))
-			//return false;
+
 		print(tess, 0);
 
 		text = text + tess.GetUTF8Text();
@@ -879,8 +876,6 @@ bool algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std:
 
 bool algorithm::readText(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars)
 {
-	bool result = true;
-
 	std::vector<cv::Rect> left;
 	std::vector<cv::Rect> middle;
 	std::vector<cv::Rect> right;
@@ -888,13 +883,13 @@ bool algorithm::readText(const cv::Mat& src, std::string& text, const std::vecto
 	wordSeparation(chars, left, middle, right);
 
 	if (!applyTesseract(src, text, left, 0))
-		result = false;
+		return false;
 	if (!applyTesseract(src, text, middle, 1))
-		result = false;
+		return false;
 	if (!applyTesseract(src, text, right, 0))
-		result = false;
+		return false;
 
-	return result;
+	return true;
 }
 
 void algorithm::drawBBoxes(cv::Mat& dst, std::vector<cv::Rect>& roiConnectedComponents)

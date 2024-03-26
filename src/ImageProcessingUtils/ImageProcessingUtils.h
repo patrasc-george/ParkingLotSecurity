@@ -12,15 +12,15 @@
 #include <leptonica/allheaders.h>
 
 /**
- * @class algorithm
- * @brief Provides a collection of image processing functions.
- *
- * This class encapsulates a series of static functions designed for various image processing tasks,
- * including color space conversion, binary thresholding, connected component analysis,
- * geometric transformations, and text extraction using OCR. It aims to provide a toolkit
- * for preprocessing images, detecting and extracting features, and performing post-processing
- * operations such as drawing bounding boxes around detected regions.
- */
+* @class algorithm
+* @brief Provides a collection of image processing functions.
+*
+* This class encapsulates a series of static functions designed for various image processing tasks,
+* including color space conversion, binary thresholding, connected component analysis,
+* geometric transformations, and text extraction using OCR. It aims to provide a toolkit
+* for preprocessing images, detecting and extracting features, and performing post-processing
+* operations such as drawing bounding boxes around detected regions.
+*/
 class algorithm
 {
 	/**
@@ -86,15 +86,18 @@ class algorithm
 	static bool heightBBox(const cv::Rect& roi, const float& min, const float& max);
 
 	/**
-	 * @brief Adds padding to a source rectangle within the specified bounds.
-	 * @details Expands the source rectangle by a certain percentage of its size on all sides,
-	 * ensuring the expanded rectangle stays within the given size limits.
-	 * @param[in] src The source rectangle to be padded.
-	 * @param[out] dst The destination rectangle with padding applied.
-	 * @param[in] size The size limits within which the destination rectangle must fit.
-	 * @param[in] percent The percentage of the original size by which to expand the rectangle on each side. Defaults to 0 if not specified.
+	 * @brief Adds padding to a rectangle and optionally enforces a square shape.
+	 * @details This function calculates padding for a given rectangle based on a specified percentage of its dimensions.
+	 * It ensures a minimum padding of 3 units if the calculated padding is less than that.
+	 * The function can also adjust the padded rectangle to maintain a square shape based on the longest side.
+	 * Additionally, it ensures the padded rectangle fits within an optional boundary size, adjusting its position and size if necessary.
+	 * @param src The source rectangle to which padding will be applied.
+	 * @param dst The destination rectangle with applied padding. It may be adjusted to maintain a square shape or fit within specified bounds.
+	 * @param percent The percentage of the rectangle's dimensions to calculate the padding thickness. Default is 0.
+	 * @param square A boolean flag indicating whether to enforce a square shape for the destination rectangle. Default is false.
+	 * @param size An optional cv::Size representing boundary dimensions within which the destination rectangle must fit. Default is cv::Size(), implying no bounds.
 	 */
-	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const cv::Size& size, const float& percent);
+	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent, const bool& square, const cv::Size& size);
 
 	/**
 	 * @brief Converts pixels within a specific blue range to black in the source image.
@@ -124,7 +127,8 @@ class algorithm
 
 	/**
 	 * @brief Calculates the cumulative histogram of a given histogram.
-	 * @details This function computes the cumulative histogram by summing up the pixel counts from the input histogram. The cumulative value at each bin represents the total count of pixels with intensity values up to that bin.
+	 * @details This function computes the cumulative histogram by summing up the pixel counts from the input histogram.
+	 * The cumulative value at each bin represents the total count of pixels with intensity values up to that bin.
 	 * @param[in] hist The input histogram.
 	 * @param[out] cumulvativeHist The cumulative histogram, stored as a cv::Mat.
 	 */
@@ -147,15 +151,6 @@ class algorithm
 	 * @return The calculated distance as a float.
 	 */
 	static float distance(const float& x, const float& y, const cv::Vec4f& line);
-
-	/**
-	 * @brief Applies binary thresholding to an image.
-	 * @details This function creates a binary image from the source by setting pixels to white if their intensity exceeds a given threshold, and to black otherwise.
-	 * @param[in] src The source image to threshold.
-	 * @param[out] dst The destination binary image.
-	 * @param[in] threshold The intensity threshold.
-	 */
-	static void binaryThresholding(const cv::Mat& src, cv::Mat& dst, const int& threshold);
 
 	/**
 	 * @brief Applies triangle thresholding to an image.
@@ -211,30 +206,11 @@ class algorithm
 	 */
 	static void getLargestContour(const std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point>& largestContour);
 
-	/**
-	 * @brief Identifies the largest contour in the source image and optionally applies morphological operations.
-	 * @details This function applies a binary Otsu threshold to the source image to facilitate contour detection. 
-	 * Optionally, if an edges image is provided, it performs a bitwise NAND operation with a dilated version of the edges to refine the result. 
-	 * Additionally, a morphological opening can be applied to reduce noise.
-	 * @param src The source image for contour extraction.
-	 * @param dst The destination image where the largest contour is drawn. It is a binary image with the largest contour filled.
-	 * @param largestContour Output vector of points representing the largest contour detected in the source image.
-	 * @param edges Optional parameter providing an edge-detected version of the source image. This is used to refine the contour detection process if provided.
-	 * @param opening Boolean flag indicating whether to perform a morphological opening on the thresholded image. Useful for removing small objects or noise.
-	 */
-	static void roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const bool& opening);
+	static void roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges);
 
-	/**
-	 * @brief Categorizes lines based on their position relative to a centroid.
-	 * @details This function divides lines into two groups based on whether their median point falls above or below
-	 * (or left/right) the centroid along the specified direction.
-	 * @param lines The vector of lines to be categorized.
-	 * @param firstLines Output vector for lines on one side of the centroid.
-	 * @param secondLines Output vector for lines on the opposite side of the centroid.
-	 * @param centroid The point representing the centroid for comparison.
-	 * @param direction The axis (0 for x, 1 for y) along which to compare the lines' positions to the centroid.
-	 */
-	static void compareWithCentroid(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec2i& centroid, const bool& direction);
+	static void lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction);
+
+	static void compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec4f& referenceLine);
 
 	/**
 	 * @brief Determines the initial and terminal points of a line segment representing the combined span of multiple lines.
@@ -246,16 +222,7 @@ class algorithm
 	 */
 	static cv::Vec4i initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction);
 
-	/**
-	 * @brief Sorts lines into vertical or horizontal categories and further by their position relative to the image's centroid.
-	 * @details This function sorts lines based on their orientation (vertical or horizontal)
-	 * and spatial position (e.g., above or below the centroid) to facilitate further geometric analyses.
-	 * @param sortedLines Output vector for the sorted lines.
-	 * @param lines The vector of detected lines to sort.
-	 * @param size The size of the image for calculating the centroid.
-	 * @return Boolean indicating success of the sorting operation.
-	 */
-	static bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, cv::Mat src);
+	static bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, cv::Mat& debug);
 
 	/**
 	 * @brief Calculates the intersection point of two line segments.
@@ -266,48 +233,11 @@ class algorithm
 	 */
 	static cv::Point2f intersection(const cv::Vec4i& line1, const cv::Vec4i& line2);
 
-	/**
-	 * @brief Calculates quadrilateral coordinates by finding intersections of sorted lines.
-	 * @details Uses Hough line detection and sorting to calculate the intersection points of the detected lines,
-	 * forming a quadrilateral that approximates a region of interest.
-	 * @param src The source image for context in calculating line intersections.
-	 * @param quadrilateralCoordinates Output vector for the coordinates of the quadrilateral.
-	 * @param largestContour The largest contour, used for defining the region of interest.
-	 * @return Boolean indicating whether the calculation was successful.
-	 */
-	static bool cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour);
+	static bool cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour, cv::Mat& debug);
 
-	/**
-	 * @brief Adjusts the source image's size based on a set of points, adding padding if necessary.
-	 * @details This function ensures that all points lie within the bounds of the image,
-	 * potentially adjusting the image size by adding padding where needed.
-	 * @param[in] src The original image.
-	 * @param[out] dst The resized image with padding added as required.
-	 * @param[in,out] points The points that must all be visible in the resized image. They are adjusted if padding is added.
-	 */
-	static void resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points);
+	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent);
 
-	/**
-	 * @brief Applies a geometric transformation to extract a quadrilateral region from the source image.
-	 * @details This function applies a perspective transformation to the source image
-	 * to extract and rectify a quadrilateral region defined by the given coordinates.
-	 * @param src The source image.
-	 * @param dst The destination image after applying the geometric transformation.
-	 * @param quadrilateralCoordinates The coordinates of the quadrilateral to be extracted.
-	 */
-	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates);
-
-	/**
-	 * @brief Adds padding to an image with specified padding thickness and value.
-	 * @details This function applies a uniform padding around the source image. 
-	 * The thickness of the padding is determined by a percentage of the image's dimensions. 
-	 * A default padding of 1 pixel is applied if the percentage is 0. The function supports custom padding values for flexibility.
-	 * @param src The source image to which padding will be applied.
-	 * @param dst The destination image with applied padding. It is larger than the source image according to the specified padding.
-	 * @param percent The percentage of the source image's dimensions to calculate the padding thickness. Default is 0, which applies a minimum padding of 1 pixel.
-	 * @param value The color value used for padding. Default is cv::Scalar(), which applies black padding.
-	 */
-	static void paddingImage(const cv::Mat& src, cv::Mat& dst, const float& percent, const cv::Scalar& value);
+	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent);
 
 	/**
 	 * @brief Determines if the specified region within a contour is non-empty.
@@ -335,39 +265,70 @@ class algorithm
 	 */
 	static int medianHeight(const std::vector<std::vector<cv::Point>>& contours);
 
-	/**
-	 * @brief Applies a denoising operation to a binary image based on contour analysis.
-	 * @details This function performs contour detection, filters out contours that significantly deviate from the median height,
-	 * and retains a specified number of the largest contours to denoise the image.
-	 * @param[in] src The source binary image.
-	 * @param[out] dst The destination image after denoising.
-	 * @param[in] percent The percentage used to determine the acceptable deviation from the median height for contours.
-	 * @return A boolean value indicating success of the denoising process.
-	 */
 	static bool denoise(const cv::Mat& src, cv::Mat& dst, const float& percent);
 
-	static void charsSeparation(const cv::Mat& src, std::vector<cv::Rect>& chars);
-
-	static void wordSeparation(const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& left, std::vector<cv::Rect>& middle, std::vector<cv::Rect>& right);
-
-	static void getWord(const std::vector<cv::Rect>& chars, cv::Rect& word);
-
-	static bool print(tesseract::TessBaseAPI& tess, const bool& levelValue);
-
-	static bool applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, const bool& charType);
-
-	static bool readText(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars);
+	/**
+	 * @brief Extracts bounding boxes for characters from the source image.
+	 * @details This function applies connected component analysis to the source image to find individual characters.
+	 * It stores the bounding boxes of these characters in the provided vector.
+	 * @param src The source binary image from which characters are to be extracted.
+	 * @param chars Output vector storing the bounding boxes of detected characters.
+	 */
+	static void charsBBoxes(const cv::Mat& src, std::vector<cv::Rect>& chars);
 
 	/**
-	 * @brief Draws bounding boxes around specified regions on an image.
-	 * @details This function visually highlights regions of interest in an image,
-	 * typically used to denote areas where text or specific features were identified.
-	 * @param[out] dst The image on which bounding boxes will be drawn.
-	 * @param[in] roiConnectedComponents A vector of rectangles representing the regions of interest.
+	 * @brief Identifies critical indexes in the character bounding boxes vector to aid in word separation.
+	 * @details Finds the first index of characters and the index where the largest spacing between characters occurs,
+	 * indicating possible word boundaries.
+	 * @param chars Vector of character bounding boxes.
+	 * @param indexes Output array storing critical indexes for word separation.
 	 */
-	static void drawBBoxes(cv::Mat& src, std::vector<cv::Rect>& roiConnectedComponents);
+	static bool firstIndexes(const std::vector<cv::Rect>& chars, std::array<int, 3>& firstIndexes);
 
-	friend std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);
+	/**
+	 * @brief Applies padding to character bounding boxes and adjusts positions to maintain layout.
+	 * @details Enlarges character bounding boxes based on a percentage and ensures they do not overlap by adjusting their positions accordingly.
+	 * @param src Vector of original character bounding boxes.
+	 * @param dst Vector of padded and adjusted character bounding boxes.
+	 * @param percent Percentage of the original size to calculate padding.
+	 */
+	static void paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent);
+
+	/**
+	 * @brief Creates a single matrix with characters spaced according to their padded bounding boxes.
+	 * @details Arranges character matrices in a single line with appropriate spacing derived from their padded bounding boxes.
+	 * This can be useful for visualization or OCR processing.
+	 * @param src The source image from which characters were extracted.
+	 * @param dst Output image with characters arranged and spaced according to `paddedChars`.
+	 * @param chars Vector of character bounding boxes.
+	 * @param paddedChars Vector of padded character bounding boxes used for spacing.
+	 */
+	static void charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars);
+
+	/**
+	 * @brief Separates characters into words based on spacing analysis.
+	 * @details Uses the indexes identified by spacing analysis to split the character bounding boxes into separate vectors, each representing a word.
+	 * @param chars Vector of all character bounding boxes.
+	 * @param words Output array of vectors, each storing character bounding boxes for a separate word.
+	 * @param indexes Array of indexes used to determine word boundaries.
+	 */
+	static void wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes);
+
+	static bool verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence);
+
+	static void resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::Size& size);
+
+	static void padding(const int& firstSize, const int& secondSize, int& firstPadding, int& secondPadding);
+
+	static bool matching(const cv::Mat& src, float& dice, const float& percent);
+
+	static bool applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars, const bool& charType, float& confidence);
+
+	static bool readText(const cv::Mat& src, std::string& text, float& confidence, const std::array<std::vector<cv::Rect>, 3>& words, std::array<std::vector<cv::Rect>, 3>& paddedWords);
+
+	static void drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const std::string& text, const float& confidence);
+
+	friend std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst, int j);
 };
 
-std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);
+std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst, int j);

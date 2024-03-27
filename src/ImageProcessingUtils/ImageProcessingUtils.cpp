@@ -293,8 +293,6 @@ void algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction
 
 void algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& directions)
 {
-	//dst = cv::Mat::zeros(src.size(), CV_8UC1);
-
 	for (int y = 2; y < src.rows - 2; y++)
 		for (int x = 2; x < src.cols - 2; x++)
 		{
@@ -475,7 +473,7 @@ cv::Vec4i algorithm::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const 
 	return segment;
 }
 
-bool algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, cv::Mat& debug)
+bool algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size)
 {
 	float horizontalSlope = 0;
 
@@ -484,7 +482,6 @@ bool algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vect
 
 	for (const auto& line : lines)
 	{
-		cv::line(debug, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(0, 255, 0), 2);
 		if (line[2] == line[0])
 		{
 			verticalLines.push_back(line);
@@ -531,46 +528,6 @@ bool algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vect
 	sortedLines.push_back(initialTerminalPoints(rightLines, 1));
 	sortedLines.push_back(initialTerminalPoints(bottomLines, 0));
 
-	//-------------------------------------------------------------------------
-	//cv::Mat debug;
-	//cv::cvtColor(src, debug, cv::COLOR_GRAY2BGR);
-
-	cv::circle(debug, cv::Point(centroid[0], centroid[1]), 3, cv::Scalar(0, 0, 255), -1);
-
-	cv::line(debug, cv::Point(horizontalLine[0], horizontalLine[1]), cv::Point(horizontalLine[2], horizontalLine[3]), cv::Scalar(0, 255, 0), 1);
-
-	cv::line(debug, cv::Point(verticalLine[0], verticalLine[1]), cv::Point(verticalLine[2], verticalLine[3]), cv::Scalar(0, 255, 0), 1);
-
-	for (const cv::Vec4i& line : bottomLines) {
-		cv::Point start(line[0], line[1]);
-		cv::Point end(line[2], line[3]);
-		cv::line(debug, start, end, cv::Scalar(0, 0, 255), 1);
-	}
-
-	for (const cv::Vec4i& line : topLines) {
-		cv::Point start(line[0], line[1]);
-		cv::Point end(line[2], line[3]);
-		cv::line(debug, start, end, cv::Scalar(0, 255, 0), 1);
-	}
-	for (const cv::Vec4i& line : rightLines) {
-		cv::Point start(line[0], line[1]);
-		cv::Point end(line[2], line[3]);
-		cv::line(debug, start, end, cv::Scalar(255, 0, 0), 1);
-	}
-	for (const cv::Vec4i& line : leftLines) {
-		cv::Point start(line[0], line[1]);
-		cv::Point end(line[2], line[3]);
-		cv::line(debug, start, end, cv::Scalar(0, 255, 255), 1);
-	}
-
-	for (const auto& line : sortedLines)
-	{
-		cv::Point startPoint(line[0], line[1]);
-		cv::Point endPoint(line[2], line[3]);
-		cv::line(debug, startPoint, endPoint, cv::Scalar(0, 0, 255), 3);
-	}
-	//-------------------------------------------------------------------------
-
 	return true;
 }
 
@@ -592,7 +549,7 @@ cv::Point2f algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& lin
 	return cv::Point2f(x, y);
 }
 
-bool algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour, cv::Mat& debug)
+bool algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour)
 {
 	cv::Mat erodedRegionContour;
 	cv::erode(src, erodedRegionContour, cv::Mat());
@@ -607,23 +564,13 @@ bool algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>&
 	do {
 		cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 10, minLineLenght, maxLineGap);
 		minLineLenght--;
-	} while (!lineSorting(sortedLines, lines, src.size(), debug) && minLineLenght > 0);
+	} while (!lineSorting(sortedLines, lines, src.size()) && minLineLenght > 0);
 
 	if (minLineLenght <= 0)
 		return false;
 
 	for (int i = 0; i < sortedLines.size(); i++)
 		quadrilateralCoordinates.push_back(intersection(sortedLines[i], sortedLines[(i + 1) % 4]));
-
-	//-------------------------------------------------------------------------
-	//debug = edges.clone();
-	//cv::cvtColor(debug, debug, cv::COLOR_GRAY2BGR);
-	//cv::Mat debug;
-	//cv::cvtColor(edges, debug, cv::COLOR_GRAY2BGR);
-
-	//for (const auto& point : quadrilateralCoordinates)
-	//	cv::circle(debug, point, 2, cv::Scalar(0, 0, 255), -1);
-	//-------------------------------------------------------------------------
 
 	return true;
 }
@@ -909,7 +856,6 @@ void algorithm::wordsSeparation(const std::vector<cv::Rect>& chars, std::array<s
 	words[2].insert(words[2].end(), chars.begin() + indexes[2], chars.end());
 }
 
-
 bool algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence)
 {
 	std::string text = tess.GetUTF8Text();
@@ -920,14 +866,6 @@ bool algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence
 	tess.Recognize(0);
 	tesseract::ResultIterator* iterator = tess.GetIterator();
 	confidence = confidence + iterator->Confidence(tesseract::RIL_SYMBOL);
-
-	//-------------------------------------------------------------------------
-	//tesseract::ChoiceIterator ci(*iterator);
-	//do {
-	//	const char* choice = ci.GetUTF8Text();
-	//	std::cout << choice << " " << ci.Confidence() << std::endl;
-	//} while (ci.Next());
-	//-------------------------------------------------------------------------
 
 	return true;
 }
@@ -1041,13 +979,6 @@ bool algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std:
 		text = text + result;
 	}
 
-	//-------------------------------------------------------------------------
-	//cv::Mat debug;
-	//cv::cvtColor(src, debug, cv::COLOR_GRAY2BGR);
-	//for (const auto& rect : paddedChars)
-	//	cv::rectangle(debug, rect, cv::Scalar(0, 255, 0), 2);
-	//-------------------------------------------------------------------------
-
 	return true;
 }
 
@@ -1077,7 +1008,9 @@ void algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const
 
 	time = ss.str();
 
-	std::string displayText = time + " / " + text + " / " + std::to_string(confidence);
+	std::ostringstream stream;
+	stream << std::fixed << std::setprecision(2) << confidence;
+	std::string displayText = time + " / " + text + " / " + "Score: " + stream.str();
 
 	cv::putText(dst, displayText, cv::Point(10, dst.rows - 30), cv::FONT_HERSHEY_SIMPLEX, 4, cv::Scalar(0, 0, 0), 18, cv::LINE_AA);
 	cv::putText(dst, displayText, cv::Point(10, dst.rows - 30), cv::FONT_HERSHEY_SIMPLEX, 4, cv::Scalar(255, 255, 255), 9, cv::LINE_AA);
@@ -1091,20 +1024,9 @@ void algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const
 	roi.height = roi.height * 2;
 
 	cv::rectangle(dst, roi, cv::Scalar(0, 255, 0), 5);
-
-	//-------------------------------------------------------------------------
-	//cv::Mat cvtSpacedConnectedComponent;
-	//cv::cvtColor(spacedConnectedComponent, cvtSpacedConnectedComponent, cv::COLOR_GRAY2BGR);
-	//if (spacedConnectedComponent.rows <= dst.rows && spacedConnectedComponent.cols <= dst.cols) {
-	//	cvtSpacedConnectedComponent.copyTo(dst(cv::Rect(0, 0, spacedConnectedComponent.cols, spacedConnectedComponent.rows)));
-	//}
-	//-------------------------------------------------------------------------
 }
 
-//-------------------------------------------------------------------------
-#include <fstream>
-//-------------------------------------------------------------------------
-std::string textFromImage(const cv::Mat& src, cv::Mat& dst, int j)
+std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 {
 	cv::Mat bgrSrc;
 	if (src.type() == CV_8UC4)
@@ -1142,10 +1064,6 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst, int j)
 		int label = areas[i].first;
 		algorithm::getRoi(stats, roi, label);
 
-		//-------------------------------------------------------------------------
-		//cv::Mat debug = cropped(roi);
-		//-------------------------------------------------------------------------
-
 		if (!algorithm::sizeBBox(cropped, roi, 0.01, 0.15) || !algorithm::heightBBox(roi, 0.2, 0.9))
 			continue;
 
@@ -1178,10 +1096,8 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst, int j)
 
 		algorithm::roiContour(regionContour, regionContour, largestContour);
 
-		cv::Mat debug;
-		cv::cvtColor(regionContour, debug, cv::COLOR_GRAY2BGR);
 		std::vector<cv::Point2f> quadrilateralCoordinates;
-		if (!algorithm::cornersCoordinates(regionContour, quadrilateralCoordinates, largestContour, debug))
+		if (!algorithm::cornersCoordinates(regionContour, quadrilateralCoordinates, largestContour))
 			continue;
 
 		cv::Mat resizedConnectedComponent;
@@ -1236,33 +1152,10 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst, int j)
 			continue;
 
 		roiConnectedComponent = roi;
-
-		//-------------------------------------------------------------------------
-		//std::ifstream file("C:\\Users\\George Patrasc\\OneDrive\\Pictures\\dataset\\annots.txt");
-		//std::string line;
-		//int currentLine = 1;
-		//while (getline(file, line))
-		//{
-		//	if (currentLine == j)
-		//	{
-		//		std::cout << j;
-		//		if (plate != line)
-		//			std::cout << ": " << line << " / " << plate;
-		//		std::cout << std::endl;
-		//		break;
-		//	}
-		//	currentLine++;
-		//}
-		//file.close();
-
-		//cv::Mat finaly = debug.clone();
-		//std::string path = "C:/Users/George Patrasc/OneDrive/Pictures/dataset/New folder/" + std::to_string(j) + ".jpg";
-		//cv::imwrite(path, finaly);
-		//-------------------------------------------------------------------------
 	}
 
 	if (plate.empty())
-		plate = "none";
+		plate = "necunoscut";
 
 	algorithm::drawBBoxes(bgrDst, roiConnectedComponent, time, plate, confidence);
 

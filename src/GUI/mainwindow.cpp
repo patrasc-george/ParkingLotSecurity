@@ -7,44 +7,9 @@
 #include <QGraphicsPixmapItem>
 #include <QLabel>
 
-//-------------------------------------------------------------------
-void MainWindow::processImagesFromDirectory(const QString& directoryPath)
-{
-	QDir dir(directoryPath);
-	bool fileExists = true;
-
-	while (fileExists) {
-		QString filePath = dir.absoluteFilePath("(" + QString::number(vehicles.size() + 1) + ").jpg");
-
-		QFileInfo checkFile(filePath);
-		if (!checkFile.exists() || !checkFile.isFile())
-			filePath = dir.absoluteFilePath(" (" + QString::number(vehicles.size() + 1) + ").jpg");
-
-		checkFile = QFileInfo(filePath);
-
-		if (checkFile.exists() && checkFile.isFile()) {
-			if (image.load(filePath)) {
-				getVehicle();
-				clearPreviousItems();
-				createNewPixmapItem();
-				setGraphicsViewProperties();
-				processLastVehicle();
-			}
-		}
-		else {
-			fileExists = false;
-		}
-	}
-}
-//-------------------------------------------------------------------
-
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
 	setupUI();
-	//-------------------------------------------------------------------
-	//processImagesFromDirectory("C:/Users/George Patrasc/OneDrive/Pictures/dataset/dreapta");
-	//processImagesFromDirectory("C:/Users/George Patrasc/OneDrive/Pictures/dataset/stanga");
-	//-------------------------------------------------------------------
 }
 
 void MainWindow::setupUI()
@@ -112,8 +77,8 @@ void MainWindow::setupUI()
 	connect(entriesListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
 	connect(exitsListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
 
-	//uploadDataBase();
-	//uploadVehicles();
+	uploadDataBase();
+	uploadVehicles();
 }
 
 void MainWindow::uploadDataBase()
@@ -126,10 +91,10 @@ void MainWindow::uploadDataBase()
 	{
 		if (line.empty())
 		{
-			vehicle = Vehicle(std::stoi(vehicleData[0]), vehicleData[1], vehicleData[2], vehicleData[3]);
+			vehicle = Vehicle(std::stoi(vehicleData[0]), vehicleData[1], std::stoi(vehicleData[2]), vehicleData[3], vehicleData[4]);
 
-			if (vehicleData.size() == 5)
-				vehicle.setTimeParked(vehicleData[4]);
+			if (vehicleData.size() == 6)
+				vehicle.setTimeParked(vehicleData[5]);
 
 			vehicles.push_back(vehicle);
 			vehicleData.clear();
@@ -169,14 +134,21 @@ void MainWindow::uploadVehicles()
 void MainWindow::getVehicle()
 {
 	cv::Mat cvImage(image.height(), image.width(), CV_8UC4, const_cast<uchar*>(image.bits()), image.bytesPerLine());
-	std::string text = textFromImage(cvImage, cvImage, vehicles.size() + 1);
+	std::string text = textFromImage(cvImage, cvImage);
 	image = QImage(cvImage.data, cvImage.cols, cvImage.rows, static_cast<int>(cvImage.step), QImage::Format_RGB888).copy();
+
+	int firstPosition = imagePath.toStdString().rfind("/");
+	int lastPosition = imagePath.toStdString().find("_", firstPosition);
+
+	int ticket = 0;
+	if (firstPosition != std::string::npos && lastPosition != std::string::npos)
+		ticket = imagePath.mid(firstPosition + 1, lastPosition - firstPosition - 1).toInt();
 
 	imagePath = "../../../database/" + QString::number(vehicles.size()) + ".jpg";
 	size_t plate = text.find('\n');
 	size_t time = text.find('\n', plate + 1);
 
-	vehicle = Vehicle(vehicles.size(), imagePath.toStdString(), text.substr(0, plate), text.substr(plate + 1, time - plate - 1));
+	vehicle = Vehicle(vehicles.size(), imagePath.toStdString(), ticket, text.substr(0, plate), text.substr(plate + 1, time - plate - 1));
 	vehicles.push_back(vehicle);
 }
 
@@ -208,9 +180,22 @@ void MainWindow::setGraphicsViewProperties()
 
 std::string MainWindow::timeParked()
 {
-	auto it = std::find_if(vehicles.rbegin() + 1, vehicles.rend(), [&](const Vehicle& auxVehicle) {
-		return vehicle.getLicensePlate() == auxVehicle.getLicensePlate();
-		});
+	std::vector<Vehicle>::reverse_iterator it;
+
+	if (vehicle.getLicensePlate() != "necunoscut")
+	{
+		it = std::find_if(vehicles.rbegin() + 1, vehicles.rend(), [&](const Vehicle& auxVehicle) {
+			return vehicle.getLicensePlate() == auxVehicle.getLicensePlate();
+			});
+	}
+	else if (vehicle.getTicket())
+	{
+		it = std::find_if(vehicles.rbegin() + 1, vehicles.rend(), [&](const Vehicle& auxVehicle) {
+			return vehicle.getTicket() == auxVehicle.getTicket();
+			});
+	}
+	else
+		return "00:00:00";
 
 	std::ostringstream timeStream;
 	if (it != vehicles.rend())
@@ -248,12 +233,7 @@ void MainWindow::processLastVehicle()
 
 	if (button == exitButton)
 	{
-		std::string time;
-		if (vehicle.getLicensePlate() == "none")
-			time = "00:00:00";
-		else
-			time = timeParked();
-
+		std::string time = timeParked();
 		displayText += '\n' + time;
 		vehicle.setTimeParked(time);
 	}

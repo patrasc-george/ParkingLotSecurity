@@ -10,6 +10,11 @@ std::string Vehicle::getPath() const
 	return path;
 }
 
+int Vehicle::getTicket() const
+{
+	return ticket;
+}
+
 std::string Vehicle::getLicensePlate() const
 {
 	return licensePlate;
@@ -34,6 +39,7 @@ std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)
 {
 	os << vehicle.getId() << std::endl;
 	os << vehicle.getPath() << std::endl;
+	os << vehicle.getTicket() << std::endl;
 	os << vehicle.getLicensePlate() << std::endl;
 	os << vehicle.getTime() << std::endl;
 	os << vehicle.getTimeParked() << std::endl;

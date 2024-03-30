@@ -376,7 +376,7 @@ void algorithm::getLargestContour(const std::vector<std::vector<cv::Point>>& con
 	}
 }
 
-void algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat())
+bool algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const float& percent = 0)
 {
 	cv::Mat otsu;
 	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
@@ -396,6 +396,10 @@ void algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Poi
 
 	dst = cv::Mat::zeros(otsu.size(), otsu.type());
 	cv::drawContours(dst, std::vector<std::vector<cv::Point>>{largestContour}, 0, cv::Scalar(255), cv::FILLED);
+
+	cv::Rect bbox = cv::boundingRect(largestContour);
+
+	return bbox.width > src.cols * percent;
 }
 
 void algorithm::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
@@ -1056,7 +1060,7 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 
 	cv::Rect roiConnectedComponent;
 	std::string time;
-	std::string plate;
+	std::string plate = "";
 	float confidence = 0;
 	for (int i = 0; i < areas.size(); i++)
 	{
@@ -1088,7 +1092,8 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 
 		cv::Mat regionContour;
 		std::vector<cv::Point> largestContour;
-		algorithm::roiContour(connectedComponent, regionContour, largestContour, edges);
+		if (!algorithm::roiContour(connectedComponent, regionContour, largestContour, edges, 0.8))
+			continue;
 
 		cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 		cv::erode(regionContour, regionContour, kernel);

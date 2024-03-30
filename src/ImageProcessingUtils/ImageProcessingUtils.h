@@ -217,7 +217,7 @@ class algorithm
 	 * @param[out] largestContour The largest contour found in the source image.
 	 * @param[in] edges (Optional) An edge image that can be used to refine the ROI by excluding certain areas from the contour detection process.
 	 */
-	static void roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges);
+	static bool roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const float& percent);
 
 	/**
 	 * @brief Calculates a line passing through a given point with a specified slope and direction.

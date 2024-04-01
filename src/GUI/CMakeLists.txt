@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
 project(UserInterface)
 
 # Define UI exports
@@ -17,7 +16,7 @@ file(
     LIST_DIRECTORIES false
     "${GUI_ROOT_DIR}/*.c*"
     "${GUI_ROOT_DIR}/*.h*"
-)
+	)
 
 # Add the library
 add_library(${PROJECT_NAME} STATIC ${GUI_FILES})
@@ -30,7 +29,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_SOURCE_DIR}/src/ImageProcessingUtils"
     "${CMAKE_SOURCE_DIR}/src/GUI"
     ${OpenCV_INCLUDE_DIRS}
-)
+	)
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}
@@ -38,7 +37,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt6::Widgets 
     Qt6::Core
     ${OpenCV_LIBS}
-)
+	)
 
 # Link to the runtime output directory
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

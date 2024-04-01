@@ -1,6 +1,6 @@
 ﻿#include "ImageProcessingUtils.h"
 
-void algorithm::BGR2HSV(const cv::Mat& src, cv::Mat& dst)
+void Algorithm::BGR2HSV(const cv::Mat& src, cv::Mat& dst)
 {
 	dst = cv::Mat(src.size(), CV_8UC3);
 
@@ -38,7 +38,7 @@ void algorithm::BGR2HSV(const cv::Mat& src, cv::Mat& dst)
 		}
 }
 
-void algorithm::HSV2Binary(const cv::Mat& src, cv::Mat& dst, const uchar& threshold = 125)
+void Algorithm::HSV2Binary(const cv::Mat& src, cv::Mat& dst, const uchar& threshold = 125)
 {
 	dst = cv::Mat::zeros(src.size(), CV_8UC1);
 
@@ -53,7 +53,7 @@ bool compareConnectedComponents(const std::pair<int, int>& a, const std::pair<in
 	return a.second > b.second;
 }
 
-void algorithm::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize = 0)
+void Algorithm::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize = 0)
 {
 	cv::Mat labels, cendtroids;
 	int size = cv::connectedComponentsWithStats(src, labels, stats, cendtroids);
@@ -67,7 +67,7 @@ void algorithm::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::
 		areas.resize(newSize);
 }
 
-void algorithm::getRoi(const cv::Mat& stats, cv::Rect& roi, const int& label)
+void Algorithm::getRoi(const cv::Mat& stats, cv::Rect& roi, const int& label)
 {
 	roi.x = stats.ptr<int>(label, cv::CC_STAT_LEFT)[0];
 	roi.y = stats.ptr<int>(label, cv::CC_STAT_TOP)[0];
@@ -75,7 +75,7 @@ void algorithm::getRoi(const cv::Mat& stats, cv::Rect& roi, const int& label)
 	roi.height = stats.ptr<int>(label, cv::CC_STAT_HEIGHT)[0];
 }
 
-bool algorithm::sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& min = 0, const float& max = 1)
+bool Algorithm::sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& min = 0, const float& max = 1)
 {
 	int areaConnectedComponent = roi.height * roi.width;
 	int areaSrc = src.rows * src.cols;
@@ -84,13 +84,13 @@ bool algorithm::sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& m
 		areaConnectedComponent < areaSrc * max;
 }
 
-bool algorithm::heightBBox(const cv::Rect& roi, const float& min = 0, const float& max = 1)
+bool Algorithm::heightBBox(const cv::Rect& roi, const float& min = 0, const float& max = 1)
 {
 	return roi.height > roi.width * min &&
 		roi.height < roi.width * max;
 }
 
-void algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent = 0, const bool& square = 0, const cv::Size& size = cv::Size())
+void Algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent = 0, const bool& square = 0, const cv::Size& size = cv::Size())
 {
 	int paddingX = src.width * percent;
 	if (paddingX < 3)
@@ -124,7 +124,7 @@ void algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& per
 	}
 }
 
-void algorithm::blueToBlack(const cv::Mat& src, cv::Mat& dst)
+void Algorithm::blueToBlack(const cv::Mat& src, cv::Mat& dst)
 {
 	dst = src.clone();
 
@@ -140,7 +140,7 @@ void algorithm::blueToBlack(const cv::Mat& src, cv::Mat& dst)
 			}
 }
 
-void algorithm::HSV2BGR(const cv::Mat& src, cv::Mat& dst)
+void Algorithm::HSV2BGR(const cv::Mat& src, cv::Mat& dst)
 {
 	dst = cv::Mat(src.size(), CV_8UC3);
 
@@ -197,7 +197,7 @@ void algorithm::HSV2BGR(const cv::Mat& src, cv::Mat& dst)
 		}
 }
 
-void algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
+void Algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
 {
 	double maxVal;
 	cv::minMaxLoc(src, NULL, &maxVal);
@@ -209,7 +209,7 @@ void algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
 	cv::calcHist(&src, 1, 0, cv::Mat(), hist, 1, &histSize, ranges);
 }
 
-void algorithm::cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHist)
+void Algorithm::cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHist)
 {
 	cumulvativeHist = cv::Mat(cv::Size(hist.rows, hist.cols), hist.type());
 
@@ -221,7 +221,7 @@ void algorithm::cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHis
 	}
 }
 
-void algorithm::histogramLine(const cv::Mat& cumulvativeHist, cv::Vec4f& line)
+void Algorithm::histogramLine(const cv::Mat& cumulvativeHist, cv::Vec4f& line)
 {
 	double maxVal;
 	cv::Point max;
@@ -240,7 +240,7 @@ void algorithm::histogramLine(const cv::Mat& cumulvativeHist, cv::Vec4f& line)
 	line = cv::Vec4f(min.x, minVal, max.x, maxVal);
 }
 
-float algorithm::distance(const float& x, const float& y, const cv::Vec4f& line)
+float Algorithm::distance(const float& x, const float& y, const cv::Vec4f& line)
 {
 	float a = line[1] - line[3];
 	float b = line[2] - line[0];
@@ -249,7 +249,7 @@ float algorithm::distance(const float& x, const float& y, const cv::Vec4f& line)
 	return abs((a * x + b * y + c) / sqrt(a * a + b * b));
 }
 
-void algorithm::triangleThresholding(const cv::Mat& src, cv::Mat& dst)
+void Algorithm::triangleThresholding(const cv::Mat& src, cv::Mat& dst)
 {
 	cv::Mat floatSrc;
 	src.convertTo(floatSrc, CV_32F);
@@ -279,7 +279,7 @@ void algorithm::triangleThresholding(const cv::Mat& src, cv::Mat& dst)
 	cv::convertScaleAbs(dst, dst);
 }
 
-void algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction)
+void Algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction)
 {
 	cv::Mat sobel, x, y, magnitude;
 
@@ -291,7 +291,7 @@ void algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction
 	triangleThresholding(magnitude, dst);
 }
 
-void algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& directions)
+void Algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& directions)
 {
 	for (int y = 2; y < src.rows - 2; y++)
 		for (int x = 2; x < src.cols - 2; x++)
@@ -335,7 +335,7 @@ void algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv
 		}
 }
 
-void algorithm::edgeDetection(const cv::Mat& src, cv::Mat& dst)
+void Algorithm::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 {
 	cv::Mat sobel, direction;
 	binarySobel(src, sobel, direction);
@@ -354,7 +354,7 @@ void algorithm::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 	nonMaximumSuppression(morphologicalGradient, dst, direction);
 }
 
-void algorithm::bitwiseNand(cv::Mat& src, const cv::Mat& edges)
+void Algorithm::bitwiseNand(cv::Mat& src, const cv::Mat& edges)
 {
 	for (int y = 0; y < src.rows; y++)
 		for (int x = 0; x < src.cols; x++)
@@ -362,7 +362,7 @@ void algorithm::bitwiseNand(cv::Mat& src, const cv::Mat& edges)
 				src.ptr<uchar>(y, x)[0] = 0;
 }
 
-void algorithm::getLargestContour(const std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point>& largestContour)
+void Algorithm::getLargestContour(const std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point>& largestContour)
 {
 	double maxArea = 0;
 	for (const auto& contour : contours)
@@ -376,7 +376,7 @@ void algorithm::getLargestContour(const std::vector<std::vector<cv::Point>>& con
 	}
 }
 
-bool algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const float& percent = 0)
+bool Algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const float& percent = 0)
 {
 	cv::Mat otsu;
 	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
@@ -402,7 +402,7 @@ bool algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Poi
 	return bbox.width > src.cols * percent;
 }
 
-void algorithm::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
+void Algorithm::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
 {
 	cv::Size size(point.x * 2, point.y * 2);
 	double b = point.y - slope * point.x;
@@ -435,7 +435,7 @@ void algorithm::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv:
 	line = cv::Vec4f(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
 }
 
-void algorithm::compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec4f& referenceLine)
+void Algorithm::compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec4f& referenceLine)
 {
 	for (const auto& line : lines)
 	{
@@ -451,7 +451,7 @@ void algorithm::compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector
 	}
 }
 
-cv::Vec4i algorithm::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction)
+cv::Vec4i Algorithm::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction)
 {
 	cv::Vec4i segment = lines[0];
 	for (auto& line : lines)
@@ -477,7 +477,7 @@ cv::Vec4i algorithm::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const 
 	return segment;
 }
 
-bool algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size)
+bool Algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size)
 {
 	float horizontalSlope = 0;
 
@@ -535,7 +535,7 @@ bool algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vect
 	return true;
 }
 
-cv::Point2f algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& line2)
+cv::Point2f Algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& line2)
 {
 	int A1 = line1[3] - line1[1];
 	int B1 = line1[0] - line1[2];
@@ -553,7 +553,7 @@ cv::Point2f algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& lin
 	return cv::Point2f(x, y);
 }
 
-bool algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour)
+bool Algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour)
 {
 	cv::Mat erodedRegionContour;
 	cv::erode(src, erodedRegionContour, cv::Mat());
@@ -579,7 +579,7 @@ bool algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>&
 	return true;
 }
 
-bool algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent = 0)
+bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent = 0)
 {
 	int minX = src.cols, minY = src.rows, maxX = 0, maxY = 0;
 
@@ -619,7 +619,7 @@ bool algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv:
 	return true;
 }
 
-bool algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent = 0)
+bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent = 0)
 {
 	int height = quadrilateralCoordinates[3].y - quadrilateralCoordinates[0].y;
 	int width = 4.3 * height;
@@ -642,7 +642,7 @@ bool algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, cons
 	return cv::countNonZero(dst);
 }
 
-bool algorithm::insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour)
+bool Algorithm::insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour)
 {
 	cv::Mat otsu;
 	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
@@ -660,7 +660,7 @@ bool compareAreas(const std::vector<cv::Point>& a, const std::vector<cv::Point>&
 	return cv::contourArea(a) > cv::contourArea(b);
 }
 
-int algorithm::getContourHeight(const std::vector<cv::Point>& contour)
+int Algorithm::getContourHeight(const std::vector<cv::Point>& contour)
 {
 	int minY = contour[0].y;
 	int maxY = contour[0].y;
@@ -674,7 +674,7 @@ int algorithm::getContourHeight(const std::vector<cv::Point>& contour)
 	return maxY - minY;
 }
 
-int algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
+int Algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
 {
 	std::vector<int> heights;
 	for (const auto& contour : contours)
@@ -684,7 +684,7 @@ int algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
 	return heights[heights.size() / 2];
 }
 
-bool algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent = 1)
+bool Algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent = 1)
 {
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(src, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -747,25 +747,25 @@ bool compareX(const cv::Rect& a, const cv::Rect& b)
 	return a.x < b.x;
 }
 
-void algorithm::charsBBoxes(const cv::Mat& src, std::vector<cv::Rect>& chars)
+void Algorithm::charsBBoxes(const cv::Mat& src, std::vector<cv::Rect>& chars)
 {
 	cv::Mat stats;
 	std::vector<std::pair<int, int>> areas;
-	algorithm::getConnectedComponents(src, stats, areas);
+	Algorithm::getConnectedComponents(src, stats, areas);
 
 	for (const auto& area : areas)
 	{
 		cv::Rect roi;
 		int label = area.first;
 
-		algorithm::getRoi(stats, roi, label);
+		Algorithm::getRoi(stats, roi, label);
 		chars.push_back(roi);
 	}
 
 	std::sort(chars.begin(), chars.end(), compareX);
 }
 
-bool algorithm::firstIndexes(const std::vector<cv::Rect>& chars, std::array<int, 3>& indexes)
+bool Algorithm::firstIndexes(const std::vector<cv::Rect>& chars, std::array<int, 3>& indexes)
 {
 	indexes[0] = 0;
 
@@ -791,7 +791,7 @@ bool algorithm::firstIndexes(const std::vector<cv::Rect>& chars, std::array<int,
 	return indexes[1] < indexes[2];
 }
 
-void algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent = 0)
+void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent = 0)
 {
 	dst.resize(src.size());
 
@@ -816,7 +816,7 @@ void algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::R
 	}
 }
 
-void algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars)
+void Algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars)
 {
 	std::vector<cv::Mat> ROIs;
 	for (int i = 0; i < chars.size(); i++)
@@ -853,14 +853,14 @@ void algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::R
 	}
 }
 
-void algorithm::wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes)
+void Algorithm::wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes)
 {
 	words[0].insert(words[0].end(), chars.begin(), chars.begin() + indexes[1]);
 	words[1].insert(words[1].end(), chars.begin() + indexes[1], chars.begin() + indexes[2]);
 	words[2].insert(words[2].end(), chars.begin() + indexes[2], chars.end());
 }
 
-bool algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence)
+bool Algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence)
 {
 	std::string text = tess.GetUTF8Text();
 
@@ -874,7 +874,7 @@ bool algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence
 	return true;
 }
 
-void algorithm::resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::Size& size)
+void Algorithm::resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::Size& size)
 {
 	double aspectRadion = static_cast<float>(src.cols) / src.rows;
 	int width = size.height * aspectRadion;
@@ -896,7 +896,7 @@ void algorithm::resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::S
 	resizedSrc(bbox).copyTo(dst);
 }
 
-void algorithm::padding(const int& firstSize, const int& secondSize, int& firstPadding, int& secondPadding)
+void Algorithm::padding(const int& firstSize, const int& secondSize, int& firstPadding, int& secondPadding)
 {
 	firstPadding = (firstSize - secondSize) / 2;
 	secondPadding = firstPadding;
@@ -904,7 +904,7 @@ void algorithm::padding(const int& firstSize, const int& secondSize, int& firstP
 		secondPadding++;
 }
 
-bool algorithm::matching(const cv::Mat& src, float& dice, const float& percent = 0)
+bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percent = 0)
 {
 	cv::Mat charTemplate = cv::imread("../../../database/i.jpg", cv::IMREAD_GRAYSCALE);
 
@@ -935,7 +935,7 @@ bool algorithm::matching(const cv::Mat& src, float& dice, const float& percent =
 	return dice > percent;
 }
 
-bool algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars, const bool& charType, float& confidence)
+bool Algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars, const bool& charType, float& confidence)
 {
 	tesseract::TessBaseAPI tess;
 	tess.Init(NULL, "DIN1451Mittelschrift", tesseract::OEM_LSTM_ONLY);
@@ -986,7 +986,7 @@ bool algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std:
 	return true;
 }
 
-bool algorithm::readText(const cv::Mat& src, std::string& text, float& confidence, const std::array<std::vector<cv::Rect>, 3>& words, std::array<std::vector<cv::Rect>, 3>& paddedWords)
+bool Algorithm::readText(const cv::Mat& src, std::string& text, float& confidence, const std::array<std::vector<cv::Rect>, 3>& words, std::array<std::vector<cv::Rect>, 3>& paddedWords)
 {
 	if (!applyTesseract(src, text, words[0], paddedWords[0], 0, confidence))
 		return false;
@@ -1002,7 +1002,7 @@ bool algorithm::readText(const cv::Mat& src, std::string& text, float& confidenc
 	return true;
 }
 
-void algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const std::string& text, const float& confidence)
+void Algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const std::string& text, const float& confidence)
 {
 	auto now = std::chrono::system_clock::now();
 	auto toTimeT = std::chrono::system_clock::to_time_t(now);
@@ -1049,35 +1049,35 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 	cv::GaussianBlur(cropped, gauss, cv::Size(3, 3), 0);
 
 	cv::Mat hsv;
-	algorithm::BGR2HSV(gauss, hsv);
+	Algorithm::BGR2HSV(gauss, hsv);
 
 	cv::Mat binary;
-	algorithm::HSV2Binary(hsv, binary, 125);
+	Algorithm::HSV2Binary(hsv, binary, 125);
 
 	cv::Mat stats;
 	std::vector<std::pair<int, int>> areas;
-	algorithm::getConnectedComponents(binary, stats, areas, 10);
+	Algorithm::getConnectedComponents(binary, stats, areas, 10);
 
 	cv::Rect roiConnectedComponent;
 	std::string time;
-	std::string plate = "";
+	std::string plate;
 	float confidence = 0;
 	for (int i = 0; i < areas.size(); i++)
 	{
 		cv::Rect roi;
 		int label = areas[i].first;
-		algorithm::getRoi(stats, roi, label);
+		Algorithm::getRoi(stats, roi, label);
 
-		if (!algorithm::sizeBBox(cropped, roi, 0.01, 0.15) || !algorithm::heightBBox(roi, 0.2, 0.9))
+		if (!Algorithm::sizeBBox(cropped, roi, 0.01, 0.15) || !Algorithm::heightBBox(roi, 0.2, 0.9))
 			continue;
 
-		algorithm::paddingRect(roi, roi, 0.05, false, cropped.size());
+		Algorithm::paddingRect(roi, roi, 0.05, false, cropped.size());
 
 		cv::Mat hsvConnectedComponent = hsv(roi);
-		algorithm::blueToBlack(hsvConnectedComponent, hsvConnectedComponent);
+		Algorithm::blueToBlack(hsvConnectedComponent, hsvConnectedComponent);
 
 		cv::Mat bgrConnectedComponent;
-		algorithm::HSV2BGR(hsvConnectedComponent, bgrConnectedComponent);
+		Algorithm::HSV2BGR(hsvConnectedComponent, bgrConnectedComponent);
 
 		cv::Mat grayConnectedComponent;
 		cv::cvtColor(bgrConnectedComponent, grayConnectedComponent, cv::COLOR_BGR2GRAY);
@@ -1088,29 +1088,29 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 		cv::Mat edges;
 		cv::threshold(grayConnectedComponent, edges, 0, 255, cv::THRESH_BINARY);
 		edges = 255 - edges;
-		algorithm::edgeDetection(connectedComponent, edges);
+		Algorithm::edgeDetection(connectedComponent, edges);
 
 		cv::Mat regionContour;
 		std::vector<cv::Point> largestContour;
-		if (!algorithm::roiContour(connectedComponent, regionContour, largestContour, edges, 0.8))
+		if (!Algorithm::roiContour(connectedComponent, regionContour, largestContour, edges, 0.8))
 			continue;
 
 		cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 		cv::erode(regionContour, regionContour, kernel);
 		cv::dilate(regionContour, regionContour, kernel);
 
-		algorithm::roiContour(regionContour, regionContour, largestContour);
+		Algorithm::roiContour(regionContour, regionContour, largestContour);
 
 		std::vector<cv::Point2f> quadrilateralCoordinates;
-		if (!algorithm::cornersCoordinates(regionContour, quadrilateralCoordinates, largestContour))
+		if (!Algorithm::cornersCoordinates(regionContour, quadrilateralCoordinates, largestContour))
 			continue;
 
 		cv::Mat resizedConnectedComponent;
-		if (!algorithm::resizeToPoints(connectedComponent, resizedConnectedComponent, quadrilateralCoordinates, 0.2))
+		if (!Algorithm::resizeToPoints(connectedComponent, resizedConnectedComponent, quadrilateralCoordinates, 0.2))
 			continue;
 
 		cv::Mat transformedConnectedComponent;
-		if (!algorithm::geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, quadrilateralCoordinates, 0.2))
+		if (!Algorithm::geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, quadrilateralCoordinates, 0.2))
 			continue;
 
 		cv::Rect crop(1, 1, transformedConnectedComponent.cols - 2, transformedConnectedComponent.rows - 2);
@@ -1118,42 +1118,42 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 		cv::Mat borderedConnectedComponent = transformedConnectedComponent.clone();
 		cv::copyMakeBorder(borderedConnectedComponent, borderedConnectedComponent, 1, 1, 1, 1, cv::BORDER_CONSTANT, cv::Scalar(255));
 
-		algorithm::roiContour(borderedConnectedComponent, regionContour, largestContour);
+		Algorithm::roiContour(borderedConnectedComponent, regionContour, largestContour);
 
 		cv::Mat textConnectedComponent;
-		if (!algorithm::insideContour(borderedConnectedComponent, textConnectedComponent, regionContour))
+		if (!Algorithm::insideContour(borderedConnectedComponent, textConnectedComponent, regionContour))
 			continue;
 
 		cv::Mat denoiseConnectedComponent;
-		if (!algorithm::denoise(textConnectedComponent, denoiseConnectedComponent, 0.15))
+		if (!Algorithm::denoise(textConnectedComponent, denoiseConnectedComponent, 0.15))
 			continue;
 
 		cv::dilate(denoiseConnectedComponent, denoiseConnectedComponent, cv::Mat());
 		cv::erode(denoiseConnectedComponent, denoiseConnectedComponent, cv::Mat());
 
-		if (!algorithm::denoise(denoiseConnectedComponent, denoiseConnectedComponent, 0.15))
+		if (!Algorithm::denoise(denoiseConnectedComponent, denoiseConnectedComponent, 0.15))
 			continue;
 
 		std::vector<cv::Rect> chars;
-		algorithm::charsBBoxes(denoiseConnectedComponent, chars);
+		Algorithm::charsBBoxes(denoiseConnectedComponent, chars);
 
 		std::array<int, 3> indexes;
-		if (!algorithm::firstIndexes(chars, indexes))
+		if (!Algorithm::firstIndexes(chars, indexes))
 			continue;
 
 		std::vector<cv::Rect> paddedChars;
-		algorithm::paddingChars(chars, paddedChars, 0.6);
+		Algorithm::paddingChars(chars, paddedChars, 0.6);
 
 		cv::Mat spacedConnectedComponent;
-		algorithm::charsSpacing(denoiseConnectedComponent, spacedConnectedComponent, chars, paddedChars);
+		Algorithm::charsSpacing(denoiseConnectedComponent, spacedConnectedComponent, chars, paddedChars);
 
 		std::array<std::vector<cv::Rect>, 3> words;
-		algorithm::wordsSeparation(chars, words, indexes);
+		Algorithm::wordsSeparation(chars, words, indexes);
 
 		std::array<std::vector<cv::Rect>, 3> paddedWords;
-		algorithm::wordsSeparation(paddedChars, paddedWords, indexes);
+		Algorithm::wordsSeparation(paddedChars, paddedWords, indexes);
 
-		if (!algorithm::readText(spacedConnectedComponent, plate, confidence, words, paddedWords))
+		if (!Algorithm::readText(spacedConnectedComponent, plate, confidence, words, paddedWords))
 			continue;
 
 		roiConnectedComponent = roi;
@@ -1162,7 +1162,7 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 	if (plate.empty())
 		plate = "necunoscut";
 
-	algorithm::drawBBoxes(bgrDst, roiConnectedComponent, time, plate, confidence);
+	Algorithm::drawBBoxes(bgrDst, roiConnectedComponent, time, plate, confidence);
 
 	cv::cvtColor(bgrDst, dst, cv::COLOR_BGR2RGB);
 

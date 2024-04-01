@@ -21,7 +21,7 @@
 * for preprocessing images, detecting and extracting features, and performing post-processing
 * operations such as drawing bounding boxes around detected regions.
 */
-class algorithm
+class IMAGEPROCESSINGUTILS_API Algorithm
 {
 	/**
 	 * @brief Converts an image from BGR color space to HSV color space.
@@ -506,6 +506,8 @@ class algorithm
 	static void drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const std::string& text, const float& confidence);
 
 	friend std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);
+
+	friend class AlgorithmTests;
 };
 
 /**

@@ -17,6 +17,7 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Core Widgets)
 find_package(Tesseract REQUIRED)
 
 # Add subdirectories for different parts of the application
+add_subdirectory(tests)
 add_subdirectory(src/Application)
 add_subdirectory(src/ImageProcessingUtils)
 add_subdirectory(src/GUI)

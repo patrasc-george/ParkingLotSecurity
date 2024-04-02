@@ -111,6 +111,8 @@ private:
 	 */
 	void processLastVehicle();
 
+	//void processImagesFromDirectory(const QString& directoryPath);
+
 private:
 	QGraphicsView* graphicsView;
 	QGraphicsScene* scene;

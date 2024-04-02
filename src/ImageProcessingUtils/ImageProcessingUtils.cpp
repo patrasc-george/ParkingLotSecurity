@@ -38,7 +38,7 @@ void Algorithm::BGR2HSV(const cv::Mat& src, cv::Mat& dst)
 		}
 }
 
-void Algorithm::HSV2Binary(const cv::Mat& src, cv::Mat& dst, const uchar& threshold = 125)
+void Algorithm::HSV2Binary(const cv::Mat& src, cv::Mat& dst, const uchar& threshold)
 {
 	dst = cv::Mat::zeros(src.size(), CV_8UC1);
 
@@ -53,8 +53,11 @@ bool compareConnectedComponents(const std::pair<int, int>& a, const std::pair<in
 	return a.second > b.second;
 }
 
-void Algorithm::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize = 0)
+void Algorithm::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize)
 {
+	if (src.empty() || src.type() != CV_8UC1)
+		return;
+
 	cv::Mat labels, cendtroids;
 	int size = cv::connectedComponentsWithStats(src, labels, stats, cendtroids);
 
@@ -69,13 +72,19 @@ void Algorithm::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::
 
 void Algorithm::getRoi(const cv::Mat& stats, cv::Rect& roi, const int& label)
 {
+	if (stats.empty())
+		return;
+
+	if (label < 0)
+		return;
+
 	roi.x = stats.ptr<int>(label, cv::CC_STAT_LEFT)[0];
 	roi.y = stats.ptr<int>(label, cv::CC_STAT_TOP)[0];
 	roi.width = stats.ptr<int>(label, cv::CC_STAT_WIDTH)[0];
 	roi.height = stats.ptr<int>(label, cv::CC_STAT_HEIGHT)[0];
 }
 
-bool Algorithm::sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& min = 0, const float& max = 1)
+bool Algorithm::sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& min, const float& max)
 {
 	int areaConnectedComponent = roi.height * roi.width;
 	int areaSrc = src.rows * src.cols;
@@ -84,13 +93,13 @@ bool Algorithm::sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& m
 		areaConnectedComponent < areaSrc * max;
 }
 
-bool Algorithm::heightBBox(const cv::Rect& roi, const float& min = 0, const float& max = 1)
+bool Algorithm::heightBBox(const cv::Rect& roi, const float& min, const float& max)
 {
 	return roi.height > roi.width * min &&
 		roi.height < roi.width * max;
 }
 
-void Algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent = 0, const bool& square = 0, const cv::Size& size = cv::Size())
+void Algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent, const bool& square, const cv::Size& size)
 {
 	int paddingX = src.width * percent;
 	if (paddingX < 3)
@@ -199,6 +208,9 @@ void Algorithm::HSV2BGR(const cv::Mat& src, cv::Mat& dst)
 
 void Algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
 {
+	if (src.empty() || src.type() != CV_8UC1)
+		return;
+
 	double maxVal;
 	cv::minMaxLoc(src, NULL, &maxVal);
 	int histSize = static_cast<int>(maxVal) + 1;
@@ -211,6 +223,9 @@ void Algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
 
 void Algorithm::cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHist)
 {
+	if (hist.empty() || hist.type() != CV_8UC1)
+		return;
+
 	cumulvativeHist = cv::Mat(cv::Size(hist.rows, hist.cols), hist.type());
 
 	float sum = 0;
@@ -223,6 +238,9 @@ void Algorithm::cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHis
 
 void Algorithm::histogramLine(const cv::Mat& cumulvativeHist, cv::Vec4f& line)
 {
+	if (cumulvativeHist.empty() || cumulvativeHist.type() != CV_8UC1)
+		return;
+
 	double maxVal;
 	cv::Point max;
 	cv::minMaxLoc(cumulvativeHist, NULL, &maxVal, NULL, &max);
@@ -281,6 +299,9 @@ void Algorithm::triangleThresholding(const cv::Mat& src, cv::Mat& dst)
 
 void Algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction)
 {
+	if (src.empty() || src.type() != CV_8UC3)
+		return;
+
 	cv::Mat sobel, x, y, magnitude;
 
 	cv::Sobel(src, x, CV_32F, 1, 0);
@@ -293,6 +314,12 @@ void Algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction
 
 void Algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& directions)
 {
+	if (src.empty() || directions.empty())
+		return;
+
+	if (src.size() != directions.size())
+		return;
+
 	for (int y = 2; y < src.rows - 2; y++)
 		for (int x = 2; x < src.cols - 2; x++)
 		{
@@ -337,6 +364,9 @@ void Algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv
 
 void Algorithm::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 {
+	if (src.empty() || src.type() != CV_8UC3)
+		return;
+
 	cv::Mat sobel, direction;
 	binarySobel(src, sobel, direction);
 
@@ -376,8 +406,11 @@ void Algorithm::getLargestContour(const std::vector<std::vector<cv::Point>>& con
 	}
 }
 
-bool Algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const float& percent = 0)
+bool Algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const float& percent)
 {
+	if (src.empty() || src.type() != CV_8UC1)
+		return true;
+
 	cv::Mat otsu;
 	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
@@ -393,6 +426,9 @@ bool Algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Poi
 	cv::findContours(otsu, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	getLargestContour(contours, largestContour);
+
+	if (!largestContour.size())
+		return false;
 
 	dst = cv::Mat::zeros(otsu.size(), otsu.type());
 	cv::drawContours(dst, std::vector<std::vector<cv::Point>>{largestContour}, 0, cv::Scalar(255), cv::FILLED);
@@ -453,6 +489,12 @@ void Algorithm::compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector
 
 cv::Vec4i Algorithm::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction)
 {
+	if (lines.empty())
+		return cv::Vec4i();
+
+	if (direction != 0 && direction != 1)
+		return cv::Vec4i();
+
 	cv::Vec4i segment = lines[0];
 	for (auto& line : lines)
 	{
@@ -486,7 +528,7 @@ bool Algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vect
 
 	for (const auto& line : lines)
 	{
-		if (line[2] == line[0])
+		if (line[0] == line[2])
 		{
 			verticalLines.push_back(line);
 			continue;
@@ -537,6 +579,12 @@ bool Algorithm::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vect
 
 cv::Point2f Algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& line2)
 {
+	if (line1[0] == line1[2] && line1[1] == line1[3])
+		return cv::Point2f();
+
+	if (line2[0] == line2[2] && line2[1] == line2[3])
+		return cv::Point2f();
+
 	int A1 = line1[3] - line1[1];
 	int B1 = line1[0] - line1[2];
 	int C1 = A1 * line1[0] + B1 * line1[1];
@@ -545,16 +593,25 @@ cv::Point2f Algorithm::intersection(const cv::Vec4i& line1, const cv::Vec4i& lin
 	int B2 = line2[0] - line2[2];
 	int C2 = A2 * line2[0] + B2 * line2[1];
 
-	int det = A1 * B2 - A2 * B1;
+	int determinant = A1 * B2 - A2 * B1;
 
-	float x = (B2 * C1 - B1 * C2) / det;
-	float y = (A1 * C2 - A2 * C1) / det;
+	if (!determinant)
+		return cv::Point2f();
+
+	float x = (B2 * C1 - B1 * C2) / determinant;
+	float y = (A1 * C2 - A2 * C1) / determinant;
 
 	return cv::Point2f(x, y);
 }
 
 bool Algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>& quadrilateralCoordinates, const std::vector<cv::Point>& largestContour)
 {
+	if (src.empty() || src.type() != CV_8UC1)
+		return false;
+
+	if (largestContour.empty())
+		return false;
+
 	cv::Mat erodedRegionContour;
 	cv::erode(src, erodedRegionContour, cv::Mat());
 	cv::Mat edges = src - erodedRegionContour;
@@ -579,8 +636,11 @@ bool Algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>&
 	return true;
 }
 
-bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent = 0)
+bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent)
 {
+	if (src.empty())
+		return false;
+
 	int minX = src.cols, minY = src.rows, maxX = 0, maxY = 0;
 
 	for (const auto& point : points)
@@ -619,8 +679,14 @@ bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv:
 	return true;
 }
 
-bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent = 0)
+bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent)
 {
+	if (src.empty() || src.type() != CV_8UC1)
+		return false;
+
+	if (quadrilateralCoordinates.size() != 4)
+		return false;
+
 	int height = quadrilateralCoordinates[3].y - quadrilateralCoordinates[0].y;
 	int width = 4.3 * height;
 
@@ -644,6 +710,15 @@ bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, cons
 
 bool Algorithm::insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour)
 {
+	if (src.empty() || regionContour.empty())
+		return false;
+
+	if (src.type() != CV_8UC1 || regionContour.type() != CV_8UC1)
+		return false;
+
+	if (src.size() != regionContour.size())
+		return false;
+
 	cv::Mat otsu;
 	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
@@ -662,6 +737,9 @@ bool compareAreas(const std::vector<cv::Point>& a, const std::vector<cv::Point>&
 
 int Algorithm::getContourHeight(const std::vector<cv::Point>& contour)
 {
+	if (!contour.size())
+		return 0;
+
 	int minY = contour[0].y;
 	int maxY = contour[0].y;
 
@@ -676,6 +754,9 @@ int Algorithm::getContourHeight(const std::vector<cv::Point>& contour)
 
 int Algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
 {
+	if (!contours.size())
+		return 0;
+
 	std::vector<int> heights;
 	for (const auto& contour : contours)
 		heights.push_back(getContourHeight(contour));
@@ -684,8 +765,11 @@ int Algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
 	return heights[heights.size() / 2];
 }
 
-bool Algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent = 1)
+bool Algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent)
 {
+	if (src.empty() || src.type() != CV_8UC1)
+		return false;
+
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(src, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	std::sort(contours.begin(), contours.end(), compareAreas);
@@ -767,6 +851,9 @@ void Algorithm::charsBBoxes(const cv::Mat& src, std::vector<cv::Rect>& chars)
 
 bool Algorithm::firstIndexes(const std::vector<cv::Rect>& chars, std::array<int, 3>& indexes)
 {
+	if (chars.empty())
+		return false;
+
 	indexes[0] = 0;
 
 	int maxDistance = 0;
@@ -791,7 +878,7 @@ bool Algorithm::firstIndexes(const std::vector<cv::Rect>& chars, std::array<int,
 	return indexes[1] < indexes[2];
 }
 
-void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent = 0)
+void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent)
 {
 	dst.resize(src.size());
 
@@ -818,6 +905,9 @@ void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::R
 
 void Algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars)
 {
+	if (chars.size() != paddedChars.size())
+		return;
+
 	std::vector<cv::Mat> ROIs;
 	for (int i = 0; i < chars.size(); i++)
 	{
@@ -844,10 +934,13 @@ void Algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::R
 		width += rect.width;
 	}
 
-	dst = cv::Mat::zeros(cv::Size(width, height), src.type());
+	dst = cv::Mat::zeros(cv::Size(width + 1, height + 1), src.type());
 
 	for (int i = 0; i < paddedChars.size(); i++)
 	{
+		if (!ROIs[i].cols || !ROIs[i].rows)
+			continue;
+
 		cv::Rect rect(paddedChars[i].x, paddedChars[i].y, ROIs[i].cols, ROIs[i].rows);
 		ROIs[i].copyTo(dst(rect));
 	}
@@ -855,6 +948,13 @@ void Algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::R
 
 void Algorithm::wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes)
 {
+	if (chars.empty())
+		return;
+
+	for (const auto& index : indexes)
+		if (chars.size() < index)
+			return;
+
 	words[0].insert(words[0].end(), chars.begin(), chars.begin() + indexes[1]);
 	words[1].insert(words[1].end(), chars.begin() + indexes[1], chars.begin() + indexes[2]);
 	words[2].insert(words[2].end(), chars.begin() + indexes[2], chars.end());
@@ -862,6 +962,9 @@ void Algorithm::wordsSeparation(const std::vector<cv::Rect>& chars, std::array<s
 
 bool Algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence)
 {
+	if (!tess.GetUTF8Text())
+		return false;
+
 	std::string text = tess.GetUTF8Text();
 
 	if (text.size() != 2)
@@ -874,8 +977,14 @@ bool Algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence
 	return true;
 }
 
-void Algorithm::resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::Size& size)
+bool Algorithm::resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::Size& size)
 {
+	if (src.empty() || src.type() != CV_8UC1)
+		return false;
+
+	if (size.width < 3 || size.height < 3)
+		return false;
+
 	double aspectRadion = static_cast<float>(src.cols) / src.rows;
 	int width = size.height * aspectRadion;
 
@@ -886,14 +995,19 @@ void Algorithm::resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::S
 	std::vector<std::vector<cv::Point>> contour;
 	cv::findContours(resizedSrc, contour, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
+	if (contour.empty())
+		return false;
+
 	cv::Rect bbox(cv::boundingRect(contour[0]));
-	bbox.x--;
-	bbox.y--;
-	bbox.width += 2;
-	bbox.height += 2;
+	bbox.x = std::max(0, bbox.x - 1);
+	bbox.y = std::max(0, bbox.y - 1);
+	bbox.width = std::min(resizedSrc.cols - bbox.x, bbox.width + 2);
+	bbox.height = std::min(resizedSrc.rows - bbox.y, bbox.height + 2);
 
 	dst = cv::Mat::zeros(cv::Size(bbox.width + 1, bbox.height + 1), resizedSrc.type());
 	resizedSrc(bbox).copyTo(dst);
+
+	return true;
 }
 
 void Algorithm::padding(const int& firstSize, const int& secondSize, int& firstPadding, int& secondPadding)
@@ -904,12 +1018,16 @@ void Algorithm::padding(const int& firstSize, const int& secondSize, int& firstP
 		secondPadding++;
 }
 
-bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percent = 0)
+bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percent)
 {
+	if (src.type() != CV_8UC1)
+		return false;
+
 	cv::Mat charTemplate = cv::imread("../../../database/i.jpg", cv::IMREAD_GRAYSCALE);
 
 	cv::Mat resizedCharTemplate;
-	resizeCharTemplate(charTemplate, resizedCharTemplate, src.size());
+	if (!resizeCharTemplate(charTemplate, resizedCharTemplate, src.size()))
+		return false;
 
 	int width = std::max(src.cols, resizedCharTemplate.cols);
 	cv::Size size(width, src.rows);
@@ -937,6 +1055,9 @@ bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percent =
 
 bool Algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars, const bool& charType, float& confidence)
 {
+	if (chars.size() != paddedChars.size())
+		return false;
+
 	tesseract::TessBaseAPI tess;
 	tess.Init(NULL, "DIN1451Mittelschrift", tesseract::OEM_LSTM_ONLY);
 
@@ -957,14 +1078,23 @@ bool Algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std:
 
 	for (int i = 0; i < paddedChars.size(); i++)
 	{
-		do
+		if (paddedChars[i].width >= src.cols)
+			continue;
+
+		if (paddedChars[i].height >= src.rows)
+			continue;
+
+		while (paddedChars[i].width >= chars[i].width + 3 && paddedChars[i].height >= chars[i].height + 3)
 		{
 			tess.SetRectangle(paddedChars[i].x, paddedChars[i].y, paddedChars[i].width, paddedChars[i].height);
 			paddedChars[i].x++;
 			paddedChars[i].y++;
 			paddedChars[i].width -= 2;
 			paddedChars[i].height -= 2;
-		} while (!verifyOutputText(tess, confidence) && (paddedChars[i].width >= chars[i].width + 3 && paddedChars[i].height >= chars[i].height + 3));
+
+			if (verifyOutputText(tess, confidence))
+				break;
+		}
 
 		std::string result = tess.GetUTF8Text();
 
@@ -1004,6 +1134,9 @@ bool Algorithm::readText(const cv::Mat& src, std::string& text, float& confidenc
 
 void Algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const std::string& text, const float& confidence)
 {
+	if (dst.empty())
+		return;
+
 	auto now = std::chrono::system_clock::now();
 	auto toTimeT = std::chrono::system_clock::to_time_t(now);
 
@@ -1032,9 +1165,12 @@ void Algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const
 
 std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 {
+	if (src.empty())
+		return "";
+
 	cv::Mat bgrSrc;
-	if (src.type() == CV_8UC4)
-		cv::cvtColor(src, bgrSrc, cv::COLOR_BGRA2BGR);
+	if (src.type() != CV_8UC3)
+		src.convertTo(bgrSrc, CV_8UC3);
 	else
 		bgrSrc = src.clone();
 

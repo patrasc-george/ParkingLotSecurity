@@ -40,7 +40,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[out] dst The destination binary image.
 	 * @param[in] threshold The threshold value used for binarization.
 	 */
-	static void HSV2Binary(const cv::Mat& src, cv::Mat& dst, const uchar& threshold);
+	static void HSV2Binary(const cv::Mat& src, cv::Mat& dst, const uchar& threshold = 125);
 
 	/**
 	 * @brief Identifies connected components in a binary image and sorts them by area.
@@ -51,7 +51,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[out] areas A vector of pairs, each containing the label and area of a connected component.
 	 * @param[in] newSize The maximum number of components to keep after sorting.
 	 */
-	static void getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize);
+	static void getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize = 0);
 
 	/**
 	 * @brief Retrieves the bounding box of a connected component identified by its label.
@@ -72,7 +72,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[in] max The maximum fraction of the source image area that the bounding box area must not exceed.
 	 * @return A boolean value indicating whether the bounding box meets the specified size criteria.
 	 */
-	static bool sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& min, const float& max);
+	static bool sizeBBox(const cv::Mat& src, const cv::Rect& roi, const float& min = 0, const float& max = 1);
 
 	/**
 	 * @brief Checks if the height of the bounding box meets specified criteria relative to its width.
@@ -83,7 +83,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[in] max The maximum allowed height-to-width ratio.
 	 * @return A boolean value indicating whether the bounding box meets the specified proportional criteria.
 	 */
-	static bool heightBBox(const cv::Rect& roi, const float& min, const float& max);
+	static bool heightBBox(const cv::Rect& roi, const float& min = 0, const float& max = 1);
 
 	/**
 	 * @brief Adds padding to a rectangle and optionally enforces a square shape.
@@ -97,7 +97,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param square A boolean flag indicating whether to enforce a square shape for the destination rectangle. Default is false.
 	 * @param size An optional cv::Size representing boundary dimensions within which the destination rectangle must fit. Default is cv::Size(), implying no bounds.
 	 */
-	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent, const bool& square, const cv::Size& size);
+	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent = 0, const bool& square = 0, const cv::Size& size = cv::Size());
 
 	/**
 	 * @brief Converts pixels within a specific blue range to black in the source image.
@@ -217,7 +217,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[out] largestContour The largest contour found in the source image.
 	 * @param[in] edges (Optional) An edge image that can be used to refine the ROI by excluding certain areas from the contour detection process.
 	 */
-	static bool roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const float& percent);
+	static bool roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const float& percent = 0);
 
 	/**
 	 * @brief Calculates a line passing through a given point with a specified slope and direction.
@@ -305,7 +305,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[in] percent (Optional) A percentage indicating how much larger the resulting image can be compared to the original, to accommodate the points.
 	 * @return A boolean value indicating whether the resizing was within the specified percentage limits. Returns true if the resizing meets the criteria, false otherwise.
 	 */
-	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent);
+	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent = 0);
 
 	/**
 	 * @brief Applies a geometrical transformation to the source image based on quadrilateral coordinates, adjusting its perspective.
@@ -320,7 +320,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @return A boolean value indicating the success of the transformation.
 	 * Returns true if the transformation was applied successfully and the resulting image meets the size criteria; otherwise, it returns false.
 	 */
-	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent);
+	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent = 0);
 
 	/**
 	 * @brief Determines if the specified region within a contour is non-empty.
@@ -363,7 +363,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * Returns true if the resulting image has a non-zero number of pixels (indicating successful contour isolation),
 	 * and false otherwise, suggesting inadequate contour selection or excessive noise removal.
 	 */
-	static bool denoise(const cv::Mat& src, cv::Mat& dst, const float& percent);
+	static bool denoise(const cv::Mat& src, cv::Mat& dst, const float& percent = 1);
 
 	/**
 	 * @brief Extracts bounding boxes for characters from the source image.
@@ -390,7 +390,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param dst Vector of padded and adjusted character bounding boxes.
 	 * @param percent Percentage of the original size to calculate padding.
 	 */
-	static void paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent);
+	static void paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent = 0);
 
 	/**
 	 * @brief Creates a single matrix with characters spaced according to their padded bounding boxes.
@@ -434,7 +434,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[in] size The desired size, specifically the height, to which the character template should be resized.
 	 * The width is determined based on the aspect ratio.
 	 */
-	static void resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::Size& size);
+	static bool resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::Size& size);
 
 	/**
 	 * @brief Calculates the padding needed to make two dimensions equal, distributing the padding evenly on two sides.
@@ -458,7 +458,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[in] percent (Optional) The threshold percentage for the Dice coefficient to consider the match successful.
 	 * @return Returns true if the Dice similarity coefficient is greater than the specified threshold, indicating a successful match; false otherwise.
 	 */
-	static bool matching(const cv::Mat& src, float& dice, const float& percent);
+	static bool matching(const cv::Mat& src, float& dice, const float& percent = 0);
 
 	/**
 	 * @brief Applies Tesseract OCR to recognize text in specified regions of an image, adjusting for character types and improving confidence.

@@ -7,6 +7,42 @@
 #include <QGraphicsPixmapItem>
 #include <QLabel>
 
+//void MainWindow::processImagesFromDirectory(const QString& directoryPath)
+//{
+//	QDir dir(directoryPath);
+//	QStringList filters;
+//	filters << "*.jpg";
+//	QStringList fileList = dir.entryList(filters, QDir::Files);
+//
+//	// Sortăm lista folosind un comparator personalizat care compară componentele numerice.
+//	std::sort(fileList.begin(), fileList.end(), [](const QString& file1, const QString& file2) {
+//		QRegularExpression re("(\\d+)");
+//		QRegularExpressionMatch match1 = re.match(file1);
+//		QRegularExpressionMatch match2 = re.match(file2);
+//		if (match1.hasMatch() && match2.hasMatch()) {
+//			int num1 = match1.captured(1).toInt();
+//			int num2 = match2.captured(1).toInt();
+//			return num1 < num2;
+//		}
+//		return file1 < file2; // În caz că nu sunt numere, sortăm alfabetic.
+//		});
+//
+//	foreach(const QString & fileName, fileList) {
+//		imagePath = dir.absoluteFilePath(fileName);
+//
+//		QFileInfo checkFile(imagePath);
+//		if (checkFile.exists() && checkFile.isFile()) {
+//			if (image.load(imagePath)) {
+//				getVehicle();
+//				clearPreviousItems();
+//				createNewPixmapItem();
+//				setGraphicsViewProperties();
+//				processLastVehicle();
+//			}
+//		}
+//	}
+//}
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
 	setupUI();
@@ -135,6 +171,7 @@ void MainWindow::getVehicle()
 {
 	cv::Mat cvImage(image.height(), image.width(), CV_8UC4, const_cast<uchar*>(image.bits()), image.bytesPerLine());
 	std::string text = textFromImage(cvImage, cvImage);
+	//Algorithm::BGR2HSV(cvImage, cvImage);
 	image = QImage(cvImage.data, cvImage.cols, cvImage.rows, static_cast<int>(cvImage.step), QImage::Format_RGB888).copy();
 
 	int firstPosition = imagePath.toStdString().rfind("/");
@@ -150,6 +187,24 @@ void MainWindow::getVehicle()
 
 	vehicle = Vehicle(vehicles.size(), imagePath.toStdString(), ticket, text.substr(0, plate), text.substr(plate + 1, time - plate - 1));
 	vehicles.push_back(vehicle);
+
+	//int j = vehicle.getTicket();
+	//std::ifstream file("C:\\Users\\George Patrasc\\OneDrive\\Pictures\\dataset\\annots.txt");
+	//std::string line;
+	//int currentLine = 1;
+	//while (getline(file, line))
+	//{
+	//	if (currentLine == j)
+	//	{
+	//		std::cout << j;
+	//		if (text.substr(0, plate) != line)
+	//			std::cout << ": " << line << " / " << text.substr(0, plate);
+	//		std::cout << std::endl;
+	//		break;
+	//	}
+	//	currentLine++;
+	//}
+	//file.close();
 }
 
 void MainWindow::clearPreviousItems()

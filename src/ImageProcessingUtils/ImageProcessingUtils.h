@@ -323,14 +323,13 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent = 0);
 
 	/**
-	 * @brief Determines if the specified region within a contour is non-empty.
-	 * @details Applies binary thresholding to identify and isolate regions within a specified contour, useful for filtering and analysis.
-	 * @param src The source image.
-	 * @param dst The destination binary image showing the region within the contour.
-	 * @param regionContour The contour defining the region of interest.
-	 * @return Boolean indicating whether the region within the contour is non-empty.
+	 * @brief Extracts inner contour of objects in an image.
+	 * @details This function first crops the source image slightly to focus on the interior. It then adds a white border around the cropped image,
+	 * and applies Otsu's thresholding to distinguish the inner contours. Finally, the result is inverted to highlight these contours against a dark background.
+	 * @param src The source image to process.
+	 * @param dst The destination image where the result is stored. This will contain the highlighted inner contours.
 	 */
-	static bool insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour);
+	static void insideContour(const cv::Mat& src, cv::Mat& dst);
 
 	/**
 	 * @brief Calculates the height of a given contour.

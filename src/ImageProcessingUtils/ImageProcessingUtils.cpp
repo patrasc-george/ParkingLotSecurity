@@ -708,26 +708,16 @@ bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, cons
 	return cv::countNonZero(dst);
 }
 
-bool Algorithm::insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& regionContour)
+void Algorithm::insideContour(const cv::Mat& src, cv::Mat& dst)
 {
-	if (src.empty() || regionContour.empty())
-		return false;
+	cv::Rect crop(1, 1, src.cols - 2, src.rows - 2);
+	cv::Mat cropped = src(crop);
 
-	if (src.type() != CV_8UC1 || regionContour.type() != CV_8UC1)
-		return false;
+	cv::Mat bordered = cropped.clone();
+	cv::copyMakeBorder(bordered, bordered, 1, 1, 1, 1, cv::BORDER_CONSTANT, cv::Scalar(255));
 
-	if (src.size() != regionContour.size())
-		return false;
-
-	cv::Mat otsu;
-	cv::threshold(src, otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-
-	otsu = 255 - otsu;
-
-	dst = cv::Mat::zeros(otsu.size(), otsu.type());
-	otsu.copyTo(dst, regionContour);
-
-	return cv::countNonZero(dst);
+	cv::threshold(bordered, dst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+	dst = 255 - dst;
 }
 
 int Algorithm::getContourHeight(const std::vector<cv::Point>& contour)
@@ -1263,14 +1253,8 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 		if (!Algorithm::geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, quadrilateralCoordinates, 0.2))
 			continue;
 
-		cv::Rect crop(1, 1, transformedConnectedComponent.cols - 2, transformedConnectedComponent.rows - 2);
-		transformedConnectedComponent = transformedConnectedComponent(crop);
-
-		Algorithm::roiContour(transformedConnectedComponent, regionContour, largestContour);
-
 		cv::Mat textConnectedComponent;
-		if (!Algorithm::insideContour(transformedConnectedComponent, textConnectedComponent, regionContour))
-			continue;
+		Algorithm::insideContour(transformedConnectedComponent, textConnectedComponent);
 
 		cv::Mat denoiseConnectedComponent;
 		if (!Algorithm::denoise(textConnectedComponent, denoiseConnectedComponent, 0.15))

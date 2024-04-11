@@ -208,7 +208,7 @@ void Algorithm::HSV2BGR(const cv::Mat& src, cv::Mat& dst)
 
 void Algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
 {
-	if (src.empty() || src.type() != CV_8UC1)
+	if (src.empty() || src.channels() != 1)
 		return;
 
 	double maxVal;
@@ -223,7 +223,7 @@ void Algorithm::histogram(const cv::Mat& src, cv::Mat& hist)
 
 void Algorithm::cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHist)
 {
-	if (hist.empty() || hist.type() != CV_8UC1)
+	if (hist.empty() || hist.channels() != 1)
 		return;
 
 	cumulvativeHist = cv::Mat(cv::Size(hist.rows, hist.cols), hist.type());
@@ -238,7 +238,7 @@ void Algorithm::cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHis
 
 void Algorithm::histogramLine(const cv::Mat& cumulvativeHist, cv::Vec4f& line)
 {
-	if (cumulvativeHist.empty() || cumulvativeHist.type() != CV_8UC1)
+	if (cumulvativeHist.empty() || cumulvativeHist.channels() != 1)
 		return;
 
 	double maxVal;
@@ -299,7 +299,7 @@ void Algorithm::triangleThresholding(const cv::Mat& src, cv::Mat& dst)
 
 void Algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction)
 {
-	if (src.empty() || src.type() != CV_8UC3)
+	if (src.empty() || src.type() != CV_8UC1)
 		return;
 
 	cv::Mat sobel, x, y, magnitude;
@@ -364,7 +364,7 @@ void Algorithm::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv
 
 void Algorithm::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 {
-	if (src.empty() || src.type() != CV_8UC3)
+	if (src.empty() || src.type() != CV_8UC1)
 		return;
 
 	cv::Mat sobel, direction;
@@ -730,11 +730,6 @@ bool Algorithm::insideContour(const cv::Mat& src, cv::Mat& dst, const cv::Mat& r
 	return cv::countNonZero(dst);
 }
 
-bool compareAreas(const std::vector<cv::Point>& a, const std::vector<cv::Point>& b)
-{
-	return cv::contourArea(a) > cv::contourArea(b);
-}
-
 int Algorithm::getContourHeight(const std::vector<cv::Point>& contour)
 {
 	if (!contour.size())
@@ -750,6 +745,11 @@ int Algorithm::getContourHeight(const std::vector<cv::Point>& contour)
 	}
 
 	return maxY - minY;
+}
+
+bool Algorithm::compareAreas(const std::vector<cv::Point>& a, const std::vector<cv::Point>& b)
+{
+	return getContourHeight(a) > getContourHeight(b);
 }
 
 int Algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
@@ -958,6 +958,20 @@ void Algorithm::wordsSeparation(const std::vector<cv::Rect>& chars, std::array<s
 	words[0].insert(words[0].end(), chars.begin(), chars.begin() + indexes[1]);
 	words[1].insert(words[1].end(), chars.begin() + indexes[1], chars.begin() + indexes[2]);
 	words[2].insert(words[2].end(), chars.begin() + indexes[2], chars.end());
+}
+
+tesseract::TessBaseAPI& Algorithm::getTessInstance()
+{
+	static tesseract::TessBaseAPI tess;
+	static bool isInitialized = false;
+
+	if (!isInitialized)
+	{
+		tess.Init(NULL, "DIN1451Mittelschrift", tesseract::OEM_LSTM_ONLY);
+		isInitialized = true;
+	}
+
+	return tess;
 }
 
 bool Algorithm::verifyOutputText(tesseract::TessBaseAPI& tess, float& confidence)
@@ -1251,13 +1265,11 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 
 		cv::Rect crop(1, 1, transformedConnectedComponent.cols - 2, transformedConnectedComponent.rows - 2);
 		transformedConnectedComponent = transformedConnectedComponent(crop);
-		cv::Mat borderedConnectedComponent = transformedConnectedComponent.clone();
-		cv::copyMakeBorder(borderedConnectedComponent, borderedConnectedComponent, 1, 1, 1, 1, cv::BORDER_CONSTANT, cv::Scalar(255));
 
-		Algorithm::roiContour(borderedConnectedComponent, regionContour, largestContour);
+		Algorithm::roiContour(transformedConnectedComponent, regionContour, largestContour);
 
 		cv::Mat textConnectedComponent;
-		if (!Algorithm::insideContour(borderedConnectedComponent, textConnectedComponent, regionContour))
+		if (!Algorithm::insideContour(transformedConnectedComponent, textConnectedComponent, regionContour))
 			continue;
 
 		cv::Mat denoiseConnectedComponent;
@@ -1293,6 +1305,7 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 			continue;
 
 		roiConnectedComponent = roi;
+		break;
 	}
 
 	if (plate.empty())

@@ -200,7 +200,7 @@ std::string MainWindow::timeParked()
 	std::ostringstream timeStream;
 	if (it != vehicles.rend())
 	{
-		std::tm tmIn, tmOut;
+		std::tm tmIn = {}, tmOut = {};
 		std::istringstream inStr(it->getTime());
 		std::istringstream outStr(vehicle.getTime());
 		inStr >> std::get_time(&tmIn, "%d-%m-%Y %H:%M:%S");
@@ -241,10 +241,10 @@ void MainWindow::processLastVehicle()
 	QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
 	item->setData(Qt::UserRole, vehicle.getId());
 
-	if (button == enterButton)
-		entriesListWidget->addItem(item);
-	else
+	if (button == exitButton)
 		exitsListWidget->addItem(item);
+	else
+		entriesListWidget->addItem(item);
 
 	image.save(imagePath);
 	writeFile << vehicle;

@@ -341,6 +341,16 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	static int getContourHeight(const std::vector<cv::Point>& contour);
 
 	/**
+	 * @brief Compares the areas of two contours by their heights.
+	 * @details This function compares two contours based on their heights, calculated from their respective points.
+	 * It's useful for sorting or prioritizing contours by size.
+	 * @param[in] a The first contour to compare, represented as a vector of cv::Point.
+	 * @param[in] b The second contour to compare, represented as a vector of cv::Point.
+	 * @return Returns true if the height of contour 'a' is greater than the height of contour 'b'; false otherwise.
+	 */
+	static bool compareAreas(const std::vector<cv::Point>& a, const std::vector<cv::Point>& b);
+
+	/**
 	 * @brief Calculates the median height of a set of contours.
 	 * @details This function determines the median height among all given contours, useful for filtering contours based on their size.
 	 * @param[in] contours A vector of contours.
@@ -411,6 +421,14 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param indexes Array of indexes used to determine word boundaries.
 	 */
 	static void wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes);
+
+	/**
+	 * @brief Returns a singleton instance of the Tesseract OCR engine initialized with specific settings.
+	 * @details Initializes the Tesseract OCR engine once with the "DIN1451Mittelschrift" font and LSTM engine only.
+	 * Subsequent calls return the same initialized instance, ensuring efficiency and thread safety.
+	 * @return A reference to the singleton instance of tesseract::TessBaseAPI.
+	 */
+	static tesseract::TessBaseAPI& getTessInstance();
 
 	/**
 	 * @brief Verifies the output text from Tesseract OCR for a given image area and updates the confidence level.

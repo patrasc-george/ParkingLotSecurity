@@ -70,7 +70,8 @@ void MainWindow::setupUI()
 
 	setCentralWidget(centralWidget);
 
-	writeFile = std::ofstream("../../../database/vehicles.txt", std::ios::app);
+	isDevelopment();
+	writeFile = std::ofstream(databasePath + "vehicles.txt", std::ios::app);
 
 	connect(enterButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
 	connect(exitButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
@@ -81,9 +82,17 @@ void MainWindow::setupUI()
 	uploadVehicles();
 }
 
+void MainWindow::isDevelopment()
+{
+	if (std::filesystem::exists("../../../database"))
+		databasePath = "../../../database/";
+	else
+		databasePath = "database/";
+}
+
 void MainWindow::uploadDataBase()
 {
-	std::ifstream readFile("../../../database/vehicles.txt");
+	std::ifstream readFile(databasePath + "vehicles.txt");
 
 	std::vector<std::string> vehicleData;
 	std::string line;
@@ -144,7 +153,7 @@ void MainWindow::getVehicle()
 	if (firstPosition != std::string::npos && lastPosition != std::string::npos)
 		ticket = imagePath.mid(firstPosition + 1, lastPosition - firstPosition - 1).toInt();
 
-	imagePath = "../../../database/" + QString::number(vehicles.size()) + ".jpg";
+	imagePath = QString::fromStdString(databasePath) + QString::number(vehicles.size()) + ".jpg";
 	size_t plate = text.find('\n');
 	size_t time = text.find('\n', plate + 1);
 

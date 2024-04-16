@@ -52,6 +52,12 @@ private:
 	void setupUI();
 
 	/**
+	 * @brief Sets the database path based on directory existence.
+	 * @details Checks if "../../../database" exists and sets the database path accordingly; otherwise uses "database/".
+	 */
+	void isDevelopment();
+
+	/**
 	 * @brief Loads vehicle data from the database file into the application.
 	 * @details Reads vehicle information from a text file and stores it in the application's memory.
 	 * This method parses the file to create Vehicle objects and adds them to the vehicles vector.
@@ -122,6 +128,7 @@ private:
 	QString imagePath;
 	QImage image;
 	Vehicle vehicle;
+	std::string databasePath;
 	std::string displayText;
 	std::vector<Vehicle> vehicles;
 	std::ofstream writeFile;

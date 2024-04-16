@@ -1029,6 +1029,9 @@ bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percent)
 
 	cv::Mat charTemplate = cv::imread("../../../database/i.jpg", cv::IMREAD_GRAYSCALE);
 
+	if (charTemplate.empty())
+		charTemplate = cv::imread("database/i.jpg", cv::IMREAD_GRAYSCALE);
+
 	cv::Mat resizedCharTemplate;
 	if (!resizeCharTemplate(charTemplate, resizedCharTemplate, src.size()))
 		return false;

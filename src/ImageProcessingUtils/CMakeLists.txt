@@ -17,12 +17,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-    Qt6::Widgets 
-    Qt6::Core
     ${OpenCV_LIBS}
     ${Tesseract_LIBRARIES}
 	${Tesseract_LIBRARY_DEBUG}
 	)
-
-# Install the library to the 'bin' directory on installation
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)

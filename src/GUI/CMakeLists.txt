@@ -8,14 +8,18 @@ set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC ON)
 
 # Set the root directory for the GUI
-set(GUI_ROOT_DIR "${ROOT_DIR}/src/GUI")
+# set(GUI_ROOT_DIR "${ROOT_DIR}/src/GUI")
+
+# Collect every header and source in the directory
+file(GLOB HEADER_FILES "*.h")
+file(GLOB SOURCE_FILES "*.c*")
 
 # Collect all headers and sources in the directory
 file(
     GLOB_RECURSE GUI_FILES
     LIST_DIRECTORIES false
-    "${GUI_ROOT_DIR}/*.c*"
-    "${GUI_ROOT_DIR}/*.h*"
+	${HEADER_FILES} 
+	${SOURCE_FILES}
 	)
 
 # Add the library
@@ -41,6 +45,3 @@ target_link_libraries(${PROJECT_NAME}
 
 # Link to the runtime output directory
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-# Install the target to the 'bin' directory on installation
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)

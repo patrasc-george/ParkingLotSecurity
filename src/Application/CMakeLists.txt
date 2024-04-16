@@ -41,7 +41,7 @@ set(Qt6_DLLS "${Qt6_DIR}/../../../plugins")
 install(DIRECTORY ${Qt6_DLLS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack" USE_SOURCE_PERMISSIONS)
 
 file(GLOB Tesseract_DLLS "${Tesseract_INCLUDE_DIRS}/../bin/*.dll")
-install(FILES ${Tesseract_DLLS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/tesseract")
+install(FILES ${Tesseract_DLLS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack")
 
 file(GLOB DATABASE "${CMAKE_SOURCE_DIR}/database/I.jpg" "${CMAKE_SOURCE_DIR}/database/vehicles.txt")
 install(FILES ${DATABASE} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/database")

@@ -21,8 +21,25 @@ void MainWindow::setupUI()
 	pixmapItem = new QGraphicsPixmapItem();
 	scene->addItem(pixmapItem);
 
-	enterButton = new QPushButton("ENTER", this);
-	exitButton = new QPushButton("EXIT", this);
+	isDevelopment();
+
+	enterButton = new QPushButton(this);
+	std::string enterPath = databasePath + "enter.png";
+	QPixmap enterPixmap(enterPath.c_str());
+	enterButton->setIcon(QIcon(enterPixmap));
+	enterButton->setIconSize(enterPixmap.size() / 4);
+	enterButton->setFixedSize(enterPixmap.size() / 4);
+
+	exitButton = new QPushButton(this);
+	std::string exitPath = databasePath + "exit.png";
+	QPixmap exitPixmap(exitPath.c_str());
+	exitButton->setIcon(QIcon(exitPixmap));
+	exitButton->setIconSize(exitPixmap.size() / 4);
+	exitButton->setFixedSize(exitPixmap.size() / 4);
+
+	QHBoxLayout* buttonLayout = new QHBoxLayout();
+	buttonLayout->addWidget(enterButton, 0, Qt::AlignCenter);
+	buttonLayout->addWidget(exitButton, 0, Qt::AlignCenter);
 
 	setFixedSize(1300, 700);
 
@@ -52,25 +69,17 @@ void MainWindow::setupUI()
 
 	QVBoxLayout* rightLayout = new QVBoxLayout();
 	rightLayout->addLayout(listsLayout);
+	rightLayout->addLayout(buttonLayout);
 
 	QHBoxLayout* mainLayout = new QHBoxLayout();
 	mainLayout->addLayout(leftLayout, 2);
 	mainLayout->addLayout(rightLayout, 1);
 
-	QHBoxLayout* buttonsLayout = new QHBoxLayout();
-	buttonsLayout->addWidget(enterButton, 0, Qt::AlignRight);
-	buttonsLayout->addWidget(exitButton, 0, Qt::AlignLeft);
-
-	QVBoxLayout* outerLayout = new QVBoxLayout();
-	outerLayout->addLayout(mainLayout);
-	outerLayout->addLayout(buttonsLayout, 0);
-
 	QWidget* centralWidget = new QWidget(this);
-	centralWidget->setLayout(outerLayout);
+	centralWidget->setLayout(mainLayout);
 
 	setCentralWidget(centralWidget);
 
-	isDevelopment();
 	writeFile = std::ofstream(databasePath + "vehicles.txt", std::ios::app);
 
 	connect(enterButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
@@ -81,6 +90,7 @@ void MainWindow::setupUI()
 	uploadDataBase();
 	uploadVehicles();
 }
+
 
 void MainWindow::isDevelopment()
 {

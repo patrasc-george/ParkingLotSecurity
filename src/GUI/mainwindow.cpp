@@ -27,15 +27,15 @@ void MainWindow::setupUI()
 	std::string enterPath = databasePath + "enter.png";
 	QPixmap enterPixmap(enterPath.c_str());
 	enterButton->setIcon(QIcon(enterPixmap));
-	enterButton->setIconSize(enterPixmap.size() / 4);
-	enterButton->setFixedSize(enterPixmap.size() / 4);
+	enterButton->setIconSize(enterPixmap.size() / 5);
+	enterButton->setFixedSize(enterPixmap.size() / 5);
 
 	exitButton = new QPushButton(this);
 	std::string exitPath = databasePath + "exit.png";
 	QPixmap exitPixmap(exitPath.c_str());
 	exitButton->setIcon(QIcon(exitPixmap));
-	exitButton->setIconSize(exitPixmap.size() / 4);
-	exitButton->setFixedSize(exitPixmap.size() / 4);
+	exitButton->setIconSize(exitPixmap.size() / 5);
+	exitButton->setFixedSize(exitPixmap.size() / 5);
 
 	QHBoxLayout* buttonLayout = new QHBoxLayout();
 	buttonLayout->addWidget(enterButton, 0, Qt::AlignCenter);

@@ -3,10 +3,7 @@
 /Documentation/Licenta/dataset/
 /Documentation/Licenta/images/
 /Documentation/Licenta/segmentari/
-/database/*
-!dataset/enter.png
-!dataset/exit.png
-!dataset/I.jpg
+/database/
 *.aux
 *.log
 *.out

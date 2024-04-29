@@ -1,0 +1,14 @@
+/build/
+/DeliveryPack/
+/Documentation/Licenta/dataset/
+/Documentation/Licenta/images/
+/Documentation/Licenta/segmentari/
+/database/*
+!dataset/enter.png
+!dataset/exit.png
+!dataset/I.jpg
+*.aux
+*.log
+*.out
+*.pdf
+*.synctex.gz

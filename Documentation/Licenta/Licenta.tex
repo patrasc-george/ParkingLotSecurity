@@ -26,7 +26,37 @@
 ]
 
 \begin{document}
-\section*{Scopul aplicației}
+
+\begin{titlepage}
+    \begin{center}
+        \begin{minipage}{8cm}
+            \includegraphics[width=\linewidth]{images/unitbv.jpg}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{5cm}
+            \textbf{Programul de studiu:}\\
+            Informatică
+        \end{minipage}
+    \end{center}
+
+    \vspace{3cm}
+
+    \begin{center}
+        \textbf{\LARGE Lucrare de licență}\\
+        \vspace{0.5cm}
+        \textbf{\Large Sistem de gestionare al accesului într-o parcare auto folosind tehnici de procesare a imaginilor}\\
+        \vspace{2cm}
+        \textbf{Autor: George Daniel Patrașc}\\
+        \textbf{Coordonator științific: Lect. Dr. Honorius Cezar Gâlmeanu}\\
+        \vspace{2cm}
+        \textbf{Brașov, 2024}
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+
+\chapter{Introducere}
+\section{Scopul aplicației}
 Aplicația are scopul de a facilita și automatiza gestionarea accesului în parcările auto, prin identificarea și înregistrarea automată a numerelor de înmatriculare ale autovehiculelor, aducând beneficii eficienței operaționale și securității.
 
 \begin{figure}[h]
@@ -47,7 +77,7 @@ Aplicația are scopul de a facilita și automatiza gestionarea accesului în par
     \item \textbf{Interfața grafică de utilizator (GUI):} Aplicația include o interfață grafică prietenoasă și intuitivă, care afișează în timp real informațiile despre accesul în parcare. Interfața permite utilizatorilor să vizualizeze imagini recente și să acceseze istoricul vehiculelor care au pătruns în parcare.
 \end{enumerate}
 
-\section*{Motivarea aplicației}
+\section{Motivarea aplicației}
 În cadrul proiectului, s-a urmărit dezvoltarea unei soluții eficiente prin valorificarea cunoștințelor existente din domeniul procesării imaginilor. Totodata, proiectul a implicat aplicarea și extinderea tehnicilor de analiză și procesare vizuală, pentru a identifica și extrage numerele de înmatriculare din imaginile captate de la intrările în parcările auto.
 
 Ca limbaj de programare s-a optat pentru C++, care este larg recunoscut în domeniul procesării de imagini datorită eficienței sale remarcabile și a flexibilității pe care o oferă în gestionarea resurselor de sistem, contribuind la optimizarea timpului de execuție si permițând manipularea avansată și rapidă a datelor vizuale.
@@ -58,8 +88,36 @@ Interfața grafică a fost creată cu ajutorul framework-ului Qt, oferind o mani
 
 Întregul proces de dezvoltare a fost suportat de mediul integrat de dezvoltare Visual Studio, și a fost gestionat folosind GitLab pentru versionarea codului.
 
-\section*{Segmentarea, rectificarea și recunoașterea textului}
-În continuare, dorim să aprofundăm pașii de execuție ai programului. În paralel, vom lua în considerare și o imagine drept exemplu pentru a ilustra fiecare etapă, oferind o perspectivă mai clară și mai cuprinzătoare asupra procesului de funcționare a aplicației.
+\chapter{Noțiuni teoretice}
+
+\chapter{Prezentarea aplicației}
+\section{Arhitectura}
+Vom începe prin a detalia arhitectura modulară a aplicației, accentuând modul în care fiecare componentă specifică aduce un aport semnificativ la funcționalitatea de ansamblu. Această arhitectură este concepută pentru a sprijini extensibilitatea, ușurința în mentenanță și posibilitatea de a testa independent fiecare modul, facilitând astfel adaptarea și scalarea aplicației în funcție de necesități.
+
+Intrarea în aplicație este gestionată de proiectul Application, care cuprinde funcția main. Aceasta are rolul de a inițializa și lansa interfața grafice, fiind punctul de interacțiune primar pentru utilizatori. Structura simplificată a funcției main este proiectată pentru a oferi un punct de start clar și eficient, minimizând dependențele inițiale și asigurând o încărcare rapidă și neîntreruptă a aplicației.
+
+Interfața de utilizator a aplicației este orchestrată prin intermediul proiectului UserInterface, care este subordonat proiectului principal Application. Acest modul este esențial pentru gestionarea interacțiunii cu utilizatorul și include toate elementele de GUI necesare pentru o navigare intuitivă și eficientă în cadrul aplicației.
+
+Proiectul UserInterface cuprinde, în principal, două componente cheie: clasa Vehicle și clasa MainWindow. Clasa Vehicle are rolul de a administra datele și a operațiunile asociate cu vehiculele procesate de aplicație. Aceasta funcționează ca o abstracție a datelor vehiculului, facilitând manipularea și accesul la informațiile relevante într-un mod organizat și eficient.
+
+Pe de altă parte, clasa MainWindow reprezintă fereastra principală a aplicației și este responsabilă pentru gestionarea layout-ului și a elementelor UI principale. Aceasta servește ca punct central al interacțiunii utilizatorului, integrând diverse controale și afișând informații într-un mod accesibil și prietenos. MainWindow”utilizează instanțe ale clasei Vehicle pentru a popula interfața cu date specifice fiecărui vehicul, permițând utilizatorilor să vizualizeze și să interacționeze cu aceste detalii într-un context relevant. Utilizarea clasei Vehicle în cadrul MainWindow asigură o separare clară între logica de prezentare și logica din spate a aplicației.
+
+Procesarea imaginilor este un aspect central al aplicației și este gestionată de modulul ImageProcessingUtils, implementat ca un DLL (Dynamic-Link Library). Acest modul este dedicat procesării vizuale, având ca scop principal recunoașterea numerelor de înmatriculare din imagini, funcționalitatea principală a aplicației.
+
+Modulul ImageProcessingUtils este integrat în proiectul UserInterface, contribuind direct la extragerea și furnizarea detaliilor legate de vehicule. Acesta include clasa Algorithm, care icapsulează toți algoritmii și funcțiile necesare pentru suportarea procesului de recunoaștere a textului. Funcțiile din această clasă sunt esențiale pentru interpretarea și transformarea imaginilor în date textuale utilizabile, facilitând astfel recunoașterea și verificarea numerelor de înmatriculare.
+
+Metodele din clasa Algorithm sunt folosite intr-o funcție externă clasei, care este apelată in clasa MainWindow, si care are ca scop chiar funcționalitatea principală a aplicației, returnarea texutului numerelor de inmatriculare. Această funcție este declarată ca fiind „friend” (prietenă) pentru a putea apela metodele clasei Algorithm și pentru a simplifica procesul de recunoaștere a textului din imagini fără a compromite incapsularea și securitatea datelor procesate.
+
+De asemenea, există și proiectul separat de teste, situat în afara directorului sursă, dedicat verificării funcționalității modulului ImageProcessingUtils. Testele unitare din acest proiect sunt esențiale pentru asigurarea calității și fiabilității algoritmilor implementați în clasa Algorithm. Aceste teste se concentrează pe evaluarea fiecărei componente software pentru a garantat că recunoașterea numerelor de înmatriculare se efectuează corect și eficient.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/UML.jpg}
+\end{figure}
+\FloatBarrier
+
+\section{Segmentarea, rectificarea și recunoașterea textului}
+În continuare, dorim să aprofundăm pașii de execuție ai programului Toate aceste funcții se regăsesc într-o clasă denumită "Algorithm", din interiorul unei biblioteci dinamice "ImageProcessingUtils". În paralel, vom lua în considerare și o imagine drept exemplu pentru a ilustra fiecare etapă, oferind o perspectivă mai clară și mai cuprinzătoare asupra procesului de funcționare a aplicației.
 
 \begin{figure}[h]
     \centering
@@ -75,13 +133,6 @@ Unghiul de fotografiere și distanța de la care se face poza nu influențează 
 Dimensiunile imaginilor reprezintă un aspect esențial pentru performanța programului. În cazul setului de date pe care a fost testată aplicația, lucrăm cu imagini de înaltă calitate, cu o rezoluție de 4624 x 3468 x 3 și un raport de aspect de 4:3. Această dimensiune generează un număr mare de pixeli, peste 48 de milioane, ceea ce are un impact direct asupra timpului de execuție al aplicației.
 
 Având imagini de aceste dimensiuni, este de așteptat să întâmpinăm provocări legate de viteză și eficiență. O soluție practică este redimensionarea imaginii de input la jumătate, ceea ce reduce numărul total de pixeli, menținând totuși o calitate superioară. Prin acest proces, timpul de execuție este îmbunătățit semnificativ, facilitând o procesare mai rapidă și eficientă, fără a sacrifica prea mult din calitatea imaginii. În acest fel, programul poate gestiona seturi de date mari într-un timp mai scurt, permițându-i să fie mai scalabil și să suporte un volum mai mare de procesare fără a compromite rezultatele.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.4\textwidth]{images/resize.jpg}
-    \caption{Imaginea redimensionată}
-\end{figure}
-\FloatBarrier
 
 Pentru a îmbunătăți timpul de execuție și mai mult, putem optimiza procesarea imaginilor concentrându-ne doar pe jumătatea inferioară a acestora. Știind că numărul de înmatriculare este de obicei amplasat în partea inferioară a vehiculului, putem decupa imaginea astfel încât să păstrăm doar jumătatea de jos a acesteia. Eventual, se pot aplica mici decupaje și din părțile laterale pentru a elimina porțiuni care nu conțin informații relevante.
 
@@ -214,13 +265,13 @@ Primul pas este aplicarea filtrului Sobel, care detectează marginile bazându-s
     \begin{minipage}{0.4\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/sobel.jpg}
-        \caption{Sobel}
+        \caption{Filtru Sobel}
     \end{minipage}
     \hspace{0.05\textwidth}
     \begin{minipage}{0.4\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/binary_sobel.jpg}
-        \caption{Sobel cu filtru binar}
+        \caption{Filtru Sobel binarizat cu metoda Triangle Thresholding}
     \end{minipage}
 \end{figure}
 \FloatBarrier
@@ -238,7 +289,7 @@ Pentru a ne asigura că am captat toți pixelii relevanți din imagine, aplicăm
     \begin{minipage}{0.4\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/binary_gradient.jpg}
-        \caption{Gradienții morfologici cu filtru binar}
+        \caption{Gradienții morfologici binarizati cu metoda Triangle Thresholding}
     \end{minipage}
 \end{figure}
 \FloatBarrier
@@ -467,7 +518,7 @@ Cu aceste dimensiuni calculate, putem stabili punctele corespunzătoare pentru f
     \item (0, 0) pentru stânga sus,
     \item (width - 1, 0) pentru dreapta sus,
     \item (width - 1, height - 1) pentru dreapta jos,
-    \item (0, height - 1) pentru stânga jos
+    \item (0, height - 1) pentru stânga jos.
 \end{itemize}
 
 \begin{figure}[h]
@@ -736,14 +787,198 @@ Scorul Dice poate fi calculat pe baza acestei intersecții, indicând cât de mu
 
 În situația în care nu a fost recunoscut textul integral al numărului de înmatriculare, acesta este catalogat drept "necunoscut".
 
-\section*{Direcții și dezvoltări viitoare}
+Pentru toate componentele descrise, s-au implementat teste in cadrul proiectului Tests. Pentru fiecare functie, s-a verificat comportamentul acesteia la imagini neinitializate, cu un numar diferit de canale decat cel asteptat, sau cu pixeli de un tip de date diferit. Pentru functiile matematice s-a testat posibilele impartiri la 0 si alte exceptii in genul acesta. In urma testelor facute, in fiecare functie s-au adaugat conditii de verificare a variabilelor de input, pentru a se putea trece testele si a nu exista posibile erori a aplicatiei.
+
+Pentru toate componentele descrise anterior, s-au dezvoltat un set de teste în cadrul proiectului „Tests” pentru a asigura robustețea și fiabilitatea aplicației. Aceste teste sunt concepute pentru a evalua comportamentul fiecărei funcții în condiții diverse, cum ar fi procesarea imaginilor neinițializate sau cu un număr diferit de canale față de cel așteptat, si manipularea pixelilor de un tip de date diferit. Aceasta abordare ajută în identificarea punctelor slabe ale procesării și asigură că modulele pot gestiona orice tip de intrare în mod corect.
+
+Pentru funcțiile matematice în special, s-au implementat teste pentru a preveni erori precum împărțirile la zero și alte situații excepționale care pot apărea în timpul execuției. Aceste teste sunt vitale pentru a evita crash-uri ale aplicației și pentru a asigura că output-ul matematic este întotdeauna valid și precis.
+
+Ca rezultat al acestor teste, în codul fiecărei funcții s-au adăugat multiple condiții de verificare a datelor de intrare. Aceste verificări suplimentare asigură că, indiferent de variațiile datelor de intrare, funcțiile vor răspunde în mod adecvat, trecând testele și evitând posibilele erori care ar putea să compromită funcționalitatea aplicației.
+
+\section{Interfața grafică}
+Pentru construcția interfeței grafice a aplicației, s-a optat pentru utilizarea framework-ului Qt, recunoscut pentru flexibilitatea și eficiența sa în dezvoltarea de interfețe moderne pentru utilizator.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/gui.jpg}
+    \caption{Interfața grafică}
+\end{figure}
+\FloatBarrier
+
+Pentru început, se poate observa că în partea stângă este afișată imaginea de input, prezentând vehiculul surprins, cu numărul de înmatriculare clar vizibil în cadrul bounding box-ului său. În partea inferioară a imaginii, sunt afișate: data și ora captării fotografiei, în format zi-lună-an ore:minute:secunde, textul recunoscut din numărul de înmatriculare și nivelul de confidență asociat recunoașterii.
+
+Mai departe, în partea dreaptă a interfeței, se pot găsi două liste detaliate care documentează istoricul vehiculelor care au intrat și respectiv ieșit din parcarea. Pentru fiecare vehicul înregistrat, listele afișează textul numărului de înmatriculare și data și ora la care imaginea a fost captată. În plus, lista vehiculelor care au părăsit parcarea include și durata de staționare a fiecărui vehicul, oferind astfel o perspectivă completă asupra traficului și utilizării spațiului de parcare.
+
+Sub fiecare listă, este situat câte un buton specific, similar celor întâlnite în terminalele de acces din parcările auto: un buton pentru intrare sub lista intrărilor și unul pentru ieșire sub lista ieșirilor. Aceste butoane permit utilizatorilor să încarce imagini pentru procesare, similare cu cele obținute de camerele video plasate la intrările în parcări.
+
+În continuare, făcând o analiză și asupra codului sursă, conform principiilor programării orientate pe obiect, este inclusă implementarea unei clase denumite "Vehicle", din interiorul unei biblioteci dinamice "UserInterface". Această clasă permite instantierea unui obiect pentru fiecare vehicul înregistrat, utilizând următorii parametri:
+
+\begin{itemize}
+    \item \textbf{id:} identificator unic pentru fiecare vehicul,
+    \item \textbf{path:} calea către imaginea asociată vehiculului,
+    \item \textbf{ticket:} numărul biletului de parcare,
+    \item \textbf{licensePlate:} numărul de înmatriculare al vehiculului,
+    \item \textbf{time:} data și ora la care vehiculul a fost înregistrat,
+    \item \textbf{timeParked:} durata de staționare în parcare.
+\end{itemize}
+
+Pentru fiecare parametru al clasei Vehicle, sunt implementate funcții de getter și setter, care îndeplinesc roluri esențiale în managementul datelor. Funcțiile de getter sunt utilizate pentru a accesa valorile atributelor instanței, permițând consultarea informațiilor despre vehicule într-un mod sigur și controlat. Pe de altă parte, funcțiile de setter oferă mecanismul necesar pentru actualizarea valorilor acestor atribute, asigurând că modificările de stare sunt gestionate corespunzător, reflectând orice schimbări în comportamentul sau statutul vehiculelor. Implementarea acestor funcții sprijină încapsularea datelor și ajută la protecția integrității acestora și la menținerea unei arhitecturi clare și organizate a codului.
+
+De asemenea, a fost inclusă și o funcție de supraincarcare a operatorului de ieșire <<, destinată afișării informațiilor despre vehicul. Această funcție permite scrierea ușoară și directă a tuturor parametrilor clasei, menționați anterior, în fluxurile de ieșire.
+
+Pentru păstrarea datelor chiar și după închiderea programului, s-a optat pentru folosirea unei baze de date. În momentul instantierii unui obiect de tip Vehicle, toate informațiile obiectului sunt automat înregistrate în baza de date, permițând stocarea structurată și accesul rapid la informații la nevoie.
+
+Mai mult, la lansarea programului, sistemul inițiază automat o procedură de încărcare a datelor din baza de date, restabilind starea anterioară a listei de vehicule. Această funcționalitate asigură că toate informațiile necesare sunt disponibile imediat după pornirea aplicației, facilitând o operare continuă și fără întreruperi a sistemului.
+
+De asemenea, pentru fereastra principală a aplicației există clasa MainWindow, aflată tot in interiorul bibliotecii dinamice "UserInterface", care este esențială pentru gestionarea interfeței utilizatorului și a datelor procesate. Aceasta include o serie de membri și metode care facilitează manipularea și afișarea informațiilor despre vehicule, precum și interacțiunea cu utilizatorul.
+
+Printre membrii săi, în primul rând, regăsim elementele de Qt care compun interfața grafică, cum ar fi butoanele, listele, etichetele și zonele de vizualizare. Acestea sunt configurete pentru a oferi o experiență de utilizare intuitivă și accesibilă, permițând utilizatorilor să interacționeze eficient cu aplicația. De asemenea, se regăsește și fișierul bazei de date și calea către acesta, asigurând gestionarea persistentă și sigură a datelor vehiculelor.
+
+De asemenea, tot ca membru al clasei este și instantierea unui obiect de tip Vehicle curent selectat și informațiile legate de acesta, cum ar fi imaginea vehiculului, calea către această imagine și textul format pentru afișare, dar și o listă de obiecte de tip Vehicle în care sunt stocate toate aceste instanțe ale clasei. Acest vector facilitează accesul rapid și eficient la informații complete despre fiecare vehicul, permițând referințarea și manipularea acestora după necesități.
+
+Pentru construcția interfeței grafice, se inițializează un QGraphicsView care funcționează ca un container pentru elementele grafice. Acesta este asociat cu un QGraphicsScene, responsabil pentru gestionarea obiectelor grafice, și un QGraphicsPixmapItem, adăugat la scena respectivă, care permite afișarea eficientă a imaginilor.
+
+Fiecare dintre cele două butoane QPushButton este încărcat cu o imagine reprezentativă pentru funcțiile de intrare, respectiv ieșire, extrase din baza de date prin intermediul căilor specificate. Dimensiunile și iconițele butoanelor sunt ajustate pentru a se integra în designul interfeței.
+
+De asemenea, se face inițializarea a două liste QListWidget care sunt utilizate pentru a afișa înregistrările vehiculelor care intră, respectiv ies din parcare. Fiecare listă este asociată cu câte o etichetă QLabel descriptivă, care este configurată pentru a avea textul centrat.
+
+Organizarea componentelor interfeței este realizată prin structurarea mai multor layout-uri:
+
+\begin{itemize}
+    \item \textbf{Layout-ul cu butoanele:} Este un layout orizontal QHBoxLayout în care cele două butoane sunt amplasate central. Acest aranjament asigură că butoanele sunt ușor accesibile și vizibil poziționate, contribuind la o interfață estetic plăcută și funcțională.
+
+    \item \textbf{Layout-ul de intrări:} Acesta este un layout vertical QVBoxLayout care începe cu eticheta de intrări declarată anterior, urmată de lista în care sunt memorate intrările vehiculelor. Organizarea verticală asigură că eticheta este afișată clar deasupra listei, creând o structură logică și estetic plăcută.
+
+    \item \textbf{Layout-ul de ieșiri:} Similar cu layout-ul de intrări, acest layout vertical QVBoxLayout conține eticheta de ieșiri și o listă dedicată ieșirilor vehiculelor. Din nou, această organizare verticală menține coerența vizuală și funcționalitatea, facilitând accesul și vizualizarea datelor.
+
+    \item \textbf{Layout-ul cu listele:} Este un layout orizontal QHBoxLayout care adaugă layout-urile de intrări și ieșiri unul lângă celălalt. Această configurație facilitează afișarea simultană a listelor de intrări și ieșiri, permițând utilizatorilor să compare și să acceseze rapid informațiile.
+
+    \item \textbf{Layout-ul din dreapta:} Acest layout vertical QVBoxLayout adaugă layout-ul cu listele, care include ambele liste și etichetele lor, precum și layout-ul care cuprinde butoanele de interacțiune. Organizarea verticală optimizează utilizarea spațiului și asigură o separare clară între zonele de afișare a datelor și cele de acțiune.
+
+    \item \textbf{Layout-ul din stânga:} Este tot un layout vertical QVBoxLayout folosit pentru a include QGraphicsView, spațiul în care sunt afișate imaginile cu vehiculele. Acest layout oferă o vizualizare centrală și neîntreruptă a elementelor grafice relevante.
+
+    \item \textbf{Layout-ul principal:} Este un layout-ul de tip orizontal QHBoxLayout, ce combină layout-ul din dreapta cu cel din stânga. Alocă o proporție mai mare pentru cel din stânga comparativ cu cel din dreapta, asigurând astfel un spațiu adecvat pentru vizualizarea graficelor și o eficiență în utilizarea spațiului de afișare.
+\end{itemize}
+După inițializarea interfeței grafice, începe procesul de încărcare a datelor din baza de date prin deschiderea unui fișier text care conține informațiile salvate despre vehicule. Fișierul este citit linie cu linie, iar datele colectate pentru fiecare vehicul sunt folosite pentru a instanția câte un obiect Vehicle. Dacă se cunosc informații despre timpul staționat al vehiculului, acest lucru indică faptul că vehiculul este înregistrat la ieșirea din parcare, și astfel, timpul staționat al instanței este actualizat corespunzător. Fiecare obiect Vehicle creat este adăugat la lista de vehicule, iar procesul continuă astfel până când toate liniile din fișier sunt citite, după care fișierul este închis.
+
+Odată ce toate datele sunt încărcate local din baza de date, informațiile trebuie afișate în interfața grafică. Această operațiune se realizează iterând prin lista vehiculelor încărcate și actualizând interfața de utilizator corespunzător. Pentru fiecare vehicul, se compune un text de afișare care include numărul de înmatriculare, data și ora înregistrării vehiculului, și, dacă este disponibil, timpul staționat în parcare. Se creează un element QListWidgetItem cu textul format și se adaugă în lista de intrări dacă nu există informații despre timpul staționat, sau în lista de ieșiri, dacă aceste informații sunt disponibile.
+
+In final, se fac și conexiunile pentru butoane. Când unul dintre cele două butoane de ieșire sau intrare sunt apăsate, se emite semnalul "clicked", care declanșează executarea metodei ce permite utilizatorului să încarce imagini ale vehiculelor pentru a fi procesate, fie la intrarea, fie la ieșirea din parcare, simbolizând momentele când vehiculele trec prin punctele de control.
+
+După ce imaginea a fost încărcată și validată, se apelează metoda de procesare care returnează: textul numărului de înmatriculare, data și ora fotografierii și imaginea de output cu numărul de înmatriculare încadrat într-un bounding box și informațiile obținute scrise pe aceasta.
+
+Pentru simularea unui sistem de tichete, fiecare vehicul este catalogat cu câte un ID comun în denumirea tuturor imaginilor în care acesta apare. Se obține acest ID din denumirea imaginii. De asemenea, fiecare imagine de output este salvată pe calculatorul personal, astfel că se creează calea de salvare, care va fi formată din calea către baza de date, la care se adaugă indexul vehiculului respectiv din întreaga listă de vehicule. Acest nou obiect de tip vehicle este memorat în listă.
+
+După încărcarea și validarea imaginii, se inițiază metoda de procesare care extrage și returnează: textul numărului de înmatriculare, data și ora la care fotografia a fost realizată și imaginea de output cu numărul de înmatriculare încadrat într-un bounding box și cu detaliile extrase afișate direct pe aceasta.
+
+Pentru a simula un sistem de tichete, fiecare vehicul este identificat printr-un ID unic, care este inclus în denumirea tuturor imaginilor în care vehiculul apare. Acest ID este extras și memorat din numele fișierului imaginii. Fiecare imagine procesată este salvată local pe calculator, așadar și aceasta curentă va fi salvată. Calea de salvare este generată automat, începând de la directorul bazei de date și adăugându-se indexul vehiculului din lista totală de vehicule. În final, se creează un nou obiect de tip Vehicle cu toate aceste informații obținute și se adaugă la listă.
+
+Dacă butonul apăsat este cel de ieșire, se inițiază calculul timpului de staționare al vehiculului. Dacă numărul de înmatriculare al vehiculului a fost recunoscut cu succes în imagine, se caută în lista de vehicule pentru a identifica cea mai recentă apariție a acestui vehicul. În cazul în care numărul de înmatriculare nu poate fi recunoscut și este etichetat ca "nerecunoscut", căutarea se va baza pe numărul tichetului asociat vehiculului.
+
+După identificarea vehiculului în listă, se extrage data și ora intrării respective. Utilizând aceste informații împreună cu data și ora ieșirii, care sunt disponibile în momentul apăsării butonului de ieșire, se calculează diferența de timp între cele două momente. Acest calcul va determina durata totală de staționare a vehiculului în respectiva parcare. Această durată este apoi folosită pentru a actualiza înregistrarea vehiculului.
+
+Ulterior, se alcătuiește textul de afișare cu numărul de înmatriculare recunoscut, data și ora și, dacă există, timpul staționat. Acest text este adăugat în lista corespunzătoare în funcție de butonul apăsat. Toate informațiile legate de vehiculul curent sunt scrise în baza de date, folosindu-se funcția de scriere supraincarcată din clasa Vehicle.
+
+Pentru a afișa noua imagine de output în interfața grafică, procesul începe cu eliminarea QGraphicsItem-ului existent din scenă, asigurându-se că nu există suprapuneri sau conflicte vizuale. Acest lucru se realizează prin îndepărtarea și ștergerea elementului grafic curent, făcând loc pentru adăugarea unui nou conținut.
+
+După curățarea scenei, se creează un nou QGraphicsPixmapItem, care este inițializat cu noua imagine procesată. Acest element nou este apoi adăugat la scena grafică, reprezentând noua imagine de afișare.
+
+Următorul pas implică ajustarea proprietăților QGraphicsView. Acesta este configurat pentru alinierea la centru, asigurând că imaginea este prezentată în mod egal și centrat în spațiul disponibil. În plus, se obține dreptunghiul delimitator al noii imagini, care este utilizat pentru a seta zona de vizualizare. Această setare definește limitele în care elementele grafice pot fi vizualizate, garantând că întreaga imagine este încadrată corespunzător.
+
+În final, imaginea este scalată și încadrată în vizualizator, cu respectarea proporțiilor originale ale acesteia, indiferent de dimensiunile și orientarea vizualizatorului.
+
+De asemenea, și listele de intrări și ieșiri din aplicație sunt conectate printr-un mecanism de semnale și sloturi care leagă selecția unui element din listă la o metodă dedicată afișării imaginii asociate vehiculului.
+
+Pentru a face acest lucru, se obține ID-ul imaginii din datele atașate elementului de listă QListWidgetItem. Utilizând ID-ul obținut, se construiește calea către fișierul de imagine și se încarcă imaginea de la această cale pentru a fi procesată ulterior. La fel ca metodele asociate butoanelor anterioare, se elimină elementul grafic anterior din scenă pentru a se evita suprapunerile. Apoi, se creează un nou QGraphicsPixmapItem din imaginea încărcată și se adaugă acest element în scenă. Apoi, se ajustează proprietățile QGraphicsView pentru a asigura că noua imagine este afișată corect și complet.
+
+În final, la închiderea aplicației, se apelează în mod automat destructorul clasei, care are rolul de a închide fișierul de scriere.
+
+Întregul proiect este încorporat în cadrul proiectului Application, care include funcția main. Aceasta funcție este responsabilă pentru inițierea și lansarea interfeței grafice.
+
+\section{CMake}
+Pentru configurarea proiectului, s-a optat pentru utilizarea software-ului CMake, care este foarte popular în rândul dezvoltatorilor software de C++. Conform structurii stabilite anterior, soluția este compusă din trei proiecte principale, la care se adaugă un proiect dedicat testelor. Astfel, pentru a configura întreaga soluție, sunt necesare cinci fișiere CMake: câte unul pentru fiecare proiect și proiectul de teste, plus un fișier suplimentar pentru configurarea globală a întregii soluții. Această abordare modulară asigură o organizare clară și facilitează gestionarea independentă și eficientă a fiecărui segment al proiectului.
+
+Configurația CMake pentru soluție începe cu specificarea versiunii minime necesare de CMake prin funcția \texttt{cmake\_minimum\_required()}, stabilită la 3.16, pentru a asigura compatibilitatea cu caracteristicile folosite în fișierele de configurare. Acest lucru garantează că toate funcționalitățile moderne ale CMake sunt disponibile și că proiectul poate fi construit în medii diverse de dezvoltare.
+
+Se folosește comanda \texttt{project()} pentru a defini numele proiectului ca fiind "ParkingLotSecurity", subliniind scopul său și facilitând gestionarea modulară a setărilor asociate în medii de dezvoltare integrate.
+
+Directoarele de ieșire pentru executabile și biblioteci sunt setate cu ajutorul funcției \texttt{set()}, astfel încât toate fișierele executabile și bibliotecile generate să fie plasate în directorul bin sub directorul binar al proiectului (\texttt{CMAKE\_BINARY\_DIR}). Această structură de director ajută la organizarea clară a fișierelor de output, făcându-le mai ușor de accesat și gestionat. Directorul rădăcină al proiectului este stabilit la locația actuală a fișierului CMake (\texttt{CMAKE\_CURRENT\_SOURCE\_DIR}), furnizând o referință centrală pentru alte scripturi și module care pot necesita calea către rădăcina proiectului. Proiectul de start pentru Visual Studio este configurat pentru a deschide automat proiectul Application când soluția este încărcată, facilitând dezvoltarea și depanarea rapidă în acest IDE.
+
+De asemenea, CMake configurează și caută pachetele necesare folosindu-se de comanda \texttt{find\_package()}, bibliotecile necesare fiind: OpenCV, Qt6 și Tesseract.
+
+Proiectul include mai multe subdirectoare cu ajutorul funcției \texttt{add\_subdirectory()}, fiecare dedicat unei părți specifice a aplicației:
+\begin{itemize}
+    \item \path{tests}: pentru unit testing și asigurarea calității codului,
+    \item \path{src/Application}: care conține codul principal al aplicației,
+    \item \path{src/ImageProcessingUtils}: pentru utilitățile de procesare a imaginilor,
+    \item \path{src/GUI}: care gestionează componentele interfeței grafice.
+\end{itemize}
+
+Această structură modulară creată de CMake ajută la menținerea unei organizări clare a codului sursă și la separarea responsabilităților în cadrul proiectului, ceea ce este vital pentru întreținerea și scalabilitatea pe termen lung a aplicației.
+
+Pentru început, ne concentrăm asupra scriptului CMake dezvoltat pentru configurarea proiectului ImageProcessingUtils, dedicat gestionării tuturor aspectelor legate de procesarea imaginilor în cadrul aplicației. Folosind comanda \texttt{project()}, se inițiază un nou proiect în CMake cu denumirea „ImageProcessingUtils”, stabilind acest modul ca responsabil principal pentru funcțiile de procesare a imaginilor.
+
+Comanda \texttt{add\_definitions()} introduce definiția preprocesorului \newline \texttt{-DIMAGEPROCESSINGUTILS\_EXPORTS}. Acest macro este utilizat frecvent pentru a reglementa vizibilitatea funcțiilor și claselor în cadrul bibliotecilor partajate, semnalând că acestea sunt exportate din bibliotecă. Comenzile \texttt{file()} aplică metoda \texttt{GLOB} pentru a colecta automat toate fișierele header (.h) și sursă (.cpp) din directorul curent al proiectului. Această metodă simplifică adăugarea fișierelor la proiect și garantează includerea tuturor resurselor necesare.
+
+Utilizând comanda \texttt{add\_library()}, se construiește o bibliotecă partajată denumită conform variabilei \texttt{PROJECT\_NAME}, în acest caz, ImageProcessingUtils. Biblioteca include toate fișierele header și sursă colectate. Bibliotecile partajate sunt avantajoase în reducerea dimensiunii totale a programului și permit actualizarea componentelor individuale fără necesitatea recompilării întregii aplicații.
+
+În continuare, comanda \texttt{target\_include\_directories()} specifică directoarele unde compilatorul trebuie să caute fișierele de antet necesare pentru bibliotecile OpenCV și Tesseract, asigurând acces la API-urile și funcționalitățile acestor biblioteci esențiale pentru proiect. Comanda \texttt{target\_link\_libraries()} asociază proiectul ImageProcessingUtils cu bibliotecile OpenCV și Tesseract. Aceasta include versiunile de release și de debug ale Tesseract, garantând că proiectul are acces la funcționalitățile necesare pentru procesarea avansată a imaginilor și recunoașterea optică a caracterelor.
+
+Această configurare a modulului pregătește proiectul să abordeze diverse sarcini de procesare a imaginilor, beneficiind de capabilitățile avansate ale OpenCV și Tesseract, vitale pentru analiza detaliată și manipularea datelor vizuale.
+
+În continuare, să examinăm scriptul CMake creat pentru configurarea proiectului UserInterface, care se concentrează pe dezvoltarea interfeței grafice a aplicației. Fiecare linie de cod din acest script are un rol esențial în structurarea și pregătirea proiectului pentru compilare. Comanda \texttt{project()} inițiază un nou proiect în CMake sub denumirea "UserInterface". Aceasta este importantă pentru coordonarea setărilor specifice necesare modulelor interfeței grafice ale aplicației.
+
+Comanda \texttt{add\_definitions()} introduce o definiție globală a preprocesorului, \newline \texttt{-DUI\_EXPORTS}, utilă în gestionarea vizibilității funcțiilor și claselor în cadrul bibliotecilor dinamice. Aceasta facilitează administrarea exporturilor de componente în interfața grafică.
+
+Prin intermediul funcției \texttt{set()}, \texttt{CMAKE\_AUTOUIC} este dezactivat (OFF) pentru a opri procesarea automată a fișierelor de interfață Qt (.ui) de către uic (Qt User Interface Compiler). Astfel, se oferă posibilitatea controlului manual asupra acestui proces, dacă este necesar. În schimb, \texttt{CMAKE\_AUTOMOC} este activat (ON), permițând CMake să gestioneze automat compilarea fișierelor moc (Meta-Object Compiler) pentru codul Qt ce implică utilizarea semnalelor și sloturilor, asigurând o integrare adecvată a mecanismelor Qt.
+
+Utilizând comanda \texttt{file()}, scriptul colectează toate fișierele sursă (.c) și header (*.h) din directorul curent al proiectului, facilitând astfel includerea lor automată și completă în proiect. De asemenea, se extinde colecția de fișiere pentru a include toate fișierele sursă și header din subdirectoare, utilizând opțiunea \texttt{GLOB\_RECURSE} pentru a efectua căutări recursive, iar opțiunea \texttt{LIST\_DIRECTORIES false} indică faptul că directoarele nu sunt incluse în rezultate. Aceasta asigură o gestionare eficientă și organizată a resurselor proiectului.
+
+Funcția \texttt{add\_library()} creează un nou modul bibliotecă numit conform variabilei \texttt{PROJECT\_NAME} (denumită "UserInterface"), definit ca bibliotecă statică. Se utilizează toate fișierele GUI colectate anterior pentru compilarea acestei biblioteci. Bibliotecile statice sunt integrate direct în executabil în timpul compilării, ceea ce poate duce la performanțe îmbunătățite în timpul rulării.
+
+Comanda \texttt{add\_dependencies()} stabilește că UserInterface depinde de modulul ImageProcessingUtils. Aceasta înseamnă că ImageProcessingUtils trebuie compilat înainte de UserInterface, garantând că toate dependințele sunt rezolvate înainte de linkarea finală.
+
+Cu \texttt{target\_include\_directories()}, se configurează directoarele care vor fi incluse în calea de căutare pentru fișierele de antet necesare compilării UserInterface. Aceasta asigură că compilatorul poate accesa toate antetele necesare din ImageProcessingUtils, directorul GUI și bibliotecile OpenCV. De asemenea, se utilizează comanda \texttt{target\_link\_libraries()}, care asociază UserInterface cu bibliotecile necesare pentru funcționalitatea sa. Aceasta include ImageProcessingUtils pentru procesarea imaginilor, modulele Qt6::Widgets și Qt6::Core pentru funcționalitățile interfeței grafice și bibliotecile OpenCV pentru procesare avansată a imaginilor.
+
+Prin comanda \texttt{target\_link\_directories()}, se adaugă directorul de output al runtime-ului la calea de linkare, asigurând că executabilele și bibliotecile sunt detectabile de sistemul de operare în timpul execuției.
+
+Aceste setări configurează integral modulul UserInterface, permițându-i să interacționeze eficient cu restul componentelor aplicației și să acceseze resursele necesare pentru a funcționa optim în cadrul proiectului.
+
+Proiectului Application include cele două proiecte descrise anterior și este folosit în construirea executabilului. Cu ajutorul comenzii \texttt{project()}, se inițializează proiectul CMake cu numele "Application".
+
+Pentru a găsi toate fișierele header (*.h) și sursă (*.cpp) în directorul curent, se va folosi comanda \texttt{GLOB}. Acestea sunt stocate în variabilele \texttt{HEADER\_FILES} și \texttt{SOURCE\_FILES}. Apoi, comanda \texttt{add\_executable()} adaugă un executabil sub numele \texttt{PROJECT\_NAME} (care este "Application"), specificând că este o aplicație Windows (\texttt{WIN32}) și incluzând toate fișierele header și sursă colectate anterior. Cu \texttt{set\_target\_properties()} se setează proprietățile pentru ținta specificată, aici schimbând numele output-ului executabilului în "ParkingLotSecurityCamera".
+
+Pentru a adăuga dependințele proiectului, se folosește comanda \newline \texttt{add\_dependencies()}, indicând că Application depinde de subproiectele ImageProcessingUtils și UserInterface. Astfel, se asigură că aceste subproiecte sunt construite înainte de Application. Pentru a specifica și directoarele care trebuie să fie disponibile proiectului pentru includere, este necesar ca acestea să fie incluse în comanda \texttt{target\_include\_directories()}. Directoarele necesare în cazul de față sunt cele de dezvoltare ale bibliotecii OpenCV și subdirectoarele proprii ale proiectului, mai exact UserInterface și ImageProcessingUtils.
+
+Comanda \texttt{target\_link\_libraries()} leagă bibliotecile specificate la executabilul Application. Aceasta include linkarea la modulele Qt necesare (Core, Widgets) și bibliotecile OpenCV, precum și bibliotecile create în subproiecte (ImageProcessingUtils și UserInterface). Cu \texttt{target\_link\_directories()} se adaugă directorul specificat la locațiile în care linkerul va căuta biblioteci la runtime, asigurându-se că toate dependințele necesare sunt accesibile.
+
+Funcția \texttt{install(TARGETS...)} instalează executabilul proiectului în directorul DeliveryPack din directorul sursă al proiectului. Acesta este pasul final care face executabilul disponibil pentru distribuire. Cu ajutorul comenzii \newline \texttt{install(FILES \$<TARGET\_RUNTIME\_DLLS:...>)} se instalează toate DLL-urile necesare rulării executabilului în același director. \texttt{TARGET\_RUNTIME\_DLLS} este un generator care listează toate DLL-urile la care executabilul face referință, asigurând că toate dependințele din timpul rulării sunt incluse.
+
+Următoarea secțiune de cod folosește funcția \texttt{set()} pentru a defini calea către plugin-urile Qt necesare la \path{"${Qt6_DIR}/../../../plugins"} și le instalează în directorul DeliveryPack folosind comanda \texttt{install(DIRECTORY ...)}. Opțiunea \newline \texttt{USE\_SOURCE\_PERMISSIONS} este utilizată pentru a asigura păstrarea permisiunilor originale ale fișierelor. Comanda \texttt{file(GLOB ...)} este utilizată pentru a identifica toate fișierele DLL din directorul binar al bibliotecii Tesseract OCR, cu \newline \texttt{Tesseract\_INCLUDE\_DIRS} indicând calea către acest director. Fișierele identificate sunt apoi instalate în pachetul de livrare folosind \texttt{install(FILES ...)}.
+
+Mai departe, \texttt{file(GLOB ...)} este folosită din nou pentru a găsi diverse fișiere din directorul bazei de date, inclusiv fișierul text care stochează informații despre istoricul vehiculelor, șablonul literei 'I' pentru tehnica de template matching și două imagini pentru butoanele din interfața grafică. Toate aceste fișiere sunt instalate în pachetul de livrare folosind din nou comanda \texttt{install(FILES ...)}.
+
+Astfel,  proiectul Application integrează subproiectele ImageProcessingUtils și UserInterface pentru a crea un executabil complet. Acesta colectează fișierele necesare, gestionează dependințele și leagă bibliotecile adecvate, asigurând o compilare eficientă și o integrare fără cusur. Finalizarea prin instalarea executabilului și a DLL-urilor necesare în directorul DeliveryPack pregătește aplicația pentru distribuire, transformând-o într-un produs gata de utilizare.
+
+Separat de scripturile anterioare, acest script CMake este destinat configurării proiectului Tests, dedicat testelor unitare pentru aplicație. Inițierea proiectului se face prin comanda \texttt{project()}, care stabilește "Tests" ca nume al proiectului.
+
+Comanda \texttt{file(GLOB ...)} este utilizată pentru a colecta automat toate fișierele sursă C++ din directorul curent, simplificând procesul de adăugare a acestora la proiect. Proiectul utilizează aceste fișiere pentru a crea o bibliotecă partajată, prin comanda \texttt{add\_library()}. Această abordare favorizează reutilizarea codului și eficientizează testarea componentelor.
+
+Funcția \texttt{target\_include\_directories()} specifică directoarele de căutare pentru fișierele de antet necesare utilizării bibliotecilor OpenCV și Tesseract, garantând accesul la aceste resurse în timpul compilării. Funcția  \texttt{target\_link\_libraries()} leagă proiectul Tests de bibliotecile necesare, inclusiv ImageProcessingUtils și cele externe OpenCV și Tesseract, asigurând disponibilitatea tuturor funcționalităților pentru testare. Iar setarea \texttt{target\_link\_directories()} asociază directorul de output runtime, specificat prin \texttt{CMAKE\_RUNTIME\_OUTPUT\_DIRECTORY}, facilitând localizarea executabilului și a bibliotecilor în timpul execuției testelor.
+
+Ultima parte a configurării folosește \texttt{add\_test()} pentru a defini un test specific în infrastructura CTest a CMake, specificând utilizarea vstest.console.exe pentru executarea testelor, cu fișierul "Tests.dll" ca țintă și directorul de lucru specificat pentru desfășurarea testului.
+
+Structura pregătește proiectul Tests pentru realizarea unor teste unitare eficiente.
+
+\chapter{Concluzii și rezultate}
+\section{Direcții și dezvoltări viitoare}
 Pentru a asigura o alternativă eficientă în cazul unor erori ale sistemului principal de recunoaștere a numerelor de înmatriculare, se prevede implementarea unui sistem de backup bazat pe tickete cu coduri de bare. Această soluție va permite accesul vehiculelor în parcarea auto prin scanarea unui cod de bare generat la intrare, asigurând astfel continuitatea serviciului chiar și în condiții neprevazute a sistemului principal.
 
 De asemenea, se dorește dezvoltarea și configurarea unui model propriu de inteligență artificială, conceput special pentru a se adapta specificului și cerințelor sistemului de monitorizare a parcărilor. Acest model AI se vrea a fi dezvoltat utilizând tehnici de învățare automată și seturi de date extinse, pentru a îmbunătăți acuratețea și eficiența recunoașterii numerelor de înmatriculare. Procesul va include etape de antrenare si testare ale modelului, cu scopul de a optimiza performanța generală a sistemului.
 
 Aceste doua functionalitati dovedesc inovarea continuă pentru astfel de sisteme de gestionare a accesului în parcările auto și aduc un plus de securitate, facilitând o gestionare mai flexibilă și adaptată nevoilor utilizatorilor.
 
-\section*{Concluzii}
+\section{Concluzii}
 În procesul de dezvoltare a sistemului, competențele și cunoștințele legate de tehnologiile aplicate au cunoscut îmbunătățiri, dar mai ales în mod semnificativ următoarele aspecte:
 
 \begin{itemize}
@@ -773,202 +1008,207 @@ Prin urmare, în urma implementării soluției descrise, s-a dezvoltat un sistem
 
 Experiența acumulată în utilizarea tehnologiilor avansate a contribuit la dezvoltarea profesională, oferind o bază solidă pentru proiectele viitoare și pentru adaptarea continuă la noutățile tehnologice.
 
-\section*{Anexă}
+\bibliographystyle{plain}
+\bibliography{bibliography}
+\cite{1}
+\cite{2}
+
+\chapter{Anexă}
 \begin{longtable}{| m{0.6cm} | m{3cm} | m{3cm} | m{1.8cm} | m{1.8cm} | m{1.8cm} |}
     \hline
-    Nr. & Input & Numar de \newline înmatriculare & Text \newline țintă & Text \newline prezis & Confidența \\ \hline
+    Nr. & Input                                                           & Numar de \newline înmatriculare                                 & Text \newline țintă & Text \newline prezis & Confidența \\ \hline
     \endhead
-        1 & \includegraphics[width=3cm,keepaspectratio]{dataset/1_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/1.jpg} & DB17NGM & DB17NGM & 98.97\% \\ \hline
-        2 & \includegraphics[width=3cm,keepaspectratio]{dataset/1_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/2.jpg} & DB17NGM & DB17NGM & 98.92\% \\ \hline
-        3 & \includegraphics[width=3cm,keepaspectratio]{dataset/1_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/3.jpg} & DB17NGM & DB17NGM & 98.91\% \\ \hline
-        4 & \includegraphics[width=3cm,keepaspectratio]{dataset/1_s2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/4.jpg} & DB17NGM & DB17NGM & 97.48\% \\ \hline
-        5 & \includegraphics[width=3cm,keepaspectratio]{dataset/2_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/5.jpg} & BV20HDY & BV20HDY & 98.74\% \\ \hline
-        6 & \includegraphics[width=3cm,keepaspectratio]{dataset/2_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/6.jpg} & BV20HDY & BV20HDY & 98.61\% \\ \hline
-        7 & \includegraphics[width=3cm,keepaspectratio]{dataset/2_d3.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/7.jpg} & BV20HDY & BV20HDY & 98.18\% \\ \hline
-        8 & \includegraphics[width=3cm,keepaspectratio]{dataset/3_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/8.jpg} & GL87ZBM & GL87ZBM & 96.65\% \\ \hline
-        9 & \includegraphics[width=3cm,keepaspectratio]{dataset/4_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/9.jpg} & BV56RAU & BV56RAU & 97.34\% \\ \hline
-        10 & \includegraphics[width=3cm,keepaspectratio]{dataset/4_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/10.jpg} & BV56RAU & BV56RAU & 96.86\% \\ \hline
-        11 & \includegraphics[width=3cm,keepaspectratio]{dataset/4_d3.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/11.jpg} & BV56RAU & BV56RAU & 97.37\% \\ \hline
-        12 & \includegraphics[width=3cm,keepaspectratio]{dataset/5_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/12.jpg} & BV28BRI & BV28BRI & 97.98\% \\ \hline
-        13 & \includegraphics[width=3cm,keepaspectratio]{dataset/6_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/13.jpg} & BV29PMN & BV29PMN & 98.98\% \\ \hline
-        14 & \includegraphics[width=3cm,keepaspectratio]{dataset/6_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/14.jpg} & BV29PMN & BV29PMN & 98.91\% \\ \hline
-        15 & \includegraphics[width=3cm,keepaspectratio]{dataset/7_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/15.jpg} & BV60TEO & BV60TEO & 98.38\% \\ \hline
-        16 & \includegraphics[width=3cm,keepaspectratio]{dataset/7_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/16.jpg} & BV60TEO & BV60TEO & 98.19\% \\ \hline
-        17 & \includegraphics[width=3cm,keepaspectratio]{dataset/8_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/17.jpg} & BV81NYC & BV81NYC & 97.73\% \\ \hline
-        18 & \includegraphics[width=3cm,keepaspectratio]{dataset/9_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/18.jpg} & BV20SXK & BV20SXK & 98.88\% \\ \hline
-        19 & \includegraphics[width=3cm,keepaspectratio]{dataset/10_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/19.jpg} & CT36NLA & CT36NLA & 97.66\% \\ \hline
-        20 & \includegraphics[width=3cm,keepaspectratio]{dataset/10_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/20.jpg} & CT36NLA & CT36NLA & 98.40\% \\ \hline
-        21 & \includegraphics[width=3cm,keepaspectratio]{dataset/10_d3.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/21.jpg} & CT36NLA & CT36NLA & 98.52\% \\ \hline
-        22 & \includegraphics[width=3cm,keepaspectratio]{dataset/11_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/22.jpg} & BV18UFN & BV18UFN & 97.16\% \\ \hline
-        23 & \includegraphics[width=3cm,keepaspectratio]{dataset/11_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/23.jpg} & BV18UFN & BV18UFN & 98.20\% \\ \hline
-        24 & \includegraphics[width=3cm,keepaspectratio]{dataset/12_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/24.jpg} & BV37RED & BV37RED & 98.91\% \\ \hline
-        25 & \includegraphics[width=3cm,keepaspectratio]{dataset/12_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/25.jpg} & BV37RED & BV37RED & 98.93\% \\ \hline
-        26 & \includegraphics[width=3cm,keepaspectratio]{dataset/13_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/26.jpg} & BZ30GIG & BZ30GIG & 97.20\% \\ \hline
-        27 & \includegraphics[width=3cm,keepaspectratio]{dataset/14_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/27.jpg} & CJ25SGL & CJ25SGL & 98.44\% \\ \hline
-        28 & \includegraphics[width=3cm,keepaspectratio]{dataset/15_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/28.jpg} & AR15YCM & AR15YCM & 97.88\% \\ \hline
-        29 & \includegraphics[width=3cm,keepaspectratio]{dataset/15_s2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/29.jpg} & AR15YCM & AR15YCM & 97.28\% \\ \hline
-        30 & \includegraphics[width=3cm,keepaspectratio]{dataset/16_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/30.jpg} & B708VDF & B708VDF & 98.61\% \\ \hline
-        31 & \includegraphics[width=3cm,keepaspectratio]{dataset/16_s2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/31.jpg} & B708VDF & B708VDF & 98.63\% \\ \hline
-        32 & \includegraphics[width=3cm,keepaspectratio]{dataset/17_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/32.jpg} & BV90WLF & BV90WLF & 98.58\% \\ \hline
-        33 & \includegraphics[width=3cm,keepaspectratio]{dataset/18_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/33.jpg} & BV77RSU & BV77RSU & 98.96\% \\ \hline
-        34 & \includegraphics[width=3cm,keepaspectratio]{dataset/19_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/34.jpg} & BV02ALA & BV02ALA & 99.13\% \\ \hline
-        35 & \includegraphics[width=3cm,keepaspectratio]{dataset/20_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/35.jpg} & B730HEX & B730HEX & 98.96\% \\ \hline
-        36 & \includegraphics[width=3cm,keepaspectratio]{dataset/21_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/36.jpg} & B88FBU & B88FBU & 98.89\% \\ \hline
-        37 & \includegraphics[width=3cm,keepaspectratio]{dataset/21_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/37.jpg} & B88FBU & B88FBU & 98.82\% \\ \hline
-        38 & \includegraphics[width=3cm,keepaspectratio]{dataset/21_d3.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/38.jpg} & B88FBU & B88FBU & 98.90\% \\ \hline
-        39 & \includegraphics[width=3cm,keepaspectratio]{dataset/22_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/39.jpg} & DB20PMD & DB20PMD & 98.67\% \\ \hline
-        40 & \includegraphics[width=3cm,keepaspectratio]{dataset/23_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/40.jpg} & B496AMI & B496AMI & 98.33\% \\ \hline
-        41 & \includegraphics[width=3cm,keepaspectratio]{dataset/24_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/41.jpg} & BV15ZTP & BV15ZTP & 97.09\% \\ \hline
-        42 & \includegraphics[width=3cm,keepaspectratio]{dataset/24_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/42.jpg} & BV15ZTP & BV15ZTP & 97.88\% \\ \hline
-        43 & \includegraphics[width=3cm,keepaspectratio]{dataset/25_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/43.jpg} & BV20ZZB & BV20ZZB & 98.21\% \\ \hline
-        44 & \includegraphics[width=3cm,keepaspectratio]{dataset/25_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/44.jpg} & BV20ZZB & BV20ZZB & 97.97\% \\ \hline
-        45 & \includegraphics[width=3cm,keepaspectratio]{dataset/26_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/45.jpg} & BV15TWB & BV15TWB & 97.69\% \\ \hline
-        46 & \includegraphics[width=3cm,keepaspectratio]{dataset/26_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/46.jpg} & BV15TWB & BV15TWB & 97.95\% \\ \hline
-        47 & \includegraphics[width=3cm,keepaspectratio]{dataset/27_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/47.jpg} & B808JDM & B808JDM & 99.12\% \\ \hline
-        48 & \includegraphics[width=3cm,keepaspectratio]{dataset/27_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/48.jpg} & B808JDM & B808JDM & 99.04\% \\ \hline
-        49 & \includegraphics[width=3cm,keepaspectratio]{dataset/28_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/49.jpg} & B800JDM & B800JDM & 98.86\% \\ \hline
-        50 & \includegraphics[width=3cm,keepaspectratio]{dataset/28_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/50.jpg} & B800JDM & B800JDM & 98.62\% \\ \hline
-        51 & \includegraphics[width=3cm,keepaspectratio]{dataset/29_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/51.jpg} & BV13KPM & BV13KPM & 97.88\% \\ \hline
-        52 & \includegraphics[width=3cm,keepaspectratio]{dataset/29_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/52.jpg} & BV13KPM & BV13KPM & 96.99\% \\ \hline
-        53 & \includegraphics[width=3cm,keepaspectratio]{dataset/29_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/53.jpg} & BV13KPM & BV13KPM & 98.45\% \\ \hline
-        54 & \includegraphics[width=3cm,keepaspectratio]{dataset/30_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/54.jpg} & BV19MDZ & BV19MDZ & 98.38\% \\ \hline
-        55 & \includegraphics[width=3cm,keepaspectratio]{dataset/30_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/55.jpg} & BV19MDZ & BV19MDZ & 97.62\% \\ \hline
-        56 & \includegraphics[width=3cm,keepaspectratio]{dataset/31_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/56.jpg} & BV88UMK & BV88UMK & 98.91\% \\ \hline
-        57 & \includegraphics[width=3cm,keepaspectratio]{dataset/32_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/57.jpg} & BV17XSA & BV17XSA & 98.82\% \\ \hline
-        58 & \includegraphics[width=3cm,keepaspectratio]{dataset/32_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/58.jpg} & BV17XSA & BV17XSA & 98.54\% \\ \hline
-        59 & \includegraphics[width=3cm,keepaspectratio]{dataset/33_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/59.jpg} & B500FMP & B500FMP & 97.63\% \\ \hline
-        60 & \includegraphics[width=3cm,keepaspectratio]{dataset/34_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/60.jpg} & VN61AVM & VN61AVM & 98.46\% \\ \hline
-        61 & \includegraphics[width=3cm,keepaspectratio]{dataset/35_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/61.jpg} & BV88BMG & BV88BMG & 98.93\% \\ \hline
-        62 & \includegraphics[width=3cm,keepaspectratio]{dataset/35_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/62.jpg} & BV88BMG & BV88BMG & 98.91\% \\ \hline
-        63 & \includegraphics[width=3cm,keepaspectratio]{dataset/36_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/63.jpg} & B110SRH & B110SRH & 98.09\% \\ \hline
-        64 & \includegraphics[width=3cm,keepaspectratio]{dataset/36_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/64.jpg} & B110SRH & B110SRH & 97.57\% \\ \hline
-        65 & \includegraphics[width=3cm,keepaspectratio]{dataset/37_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/65.jpg} & CV89COX & CV89COX & 98.83\% \\ \hline
-        66 & \includegraphics[width=3cm,keepaspectratio]{dataset/37_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/66.jpg} & CV89COX & CV89COX & 97.89\% \\ \hline
-        67 & \includegraphics[width=3cm,keepaspectratio]{dataset/38_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/67.jpg} & BV99VDV & BV99VDV & 99.01\% \\ \hline
-        68 & \includegraphics[width=3cm,keepaspectratio]{dataset/38_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/68.jpg} & BV99VDV & BV99VDV & 98.85\% \\ \hline
-        69 & \includegraphics[width=3cm,keepaspectratio]{dataset/39_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/69.jpg} & BV32GHE & BV32GHE & 98.85\% \\ \hline
-        70 & \includegraphics[width=3cm,keepaspectratio]{dataset/39_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/70.jpg} & BV32GHE & BV32GHE & 98.95\% \\ \hline
-        71 & \includegraphics[width=3cm,keepaspectratio]{dataset/40_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/71.jpg} & B212FAD & B212FAD & 99.08\% \\ \hline
-        72 & \includegraphics[width=3cm,keepaspectratio]{dataset/40_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/72.jpg} & B212FAD & B212FAD & 99.11\% \\ \hline
-        73 & \includegraphics[width=3cm,keepaspectratio]{dataset/41_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/73.jpg} & BV01UBC & BV01UBC & 98.28\% \\ \hline
-        74 & \includegraphics[width=3cm,keepaspectratio]{dataset/42_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/74.jpg} & NT11TRP & NT11TRP & 98.16\% \\ \hline
-        75 & \includegraphics[width=3cm,keepaspectratio]{dataset/43_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/75.jpg} & B321KWL & B321KWL & 99.13\% \\ \hline
-        76 & \includegraphics[width=3cm,keepaspectratio]{dataset/43_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/76.jpg} & B321KWL & B321KWL & 99.02\% \\ \hline
-        77 & \includegraphics[width=3cm,keepaspectratio]{dataset/43_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/77.jpg} & B321KWL & B321KWL & 98.42\% \\ \hline
-        78 & \includegraphics[width=3cm,keepaspectratio]{dataset/44_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/78.jpg} & BV83ALE & BV83ALE & 99.07\% \\ \hline
-        79 & \includegraphics[width=3cm,keepaspectratio]{dataset/44_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/79.jpg} & BV83ALE & BV83ALE & 98.99\% \\ \hline
-        80 & \includegraphics[width=3cm,keepaspectratio]{dataset/45_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/80.jpg} & SV10URK & SV10URK & 98.43\% \\ \hline
-        81 & \includegraphics[width=3cm,keepaspectratio]{dataset/46_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/81.jpg} & IS99GTM & IS99GTM & 98.73\% \\ \hline
-        82 & \includegraphics[width=3cm,keepaspectratio]{dataset/47_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/82.jpg} & CV09BDL & CV09BDL & 98.64\% \\ \hline
-        83 & \includegraphics[width=3cm,keepaspectratio]{dataset/48_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/83.jpg} & BV50MBA & BV50MBA & 98.50\% \\ \hline
-        84 & \includegraphics[width=3cm,keepaspectratio]{dataset/49_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/84.jpg} & BV94MTN & BV94MTN & 98.80\% \\ \hline
-        85 & \includegraphics[width=3cm,keepaspectratio]{dataset/50_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/85.jpg} & BV18GBT & BV18GBT & 98.80\% \\ \hline
-        86 & \includegraphics[width=3cm,keepaspectratio]{dataset/51_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/86.jpg} & BV26USA & BV26USA & 98.83\% \\ \hline
-        87 & \includegraphics[width=3cm,keepaspectratio]{dataset/52_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/87.jpg} & BV43BDL & BV43BDL & 98.31\% \\ \hline
-        88 & \includegraphics[width=3cm,keepaspectratio]{dataset/52_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/88.jpg} & BV43BDL & BV43BDL & 98.23\% \\ \hline
-        89 & \includegraphics[width=3cm,keepaspectratio]{dataset/53_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/89.jpg} & CV07BJM & CV07BJM & 99.04\% \\ \hline
-        90 & \includegraphics[width=3cm,keepaspectratio]{dataset/53_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/90.jpg} & CV07BJM & CV07BJM & 98.64\% \\ \hline
-        91 & \includegraphics[width=3cm,keepaspectratio]{dataset/54_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/91.jpg} & BV30PAG & BV30PAG & 98.90\% \\ \hline
-        92 & \includegraphics[width=3cm,keepaspectratio]{dataset/54_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/92.jpg} & BV30PAG & BV30PAG & 98.48\% \\ \hline
-        93 & \includegraphics[width=3cm,keepaspectratio]{dataset/55_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/93.jpg} & BV63TOY & BV63TOY & 98.15\% \\ \hline
-        94 & \includegraphics[width=3cm,keepaspectratio]{dataset/55_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/94.jpg} & BV63TOY & BV63TOY & 97.95\% \\ \hline
-        95 & \includegraphics[width=3cm,keepaspectratio]{dataset/56_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/95.jpg} & BV16EWM & BV16EWM & 98.50\% \\ \hline
-        96 & \includegraphics[width=3cm,keepaspectratio]{dataset/56_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/96.jpg} & BV16EWM & BV16EWM & 98.01\% \\ \hline
-        97 & \includegraphics[width=3cm,keepaspectratio]{dataset/57_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/97.jpg} & VN97CRU & VN97CRU & 98.91\% \\ \hline
-        98 & \includegraphics[width=3cm,keepaspectratio]{dataset/57_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/98.jpg} & VN97CRU & VN97CRU & 98.78\% \\ \hline
-        99 & \includegraphics[width=3cm,keepaspectratio]{dataset/58_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/99.jpg} & BV13LIE & BV13LIE & 97.41\% \\ \hline
-        100 & \includegraphics[width=3cm,keepaspectratio]{dataset/59_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/100.jpg} & B110NPA & B110NPA & 98.34\% \\ \hline
-        101 & \includegraphics[width=3cm,keepaspectratio]{dataset/59_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/101.jpg} & B110NPA & B110NPA & 98.66\% \\ \hline
-        102 & \includegraphics[width=3cm,keepaspectratio]{dataset/60_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/102.jpg} & BV26BBZ & BV26BBZ & 97.90\% \\ \hline
-        103 & \includegraphics[width=3cm,keepaspectratio]{dataset/60_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/103.jpg} & BV26BBZ & BV26BBZ & 97.29\% \\ \hline
-        104 & \includegraphics[width=3cm,keepaspectratio]{dataset/61_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/104.jpg} & B675GEO & B675GEO & 98.29\% \\ \hline
-        105 & \includegraphics[width=3cm,keepaspectratio]{dataset/61_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/105.jpg} & B675GEO & B675GEO & 96.96\% \\ \hline
-        106 & \includegraphics[width=3cm,keepaspectratio]{dataset/62_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/106.jpg} & BV24CAI & BV24CAI & 98.87\% \\ \hline
-        107 & \includegraphics[width=3cm,keepaspectratio]{dataset/62_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/107.jpg} & BV24CAI & BV24CAI & 96.98\% \\ \hline
-        108 & \includegraphics[width=3cm,keepaspectratio]{dataset/63_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/108.jpg} & BV17CLT & BV17CLT & 98.68\% \\ \hline
-        109 & \includegraphics[width=3cm,keepaspectratio]{dataset/63_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/109.jpg} & BV17CLT & BV17CLT & 98.80\% \\ \hline
-        110 & \includegraphics[width=3cm,keepaspectratio]{dataset/64_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/110.jpg} & BV19BRO & BV19BRO & 98.80\% \\ \hline
-        111 & \includegraphics[width=3cm,keepaspectratio]{dataset/64_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/111.jpg} & BV19BRO & BV19BRO & 98.25\% \\ \hline
-        112 & \includegraphics[width=3cm,keepaspectratio]{dataset/65_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/112.jpg} & BV97DIA & BV97DIA & 97.97\% \\ \hline
-        113 & \includegraphics[width=3cm,keepaspectratio]{dataset/65_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/113.jpg} & BV97DIA & BV97DIA & 97.11\% \\ \hline
-        114 & \includegraphics[width=3cm,keepaspectratio]{dataset/66_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/114.jpg} & BV07RGN & BV07RGN & 98.65\% \\ \hline
-        115 & \includegraphics[width=3cm,keepaspectratio]{dataset/67_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/115.jpg} & BV99RMB & BV99RMB & 98.90\% \\ \hline
-        116 & \includegraphics[width=3cm,keepaspectratio]{dataset/67_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/116.jpg} & BV99RMB & BV99RMB & 99.05\% \\ \hline
-        117 & \includegraphics[width=3cm,keepaspectratio]{dataset/68_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/117.jpg} & BV41AIG & BV41AIG & 96.82\% \\ \hline
-        118 & \includegraphics[width=3cm,keepaspectratio]{dataset/69_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/118.jpg} & BV17CCO & BV17CCO & 98.75\% \\ \hline
-        119 & \includegraphics[width=3cm,keepaspectratio]{dataset/69_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/119.jpg} & BV17CCO & BV17CCO & 98.63\% \\ \hline
-        120 & \includegraphics[width=3cm,keepaspectratio]{dataset/70_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/120.jpg} & BV17NFU & BV17NFU & 97.43\% \\ \hline
-        121 & \includegraphics[width=3cm,keepaspectratio]{dataset/71_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/121.jpg} & BV62MDL & BV62MDL & 98.06\% \\ \hline
-        122 & \includegraphics[width=3cm,keepaspectratio]{dataset/72_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/122.jpg} & B520DGY & B520DGY & 98.39\% \\ \hline
-        123 & \includegraphics[width=3cm,keepaspectratio]{dataset/72_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/123.jpg} & B520DGY & B520DGY & 98.50\% \\ \hline
-        124 & \includegraphics[width=3cm,keepaspectratio]{dataset/73_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/124.jpg} & BV92BBU & BV92BBU & 98.99\% \\ \hline
-        125 & \includegraphics[width=3cm,keepaspectratio]{dataset/73_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/125.jpg} & BV92BBU & BV92BBU & 99.02\% \\ \hline
-        126 & \includegraphics[width=3cm,keepaspectratio]{dataset/74_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/126.jpg} & VN99CZJ & VN99CZJ & 97.41\% \\ \hline
-        127 & \includegraphics[width=3cm,keepaspectratio]{dataset/75_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/127.jpg} & BV28NIM & BV28NIM & 98.64\% \\ \hline
-        128 & \includegraphics[width=3cm,keepaspectratio]{dataset/75_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/128.jpg} & BV28NIM & BV28NIM & 97.73\% \\ \hline
-        129 & \includegraphics[width=3cm,keepaspectratio]{dataset/76_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/129.jpg} & BV83ARC & BV83ARC & 99.00\% \\ \hline
-        130 & \includegraphics[width=3cm,keepaspectratio]{dataset/76_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/130.jpg} & BV83ARC & BV83ARC & 99.03\% \\ \hline
-        131 & \includegraphics[width=3cm,keepaspectratio]{dataset/77_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/131.jpg} & BV02LTV & BV02LTV & 98.62\% \\ \hline
-        132 & \includegraphics[width=3cm,keepaspectratio]{dataset/78_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/132.jpg} & BV70NOA & BV70NOA & 98.01\% \\ \hline
-        133 & \includegraphics[width=3cm,keepaspectratio]{dataset/78_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/133.jpg} & BV70NOA & BV70NOA & 98.65\% \\ \hline
-        134 & \includegraphics[width=3cm,keepaspectratio]{dataset/79_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/134.jpg} & BV14LEI & BV14LEI & 95.51\% \\ \hline
-        135 & \includegraphics[width=3cm,keepaspectratio]{dataset/79_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/135.jpg} & BV14LEI & BV14LEI & 96.56\% \\ \hline
-        136 & \includegraphics[width=3cm,keepaspectratio]{dataset/80_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/136.jpg} & BV61MTS & BV61MTS & 98.45\% \\ \hline
-        137 & \includegraphics[width=3cm,keepaspectratio]{dataset/80_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/137.jpg} & BV61MTS & BV61MTS & 98.69\% \\ \hline
-        138 & \includegraphics[width=3cm,keepaspectratio]{dataset/81_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/138.jpg} & BV77MRU & BV77MRU & 98.88\% \\ \hline
-        139 & \includegraphics[width=3cm,keepaspectratio]{dataset/82_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/139.jpg} & B77RHY & B77RHY & 99.09\% \\ \hline
-        140 & \includegraphics[width=3cm,keepaspectratio]{dataset/82_d2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/140.jpg} & B77RHY & B77RHY & 99.12\% \\ \hline
-        141 & \includegraphics[width=3cm,keepaspectratio]{dataset/82_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/141.jpg} & B77RHY & B77RHY & 95.17\% \\ \hline
-        142 & \includegraphics[width=3cm,keepaspectratio]{dataset/83_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/142.jpg} & AG95BFG & AG95BFG & 98.62\% \\ \hline
-        143 & \includegraphics[width=3cm,keepaspectratio]{dataset/83_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/143.jpg} & AG95BFG & AG95BFG & 97.17\% \\ \hline
-        144 & \includegraphics[width=3cm,keepaspectratio]{dataset/84_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/144.jpg} & BV70AAC & BV70AAC & 99.12\% \\ \hline
-        145 & \includegraphics[width=3cm,keepaspectratio]{dataset/84_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/145.jpg} & BV70AAC & BV70AAC & 99.02\% \\ \hline
-        146 & \includegraphics[width=3cm,keepaspectratio]{dataset/85_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/146.jpg} & BV03BYT & BV03BYT & 98.92\% \\ \hline
-        147 & \includegraphics[width=3cm,keepaspectratio]{dataset/86_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/147.jpg} & CV92NAT & CV92NAT & 99.11\% \\ \hline
-        148 & \includegraphics[width=3cm,keepaspectratio]{dataset/87_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/148.jpg} & AG93WAY & AG93WAY & 99.16\% \\ \hline
-        149 & \includegraphics[width=3cm,keepaspectratio]{dataset/87_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/149.jpg} & AG93WAY & AG93WAY & 99.16\% \\ \hline
-        150 & \includegraphics[width=3cm,keepaspectratio]{dataset/88_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/150.jpg} & BV19PDM & BV19PDM & 98.91\% \\ \hline
-        151 & \includegraphics[width=3cm,keepaspectratio]{dataset/88_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/151.jpg} & BV19PDM & BV19PDM & 98.77\% \\ \hline
-        152 & \includegraphics[width=3cm,keepaspectratio]{dataset/89_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/152.jpg} & BV12PDM & BV12PDM & 98.48\% \\ \hline
-        153 & \includegraphics[width=3cm,keepaspectratio]{dataset/90_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/153.jpg} & BV45MCR & BV45MCR & 98.73\% \\ \hline
-        154 & \includegraphics[width=3cm,keepaspectratio]{dataset/91_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/154.jpg} & CV92PRO & CV92PRO & 97.72\% \\ \hline
-        155 & \includegraphics[width=3cm,keepaspectratio]{dataset/92_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/155.jpg} & B211ABV & B211ABV & 98.80\% \\ \hline
-        156 & \includegraphics[width=3cm,keepaspectratio]{dataset/93_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/156.jpg} & IS03BMI & IS03BMI & 96.44\% \\ \hline
-        157 & \includegraphics[width=3cm,keepaspectratio]{dataset/94_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/157.jpg} & CV07BHS & CV07BHS & 98.76\% \\ \hline
-        158 & \includegraphics[width=3cm,keepaspectratio]{dataset/95_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/158.jpg} & CV05DIW & CV05DIW & 91.78\% \\ \hline
-        159 & \includegraphics[width=3cm,keepaspectratio]{dataset/96_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/159.jpg} & BV50MSL & BV50MSL & 98.14\% \\ \hline
-        160 & \includegraphics[width=3cm,keepaspectratio]{dataset/97_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/160.jpg} & BV09FVK & BV09FVK & 98.62\% \\ \hline
-        161 & \includegraphics[width=3cm,keepaspectratio]{dataset/98_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/161.jpg} & AG95NRS & AG95NRS & 97.60\% \\ \hline
-        162 & \includegraphics[width=3cm,keepaspectratio]{dataset/99_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/162.jpg} & BV77RSU & BV77RSU & 98.84\% \\ \hline
-        163 & \includegraphics[width=3cm,keepaspectratio]{dataset/100_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/163.jpg} & BV77ZZP & BV77ZZP & 98.29\% \\ \hline
-        164 & \includegraphics[width=3cm,keepaspectratio]{dataset/101_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/164.jpg} & BV17PVU & BV17PVU & 98.69\% \\ \hline
-        165 & \includegraphics[width=3cm,keepaspectratio]{dataset/102_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/165.jpg} & IF37MRY & IF37MRY & 98.26\% \\ \hline
-        166 & \includegraphics[width=3cm,keepaspectratio]{dataset/103_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/166.jpg} & BV94TRT & BV94TRT & 98.19\% \\ \hline
-        167 & \includegraphics[width=3cm,keepaspectratio]{dataset/104_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/167.jpg} & BV30PLK & BV30PLK & 98.87\% \\ \hline
-        168 & \includegraphics[width=3cm,keepaspectratio]{dataset/105_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/168.jpg} & BV07RGN & BV07RGN & 93.96\% \\ \hline
-        169 & \includegraphics[width=3cm,keepaspectratio]{dataset/106_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/169.jpg} & BC74DNS & BC74DNS & 97.35\% \\ \hline
-        170 & \includegraphics[width=3cm,keepaspectratio]{dataset/106_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/170.jpg} & BC74DNS & BC74DNS & 91.62\% \\ \hline
-        171 & \includegraphics[width=3cm,keepaspectratio]{dataset/107_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/171.jpg} & BC89BEJ & BC89BEJ & 98.99\% \\ \hline
-        172 & \includegraphics[width=3cm,keepaspectratio]{dataset/107_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/172.jpg} & BC89BEJ & BC89BEJ & 99.06\% \\ \hline
-        173 & \includegraphics[width=3cm,keepaspectratio]{dataset/108_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/173.jpg} & BC89MSW & BC89MSW & 99.04\% \\ \hline
-        174 & \includegraphics[width=3cm,keepaspectratio]{dataset/108_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/174.jpg} & BC89MSW & BC89MSW & 99.11\% \\ \hline
-        175 & \includegraphics[width=3cm,keepaspectratio]{dataset/109_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/175.jpg} & BC99CSI & BC99CSI & 98.45\% \\ \hline
-        176 & \includegraphics[width=3cm,keepaspectratio]{dataset/109_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/176.jpg} & BC99CSI & BC99CSI & 98.09\% \\ \hline
-        177 & \includegraphics[width=3cm,keepaspectratio]{dataset/110_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/177.jpg} & B154HIL & B154HIL & 97.15\% \\ \hline
-        178 & \includegraphics[width=3cm,keepaspectratio]{dataset/110_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/178.jpg} & B154HIL & B154HIL & 97.05\% \\ \hline
-        179 & \includegraphics[width=3cm,keepaspectratio]{dataset/111_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/179.jpg} & BC21GUZ & BC21GUZ & 98.39\% \\ \hline
-        180 & \includegraphics[width=3cm,keepaspectratio]{dataset/111_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/180.jpg} & BC21GUZ & BC21GUZ & 98.55\% \\ \hline
-        181 & \includegraphics[width=3cm,keepaspectratio]{dataset/112_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/181.jpg} & BC27TDI & BC27TDI & 97.97\% \\ \hline
-        182 & \includegraphics[width=3cm,keepaspectratio]{dataset/113_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/182.jpg} & BC05MKA & BC05MKA & 98.32\% \\ \hline
-        183 & \includegraphics[width=3cm,keepaspectratio]{dataset/113_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/183.jpg} & BC05MKA & BC05MKA & 97.96\% \\ \hline
-        184 & \includegraphics[width=3cm,keepaspectratio]{dataset/114_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/184.jpg} & BC61BSV & BC61BSV & 98.41\% \\ \hline
-        185 & \includegraphics[width=3cm,keepaspectratio]{dataset/114_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/185.jpg} & BC61BSV & BC61BSV & 98.54\% \\ \hline
-        186 & \includegraphics[width=3cm,keepaspectratio]{dataset/115_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/186.jpg} & BC27LYV & BC27LYV & 98.78\% \\ \hline
-        187 & \includegraphics[width=3cm,keepaspectratio]{dataset/116_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/187.jpg} & BC03VEL & BC03VEL & 98.80\% \\ \hline
-        188 & \includegraphics[width=3cm,keepaspectratio]{dataset/117_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/188.jpg} & BC77NDN & BC77NDN & 98.60\% \\ \hline
-        189 & \includegraphics[width=3cm,keepaspectratio]{dataset/117_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/189.jpg} & BC77NDN & BC77NDN & 99.13\% \\ \hline
-        190 & \includegraphics[width=3cm,keepaspectratio]{dataset/118_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/190.jpg} & BC23NIN & BC23NIN & 98.26\% \\ \hline
-        191 & \includegraphics[width=3cm,keepaspectratio]{dataset/118_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/191.jpg} & BC23NIN & BC23NIN & 97.64\% \\ \hline
-        192 & \includegraphics[width=3cm,keepaspectratio]{dataset/118_s2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/192.jpg} & BC23NIN & BC23NIN & 97.90\% \\ \hline
-        \end{longtable}
+    1   & \includegraphics[width=3cm,keepaspectratio]{dataset/1_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/1.jpg}   & DB17NGM             & DB17NGM              & 98.97\%    \\ \hline
+    2   & \includegraphics[width=3cm,keepaspectratio]{dataset/1_d2.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/2.jpg}   & DB17NGM             & DB17NGM              & 98.92\%    \\ \hline
+    3   & \includegraphics[width=3cm,keepaspectratio]{dataset/1_s1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/3.jpg}   & DB17NGM             & DB17NGM              & 98.91\%    \\ \hline
+    4   & \includegraphics[width=3cm,keepaspectratio]{dataset/1_s2.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/4.jpg}   & DB17NGM             & DB17NGM              & 97.48\%    \\ \hline
+    5   & \includegraphics[width=3cm,keepaspectratio]{dataset/2_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/5.jpg}   & BV20HDY             & BV20HDY              & 98.74\%    \\ \hline
+    6   & \includegraphics[width=3cm,keepaspectratio]{dataset/2_d2.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/6.jpg}   & BV20HDY             & BV20HDY              & 98.61\%    \\ \hline
+    7   & \includegraphics[width=3cm,keepaspectratio]{dataset/2_d3.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/7.jpg}   & BV20HDY             & BV20HDY              & 98.18\%    \\ \hline
+    8   & \includegraphics[width=3cm,keepaspectratio]{dataset/3_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/8.jpg}   & GL87ZBM             & GL87ZBM              & 96.65\%    \\ \hline
+    9   & \includegraphics[width=3cm,keepaspectratio]{dataset/4_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/9.jpg}   & BV56RAU             & BV56RAU              & 97.34\%    \\ \hline
+    10  & \includegraphics[width=3cm,keepaspectratio]{dataset/4_d2.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/10.jpg}  & BV56RAU             & BV56RAU              & 96.86\%    \\ \hline
+    11  & \includegraphics[width=3cm,keepaspectratio]{dataset/4_d3.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/11.jpg}  & BV56RAU             & BV56RAU              & 97.37\%    \\ \hline
+    12  & \includegraphics[width=3cm,keepaspectratio]{dataset/5_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/12.jpg}  & BV28BRI             & BV28BRI              & 97.98\%    \\ \hline
+    13  & \includegraphics[width=3cm,keepaspectratio]{dataset/6_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/13.jpg}  & BV29PMN             & BV29PMN              & 98.98\%    \\ \hline
+    14  & \includegraphics[width=3cm,keepaspectratio]{dataset/6_d2.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/14.jpg}  & BV29PMN             & BV29PMN              & 98.91\%    \\ \hline
+    15  & \includegraphics[width=3cm,keepaspectratio]{dataset/7_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/15.jpg}  & BV60TEO             & BV60TEO              & 98.38\%    \\ \hline
+    16  & \includegraphics[width=3cm,keepaspectratio]{dataset/7_d2.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/16.jpg}  & BV60TEO             & BV60TEO              & 98.19\%    \\ \hline
+    17  & \includegraphics[width=3cm,keepaspectratio]{dataset/8_s1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/17.jpg}  & BV81NYC             & BV81NYC              & 97.73\%    \\ \hline
+    18  & \includegraphics[width=3cm,keepaspectratio]{dataset/9_d1.jpg}   & \includegraphics[width=3cm,keepaspectratio]{segmentari/18.jpg}  & BV20SXK             & BV20SXK              & 98.88\%    \\ \hline
+    19  & \includegraphics[width=3cm,keepaspectratio]{dataset/10_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/19.jpg}  & CT36NLA             & CT36NLA              & 97.66\%    \\ \hline
+    20  & \includegraphics[width=3cm,keepaspectratio]{dataset/10_d2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/20.jpg}  & CT36NLA             & CT36NLA              & 98.40\%    \\ \hline
+    21  & \includegraphics[width=3cm,keepaspectratio]{dataset/10_d3.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/21.jpg}  & CT36NLA             & CT36NLA              & 98.52\%    \\ \hline
+    22  & \includegraphics[width=3cm,keepaspectratio]{dataset/11_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/22.jpg}  & BV18UFN             & BV18UFN              & 97.16\%    \\ \hline
+    23  & \includegraphics[width=3cm,keepaspectratio]{dataset/11_d2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/23.jpg}  & BV18UFN             & BV18UFN              & 98.20\%    \\ \hline
+    24  & \includegraphics[width=3cm,keepaspectratio]{dataset/12_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/24.jpg}  & BV37RED             & BV37RED              & 98.91\%    \\ \hline
+    25  & \includegraphics[width=3cm,keepaspectratio]{dataset/12_d2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/25.jpg}  & BV37RED             & BV37RED              & 98.93\%    \\ \hline
+    26  & \includegraphics[width=3cm,keepaspectratio]{dataset/13_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/26.jpg}  & BZ30GIG             & BZ30GIG              & 97.20\%    \\ \hline
+    27  & \includegraphics[width=3cm,keepaspectratio]{dataset/14_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/27.jpg}  & CJ25SGL             & CJ25SGL              & 98.44\%    \\ \hline
+    28  & \includegraphics[width=3cm,keepaspectratio]{dataset/15_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/28.jpg}  & AR15YCM             & AR15YCM              & 97.88\%    \\ \hline
+    29  & \includegraphics[width=3cm,keepaspectratio]{dataset/15_s2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/29.jpg}  & AR15YCM             & AR15YCM              & 97.28\%    \\ \hline
+    30  & \includegraphics[width=3cm,keepaspectratio]{dataset/16_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/30.jpg}  & B708VDF             & B708VDF              & 98.61\%    \\ \hline
+    31  & \includegraphics[width=3cm,keepaspectratio]{dataset/16_s2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/31.jpg}  & B708VDF             & B708VDF              & 98.63\%    \\ \hline
+    32  & \includegraphics[width=3cm,keepaspectratio]{dataset/17_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/32.jpg}  & BV90WLF             & BV90WLF              & 98.58\%    \\ \hline
+    33  & \includegraphics[width=3cm,keepaspectratio]{dataset/18_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/33.jpg}  & BV77RSU             & BV77RSU              & 98.96\%    \\ \hline
+    34  & \includegraphics[width=3cm,keepaspectratio]{dataset/19_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/34.jpg}  & BV02ALA             & BV02ALA              & 99.13\%    \\ \hline
+    35  & \includegraphics[width=3cm,keepaspectratio]{dataset/20_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/35.jpg}  & B730HEX             & B730HEX              & 98.96\%    \\ \hline
+    36  & \includegraphics[width=3cm,keepaspectratio]{dataset/21_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/36.jpg}  & B88FBU              & B88FBU               & 98.89\%    \\ \hline
+    37  & \includegraphics[width=3cm,keepaspectratio]{dataset/21_d2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/37.jpg}  & B88FBU              & B88FBU               & 98.82\%    \\ \hline
+    38  & \includegraphics[width=3cm,keepaspectratio]{dataset/21_d3.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/38.jpg}  & B88FBU              & B88FBU               & 98.90\%    \\ \hline
+    39  & \includegraphics[width=3cm,keepaspectratio]{dataset/22_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/39.jpg}  & DB20PMD             & DB20PMD              & 98.67\%    \\ \hline
+    40  & \includegraphics[width=3cm,keepaspectratio]{dataset/23_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/40.jpg}  & B496AMI             & B496AMI              & 98.33\%    \\ \hline
+    41  & \includegraphics[width=3cm,keepaspectratio]{dataset/24_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/41.jpg}  & BV15ZTP             & BV15ZTP              & 97.09\%    \\ \hline
+    42  & \includegraphics[width=3cm,keepaspectratio]{dataset/24_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/42.jpg}  & BV15ZTP             & BV15ZTP              & 97.88\%    \\ \hline
+    43  & \includegraphics[width=3cm,keepaspectratio]{dataset/25_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/43.jpg}  & BV20ZZB             & BV20ZZB              & 98.21\%    \\ \hline
+    44  & \includegraphics[width=3cm,keepaspectratio]{dataset/25_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/44.jpg}  & BV20ZZB             & BV20ZZB              & 97.97\%    \\ \hline
+    45  & \includegraphics[width=3cm,keepaspectratio]{dataset/26_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/45.jpg}  & BV15TWB             & BV15TWB              & 97.69\%    \\ \hline
+    46  & \includegraphics[width=3cm,keepaspectratio]{dataset/26_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/46.jpg}  & BV15TWB             & BV15TWB              & 97.95\%    \\ \hline
+    47  & \includegraphics[width=3cm,keepaspectratio]{dataset/27_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/47.jpg}  & B808JDM             & B808JDM              & 99.12\%    \\ \hline
+    48  & \includegraphics[width=3cm,keepaspectratio]{dataset/27_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/48.jpg}  & B808JDM             & B808JDM              & 99.04\%    \\ \hline
+    49  & \includegraphics[width=3cm,keepaspectratio]{dataset/28_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/49.jpg}  & B800JDM             & B800JDM              & 98.86\%    \\ \hline
+    50  & \includegraphics[width=3cm,keepaspectratio]{dataset/28_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/50.jpg}  & B800JDM             & B800JDM              & 98.62\%    \\ \hline
+    51  & \includegraphics[width=3cm,keepaspectratio]{dataset/29_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/51.jpg}  & BV13KPM             & BV13KPM              & 97.88\%    \\ \hline
+    52  & \includegraphics[width=3cm,keepaspectratio]{dataset/29_d2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/52.jpg}  & BV13KPM             & BV13KPM              & 96.99\%    \\ \hline
+    53  & \includegraphics[width=3cm,keepaspectratio]{dataset/29_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/53.jpg}  & BV13KPM             & BV13KPM              & 98.45\%    \\ \hline
+    54  & \includegraphics[width=3cm,keepaspectratio]{dataset/30_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/54.jpg}  & BV19MDZ             & BV19MDZ              & 98.38\%    \\ \hline
+    55  & \includegraphics[width=3cm,keepaspectratio]{dataset/30_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/55.jpg}  & BV19MDZ             & BV19MDZ              & 97.62\%    \\ \hline
+    56  & \includegraphics[width=3cm,keepaspectratio]{dataset/31_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/56.jpg}  & BV88UMK             & BV88UMK              & 98.91\%    \\ \hline
+    57  & \includegraphics[width=3cm,keepaspectratio]{dataset/32_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/57.jpg}  & BV17XSA             & BV17XSA              & 98.82\%    \\ \hline
+    58  & \includegraphics[width=3cm,keepaspectratio]{dataset/32_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/58.jpg}  & BV17XSA             & BV17XSA              & 98.54\%    \\ \hline
+    59  & \includegraphics[width=3cm,keepaspectratio]{dataset/33_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/59.jpg}  & B500FMP             & B500FMP              & 97.63\%    \\ \hline
+    60  & \includegraphics[width=3cm,keepaspectratio]{dataset/34_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/60.jpg}  & VN61AVM             & VN61AVM              & 98.46\%    \\ \hline
+    61  & \includegraphics[width=3cm,keepaspectratio]{dataset/35_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/61.jpg}  & BV88BMG             & BV88BMG              & 98.93\%    \\ \hline
+    62  & \includegraphics[width=3cm,keepaspectratio]{dataset/35_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/62.jpg}  & BV88BMG             & BV88BMG              & 98.91\%    \\ \hline
+    63  & \includegraphics[width=3cm,keepaspectratio]{dataset/36_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/63.jpg}  & B110SRH             & B110SRH              & 98.09\%    \\ \hline
+    64  & \includegraphics[width=3cm,keepaspectratio]{dataset/36_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/64.jpg}  & B110SRH             & B110SRH              & 97.57\%    \\ \hline
+    65  & \includegraphics[width=3cm,keepaspectratio]{dataset/37_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/65.jpg}  & CV89COX             & CV89COX              & 98.83\%    \\ \hline
+    66  & \includegraphics[width=3cm,keepaspectratio]{dataset/37_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/66.jpg}  & CV89COX             & CV89COX              & 97.89\%    \\ \hline
+    67  & \includegraphics[width=3cm,keepaspectratio]{dataset/38_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/67.jpg}  & BV99VDV             & BV99VDV              & 99.01\%    \\ \hline
+    68  & \includegraphics[width=3cm,keepaspectratio]{dataset/38_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/68.jpg}  & BV99VDV             & BV99VDV              & 98.85\%    \\ \hline
+    69  & \includegraphics[width=3cm,keepaspectratio]{dataset/39_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/69.jpg}  & BV32GHE             & BV32GHE              & 98.85\%    \\ \hline
+    70  & \includegraphics[width=3cm,keepaspectratio]{dataset/39_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/70.jpg}  & BV32GHE             & BV32GHE              & 98.95\%    \\ \hline
+    71  & \includegraphics[width=3cm,keepaspectratio]{dataset/40_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/71.jpg}  & B212FAD             & B212FAD              & 99.08\%    \\ \hline
+    72  & \includegraphics[width=3cm,keepaspectratio]{dataset/40_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/72.jpg}  & B212FAD             & B212FAD              & 99.11\%    \\ \hline
+    73  & \includegraphics[width=3cm,keepaspectratio]{dataset/41_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/73.jpg}  & BV01UBC             & BV01UBC              & 98.28\%    \\ \hline
+    74  & \includegraphics[width=3cm,keepaspectratio]{dataset/42_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/74.jpg}  & NT11TRP             & NT11TRP              & 98.16\%    \\ \hline
+    75  & \includegraphics[width=3cm,keepaspectratio]{dataset/43_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/75.jpg}  & B321KWL             & B321KWL              & 99.13\%    \\ \hline
+    76  & \includegraphics[width=3cm,keepaspectratio]{dataset/43_d2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/76.jpg}  & B321KWL             & B321KWL              & 99.02\%    \\ \hline
+    77  & \includegraphics[width=3cm,keepaspectratio]{dataset/43_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/77.jpg}  & B321KWL             & B321KWL              & 98.42\%    \\ \hline
+    78  & \includegraphics[width=3cm,keepaspectratio]{dataset/44_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/78.jpg}  & BV83ALE             & BV83ALE              & 99.07\%    \\ \hline
+    79  & \includegraphics[width=3cm,keepaspectratio]{dataset/44_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/79.jpg}  & BV83ALE             & BV83ALE              & 98.99\%    \\ \hline
+    80  & \includegraphics[width=3cm,keepaspectratio]{dataset/45_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/80.jpg}  & SV10URK             & SV10URK              & 98.43\%    \\ \hline
+    81  & \includegraphics[width=3cm,keepaspectratio]{dataset/46_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/81.jpg}  & IS99GTM             & IS99GTM              & 98.73\%    \\ \hline
+    82  & \includegraphics[width=3cm,keepaspectratio]{dataset/47_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/82.jpg}  & CV09BDL             & CV09BDL              & 98.64\%    \\ \hline
+    83  & \includegraphics[width=3cm,keepaspectratio]{dataset/48_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/83.jpg}  & BV50MBA             & BV50MBA              & 98.50\%    \\ \hline
+    84  & \includegraphics[width=3cm,keepaspectratio]{dataset/49_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/84.jpg}  & BV94MTN             & BV94MTN              & 98.80\%    \\ \hline
+    85  & \includegraphics[width=3cm,keepaspectratio]{dataset/50_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/85.jpg}  & BV18GBT             & BV18GBT              & 98.80\%    \\ \hline
+    86  & \includegraphics[width=3cm,keepaspectratio]{dataset/51_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/86.jpg}  & BV26USA             & BV26USA              & 98.83\%    \\ \hline
+    87  & \includegraphics[width=3cm,keepaspectratio]{dataset/52_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/87.jpg}  & BV43BDL             & BV43BDL              & 98.31\%    \\ \hline
+    88  & \includegraphics[width=3cm,keepaspectratio]{dataset/52_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/88.jpg}  & BV43BDL             & BV43BDL              & 98.23\%    \\ \hline
+    89  & \includegraphics[width=3cm,keepaspectratio]{dataset/53_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/89.jpg}  & CV07BJM             & CV07BJM              & 99.04\%    \\ \hline
+    90  & \includegraphics[width=3cm,keepaspectratio]{dataset/53_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/90.jpg}  & CV07BJM             & CV07BJM              & 98.64\%    \\ \hline
+    91  & \includegraphics[width=3cm,keepaspectratio]{dataset/54_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/91.jpg}  & BV30PAG             & BV30PAG              & 98.90\%    \\ \hline
+    92  & \includegraphics[width=3cm,keepaspectratio]{dataset/54_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/92.jpg}  & BV30PAG             & BV30PAG              & 98.48\%    \\ \hline
+    93  & \includegraphics[width=3cm,keepaspectratio]{dataset/55_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/93.jpg}  & BV63TOY             & BV63TOY              & 98.15\%    \\ \hline
+    94  & \includegraphics[width=3cm,keepaspectratio]{dataset/55_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/94.jpg}  & BV63TOY             & BV63TOY              & 97.95\%    \\ \hline
+    95  & \includegraphics[width=3cm,keepaspectratio]{dataset/56_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/95.jpg}  & BV16EWM             & BV16EWM              & 98.50\%    \\ \hline
+    96  & \includegraphics[width=3cm,keepaspectratio]{dataset/56_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/96.jpg}  & BV16EWM             & BV16EWM              & 98.01\%    \\ \hline
+    97  & \includegraphics[width=3cm,keepaspectratio]{dataset/57_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/97.jpg}  & VN97CRU             & VN97CRU              & 98.91\%    \\ \hline
+    98  & \includegraphics[width=3cm,keepaspectratio]{dataset/57_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/98.jpg}  & VN97CRU             & VN97CRU              & 98.78\%    \\ \hline
+    99  & \includegraphics[width=3cm,keepaspectratio]{dataset/58_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/99.jpg}  & BV13LIE             & BV13LIE              & 97.41\%    \\ \hline
+    100 & \includegraphics[width=3cm,keepaspectratio]{dataset/59_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/100.jpg} & B110NPA             & B110NPA              & 98.34\%    \\ \hline
+    101 & \includegraphics[width=3cm,keepaspectratio]{dataset/59_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/101.jpg} & B110NPA             & B110NPA              & 98.66\%    \\ \hline
+    102 & \includegraphics[width=3cm,keepaspectratio]{dataset/60_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/102.jpg} & BV26BBZ             & BV26BBZ              & 97.90\%    \\ \hline
+    103 & \includegraphics[width=3cm,keepaspectratio]{dataset/60_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/103.jpg} & BV26BBZ             & BV26BBZ              & 97.29\%    \\ \hline
+    104 & \includegraphics[width=3cm,keepaspectratio]{dataset/61_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/104.jpg} & B675GEO             & B675GEO              & 98.29\%    \\ \hline
+    105 & \includegraphics[width=3cm,keepaspectratio]{dataset/61_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/105.jpg} & B675GEO             & B675GEO              & 96.96\%    \\ \hline
+    106 & \includegraphics[width=3cm,keepaspectratio]{dataset/62_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/106.jpg} & BV24CAI             & BV24CAI              & 98.87\%    \\ \hline
+    107 & \includegraphics[width=3cm,keepaspectratio]{dataset/62_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/107.jpg} & BV24CAI             & BV24CAI              & 96.98\%    \\ \hline
+    108 & \includegraphics[width=3cm,keepaspectratio]{dataset/63_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/108.jpg} & BV17CLT             & BV17CLT              & 98.68\%    \\ \hline
+    109 & \includegraphics[width=3cm,keepaspectratio]{dataset/63_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/109.jpg} & BV17CLT             & BV17CLT              & 98.80\%    \\ \hline
+    110 & \includegraphics[width=3cm,keepaspectratio]{dataset/64_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/110.jpg} & BV19BRO             & BV19BRO              & 98.80\%    \\ \hline
+    111 & \includegraphics[width=3cm,keepaspectratio]{dataset/64_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/111.jpg} & BV19BRO             & BV19BRO              & 98.25\%    \\ \hline
+    112 & \includegraphics[width=3cm,keepaspectratio]{dataset/65_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/112.jpg} & BV97DIA             & BV97DIA              & 97.97\%    \\ \hline
+    113 & \includegraphics[width=3cm,keepaspectratio]{dataset/65_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/113.jpg} & BV97DIA             & BV97DIA              & 97.11\%    \\ \hline
+    114 & \includegraphics[width=3cm,keepaspectratio]{dataset/66_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/114.jpg} & BV07RGN             & BV07RGN              & 98.65\%    \\ \hline
+    115 & \includegraphics[width=3cm,keepaspectratio]{dataset/67_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/115.jpg} & BV99RMB             & BV99RMB              & 98.90\%    \\ \hline
+    116 & \includegraphics[width=3cm,keepaspectratio]{dataset/67_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/116.jpg} & BV99RMB             & BV99RMB              & 99.05\%    \\ \hline
+    117 & \includegraphics[width=3cm,keepaspectratio]{dataset/68_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/117.jpg} & BV41AIG             & BV41AIG              & 96.82\%    \\ \hline
+    118 & \includegraphics[width=3cm,keepaspectratio]{dataset/69_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/118.jpg} & BV17CCO             & BV17CCO              & 98.75\%    \\ \hline
+    119 & \includegraphics[width=3cm,keepaspectratio]{dataset/69_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/119.jpg} & BV17CCO             & BV17CCO              & 98.63\%    \\ \hline
+    120 & \includegraphics[width=3cm,keepaspectratio]{dataset/70_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/120.jpg} & BV17NFU             & BV17NFU              & 97.43\%    \\ \hline
+    121 & \includegraphics[width=3cm,keepaspectratio]{dataset/71_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/121.jpg} & BV62MDL             & BV62MDL              & 98.06\%    \\ \hline
+    122 & \includegraphics[width=3cm,keepaspectratio]{dataset/72_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/122.jpg} & B520DGY             & B520DGY              & 98.39\%    \\ \hline
+    123 & \includegraphics[width=3cm,keepaspectratio]{dataset/72_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/123.jpg} & B520DGY             & B520DGY              & 98.50\%    \\ \hline
+    124 & \includegraphics[width=3cm,keepaspectratio]{dataset/73_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/124.jpg} & BV92BBU             & BV92BBU              & 98.99\%    \\ \hline
+    125 & \includegraphics[width=3cm,keepaspectratio]{dataset/73_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/125.jpg} & BV92BBU             & BV92BBU              & 99.02\%    \\ \hline
+    126 & \includegraphics[width=3cm,keepaspectratio]{dataset/74_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/126.jpg} & VN99CZJ             & VN99CZJ              & 97.41\%    \\ \hline
+    127 & \includegraphics[width=3cm,keepaspectratio]{dataset/75_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/127.jpg} & BV28NIM             & BV28NIM              & 98.64\%    \\ \hline
+    128 & \includegraphics[width=3cm,keepaspectratio]{dataset/75_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/128.jpg} & BV28NIM             & BV28NIM              & 97.73\%    \\ \hline
+    129 & \includegraphics[width=3cm,keepaspectratio]{dataset/76_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/129.jpg} & BV83ARC             & BV83ARC              & 99.00\%    \\ \hline
+    130 & \includegraphics[width=3cm,keepaspectratio]{dataset/76_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/130.jpg} & BV83ARC             & BV83ARC              & 99.03\%    \\ \hline
+    131 & \includegraphics[width=3cm,keepaspectratio]{dataset/77_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/131.jpg} & BV02LTV             & BV02LTV              & 98.62\%    \\ \hline
+    132 & \includegraphics[width=3cm,keepaspectratio]{dataset/78_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/132.jpg} & BV70NOA             & BV70NOA              & 98.01\%    \\ \hline
+    133 & \includegraphics[width=3cm,keepaspectratio]{dataset/78_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/133.jpg} & BV70NOA             & BV70NOA              & 98.65\%    \\ \hline
+    134 & \includegraphics[width=3cm,keepaspectratio]{dataset/79_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/134.jpg} & BV14LEI             & BV14LEI              & 95.51\%    \\ \hline
+    135 & \includegraphics[width=3cm,keepaspectratio]{dataset/79_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/135.jpg} & BV14LEI             & BV14LEI              & 96.56\%    \\ \hline
+    136 & \includegraphics[width=3cm,keepaspectratio]{dataset/80_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/136.jpg} & BV61MTS             & BV61MTS              & 98.45\%    \\ \hline
+    137 & \includegraphics[width=3cm,keepaspectratio]{dataset/80_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/137.jpg} & BV61MTS             & BV61MTS              & 98.69\%    \\ \hline
+    138 & \includegraphics[width=3cm,keepaspectratio]{dataset/81_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/138.jpg} & BV77MRU             & BV77MRU              & 98.88\%    \\ \hline
+    139 & \includegraphics[width=3cm,keepaspectratio]{dataset/82_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/139.jpg} & B77RHY              & B77RHY               & 99.09\%    \\ \hline
+    140 & \includegraphics[width=3cm,keepaspectratio]{dataset/82_d2.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/140.jpg} & B77RHY              & B77RHY               & 99.12\%    \\ \hline
+    141 & \includegraphics[width=3cm,keepaspectratio]{dataset/82_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/141.jpg} & B77RHY              & B77RHY               & 95.17\%    \\ \hline
+    142 & \includegraphics[width=3cm,keepaspectratio]{dataset/83_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/142.jpg} & AG95BFG             & AG95BFG              & 98.62\%    \\ \hline
+    143 & \includegraphics[width=3cm,keepaspectratio]{dataset/83_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/143.jpg} & AG95BFG             & AG95BFG              & 97.17\%    \\ \hline
+    144 & \includegraphics[width=3cm,keepaspectratio]{dataset/84_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/144.jpg} & BV70AAC             & BV70AAC              & 99.12\%    \\ \hline
+    145 & \includegraphics[width=3cm,keepaspectratio]{dataset/84_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/145.jpg} & BV70AAC             & BV70AAC              & 99.02\%    \\ \hline
+    146 & \includegraphics[width=3cm,keepaspectratio]{dataset/85_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/146.jpg} & BV03BYT             & BV03BYT              & 98.92\%    \\ \hline
+    147 & \includegraphics[width=3cm,keepaspectratio]{dataset/86_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/147.jpg} & CV92NAT             & CV92NAT              & 99.11\%    \\ \hline
+    148 & \includegraphics[width=3cm,keepaspectratio]{dataset/87_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/148.jpg} & AG93WAY             & AG93WAY              & 99.16\%    \\ \hline
+    149 & \includegraphics[width=3cm,keepaspectratio]{dataset/87_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/149.jpg} & AG93WAY             & AG93WAY              & 99.16\%    \\ \hline
+    150 & \includegraphics[width=3cm,keepaspectratio]{dataset/88_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/150.jpg} & BV19PDM             & BV19PDM              & 98.91\%    \\ \hline
+    151 & \includegraphics[width=3cm,keepaspectratio]{dataset/88_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/151.jpg} & BV19PDM             & BV19PDM              & 98.77\%    \\ \hline
+    152 & \includegraphics[width=3cm,keepaspectratio]{dataset/89_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/152.jpg} & BV12PDM             & BV12PDM              & 98.48\%    \\ \hline
+    153 & \includegraphics[width=3cm,keepaspectratio]{dataset/90_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/153.jpg} & BV45MCR             & BV45MCR              & 98.73\%    \\ \hline
+    154 & \includegraphics[width=3cm,keepaspectratio]{dataset/91_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/154.jpg} & CV92PRO             & CV92PRO              & 97.72\%    \\ \hline
+    155 & \includegraphics[width=3cm,keepaspectratio]{dataset/92_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/155.jpg} & B211ABV             & B211ABV              & 98.80\%    \\ \hline
+    156 & \includegraphics[width=3cm,keepaspectratio]{dataset/93_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/156.jpg} & IS03BMI             & IS03BMI              & 96.44\%    \\ \hline
+    157 & \includegraphics[width=3cm,keepaspectratio]{dataset/94_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/157.jpg} & CV07BHS             & CV07BHS              & 98.76\%    \\ \hline
+    158 & \includegraphics[width=3cm,keepaspectratio]{dataset/95_s1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/158.jpg} & CV05DIW             & CV05DIW              & 91.78\%    \\ \hline
+    159 & \includegraphics[width=3cm,keepaspectratio]{dataset/96_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/159.jpg} & BV50MSL             & BV50MSL              & 98.14\%    \\ \hline
+    160 & \includegraphics[width=3cm,keepaspectratio]{dataset/97_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/160.jpg} & BV09FVK             & BV09FVK              & 98.62\%    \\ \hline
+    161 & \includegraphics[width=3cm,keepaspectratio]{dataset/98_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/161.jpg} & AG95NRS             & AG95NRS              & 97.60\%    \\ \hline
+    162 & \includegraphics[width=3cm,keepaspectratio]{dataset/99_d1.jpg}  & \includegraphics[width=3cm,keepaspectratio]{segmentari/162.jpg} & BV77RSU             & BV77RSU              & 98.84\%    \\ \hline
+    163 & \includegraphics[width=3cm,keepaspectratio]{dataset/100_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/163.jpg} & BV77ZZP             & BV77ZZP              & 98.29\%    \\ \hline
+    164 & \includegraphics[width=3cm,keepaspectratio]{dataset/101_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/164.jpg} & BV17PVU             & BV17PVU              & 98.69\%    \\ \hline
+    165 & \includegraphics[width=3cm,keepaspectratio]{dataset/102_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/165.jpg} & IF37MRY             & IF37MRY              & 98.26\%    \\ \hline
+    166 & \includegraphics[width=3cm,keepaspectratio]{dataset/103_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/166.jpg} & BV94TRT             & BV94TRT              & 98.19\%    \\ \hline
+    167 & \includegraphics[width=3cm,keepaspectratio]{dataset/104_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/167.jpg} & BV30PLK             & BV30PLK              & 98.87\%    \\ \hline
+    168 & \includegraphics[width=3cm,keepaspectratio]{dataset/105_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/168.jpg} & BV07RGN             & BV07RGN              & 93.96\%    \\ \hline
+    169 & \includegraphics[width=3cm,keepaspectratio]{dataset/106_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/169.jpg} & BC74DNS             & BC74DNS              & 97.35\%    \\ \hline
+    170 & \includegraphics[width=3cm,keepaspectratio]{dataset/106_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/170.jpg} & BC74DNS             & BC74DNS              & 91.62\%    \\ \hline
+    171 & \includegraphics[width=3cm,keepaspectratio]{dataset/107_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/171.jpg} & BC89BEJ             & BC89BEJ              & 98.99\%    \\ \hline
+    172 & \includegraphics[width=3cm,keepaspectratio]{dataset/107_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/172.jpg} & BC89BEJ             & BC89BEJ              & 99.06\%    \\ \hline
+    173 & \includegraphics[width=3cm,keepaspectratio]{dataset/108_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/173.jpg} & BC89MSW             & BC89MSW              & 99.04\%    \\ \hline
+    174 & \includegraphics[width=3cm,keepaspectratio]{dataset/108_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/174.jpg} & BC89MSW             & BC89MSW              & 99.11\%    \\ \hline
+    175 & \includegraphics[width=3cm,keepaspectratio]{dataset/109_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/175.jpg} & BC99CSI             & BC99CSI              & 98.45\%    \\ \hline
+    176 & \includegraphics[width=3cm,keepaspectratio]{dataset/109_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/176.jpg} & BC99CSI             & BC99CSI              & 98.09\%    \\ \hline
+    177 & \includegraphics[width=3cm,keepaspectratio]{dataset/110_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/177.jpg} & B154HIL             & B154HIL              & 97.15\%    \\ \hline
+    178 & \includegraphics[width=3cm,keepaspectratio]{dataset/110_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/178.jpg} & B154HIL             & B154HIL              & 97.05\%    \\ \hline
+    179 & \includegraphics[width=3cm,keepaspectratio]{dataset/111_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/179.jpg} & BC21GUZ             & BC21GUZ              & 98.39\%    \\ \hline
+    180 & \includegraphics[width=3cm,keepaspectratio]{dataset/111_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/180.jpg} & BC21GUZ             & BC21GUZ              & 98.55\%    \\ \hline
+    181 & \includegraphics[width=3cm,keepaspectratio]{dataset/112_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/181.jpg} & BC27TDI             & BC27TDI              & 97.97\%    \\ \hline
+    182 & \includegraphics[width=3cm,keepaspectratio]{dataset/113_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/182.jpg} & BC05MKA             & BC05MKA              & 98.32\%    \\ \hline
+    183 & \includegraphics[width=3cm,keepaspectratio]{dataset/113_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/183.jpg} & BC05MKA             & BC05MKA              & 97.96\%    \\ \hline
+    184 & \includegraphics[width=3cm,keepaspectratio]{dataset/114_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/184.jpg} & BC61BSV             & BC61BSV              & 98.41\%    \\ \hline
+    185 & \includegraphics[width=3cm,keepaspectratio]{dataset/114_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/185.jpg} & BC61BSV             & BC61BSV              & 98.54\%    \\ \hline
+    186 & \includegraphics[width=3cm,keepaspectratio]{dataset/115_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/186.jpg} & BC27LYV             & BC27LYV              & 98.78\%    \\ \hline
+    187 & \includegraphics[width=3cm,keepaspectratio]{dataset/116_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/187.jpg} & BC03VEL             & BC03VEL              & 98.80\%    \\ \hline
+    188 & \includegraphics[width=3cm,keepaspectratio]{dataset/117_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/188.jpg} & BC77NDN             & BC77NDN              & 98.60\%    \\ \hline
+    189 & \includegraphics[width=3cm,keepaspectratio]{dataset/117_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/189.jpg} & BC77NDN             & BC77NDN              & 99.13\%    \\ \hline
+    190 & \includegraphics[width=3cm,keepaspectratio]{dataset/118_d1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/190.jpg} & BC23NIN             & BC23NIN              & 98.26\%    \\ \hline
+    191 & \includegraphics[width=3cm,keepaspectratio]{dataset/118_s1.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/191.jpg} & BC23NIN             & BC23NIN              & 97.64\%    \\ \hline
+    192 & \includegraphics[width=3cm,keepaspectratio]{dataset/118_s2.jpg} & \includegraphics[width=3cm,keepaspectratio]{segmentari/192.jpg} & BC23NIN             & BC23NIN              & 97.90\%    \\ \hline
+\end{longtable}
 \end{document}

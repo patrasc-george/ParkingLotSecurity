@@ -302,7 +302,7 @@ void Algorithm::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction
 	if (src.empty() || src.type() != CV_8UC1)
 		return;
 
-	cv::Mat sobel, x, y, magnitude;
+	cv::Mat x, y, magnitude;
 
 	cv::Sobel(src, x, CV_32F, 1, 0);
 	cv::Sobel(src, y, CV_32F, 0, 1);
@@ -379,7 +379,7 @@ void Algorithm::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 
 	cv::bitwise_or(sobel, binary, binary);
 
-	cv::bitwise_and(sobel, morphologicalGradient, morphologicalGradient);
+	cv::bitwise_and(binary, morphologicalGradient, morphologicalGradient);
 
 	nonMaximumSuppression(morphologicalGradient, dst, direction);
 }
@@ -865,7 +865,7 @@ bool Algorithm::firstIndexes(const std::vector<cv::Rect>& chars, std::array<int,
 	if (indexes[2] - indexes[1] < 2 || indexes[2] - indexes[1] > 3)
 		return false;
 
-	return indexes[1] < indexes[2];
+	return true;
 }
 
 void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent)
@@ -874,26 +874,9 @@ void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::R
 
 	for (int i = 0; i < src.size(); i++)
 		paddingRect(src[i], dst[i], percent, true);
-
-	int paddingX = 0, paddingY = 0;
-
-	for (const auto& rect : dst)
-	{
-		paddingX = std::min(paddingX, rect.x);
-		paddingY = std::min(paddingY, rect.y);
-	}
-
-	paddingX = -paddingX;
-	paddingY = -paddingY;
-
-	for (auto& rect : dst)
-	{
-		rect.x += paddingX;
-		rect.y += paddingY;
-	}
 }
 
-void Algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars)
+void Algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars)
 {
 	if (chars.size() != paddedChars.size())
 		return;
@@ -989,8 +972,8 @@ bool Algorithm::resizeCharTemplate(const cv::Mat& src, cv::Mat& dst, const cv::S
 	if (size.width < 3 || size.height < 3)
 		return false;
 
-	double aspectRadion = static_cast<float>(src.cols) / src.rows;
-	int width = size.height * aspectRadion;
+	double aspectRation = static_cast<float>(src.cols) / src.rows;
+	int width = size.height * aspectRation;
 
 	cv::Mat resizedSrc;
 	cv::resize(src, resizedSrc, cv::Size(width, size.height));

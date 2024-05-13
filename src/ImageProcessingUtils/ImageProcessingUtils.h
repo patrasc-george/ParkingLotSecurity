@@ -410,7 +410,7 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param chars Vector of character bounding boxes.
 	 * @param paddedChars Vector of padded character bounding boxes used for spacing.
 	 */
-	static void charsSpacing(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars);
+	static void charsSpacing(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars);
 
 	/**
 	 * @brief Separates characters into words based on spacing analysis.

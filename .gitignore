@@ -3,7 +3,10 @@
 /Documentation/Licenta/dataset/
 /Documentation/Licenta/images/
 /Documentation/Licenta/segmentari/
-/Documentation/Licenta/*.toc
+/Documentation/Licenta/
+*.toc
+*.blg
+*.synctex
 /database/
 *.aux
 *.log

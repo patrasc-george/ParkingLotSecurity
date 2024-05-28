@@ -76,16 +76,16 @@ Aplicația are scopul de a facilita și automatiza gestionarea accesului în par
 \section{Motivarea aplicației}
 În cadrul proiectului, s-a urmărit dezvoltarea unei soluții eficiente prin valorificarea cunoștințelor existente din domeniul procesării imaginilor. Totodata, proiectul a implicat aplicarea și extinderea tehnicilor de analiză și procesare vizuală, pentru a identifica și extrage numerele de înmatriculare din imaginile captate de la intrările în parcările auto.
 
-Ca limbaj de programare s-a optat pentru C++, care este larg recunoscut în domeniul procesării de imagini datorită eficienței sale remarcabile și a flexibilității pe care o oferă în gestionarea resurselor de sistem, contribuind la optimizarea timpului de execuție si permițând manipularea avansată și rapidă a datelor vizuale.
+Ca limbaj de programare s-a optat pentru C++, care este larg recunoscut în domeniul procesării de imagini datorită eficienței sale remarcabile și a flexibilității pe care o oferă în gestionarea resurselor de sistem, contribuind la optimizarea timpului de execuție și permițând manipularea avansată și rapidă a datelor vizuale.
 
-Pe parcursul dezvoltării soluției, s-a pus accent pe integrarea unei suite de tehnologii și instrumente de dezvoltare pentru a optimiza atât procesul de elaborare, cât și performanța finală a sistemului. În acest sens, s-a utilizat biblioteca OpenCV, care a fost esențială în lucrul cu imagini si utilizarea algoritmilor de procesare. De asemenea, s-a folosit modelul de inteligență artificială Tesseract OCR, recunoscut pentru eficiența sa în recunoașterea optică a caracterelor, pentru a extrage textul clar și precis din imagini.
+Pe parcursul dezvoltării soluției, s-a pus accent pe integrarea unei suite de tehnologii și instrumente de dezvoltare pentru a optimiza atât procesul de elaborare, cât și performanța finală a sistemului. În acest sens, s-a utilizat biblioteca OpenCV, care a fost esențială în lucrul cu imagini și utilizarea algoritmilor de procesare. De asemenea, s-a folosit modelul de inteligență artificială Tesseract OCR, recunoscut pentru eficiența sa în recunoașterea optică a caracterelor, pentru a extrage textul clar și precis din imagini.
 
 Interfața grafică a fost creată cu ajutorul framework-ului Qt, oferind o manieră eficientă de interacțiune și o vizualizare intuitivă a datelor procesate. Pentru managementul proiectului și automatizarea construcției sistemului, s-au folosit CMake și Doxygen, acesta din urmă facilitând generarea documentației tehnice detaliate. De asemenea, pentru a asigura robustețea codului, s-au implementat unit teste, care au permis verificarea și validarea funcționalităților în diverse scenarii de utilizare.
 
 Întregul proces de dezvoltare a fost suportat de mediul integrat de dezvoltare Visual Studio, și a fost gestionat folosind GitLab pentru versionarea codului.
 
 \chapter{Noțiuni teoretice}
-\section{Ce este imaginea digitală si procesarea de imagine?}
+\section{Ce este imaginea digitală și procesarea de imagine?}
 O imagine poate fi definită ca o funcție bidimensională, f$(x,y)$, unde x și y sunt coordonate spațiale, iar amplitudinea lui f la orice pereche de coordonate $(x, y)$ este numită intensitatea sau nivelul de gri al imaginii în acel punct. Când x, y și valorile intensității lui f sunt finite și discrete, imaginea se numește imagine digitală. Procesarea imaginii digitale se referă la procesarea imaginilor digitale cu ajutorul unui computer digital. O imagine digitală este compusă dintr-un număr finit de elemente, fiecare având o locație și o valoare specifică, numite pixeli.
 
 Viziunea este cel mai avansat simț al nostru, astfel încât imaginile joacă un rol esențial în percepția umană. Spre deosebire de oameni, care sunt limitați la spectrul vizual al radiațiilor electromagnetice, mașinile de imagistică acoperă aproape întregul spectru electromagnetic, de la raze gamma la unde radio. Acestea pot opera pe imagini generate de surse neobișnuite pentru oameni, cum ar fi ultrasunetele, microscopie electronică și imagini generate de computer.
@@ -211,7 +211,7 @@ Forma histogramei este legată de apariția imaginii. De exemplu, presupunem ima
 Într-o imagine cu contrast ridicat, componentele histogramei acoperă un interval larg al scalei de intensitate, iar distribuția pixelilor nu este prea departe de uniformă, doar câteva bin-uri fiind mult mai înalte decât altele. Intuitiv, este rezonabil să concluzionăm că o imagine ale cărei pixeli tind să ocupe întregul interval de niveluri de intensitate posibile și, în plus, tind să fie distribuiți uniform, va avea un aspect de contrast ridicat și va prezenta o mare varietate de tonuri de gri. Efectul net va fi o imagine care arată o mare cantitate de detalii de nivel gri și are un interval dinamic ridicat.
 
 \section{Decupare și redimensionare}
-Decuparea este o operațiune esențială în prelucrarea imaginilor care presupune selecționarea unei subzone dintr-o imagine și eliminarea restului. Aceasta este utilă pentru focalizarea pe o regiune de interes specifică, eliminarea zonelor nedorite sau pregătirea imaginii pentru analize ulterioare. Procesul de decupare implică specificarea unui dreptunghi delimitat de coordonatele colțului din stânga sus (x, y) și dimensiunile lățimii (w) și înălțimii (h).
+Decuparea (crop) este o operațiune esențială în prelucrarea imaginilor care presupune selecționarea unei subzone dintr-o imagine și eliminarea restului. Aceasta este utilă pentru focalizarea pe o regiune de interes specifică, eliminarea zonelor nedorite sau pregătirea imaginii pentru analize ulterioare. Procesul de decupare implică specificarea unui dreptunghi delimitat de coordonatele colțului din stânga sus (x, y) și dimensiunile lățimii (w) și înălțimii (h).
 
 Redimensionarea unei imagini implică schimbarea dimensiunilor acesteia pentru a se potrivi unor specificații date. Acest proces este esențial în diverse aplicații, cum ar fi pregătirea imaginilor pentru rețele neurale, ajustarea pentru afișare pe ecrane de diferite dimensiuni sau pregătirea pentru imprimare.
 
@@ -282,7 +282,7 @@ De asemenea, este posibil ca algoritmul de binarizare să determine valoarea opt
 
 unde \( w_1(t) \) și \( w_2(t) \) sunt ponderile relative pentru cele două clase date de numărul de pixeli din fiecare clasă, iar \( \sigma_1^2 \) și \( \sigma_2^2 \) sunt varianțele din fiecare clasă. Se dovedește că minimizarea varianței celor două clase în acest mod este echivalentă cu maximizarea varianței între cele două clase. Deoarece este necesară o căutare exhaustivă a spațiului posibil de praguri, acest proces nu este unul foarte rapid, dar este foarte eficient în determinarea pragului optim pentru separarea pixelilor în două clase distincte.
 
-Filtrul de binarizare prin prag de triunghi este o alta metodă eficientă pentru determinarea automată a pragului optim de binarizare a unei imagini. Această tehnică se bazează pe analiza histogramei imaginii și utilizarea unui algoritm geometric pentru a stabili punctul de prag. Procedura implică mai multe etape:
+Filtrul de binarizare prin metoda triunghi este o alta metodă eficientă pentru determinarea automată a pragului optim de binarizare a unei imagini. Această tehnică se bazează pe analiza histogramei imaginii și utilizarea unui algoritm geometric pentru a stabili punctul de prag. Procedura implică mai multe etape:
 
 Prima etapă constă în calcularea histogramei imaginii. Fiecare intensitate este contorizată pentru a obține frecvența de apariție a fiecărei valori de pixel. După obținerea histogramei, se calculează histograma cumulativă. Aceasta ajută la identificarea distribuției totale a intensităților pixelilor și este folosită pentru a trasa linia de referință necesară în algoritmul de binarizare.
 
@@ -290,9 +290,9 @@ Pentru a determina linia de referință, se identifică punctele minim și maxim
 
 Valoarea de intensitate care are cea mai mare distanță față de linia de referință este considerată pragul optim. Acest prag este folosit pentru a binariza imaginea inițială, separând pixelii în două clase: cei cu valori sub prag și cei cu valori peste prag.
 
-Algoritmul de binarizare prin prag de triunghi oferă o metodă robustă și automată pentru binarizarea imaginilor, fiind util în diverse aplicații de prelucrare a imaginilor, unde separarea precisă a obiectelor de fundal este esențială.
+Algoritmul de binarizare prin metoda triunghi oferă o metodă robustă și automată pentru binarizarea imaginilor, fiind util în diverse aplicații de prelucrare a imaginilor, unde separarea precisă a obiectelor de fundal este esențială.
 
-\section{Filtre Low-Pass}
+\section{Filtre trece-jos}
 Filtrele spațiale de netezire (denumite și de mediere) sunt utilizate pentru a reduce tranzițiile abrupte în intensitate. Deoarece zgomotul aleatoriu constă de obicei din tranziții abrupte în intensitate, o metodă evidentă a netezirii este reducerea zgomotului. Netezirea înainte de resampling-ul imaginii pentru a reduce aliasing-ul este, de asemenea, o practică comună.
 
 \begin{figure}[h!]
@@ -313,7 +313,7 @@ Filtrele spațiale de netezire (denumite și de mediere) sunt utilizate pentru a
 
 Netezirea este utilizată pentru a reduce detaliile nerelevante într-o imagine, unde „nerelevant” se referă la regiunile de pixeli care sunt mici în raport cu dimensiunea kernelului filtrului. O altă aplicație este netezirea contururilor false care rezultă din utilizarea unui număr insuficient de niveluri de intensitate într-o imagine. Filtrele de netezire sunt utilizate în combinație cu alte tehnici pentru îmbunătățirea imaginii, cum ar fi tehnicile de procesare a histogramelor și mascare unsharp.
 
-Cel mai simplu filtru low-pass separabil este filtrul de tip cutie, ale cărui coeficienți au aceeași valoare (de obicei 1). Numele „kernel cutie” provine dintr-un kernel de dimensiuni \(m \times n\) cu toți coeficienții egali. Normalizarea kernelului se face prin împărțirea fiecărui coeficient la suma valorilor coeficienților (adică \(1 / mn\) când toți coeficienții sunt 1).
+Cel mai simplu filtru trece-jos separabil este filtrul de tip cutie, ale cărui coeficienți au aceeași valoare (de obicei 1). Numele „kernel cutie” provine dintr-un kernel de dimensiuni \(m \times n\) cu toți coeficienții egali. Normalizarea kernelului se face prin împărțirea fiecărui coeficient la suma valorilor coeficienților (adică \(1 / mn\) când toți coeficienții sunt 1).
 
 Datorită simplității lor, filtrele de tip cutie sunt potrivite pentru experimentare rapidă și oferă de obicei rezultate de netezire acceptabile vizual. Cu toate acestea, filtrele de tip cutie au limitări care le fac alegeri mai puțin ideale în multe aplicații. Kernelurile Gaussian sunt utilizate frecvent datorită proprietăților lor utile și capacității de a netezi imaginile în mod eficient. Kernelurile Gaussian sunt simetrice circular (isotrope), ceea ce înseamnă că răspunsul lor este independent de orientare.
 
@@ -332,7 +332,7 @@ unde \(K\) este o constantă de normalizare, iar \(\sigma\) este deviația stand
 
 Rezultatul convoluției este deosebit de important în filtrare. De exemplu, filtrarea se poate face în etape succesive, iar același rezultat poate fi obținut printr-o singură etapă de filtrare cu un kernel compozit format ca și convoluție a kernelurilor individuale.
 
-\section{Filtre High-Pass}
+\section{Filtre trece-sus}
 Detectarea marginilor este un pas esențial în procesarea imaginilor, deoarece ne permite să identificăm schimbările în intensitate și să găsim contururile obiectelor din imagine. În general, detectarea marginilor implică utilizarea derivatelor de ordinul întâi sau al doilea pentru a determina schimbările în intensitatea pixelilor.
 
 \begin{figure}[h!]
@@ -352,7 +352,7 @@ Detectarea marginilor este un pas esențial în procesarea imaginilor, deoarece 
     \begin{minipage}{0.4\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/canny_edge_detection.jpg}
-        \caption{Operatorul Canny}
+        \caption{Filtru Laplace}
     \end{minipage}
 \end{figure}
 \FloatBarrier
@@ -650,9 +650,9 @@ Această transformare poate scala, roti, translata sau deforma o imagine, în fu
 
 Transformarea anterioară mută coordonatele pixelilor dintr-o imagine în locații noi. Pentru a finaliza procesul, trebuie să atribuim valori de intensitate pixelilor relocați. Această sarcină este realizată folosind \textit{interpolarea intensității}.
 
-Putem utiliza ecuația în două moduri de bază. Primul este \textit{cartografierea directă}, care constă în scanarea pixelilor imaginii de intrare și, la fiecare locație $(x, y)$, calcularea locației spațiale $(x', y')$ a pixelului corespunzător în imaginea de ieșire folosind direct ecuația.
+Putem utiliza ecuația în două moduri de bază. Primul este \textit{maparea directă}, care constă în scanarea pixelilor imaginii de intrare și, la fiecare locație $(x, y)$, calcularea locației spațiale $(x', y')$ a pixelului corespunzător în imaginea de ieșire folosind direct ecuația.
 
-Al doilea mod, numit \textit{cartografiere inversă}, scanează locațiile pixelilor de ieșire și, la fiecare locație $(x', y')$, calculează locația corespunzătoare în imaginea de intrare folosind $(x, y) = A^{-1}(x', y')$. Apoi interpolează printre cei mai apropiați pixeli de intrare pentru a determina intensitatea valorii pixelului de ieșire.
+Al doilea mod, numit \textit{mapare inversă}, scanează locațiile pixelilor de ieșire și, la fiecare locație $(x', y')$, calculează locația corespunzătoare în imaginea de intrare folosind $(x, y) = A^{-1}(x', y')$. Apoi interpolează printre cei mai apropiați pixeli de intrare pentru a determina intensitatea valorii pixelului de ieșire.
 
 \section{Transformata Hough}
 Adesea, trebuie să lucrăm în medii neorganizate în care avem doar o hartă de margini și nicio informație despre unde ar putea fi obiectele de interes. În astfel de situații, toți pixelii sunt candidați pentru legături și, astfel, trebuie să fie acceptați sau eliminați pe baza unor proprietăți globale definite. În această secțiune, dezvoltăm o abordare bazată pe faptul dacă seturile de pixeli se află pe curbe de o anumită formă. Odată detectate, aceste curbe formează marginile sau contururile regiunilor de interes.
@@ -873,7 +873,7 @@ Procesarea imaginilor este un aspect central al aplicației și este gestionată
 
 Modulul ImageProcessingUtils este integrat în proiectul UserInterface, contribuind direct la extragerea și furnizarea detaliilor legate de vehicule. Acesta include clasa Algorithm, care icapsulează toți algoritmii și funcțiile necesare pentru suportarea procesului de recunoaștere a textului. Funcțiile din această clasă sunt esențiale pentru interpretarea și transformarea imaginilor în date textuale utilizabile, facilitând astfel recunoașterea și verificarea numerelor de înmatriculare.
 
-Metodele din clasa Algorithm sunt folosite intr-o funcție externă clasei, care este apelată in clasa MainWindow, si care are ca scop chiar funcționalitatea principală a aplicației, returnarea texutului numerelor de inmatriculare. Această funcție este declarată ca fiind „friend” (prietenă) pentru a putea apela metodele clasei Algorithm și pentru a simplifica procesul de recunoaștere a textului din imagini fără a compromite incapsularea și securitatea datelor procesate.
+Metodele din clasa Algorithm sunt folosite intr-o funcție externă clasei, care este apelată in clasa MainWindow, și care are ca scop chiar funcționalitatea principală a aplicației, returnarea texutului numerelor de inmatriculare. Această funcție este declarată ca fiind „friend” (prietenă) pentru a putea apela metodele clasei Algorithm și pentru a simplifica procesul de recunoaștere a textului din imagini fără a compromite incapsularea și securitatea datelor procesate.
 
 De asemenea, există și proiectul separat de teste, situat în afara directorului sursă, dedicat verificării funcționalității modulului ImageProcessingUtils. Testele unitare din acest proiect sunt esențiale pentru asigurarea calității și fiabilității algoritmilor implementați în clasa Algorithm. Aceste teste se concentrează pe evaluarea fiecărei componente software pentru a garantat că recunoașterea numerelor de înmatriculare se efectuează corect și eficient.
 
@@ -1509,7 +1509,7 @@ Deși template-ul a fost redimensionat la înălțimea segmentării, din cauza u
     \end{aligned}
 \]
 
-Pentru a stabili si lățimea imaginii template, se va adăuga un padding similar cu cel anterior, calculat pe baza diferenței dintre lățimea imaginii sursă și lățimea imaginii template. La fel ca înainte, diferența se împarte la jumătate pentru a determina padding-ul care trebuie adăugat de fiecare parte a șablonului si se verifică dacă diferența este pară, astfel încât padding-ul să fie distribuit uniform:
+Pentru a stabili și lățimea imaginii template, se va adăuga un padding similar cu cel anterior, calculat pe baza diferenței dintre lățimea imaginii sursă și lățimea imaginii template. La fel ca înainte, diferența se împarte la jumătate pentru a determina padding-ul care trebuie adăugat de fiecare parte a șablonului și se verifică dacă diferența este pară, astfel încât padding-ul să fie distribuit uniform:
 \[
     \begin{aligned}
         firstPadding  & = \frac{Sursa.width - Template.width}{2},               \\
@@ -1519,7 +1519,7 @@ Pentru a stabili si lățimea imaginii template, se va adăuga un padding simila
     \end{aligned}
 \]
 
-Acum că cele două imagini sunt ajustate la aceeași dimensiune si cu litera "I" reprezentată central după adăugarea padding-ului, se realizează intersectarea celor două regiuni albe utilizând operația logică 'și'.
+Acum că cele două imagini sunt ajustate la aceeași dimensiune și cu litera "I" reprezentată central după adăugarea padding-ului, se realizează intersectarea celor două regiuni albe utilizând operația logică 'și'.
 
 \begin{figure}[h!]
     \centering
@@ -1541,9 +1541,7 @@ Scorul Dice poate fi calculat pe baza acestei intersecții, indicând cât de mu
 
 În situația în care nu a fost recunoscut textul integral al numărului de înmatriculare, acesta este catalogat drept "necunoscut".
 
-Pentru toate componentele descrise, s-au implementat teste in cadrul proiectului Tests. Pentru fiecare functie, s-a verificat comportamentul acesteia la imagini neinitializate, cu un numar diferit de canale decat cel asteptat, sau cu pixeli de un tip de date diferit. Pentru functiile matematice s-a testat posibilele impartiri la 0 si alte exceptii in genul acesta. In urma testelor facute, in fiecare functie s-au adaugat conditii de verificare a variabilelor de input, pentru a se putea trece testele si a nu exista posibile erori a aplicatiei.
-
-Pentru toate componentele descrise anterior, s-au dezvoltat un set de teste în cadrul proiectului „Tests” pentru a asigura robustețea și fiabilitatea aplicației. Aceste teste sunt concepute pentru a evalua comportamentul fiecărei funcții în condiții diverse, cum ar fi procesarea imaginilor neinițializate sau cu un număr diferit de canale față de cel așteptat, si manipularea pixelilor de un tip de date diferit. Aceasta abordare ajută în identificarea punctelor slabe ale procesării și asigură că modulele pot gestiona orice tip de intrare în mod corect.
+Pentru toate componentele descrise anterior, s-au dezvoltat un set de teste în cadrul proiectului „Tests” pentru a asigura robustețea și fiabilitatea aplicației. Aceste teste sunt concepute pentru a evalua comportamentul fiecărei funcții în condiții diverse, cum ar fi procesarea imaginilor neinițializate sau cu un număr diferit de canale față de cel așteptat, și manipularea pixelilor de un tip de date diferit. Aceasta abordare ajută în identificarea punctelor slabe ale procesării și asigură că modulele pot gestiona orice tip de intrare în mod corect.
 
 Pentru funcțiile matematice în special, s-au implementat teste pentru a preveni erori precum împărțirile la zero și alte situații excepționale care pot apărea în timpul execuției. Aceste teste sunt vitale pentru a evita crash-uri ale aplicației și pentru a asigura că output-ul matematic este întotdeauna valid și precis.
 
@@ -1724,30 +1722,280 @@ Structura pregătește proiectul Tests pentru realizarea unor teste unitare efic
 
 \chapter{Tehnologii folosite}
 \section{Limbajul de programare C++}
+C++ este un limbaj de programare de nivel înalt, cu scop general, creat de omul de știință danez Bjarne Stroustrup. Prima versiune a fost lansată în 1985 ca o extensie a limbajului de programare C și s-a extins semnificativ de-a lungul timpului. Începând cu 1997, C++ a inclus caracteristici orientate pe obiecte, generice și funcționale, pe lângă facilitățile pentru manipularea memoriei la nivel scăzut. C++ este aproape întotdeauna implementat ca un limbaj compilat, iar mulți furnizori oferă compilatoare.
+
+C++ a fost proiectat având în vedere programarea sistemelor și software-ului embedded, software-ul cu resurse limitate și sistemele mari, punând accent pe performanță, eficiență și flexibilitate de utilizare. C++ s-a dovedit util în multe alte contexte, cu puncte forte cheie în infrastructura software și aplicațiile cu resurse limitate, inclusiv aplicații desktop, jocuri video, servere (de exemplu, comerț electronic, căutare web sau baze de date) și aplicații critice pentru performanță (de exemplu, comutatoare telefonice sau sonde spațiale).
+
+În 1979 a început dezvoltarea unui limbaj numit "C with Classes", care a evoluat ulterior în C++. Motivația pentru acest nou limbaj a venit din necesitatea de a combina caracteristicile utile ale limbajului Simula cu viteza limbajului BCPL. Inițial, "C with Classes" a adăugat la compilatorul C caracteristici precum clase, clase derivate, tipizare puternică, înliniere și argumente implicite. În 1982, limbajul a fost redenumit "C++" și au fost introduse funcții virtuale, supraincarcare de nume de funcții și operatori, referințe, constante, alocare de memorie sigură, verificare îmbunătățită a tipurilor și comentarii pe o singură linie. În 1989, a apărut C++ 2.0, cu caracteristici noi precum moștenirea multiplă și clase abstracte. O evoluție majoră a avut loc în 2011 cu C++11, care a adus numeroase caracteristici noi și extinderea bibliotecii standard.
+
+De-a lungul vieții sale, dezvoltarea și evoluția C++ au fost ghidate de un set de principii:
+\begin{itemize}
+    \item Trebuie să fie condus de probleme reale și caracteristicile sale ar trebui să fie imediat utile în programele din lumea reală.
+    \item Fiecare caracteristică ar trebui să fie implementabilă (cu o modalitate destul de evidentă de a face acest lucru).
+    \item Programatorii ar trebui să fie liberi să își aleagă propriul stil de programare, iar acel stil ar trebui să fie pe deplin susținut de C++.
+    \item Permițând o caracteristică utilă este mai important decât prevenirea fiecărei posibile utilizări greșite a C++.
+    \item Ar trebui să ofere facilități pentru organizarea programelor în părți separate, bine definite și să ofere facilități pentru combinarea părților dezvoltate separat.
+    \item Nu ar trebui să existe încălcări implicite ale sistemului de tipuri (dar să permită încălcări explicite; adică, cele solicitate explicit de programator).
+    \item Tipurile create de utilizator trebuie să aibă același suport și performanță ca tipurile încorporate.
+    \item Caracteristicile neutilizate nu ar trebui să afecteze negativ executabilele create (de exemplu, în performanță mai scăzută).
+    \item Nu ar trebui să existe niciun limbaj sub C++ (cu excepția limbajului de asamblare).
+    \item C++ ar trebui să funcționeze alături de alte limbaje de programare existente, mai degrabă decât să încurajeze propriul său mediu de programare separat și incompatibil.
+    \item Dacă intenția programatorului este necunoscută, permiteți-i programatorului să o specifice furnizând control manual.
+\end{itemize}
+
+Limbajul C++ are două componente principale: o mapare directă a caracteristicilor hardware oferite în principal de subsetul C și abstracții fără costuri suplimentare bazate pe acele mapări. Stroustrup descrie C++ ca un "limbaj de programare de abstracție ușoară, proiectat pentru construirea și utilizarea de abstracții eficiente și elegante" și "oferind atât acces la hardware, cât și abstracție. Realizarea acestui lucru în mod eficient este ceea ce îl distinge de alte limbaje."
+
+C++ moștenește majoritatea sintaxei din C. Un program care respectă standardul C este de asemenea un program valid în C++. Ca și în C, C++ suportă patru tipuri de gestionare a memoriei: obiecte cu durată statică de stocare, obiecte cu durată de stocare pe fir, obiecte cu durată automată de stocare și obiecte cu durată dinamică de stocare.
+
+Obiectele cu durată statică de stocare sunt create înainte de a intra în \texttt{main()} și distruse în ordinea inversă creării după ce \texttt{main()} iese. Ordinea exactă a creării nu este specificată de standard pentru a permite implementărilor o anumită libertate în modul de organizare a implementării lor. Mai formal, obiectele de acest tip au o durată de viață care "trebuie să dureze pe durata programului".
+
+Variabilele cu durată de stocare pe fir sunt foarte similare cu obiectele cu durată statică de stocare. Principala diferență este că timpul de creare este imediat înainte de crearea firului și distrugerea se face după ce firul a fost unit.
+
+Cele mai comune tipuri de variabile în C++ sunt variabilele locale dintr-o funcție sau bloc și variabilele temporare. Caracteristica comună a variabilelor automate este că au o durată de viață limitată la domeniul variabilei. Ele sunt create și eventual inițializate în punctul de declarație și distruse în ordinea inversă a creării atunci când domeniul este părăsit. Aceasta este implementată prin alocare pe stivă.
+
+Obiectele cu durată dinamică de stocare au o durată de viață dinamică și pot fi create direct cu un apel la \texttt{new} și distruse explicit cu un apel la \texttt{delete}. C++ suportă de asemenea \texttt{malloc} și \texttt{free} din C, dar acestea nu sunt compatibile cu \texttt{new} și \texttt{delete}. Utilizarea \texttt{new} returnează o adresă a memoriei alocate. Ghidurile de bază C++ recomandă evitarea utilizării directe a \texttt{new} pentru crearea obiectelor dinamice în favoarea pointerilor inteligenți prin \texttt{make\_unique<T>} pentru proprietatea unică și \texttt{make\_shared<T>} pentru proprietatea referențiată multiplu, care au fost introduse în C++11.
+
+\section{Programarea orientată pe obiect}
+La baza programării orientate pe obiecte (POO) se află conceptul de clasă. O clasă reprezintă o colecție de câmpuri (date) și metode (funcții) care manipulează și utilizează aceste date. Metodele sunt cunoscute și sub denumirea de funcții membre ale clasei. În C++, o clasă poate fi considerat o versiune îmbunătățită a tipului struct din C.
+
+C++ introduce caracteristici de programare orientată pe obiecte în C. Oferă clase, care furnizează cele patru caracteristici comune în limbajele POO: abstractizare, încapsulare, moștenire și polimorfism. O caracteristică distinctivă a claselor C++ comparativ cu clasele din alte limbaje de programare este suportul pentru destructorii deterministici, care, la rândul lor, furnizează suport pentru conceptul de Achiziție a Resurselor este Inițializare (RAII).
+
+O clasă în C++ este un tip de date definit de utilizator, care poate conține atât date (variabile membre), cât și funcții (funcții membre). Clasele permit abstractizarea și organizarea datelor și comportamentului în structuri bine definite. O clasă este definită folosind cuvântul cheie \texttt{class} urmat de numele clasei și un bloc de definiții între acolade. Un obiect este o instanță a unei clase. Când o clasă este definită, nu se alocă memorie până când nu se creează un obiect al acelei clase. Obiectele sunt utilizate pentru a accesa datele și funcțiile membre ale unei clase. Însă când o clasă conține metode statice, aceasta nu necesită instanțiere, metodele putând fi apelate in mod direct.
+
+Principiile fundamentale ale programării orientate pe obiecte în C++ includ:
+\begin{itemize}
+    \item \textbf{Abstractizare}: Ascunderea detaliilor complexe și expunerea unei interfețe simple. O clasă definește o interfață publică prin care utilizatorii pot interacționa cu obiectele fără a cunoaște detaliile interne.
+    \item \textbf{Încapsulare}: Gruparea datelor și a funcțiilor care operează pe acele date într-o singură unitate (clasă). Încapsularea ajută la protejarea datelor prin ascunderea lor de accesul neautorizat și expunerea doar a funcțiilor necesare.
+    \item \textbf{Moștenire}: Permite unei clase (clasa derivată) să moștenească proprietățile și comportamentul unei alte clase (clasa de bază). Moștenirea promovează reutilizarea codului și stabilirea unor relații ierarhice între clase.
+    \item \textbf{Polimorfism}: Permite obiectelor de diferite clase să fie tratate ca obiecte ale unei clase comune de bază. Polimorfismul este realizat prin funcții virtuale, permițând implementări diferite să fie apelate printr-o interfață comună.
+\end{itemize}
+
+Constructorii sunt funcții membre speciale ale unei clase care sunt apelate automat atunci când un obiect al acelei clase este creat. Constructorii au același nume ca și clasa și nu au tip de retur. Ei sunt folosiți pentru a inițializa obiectele și pentru a aloca resursele necesare. Destructorii sunt funcții membre speciale care sunt apelate automat atunci când un obiect este distrus. Destructorii au același nume ca și clasa, dar precedate de un tildă (~) și nu au parametri. Ei sunt utilizați pentru a elibera resursele alocate de constructori.
+
+Funcțiile virtuale permit implementarea polimorfismului în C++. O funcție virtuală este declarată cu cuvântul cheie \texttt{virtual} și poate fi suprascrisă de clasele derivate. Apelurile la funcții virtuale sunt rezolvate la timpul de execuție pe baza tipului obiectului actual. O clasă abstractă este o clasă care conține cel puțin o funcție pur virtuală. O funcție pur virtuală este declarată cu = 0 și nu are o implementare în clasa de bază, dar obligă clasele derivate să aibă o implementare proprie a acesteia. Clasele abstracte nu pot fi instantiate și sunt folosite ca interfețe pentru alte clase.
+
+Clasele și obiectele în C++ permit programatorilor să creeze structuri de date complexe și să dezvolte aplicații robuste prin utilizarea principiilor programării orientate pe obiecte.
 
 \section{Dynamic-link library}
+O bibliotecă de legături dinamice (Dynamic-Link Librar, DLL) este o bibliotecă partajată în sistemul de operare Microsoft Windows sau OS/2. Un DLL poate conține cod executabil (funcții), date și resurse, în orice combinație. Un fișier DLL are adesea extensia de fișier .dll, dar dezvoltatorii pot alege să utilizeze o extensie de fișier care descrie conținutul fișierului respectiv, cum ar fi .ocx pentru controale ActiveX și .drv pentru un driver de dispozitiv vechi. Un DLL care conține doar resurse poate fi numit un DLL de resurse. Exemple includ biblioteca de iconițe, uneori având extensia .icl, și biblioteca de fonturi având extensiile .fon și .fot.
+
+Formatul fișierului unui DLL este același ca pentru un executabil (EXE), dar versiunile diferite de Windows folosesc formate diferite. Versiunile de Windows pe 32 și 64 de biți folosesc Portable Executable (PE), iar versiunile de Windows pe 16 biți folosesc New Executable (NE). Principala diferență între DLL și EXE este că un DLL nu poate fi rulat direct, deoarece sistemul de operare necesită un punct de intrare pentru a începe execuția. Windows furnizează un program utilitar (RUNDLL.EXE/RUNDLL/32.EXE) pentru a executa o funcție expusă de un DLL.
+
+Deși tehnologia DLL este esențială pentru arhitectura Windows, ea are dezavantaje. "DLL Hell" descrie comportamentul necorespunzător al unei aplicații atunci când este utilizată versiunea greșită a unui DLL. Alte limitări includ lipsa protecției pentru programul apelant dacă DLL-ul are un bug. Tehnologia DLL permite modificarea unei aplicații fără a necesita recompilarea sau re-legarea componentelor consumatoare. Un DLL poate fi înlocuit astfel încât, la următoarea rulare a aplicației, aceasta să utilizeze noua versiune a DLL-ului. În API-ul Windows, fișierele DLL sunt organizate în secțiuni, fiecare având propriul set de atribute.
+
+Ca și bibliotecile statice, bibliotecile de import pentru DLL-uri sunt notate prin extensia .lib. De exemplu, kernel32.dll este legat prin kernel32.lib. Încărcarea dinamică a unui DLL poate fi realizată la timpul de execuție folosind funcțiile LoadLibrary și GetProcAddress din API-ul Windows. Microsoft Visual C++ furnizează mai multe extensii pentru C++ standard, care permit specificarea funcțiilor ca importate sau exportate direct în codul C++. Aceste extensii folosesc atributul \_\_declspec înainte de declarația unei funcții. Funcțiile importate sau exportate pot fi listate și în secțiunea IMPORT sau EXPORT a fișierului DEF utilizat de proiect.
 
 \section{OpenCV}
+OpenCV (Open Source Computer Vision Library) este o bibliotecă de funcții de programare utilizate în principal pentru viziunea computerizată în timp real. Biblioteca este multiplatformă și licențiată ca software liber și open-source. Începând din 2011, OpenCV oferă accelerare GPU pentru operațiuni în timp real.
+
+Proiectul OpenCV a fost lansat oficial în 1999 ca o inițiativă de cercetare pentru a avansa aplicațiile CPU-intensive, parte a unei serii de proiecte care includ ray tracing în timp real și pereți de afișare 3D. Obiectivele inițiale ale proiectului au fost avansarea cercetării în domeniul viziunii prin furnizarea de cod optimizat și deschis pentru infrastructura de bază a viziunii, diseminarea cunoștințelor în domeniul viziunii prin furnizarea unei infrastructuri comune pe care dezvoltatorii să o poată folosi, și avansarea aplicațiilor comerciale bazate pe viziune prin furnizarea de cod optimizat pentru performanță, disponibil gratuit.
+
+OpenCV include și o bibliotecă de învățare automată statistică ce conține algoritmi precum:
+\begin{itemize}
+    \item \textbf{Boosting}
+    \item \textbf{Învățarea arborilor de decizie}
+    \item \textbf{Arbori de boosting gradient}
+    \item \textbf{Algoritmul de așteptare-maximizare}
+    \item \textbf{Algoritmul k-nearest neighbor}
+    \item \textbf{Clasificatorul Naive Bayes}
+    \item \textbf{Rețele neuronale artificiale}
+    \item \textbf{Pădurea aleatoare}
+    \item \textbf{Mașină vectorială de suport (SVM)}
+    \item \textbf{Rețele neuronale profunde (DNN)}
+\end{itemize}
+
+OpenCV este scris în limbajul de programare C++, la fel ca interfața sa principală, dar păstrează și o interfață mai veche, mai puțin cuprinzătoare, în C.  Toate dezvoltările și algoritmii noi apar în interfața C++. Există legături de limbaj în Python, Java și MATLAB/Octave. În versiunea 3.4, au fost lansate legături JavaScript pentru un subset selectat de funcții OpenCV, cunoscut sub numele de OpenCV.js, pentru a fi utilizate pe platformele web. Pentru construirea proiectelor se folosește CMake.
+
+Dacă biblioteca găsește Primitivii de Performanță Integrată ai Intel pe sistem, va utiliza aceste rutine optimizate proprietare pentru a se accelera. O interfață bazată pe CUDA pentru unitatea de procesare grafică (GPU) este în dezvoltare din septembrie 2010. O interfață GPU bazată pe OpenCL este în dezvoltare din octombrie 2012.
 
 \section{Tesseract OCR}
+Recunoașterea optică a caracterelor sau cititorul optic de caractere (OCR) este conversia electronică sau mecanică a imaginilor de text dactilografiat, scris de mână sau tipărit în text codificat digital, fie dintr-un document scanat, o fotografie a unui document, o fotografie de scenă (de exemplu, textul de pe semne și panouri publicitare într-o fotografie peisagistică) sau din textul subtitrat suprapus pe o imagine.
+
+Folosită pe scară largă ca metodă de introducere a datelor din înregistrările pe hârtie tipărită, fie documente de pașaport, facturi, extrase bancare, chitanțe computerizate, cărți de vizită, corespondență, date tipărite sau orice documentație adecvată, este o metodă comună de digitizare a textelor tipărite pentru a putea fi editate electronic, căutate, stocate mai compact, afișate online și utilizate în procesele mecanizate, cum ar fi calculul cognitiv, traducerea automată, text-to-speech (text extras) și extragerea datelor esențiale. OCR este un domeniu de cercetare în recunoașterea modelelor, inteligența artificială și viziunea computerizată.
+
+Recunoașterea optică are ca principale domenii:
+\begin{itemize}
+    \item \textbf{Recunoaștere optică a caracterelor (OCR):} țintește textul tipărit, un glif sau caracter la un moment dat.
+    \item \textbf{Recunoaștere optică a cuvintelor:} țintește textul tipărit, un cuvânt la un moment dat. De obicei, este denumit simplu "OCR".
+    \item \textbf{Recunoaștere inteligentă a caracterelor (ICR):} țintește textul scris de mână, printscript sau cursiv, un glif sau caracter la un moment dat, de obicei implicând învățarea automată.
+    \item \textbf{Recunoaștere inteligentă a cuvintelor (IWR):} țintește textul scris de mână, printscript sau cursiv, un cuvânt la un moment dat.
+\end{itemize}
+
+Software-ul OCR preprocesează adesea imaginile pentru a îmbunătăți șansele de recunoaștere cu succes. Tehnicile includ:
+\begin{itemize}
+    \item \textbf{Rectificare:} dacă documentul nu a fost aliniat corect la scanare, acesta poate necesita o înclinare câteva grade pentru a face liniile de text perfect orizontale sau verticale.
+    \item \textbf{Eliminarea zgomotelor:} îndepărtarea punctelor pozitive și negative, netezirea marginilor.
+    \item \textbf{Binarizare:} conversia unei imagini din color sau gri în alb-negru (denumită imagine binară deoarece există două culori).
+    \item \textbf{Eliminarea liniilor:} curățarea casetelor și liniilor non-glif.
+    \item \textbf{Analiza layout-ului:} identificarea coloanelor, paragrafelor, legendelor etc. ca blocuri distincte.
+    \item \textbf{Detectarea liniilor și cuvintelor:} stabilirea unei linii de bază pentru formele cuvintelor și caracterelor, separarea cuvintelor după necesitate.
+    \item \textbf{Recunoașterea scripturilor:} în documentele multilingve, scripturile pot schimba la nivel de cuvinte, astfel identificarea scriptului este necesară înainte de a invoca OCR-ul corect pentru scriptul specific.
+    \item \textbf{Izolarea caracterelor:} pentru OCR per-caracter, multiple caractere conectate din cauza artefactelor de imagine trebuie separate.
+    \item \textbf{Normalizarea:} raportului de aspect și a scalei.
+\end{itemize}
+
+Există două tipuri de bază de algoritmi OCR: potrivirea matricială, care implică compararea unei imagini cu un glif stocat pe bază de pixeli, cunoscută și sub numele de potrivire de pattern, recunoaștere de pattern sau corelare de imagini. Al doilea tip, extracția caracteristicilor, descompune glifurile în "caracteristici" precum linii, bucle închise, direcția liniilor și intersecțiile liniilor.
+
+Acuratețea OCR poate fi crescută dacă ieșirea este constrânsă de un lexicon, o listă de cuvinte care sunt permise să apară într-un document. Acest lucru poate fi problematic dacă documentul conține cuvinte care nu sunt în lexicon, cum ar fi numele proprii. Furnizorii principali de tehnologie OCR au început să ajusteze sistemele OCR pentru a se ocupa mai eficient de tipuri specifice de intrări. Această strategie este cunoscută sub numele de "OCR orientat pe aplicații" sau "OCR personalizat".
+
+Tesseract OCR este un motor de recunoaștere optică a caracterelor pentru diverse sisteme de operare. Acesta este modelul AI folosit în aplicație pentru citerea numerelor de înmatriculare, care a și fost antrenat pe baza font-ului DIN1451Mittelschrift folosit de numerele de înmatriculare românești.
+
+Motorul Tesseract este un software scris inițial în limbajul de programare C, care mai apoi a suferit o conversie în C++. De atunci, tot codul a fost convertit pentru a fi compilat cu un compilator C++. Versiunea 4 a adaugăt un motor OCR bazat pe LSTM și modele pentru multe limbi și scripturi suplimentare, aducând totalul la 116 limbi. De asemenea, 37 de scripturi sunt suportate. Este posibil, de exemplu, să recunoască text cu un mix de limbi europene occidentale și centrale folosind modelul pentru scriptul latin în care este scris.
+
+Până la versiunea 2 inclusiv, Tesseract putea accepta doar imagini TIFF de text simplu pe o singură coloană ca intrări. Aceste versiuni timpurii nu includeau analiza layout-ului, astfel încât introducerea textului pe mai multe coloane, imagini sau ecuații producea rezultate neclare. Începând cu versiunea 3.00, s-a suportat formatarea textului de ieșire, informațiile poziționale hOCR și analiza layout-ului paginii. Suportul pentru un număr de noi formate de imagine a fost adăugat folosind biblioteca Leptonica, bibliotecă dezvoltată pentru a oferi suport în procesarea și analiza imaginilor. Tesseract poate detecta, de asemenea, dacă textul este monospațiat sau proporțional spațiat.
+
+Versiunile inițiale puteau recunoaște doar textul în limba engleză, însă de la versiunea a doua s-au adăugat șase limbi occidentale suplimentare (franceză, italiană, germană, spaniolă, portugheză braziliană, olandeză). Versiunea 3 a extins semnificativ suportul pentru limbi pentru a include limbi ideografice (chineză și japoneză) și limbi citite de la dreapta la stânga (de exemplu, arabă, ebraică), precum și multe alte scripturi. Modelul poate fi antrenat să funcționeze în alte limbi și poate procesa text de la dreapta la stânga, cum ar fi arabă sau ebraică, multe scripturi indiene, precum și CJK destul de bine.
 
 \section{Qt}
+Qt este utilizat pentru dezvoltarea interfețelor grafice cu utilizatorul (GUI) și a aplicațiilor multi-platformă care rulează pe toate platformele desktop majore și pe platformele mobile sau embedded. Majoritatea programelor GUI create cu Qt au o interfață care pare nativă, în acest caz Qt fiind clasificat ca un toolkit de widget-uri. Pot fi dezvoltate și programe non-GUI, cum ar fi unelte de linie de comandă și console pentru servere. Un exemplu de astfel de program non-GUI care utilizează Qt este framework-ul web Cutelyst.
+
+Qt suportă diverse compilatoare C++, inclusiv GCC și Clang, precum și suitele Visual Studio. Suportă alte limbaje prin legături sau extensii, cum ar fi Python prin legăturile Python și PHP printr-o extensie pentru PHP5, și oferă suport extins pentru internaționalizare. Qt oferă și Qt Quick, care include un limbaj de scripting declarativ numit QML ce permite utilizarea JavaScript pentru a oferi logica. Cu Qt Quick, dezvoltarea rapidă a aplicațiilor pentru dispozitive mobile a devenit posibilă, în timp ce logica poate fi scrisă și în cod nativ pentru a obține cea mai bună performanță posibilă.
+
+Alte caracteristici includ accesul la baze de date SQL, parsarea XML, parsarea JSON, gestionarea firelor de execuție și suportul pentru rețea.
+
+Qt este construit pe baza acestor concepte cheie:
+\begin{itemize}
+    \item \textbf{Abstracție completă a GUI-ului:} Folosește API-urile native de stil ale diferitelor platforme pentru a interoga metrici și a desena majoritatea controalelor, reducând astfel discrepanțele între platforme.
+    \item \textbf{Semnale și sloturi:} Un construct de limbaj introdus în Qt pentru comunicarea între obiecte, facilitând implementarea pattern-ului observer și evitând codul redundant.
+    \item \textbf{Compilator de metaobiecte (moc):} Un instrument care interpretează anumite macro-uri din codul C++ ca adnotări și generează cod C++ suplimentar cu meta-informații despre clasele utilizate în program.
+    \item \textbf{Legături de limbaj:} Qt poate fi utilizat în diverse limbaje de programare, cum ar fi Python, JavaScript, C\# și Rust prin intermediul legăturilor de limbaj.
+\end{itemize}
+
+Framework-ul este alcătuit din mai multe module esențiale și module suplimentare:
+
+\begin{itemize}
+    \item \textbf{Qt Core:} Singurul modul obligatoriu al Qt, conține clase utilizate de alte module, inclusiv sistemul de meta-obiecte, concurența și threading, containere, sistemul de evenimente, plugin-uri și facilități de I/O.
+    \item \textbf{Qt GUI:} Modulul central GUI. În Qt 5, acest modul depinde acum de OpenGL.
+    \item \textbf{Qt Widgets:} Conține clase pentru aplicații GUI bazate pe widget-uri clasice.
+    \item \textbf{Qt QML:} Modul pentru limbajele QML și JavaScript.
+    \item \textbf{Qt Quick:} Modul pentru aplicații GUI scrise folosind QML2.
+    \item \textbf{Qt Network:} Strat de abstractizare a rețelei.
+    \item \textbf{Qt Multimedia:} Clase pentru funcționalități audio, video, radio și cameră.
+    \item \textbf{Qt SQL:} Conține clase pentru integrarea bazelor de date folosind SQL.
+    \item \textbf{Qt Test:} Clase pentru testarea unitară a aplicațiilor și bibliotecilor Qt.
+    \item \textbf{Qt Charts:} Oferă funcționalități și widget-uri pentru a crea grafice.
+    \item \textbf{Qt WebChannel:} Oferă acces la obiectele Qt pentru HTML/Js prin WebSockets.
+    \item \textbf{Qt WebSockets:} Oferă o implementare WebSocket.
+\end{itemize}
+
+Qt vine cu propriul set de unelte pentru a facilita dezvoltarea cross-platform, care poate fi altfel complicată din cauza diferitelor seturi de unelte de dezvoltare. Qt Creator este un IDE cross-platform pentru C++ și QML. Funcționalitatea de layout/design GUI a Qt Designer este integrată în IDE, deși Qt Designer poate fi încă pornit ca o unealtă independentă. În plus față de Qt Creator, Qt oferă qmake, o unealtă cross-platform de generare a scripturilor de construcție care automatizează generarea Makefile-urilor pentru proiectele de dezvoltare pe diferite platforme. Alte unelte disponibile în Qt includ constructorul de interfețe Qt Designer și browserul de ajutor Qt Assistant (ambele fiind încorporate în Qt Creator), unealta de traducere Qt Linguist, uic (compiler de interfață cu utilizatorul) și moc (Meta-Object Compiler).
 
 \section{CMake}
+În dezvoltarea de software, CMake este un instrument gratuit și open-source, disponibil pe mai multe platforme, utilizat pentru automatizarea, testarea, ambalarea și instalarea software-ului printr-o metodă independentă de compilator. Deși CMake nu este un sistem de compilare propriu-zis, acesta generează fișiere de compilare pentru alte sisteme de compilare.
 
-\section{Unit testing}
+Principalele caracteristici oferite de CMake sunt:
+\begin{itemize}
+    \item \textbf{Arbore de construcție separat:} Oferă posibilitatea de a plasa fișierele de ieșire ale compilatorului (cum ar fi fișierele obiect) într-un arbore de construcție care este situat în afara arborelui sursă. Aceasta permite multiple construcții din același arbore sursă și cross-compilare.
+    \item \textbf{Gestionarea dependențelor:} CMake păstrează evidența și recompilarea tuturor dependențelor upstream ale unui submodul dat dacă sursele acestuia sunt schimbate.
+    \item \textbf{Structură flexibilă a proiectului:} CMake poate localiza executabile, fișiere și biblioteci specificate de utilizator sau sistem-wide. Aceste locații sunt stocate într-o cache, care poate fi apoi personalizată înainte de generarea fișierelor de construcție țintă.
+    \item \textbf{Suport pentru configurarea IDE:} CMake poate genera fișiere de proiect pentru mai multe IDE-uri populare, cum ar fi Microsoft Visual Studio, Xcode și Eclipse CDT.
+    \item \textbf{Detectarea caracteristicilor compilatorului:} Permite specificarea caracteristicilor pe care compilatorul trebuie să le suporte pentru a compila programul sau biblioteca țintă.
+    \item \textbf{Sistem de pachete:} Deși CMake nu este un manager de pachete, oferă funcții de bază pentru instalarea binarelor și informațiilor de pachet declarate de scriptul CMakeLists.txt pentru a fi folosite de proiectele CMake consumatoare.
+\end{itemize}
+
+Construcția unui program sau a unei biblioteci cu CMake este un proces în două etape. Mai întâi, fișierele de construcție (de obicei scripturi) sunt create (generate) din fișierele de configurare (scripturi CMakeLists.txt) scrise în limbajul CMake. Apoi, uneltele native de construcție ale platformei sunt invocate pentru construcția efectivă a programelor. Fișierele de construcție sunt configurate în funcție de generatorul utilizat (de exemplu, Makefiles pentru make) și fișierele de toolchain asociate. Utilizatorii avansați pot crea și încorpora generatoare suplimentare de makefile pentru a susține nevoile specifice ale compilatorului și ale sistemului de operare.
+
+CMake are un limbaj de scripting relativ simplu, interpretat, imperativ. Suportă variabile, metode de manipulare a șirurilor, array-uri, declarații de funcții/macro-uri și includerea de module (import). Comenzile limbajului CMake sunt citite de cmake dintr-un fișier numit CMakeLists.txt. Acest fișier specifică fișierele sursă și parametrii de construcție, pe care CMake le va plasa în specificația de construcție a proiectului (cum ar fi un Makefile). CMake vine cu numeroase module .cmake și unelte care facilitează munca, cum ar fi găsirea dependențelor, testarea mediului toolchain și a executabilelor, pachetizarea versiunilor (modulul CPack și comanda cpack) și gestionarea dependențelor de proiecte externe. CPack este un sistem de pachetizare pentru distribuțiile software. Este strâns integrat cu CMake, dar poate funcționa și fără acesta. CPack poate fi folosit pentru a genera pachete RPM, deb și gzip pentru Linux, fișiere NSIS pentru Microsoft Windows și pachete pentru macOS.
+
+\section{Testarea unitară}
+Testarea unitară, cunoscută și ca testarea componentelor sau a modulelor, este o formă de testare a software-ului prin care codul sursă izolat este testat pentru a valida comportamentul așteptat.
+
+Principiul testării unitare, care presupune testarea separată a unor părți mai mici dintr-un sistem software mare, datează din primele zile ale ingineriei software. Unitatea implică, în general, o cantitate relativ mică de cod, cod care poate fi izolat de restul unei baze de coduri. În programarea procedurală, o unitate este de obicei o funcție sau un modul. În programarea orientată pe obiecte, o unitate este de obicei o metodă, un obiect sau o clasă.
+
+Testele unitare pot fi realizate manual sau prin execuție automată. Testele automate includ beneficii precum: rularea testelor frecvent, rularea testelor fără costuri de personal, testare consistentă și repetabilă. Testarea este adesea efectuată de programatorul care scrie și modifică codul testat și poate fi privită ca parte a procesului de scriere a codului.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/tests.jpg}
+    \caption{Rularea testelor implementate pentru metodele aplicației}
+\end{figure}
+\FloatBarrier
+
+În timpul dezvoltării, un programator poate scrie în teste criterii sau rezultate care sunt cunoscute ca fiind bune pentru a verifica corectitudinea unității. În timpul execuției testelor, cadrele de testare înregistrează testele care nu îndeplinesc niciun criteriu și le raportează într-un rezumat. Cea mai utilizată abordare este test - funcție - valoare așteptată. În ingineria software, un caz de testare este o specificație a intrărilor, condițiilor de execuție, procedurii de testare și rezultatelor așteptate care definesc un singur test ce trebuie executat pentru a atinge un obiectiv specific de testare a software-ului, cum ar fi exercitarea unei anumite căi de program sau verificarea conformității cu o cerință specifică. Cazurile de testare stau la baza testării metodice mai degrabă decât întâmplătoare.
+
+Testarea unitară este destinată să asigure că unitățile își îndeplinesc designul și se comportă așa cum este intenționat. Unul dintre obiectivele testării unitare este de a izola fiecare parte a programului și de a arăta că părțile individuale sunt corecte. Un test unitar furnizează un contract strict, scris, pe care trebuie să-l satisfacă bucata de cod. Testarea unitară, prin definiție, testează doar funcționalitatea unităților în sine. Prin urmare, nu va detecta erori de integrare sau erori la nivel de sistem mai larg.
+
+Utilizarea testelor unitare ca specificații de design are un avantaj semnificativ față de alte metode de design: documentația de design (testele unitare în sine) poate fi folosită pentru a verifica implementarea. Testele nu vor trece decât dacă dezvoltatorul implementează o soluție conform designului.
+
+Un cadru de testare automatizată oferă funcționalități pentru automatizarea execuției testelor și poate accelera scrierea și rularea testelor. Cadrele de testare sunt de obicei terțe și nu sunt distribuite cu un compilator sau mediu de dezvoltare integrat (IDE). Testele pot fi scrise fără a utiliza un cadru pentru a exercita codul testat utilizând aserțiuni, tratarea excepțiilor și alte mecanisme de control al fluxului pentru a verifica comportamentul și a raporta eșecul.
 
 \section{Doxygen}
+Doxygen este un generator de documentație și un instrument de analiză statică pentru arborii sursă ai software-ului. Atunci când este utilizat ca generator de documentație, Doxygen extrage informații din comentariile formate special din cadrul codului. Atunci când este utilizat pentru analiză, Doxygen folosește arborele său de parsare pentru a genera diagrame și grafice ale structurii codului. Doxygen poate realiza referințe încrucișate între documentație și cod, astfel încât cititorul unui document poate referi ușor codul efectiv.
+
+Limbajele de programare suportate de Doxygen includ C, C++, C\#, D, Fortran, IDL, Java, Objective-C, Perl, PHP, Python și VHDL. Alte limbaje pot fi suportate prin adăugarea de cod suplimentar. Are suport încorporat pentru a genera diagrame de moștenire pentru clasele C++. Pentru diagrame și grafice mai avansate, Doxygen poate folosi instrumentul "dot" de la Graphviz.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/doxygen.jpg}
+    \caption{Documentația Doxygen a aplicației}
+\end{figure}
+\FloatBarrier
+
+Sursele Doxygen sunt găzduite în prezent pe GitHub, sunt scrise în C++ și constau din aproximativ 300.000 de linii de cod sursă. Pentru analiza lexicală, instrumentul standard Lex (sau înlocuitorul său Flex) este rulat prin aproximativ 35.000 de linii de script lex. Instrumentul de parsare Yacc (sau înlocuitorul său Bison) este, de asemenea, utilizat, dar doar pentru sarcini minore, cea mai mare parte a analizei limbajului este realizată de codul C++ nativ. Procesul de construire se bazează pe CMake și implică, de asemenea, unele scripturi Python.
+
+Graphviz (abreviere pentru Graph Visualization Software) este un pachet de instrumente open-source pentru desenarea grafurilor (ca în noduri și muchii, nu ca în grafice de tip bară) specificate în scripturi de limbaj DOT având extensia de fișier "gv".
+
+De asemenea, oferă biblioteci pentru aplicațiile software care utilizează aceste instrumente. Graphviz include o varietate de instrumente precum dot pentru producerea desenelor grafice stratificate, neato și fdp pentru grafuri nedirecționate, sfdp pentru grafuri nedirecționate mari, twopi pentru layout-uri radiale, circo pentru layout-uri circulare, dotty pentru vizualizarea și editarea grafurilor, și lefty un widget programabil pentru interacțiunea cu grafurile. De asemenea, include utilitare pentru conversia între diferite formate de fișiere grafice, precum GML, GraphML și GXL. Graphviz este un software gratuit licențiat sub Eclipse Public License.
 
 \section{Visual Studio}
+Un mediu de dezvoltare integrat (IDE) este o aplicație software care oferă facilități complete pentru dezvoltarea software-ului. Un IDE constă, în mod normal, cel puțin dintr-un editor de cod sursă, unelte de automatizare a compilării și un depanator. Unele medii de dezvoltare integrat conțin chiar și un sistem de control al versiunilor sau diverse unelte pentru simplificarea construirii unei interfețe grafice pentru utilizator (GUI). Multe IDE-uri moderne au, de asemenea, un browser de clase, un browser de obiecte și o diagramă a ierarhiei claselor pentru utilizarea în dezvoltarea software-ului orientat pe obiecte.
+
+IDE-urile sunt proiectate pentru a maximiza productivitatea programatorilor prin oferirea de componente bine integrate cu interfețe de utilizator similare. Acestea prezintă un singur program în care se realizează toată dezvoltarea și oferă de obicei multe funcții pentru scrierea, modificarea, compilarea, implementarea și depanarea software-ului.
+
+Unul dintre obiectivele IDE-ului este reducerea configurației necesare pentru a combina mai multe unelte de dezvoltare. În schimb, oferă același set de capabilități ca o unitate coerentă. Reducerea timpului de configurare poate crește productivitatea dezvoltatorului. Integrarea strânsă a tuturor sarcinilor de dezvoltare are potențialul de a îmbunătăți productivitatea generală, dincolo de ajutorul oferit în sarcinile de configurare. De exemplu, codul poate fi analizat continuu în timp ce este editat, oferind feedback instantaneu atunci când sunt introduse erori de sintaxă, permițând astfel dezvoltatorilor să depaneze codul mult mai rapid și mai ușor cu un IDE.
+
+Printre funcționalitățile pricipale oferite de mediile de dezvolatare se numără:
+\begin{itemize}
+    \item Sublinierea sintaxei, evidențiind structurile, cuvintele cheie ale limbajului și erorile de sintaxă cu culori și efecte de font distincte vizual.
+    \item Completarea codului, menit să accelereze programarea. IDE-urile moderne au chiar și completare inteligentă a codului.
+    \item Suport pentru refactorizare automată.
+    \item Opțiunea de versionare a proiectelor prin care se poate interacționa cu depozitele de cod sursă.
+    \item Depanarea, folosind un depanator integrat, cu suport pentru setarea punctelor de întrerupere în editor și redarea vizuală a pașilor.
+\end{itemize}
+
+In dezvolatarea aplicației s-a folosit Visual Studio, care este un mediu de dezvoltare integrat dezvoltat de Microsoft. Acesta este utilizat pentru dezvoltarea programelor de calculator, inclusiv site-uri web, aplicații web, servicii web și aplicații mobile. Acesta utilizează platformele de dezvoltare software Microsoft, inclusiv Windows API, Windows Forms, Windows Presentation Foundation (WPF), Windows Store și Microsoft Silverlight. Poate produce atât cod nativ, cât și cod gestionat.
+
+Visual Studio include un editor de cod care suportă IntelliSense (componenta de completare a codului) precum și refactorizarea codului. Debugger-ul integrat funcționează atât ca un debugger la nivel de sursă, cât și ca un debugger la nivel de mașină. Alte instrumente integrate includ un profiler de cod, un designer pentru construirea aplicațiilor GUI, un designer web, un designer de clase și un designer de scheme de baze de date. Acceptă plug-in-uri care extind funcționalitatea la aproape orice nivel, inclusiv adăugarea de suport pentru sisteme de control al versiunilor (cum ar fi Subversion și Git) și adăugarea de noi seturi de instrumente precum editoare și designeri vizuali pentru limbaje de domeniu specific sau seturi de instrumente pentru alte aspecte ale ciclului de viață al dezvoltării software.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/visual_studio.jpg}
+    \caption{Visual Studio in modul de depanare}
+\end{figure}
+\FloatBarrier
+
+Visual Studio suportă 36 de limbaje de programare diferite și permite editorului de cod și debugger-ului să suporte (în diferite grade) aproape orice limbaj de programare, cu condiția să existe un serviciu specific limbajului respectiv. Limbajele incluse nativ sunt C, C++, C++/CLI, Visual Basic .NET, C\#, F\#, JavaScript, TypeScript, XML, XSLT, HTML și CSS. Suportul pentru alte limbaje precum Python, Ruby, Node.js și M, printre altele, este disponibil prin plug-in-uri. Java (și J\#) au fost suportate în trecut.
 
 \section{GitLab}
+Git este un sistem de control al versiunilor distribuit care urmărește versionarea fișierelor. Este adesea folosit pentru a controla codul sursă de către programatorii care dezvoltă software în mod colaborativ.
+
+Obiectivele de design ale Git includ viteza, integritatea datelor și suportul pentru fluxuri de lucru distribuite și non-lineare, cu mii de ramuri paralele care rulează pe calculatoare diferite.
+
+Git menține o copie locală a întregului depozit, cunoscut sub numele de repo, cu abilități de urmărire a istoricului și a versiunilor, independent de accesul la rețea sau un server central. Un repo este stocat pe fiecare computer într-un director standard cu fișiere suplimentare ascunse pentru a oferi capabilități de control al versiunilor. Git oferă funcții pentru sincronizarea schimbărilor între repo-uri care împărtășesc istoricul, copiate (clonate) unul de la celălalt. Pentru colaborare, Git suportă sincronizarea cu repo-uri pe mașini remote. Deși toate repo-urile (cu același istoric) sunt egale, dezvoltatorii folosesc adesea un server central pentru a găzdui un repo pentru a menține o copie integrată.
+
+In dezvolatarea aplicației s-a folosit GitLab, care este un pachet software DevOps care poate dezvolta, securiza și opera software. Proiectul software open-source a fost creat de dezvoltatorul ucrainean Dmytro Zaporozhets și dezvoltatorul olandez Sytse Sijbrandij. GitLab permite gestionarea eficientă a codului sursă și colaborarea între membrii echipei. Structura depozitului GitLab a proiectului poate fi observată în figura de mai jos.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/gitlab.jpg}
+    \caption{Repository}
+\end{figure}
+\FloatBarrier
+
+GitLab permite urmărirea detaliată a istoricului modificărilor într-un depozit. Imaginea prezintă un exemplu de istoric al commit-urilor pentru aplicatie. Acest istoric arată activitatea recentă și modificările importante aduse proiectului.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/commits.jpg}
+    \caption{Istoric commit-uri}
+\end{figure}
+\FloatBarrier
 
 \chapter{Concluzii și rezultate}
 \section{Direcții și dezvoltări viitoare}
 Pentru a asigura o alternativă eficientă în cazul unor erori ale sistemului principal de recunoaștere a numerelor de înmatriculare, se prevede implementarea unui sistem de backup bazat pe tickete cu coduri de bare. Această soluție va permite accesul vehiculelor în parcarea auto prin scanarea unui cod de bare generat la intrare, asigurând astfel continuitatea serviciului chiar și în condiții neprevazute a sistemului principal.
 
-De asemenea, se dorește dezvoltarea și configurarea unui model propriu de inteligență artificială, conceput special pentru a se adapta specificului și cerințelor sistemului de monitorizare a parcărilor. Acest model AI se vrea a fi dezvoltat utilizând tehnici de învățare automată și seturi de date extinse, pentru a îmbunătăți acuratețea și eficiența recunoașterii numerelor de înmatriculare. Procesul va include etape de antrenare si testare ale modelului, cu scopul de a optimiza performanța generală a sistemului.
+De asemenea, se dorește dezvoltarea și configurarea unui model propriu de inteligență artificială, conceput special pentru a se adapta specificului și cerințelor sistemului de monitorizare a parcărilor. Acest model AI se vrea a fi dezvoltat utilizând tehnici de învățare automată și seturi de date extinse, pentru a îmbunătăți acuratețea și eficiența recunoașterii numerelor de înmatriculare. Procesul va include etape de antrenare și testare ale modelului, cu scopul de a optimiza performanța generală a sistemului.
 
 Aceste doua functionalitati dovedesc inovarea continuă pentru astfel de sisteme de gestionare a accesului în parcările auto și aduc un plus de securitate, facilitând o gestionare mai flexibilă și adaptată nevoilor utilizatorilor.
 
@@ -1781,11 +2029,23 @@ Prin urmare, în urma implementării soluției descrise, s-a dezvoltat un sistem
 
 Experiența acumulată în utilizarea tehnologiilor avansate a contribuit la dezvoltarea profesională, oferind o bază solidă pentru proiectele viitoare și pentru adaptarea continuă la noutățile tehnologice.
 
-\bibliographystyle{plain}
+\bibliographystyle{plainurl}
 \bibliography{bibliography}
 \cite{1}
 \cite{2}
 \cite{3}
+\cite{4}
+\cite{5}
+\cite{6}
+\cite{7}
+\cite{8}
+\cite{9}
+\cite{10}
+\cite{11}
+\cite{12}
+\cite{13}
+\cite{14}
+\cite{15}
 
 \chapter{Anexă}
 \begin{longtable}{| m{0.6cm} | m{3cm} | m{3cm} | m{1.8cm} | m{1.8cm} | m{1.8cm} |}

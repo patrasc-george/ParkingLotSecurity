@@ -199,7 +199,7 @@ void MainWindow::setGraphicsViewProperties()
 
 std::string MainWindow::timeParked()
 {
-	std::vector<Vehicle>::reverse_iterator it;
+	std::vector<Vehicle>::reverse_iterator it = vehicles.rend();
 
 	if (vehicle.getLicensePlate() != "necunoscut")
 	{
@@ -207,13 +207,15 @@ std::string MainWindow::timeParked()
 			return vehicle.getLicensePlate() == auxVehicle.getLicensePlate();
 			});
 	}
-	else if (vehicle.getTicket())
+
+	if (it == vehicles.rend() && vehicle.getTicket())
 	{
 		it = std::find_if(vehicles.rbegin() + 1, vehicles.rend(), [&](const Vehicle& auxVehicle) {
 			return vehicle.getTicket() == auxVehicle.getTicket();
 			});
 	}
-	else
+
+	if (it == vehicles.rend())
 		return "00:00:00";
 
 	std::ostringstream timeStream;

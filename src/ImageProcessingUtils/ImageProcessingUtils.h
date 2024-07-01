@@ -268,8 +268,11 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @return A boolean value indicating the success of the sorting operation.
 	 * Returns true if lines are successfully categorized into all four groups (left, top, right, bottom); otherwise, returns false.
 	 */
+#ifdef _DEBUG
+	static bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, const cv::Mat& src);
+#else
 	static bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size);
-
+#endif
 	/**
 	 * @brief Calculates the intersection point of two line segments.
 	 * @details This function finds the point where two line segments intersect, using their linear equations derived from the segment endpoints.
@@ -419,8 +422,11 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param words Output array of vectors, each storing character bounding boxes for a separate word.
 	 * @param indexes Array of indexes used to determine word boundaries.
 	 */
+#ifdef _DEBUG
+	static void wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes, const cv::Mat src);
+#else
 	static void wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes);
-
+#endif
 	/**
 	 * @brief Returns a singleton instance of the Tesseract OCR engine initialized with specific settings.
 	 * @details Initializes the Tesseract OCR engine once with the "DIN1451Mittelschrift" font and LSTM engine only.

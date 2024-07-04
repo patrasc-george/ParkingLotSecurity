@@ -752,7 +752,6 @@ public:
 
 		slope = 0;
 		point = cv::Point(-1, -1);
-		direction = -1;
 		Algorithm::lineThroughPoint(line, slope, point, direction);
 		Assert::IsTrue(line == cv::Vec4f(0, 0, 0, 0));
 
@@ -1636,8 +1635,14 @@ public:
 		Algorithm::charsBBoxes(src, chars);
 		indexes = { 0, 2, 4 };
 		Algorithm::paddingChars(chars, paddedChars, 0.6);
+
+#ifdef _DEBUG
 		Algorithm::wordsSeparation(chars, words, indexes, src);
 		Algorithm::wordsSeparation(paddedChars, paddedWords, indexes, src);
+#else
+		Algorithm::wordsSeparation(chars, words, indexes);
+		Algorithm::wordsSeparation(paddedChars, paddedWords, indexes);
+#endif
 
 		Algorithm::readText(src, text, confidence, words, paddedWords);
 		Assert::IsTrue(text == "CT36NLA" && confidence > 0.95);

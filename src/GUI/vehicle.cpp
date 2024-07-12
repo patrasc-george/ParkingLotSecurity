@@ -25,14 +25,24 @@ std::string Vehicle::getTime() const
 	return time;
 }
 
-void Vehicle::setTimeParked(const std::string& stayedTime)
+void Vehicle::setTimeParked(const std::string& timeParked)
 {
-	this->timeParked = stayedTime;
+	this->timeParked = timeParked;
 }
 
 std::string Vehicle::getTimeParked() const
 {
 	return timeParked;
+}
+
+void Vehicle::setTotalAmount(const int& totalAmount)
+{
+	this->totalAmount = totalAmount;
+}
+
+int Vehicle::getTotalAmount() const
+{
+	return totalAmount;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)
@@ -42,10 +52,14 @@ std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)
 	os << vehicle.getTicket() << std::endl;
 	os << vehicle.getLicensePlate() << std::endl;
 	os << vehicle.getTime() << std::endl;
-	os << vehicle.getTimeParked() << std::endl;
 
 	if (!vehicle.getTimeParked().empty())
-		os << std::endl;
+	{
+		os << vehicle.getTimeParked() << std::endl;
+		os << vehicle.getTotalAmount() << std::endl;
+	}
+
+	os << std::endl;
 
 	return os;
 }

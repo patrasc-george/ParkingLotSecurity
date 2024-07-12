@@ -1,15 +1,16 @@
 ﻿#pragma once
 
 #include "vehicle.h"
+#include "statisticswindow.h"
 
 #include <fstream>
 #include <QMainWindow>
 #include <QListWidget>
 #include <QPushButton>
-
-class QGraphicsView;
-class QGraphicsScene;
-class QGraphicsPixmapItem;
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include <QLineEdit>
 
 class MainWindow : public QMainWindow
 {
@@ -43,6 +44,13 @@ private slots:
 	 */
 	void displayImage(QListWidgetItem* item);
 
+	void setNumberParkingLots(const QString& numberParkingLots);
+
+	void setFee(const QString& fee);
+
+	void search(const QString& text);
+
+	void showStatistics();
 private:
 	/**
 	 * @brief Sets up the user interface for the main window.
@@ -56,6 +64,12 @@ private:
 	 * @details Checks if "../../../database" exists and sets the database path accordingly; otherwise uses "database/".
 	 */
 	void isDevelopment();
+
+	void setupButtons();
+
+	void setupLayouts();
+
+	void centerWindow();
 
 	/**
 	 * @brief Loads vehicle data from the database file into the application.
@@ -77,12 +91,11 @@ private:
 	 */
 	void uploadVehicles();
 
-	/**
-	 * @brief Retrieves vehicle information from an uploaded image.
-	 * @details Processes the uploaded image to extract vehicle information using image processing and OCR techniques.
-	 * Updates the vehicles vector with the new vehicle data.
-	 */
-	void getVehicle();
+	void setNumberOccupiedParkingLots();
+
+	bool verifyCapacity();
+
+	bool getVehicle();
 
 	/**
 	 * @brief Clears all items from the graphics scene.
@@ -110,6 +123,10 @@ private:
 	 */
 	std::string timeParked();
 
+	int calculateTotalAmount(const std::string& time);
+
+	void updateStatistics();
+
 	/**
 	 * @brief Processes the most recently added vehicle, updating the UI accordingly.
 	 * @details Determines whether the vehicle is entering or exiting based on the pressed button.
@@ -123,13 +140,26 @@ private:
 	QGraphicsPixmapItem* pixmapItem;
 	QListWidget* entriesListWidget;
 	QListWidget* exitsListWidget;
+	QListWidget* historyLogListWidget;
 	QPushButton* enterButton;
 	QPushButton* exitButton;
+	QPushButton* statisticsButton;
+	QPushButton* pressedButton;
+	QLineEdit* parkingLotsEdit;
+	QLineEdit* occupiedParkingLotsEdit;
+	QLineEdit* feeEdit;
+	QLineEdit* historyLogEdit;
 	QString imagePath;
 	QImage image;
-	Vehicle vehicle;
+	Vehicle curentVehicle;
 	std::string databasePath;
 	std::string displayText;
 	std::vector<Vehicle> vehicles;
+	std::unordered_map<int, bool> vehiclesStatus;
+	std::vector<std::vector<int>> enterStatistics;
+	std::vector<std::vector<int>> exitStatistics;
 	std::ofstream writeFile;
+	int numberParkingLots = 100;
+	int numberOccupiedParkingLots = 0;
+	int fee = 1;
 };

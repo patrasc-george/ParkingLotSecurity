@@ -51,7 +51,7 @@ public:
 	 * @details Allows for recording the duration that the vehicle has been parked, aiding in time-based calculations or billing.
 	 * @param[in] stayedTime The time the vehicle stayed parked.
 	 */
-	void setTimeParked(const std::string& stayedTime);
+	void setTimeParked(const std::string& timeParked);
 
 	/**
 	 * @brief Retrieves the parked time of the vehicle.
@@ -59,6 +59,10 @@ public:
 	 * @return A string representing the parked time.
 	 */
 	std::string getTimeParked() const;
+
+	void setTotalAmount(const int& totalAmount);
+
+	int getTotalAmount() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle);
 
@@ -69,6 +73,7 @@ private:
 	std::string licensePlate;
 	std::string time;
 	std::string timeParked;
+	int totalAmount;
 };
 
 /**

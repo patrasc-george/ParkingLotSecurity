@@ -6,6 +6,9 @@
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
 #include <QLabel>
+#include <QScreen>
+#include <QGuiApplication>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -23,6 +26,35 @@ void MainWindow::setupUI()
 
 	isDevelopment();
 
+	setupButtons();
+	setupLayouts();
+	centerWindow();
+
+	connect(enterButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
+	connect(exitButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
+	connect(entriesListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
+	connect(exitsListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
+	connect(parkingLotsEdit, &QLineEdit::textChanged, this, &MainWindow::setNumberParkingLots);
+	connect(feeEdit, &QLineEdit::textChanged, this, &MainWindow::setFee);
+	connect(historyLogEdit, &QLineEdit::textChanged, this, &MainWindow::search);
+	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
+
+	writeFile = std::ofstream(databasePath + "vehicles.txt", std::ios::app);
+	uploadDataBase();
+	uploadVehicles();
+	setNumberOccupiedParkingLots();
+}
+
+void MainWindow::isDevelopment()
+{
+	if (std::filesystem::exists("../../../database"))
+		databasePath = "../../../database/";
+	else
+		databasePath = "database/";
+}
+
+void MainWindow::setupButtons()
+{
 	enterButton = new QPushButton(this);
 	std::string enterPath = databasePath + "enter.png";
 	QPixmap enterPixmap(enterPath.c_str());
@@ -37,22 +69,55 @@ void MainWindow::setupUI()
 	exitButton->setIconSize(exitPixmap.size() / 5);
 	exitButton->setFixedSize(exitPixmap.size() / 5);
 
+	statisticsButton = new QPushButton(this);
+	statisticsButton->setText("Statistics");
+	statisticsButton->setFixedSize(enterButton->size());
+}
+
+void MainWindow::setupLayouts()
+{
 	QHBoxLayout* buttonLayout = new QHBoxLayout();
 	buttonLayout->addWidget(enterButton, 0, Qt::AlignCenter);
 	buttonLayout->addWidget(exitButton, 0, Qt::AlignCenter);
-
-	setFixedSize(1300, 700);
+	buttonLayout->addWidget(statisticsButton, 0, Qt::AlignCenter);
 
 	entriesListWidget = new QListWidget(this);
-	exitsListWidget = new QListWidget(this);
-
 	QLabel* entriesLabel = new QLabel("Entries", this);
-	QLabel* exitsLabel = new QLabel("Exits", this);
-
 	entriesLabel->setAlignment(Qt::AlignCenter);
+
+	exitsListWidget = new QListWidget(this);
+	QLabel* exitsLabel = new QLabel("Exits", this);
 	exitsLabel->setAlignment(Qt::AlignCenter);
 
+	historyLogListWidget = new QListWidget(this);
+	QLabel* historyLogLabel = new QLabel("History Log", this);
+	historyLogLabel->setAlignment(Qt::AlignCenter);
+	historyLogEdit = new QLineEdit(this);
+
+	QLabel* parkingLotsLabel = new QLabel("Capacity:", this);
+	QLabel* feeLabel = new QLabel("Fee:", this);
+
+	occupiedParkingLotsEdit = new QLineEdit(this);
+	occupiedParkingLotsEdit->setReadOnly(true);
+
+	parkingLotsEdit = new QLineEdit(this);
+	parkingLotsEdit->setValidator(new QIntValidator(0, 1000000, this));
+	parkingLotsEdit->setText(QString::number(numberParkingLots));
+
+	feeEdit = new QLineEdit(this);
+	feeEdit->setValidator(new QIntValidator(0, 1000000, this));
+	feeEdit->setText(QString::number(fee));
+
+	QHBoxLayout* topLayout = new QHBoxLayout();
+	topLayout->addWidget(parkingLotsLabel);
+	topLayout->addWidget(occupiedParkingLotsEdit);
+	topLayout->addWidget(new QLabel("/", this));
+	topLayout->addWidget(parkingLotsEdit);
+	topLayout->addWidget(feeLabel);
+	topLayout->addWidget(feeEdit);
+
 	QVBoxLayout* leftLayout = new QVBoxLayout();
+	leftLayout->addLayout(topLayout);
 	leftLayout->addWidget(graphicsView);
 
 	QVBoxLayout* entriesLayout = new QVBoxLayout();
@@ -63,9 +128,15 @@ void MainWindow::setupUI()
 	exitsLayout->addWidget(exitsLabel);
 	exitsLayout->addWidget(exitsListWidget);
 
+	QVBoxLayout* historyLogLayout = new QVBoxLayout();
+	historyLogLayout->addWidget(historyLogLabel);
+	historyLogLayout->addWidget(historyLogEdit);
+	historyLogLayout->addWidget(historyLogListWidget);
+
 	QHBoxLayout* listsLayout = new QHBoxLayout();
 	listsLayout->addLayout(entriesLayout);
 	listsLayout->addLayout(exitsLayout);
+	listsLayout->addLayout(historyLogLayout);
 
 	QVBoxLayout* rightLayout = new QVBoxLayout();
 	rightLayout->addLayout(listsLayout);
@@ -73,36 +144,31 @@ void MainWindow::setupUI()
 
 	QHBoxLayout* mainLayout = new QHBoxLayout();
 	mainLayout->addLayout(leftLayout, 2);
-	mainLayout->addLayout(rightLayout, 1);
+	mainLayout->addLayout(rightLayout, 1.5);
 
 	QWidget* centralWidget = new QWidget(this);
 	centralWidget->setLayout(mainLayout);
 
 	setCentralWidget(centralWidget);
-
-	writeFile = std::ofstream(databasePath + "vehicles.txt", std::ios::app);
-
-	connect(enterButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
-	connect(exitButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
-	connect(entriesListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
-	connect(exitsListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
-
-	uploadDataBase();
-	uploadVehicles();
 }
 
-
-void MainWindow::isDevelopment()
+void MainWindow::centerWindow()
 {
-	if (std::filesystem::exists("../../../database"))
-		databasePath = "../../../database/";
-	else
-		databasePath = "database/";
+	setFixedSize(1400, 700);
+
+	QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
+	int x = (screenGeometry.width() - width()) / 2;
+	int y = (screenGeometry.height() - height()) / 2;
+
+	move(x, y);
 }
 
 void MainWindow::uploadDataBase()
 {
 	std::ifstream readFile(databasePath + "vehicles.txt");
+
+	enterStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
+	exitStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
 
 	std::vector<std::string> vehicleData;
 	std::string line;
@@ -110,12 +176,21 @@ void MainWindow::uploadDataBase()
 	{
 		if (line.empty())
 		{
-			vehicle = Vehicle(std::stoi(vehicleData[0]), vehicleData[1], std::stoi(vehicleData[2]), vehicleData[3], vehicleData[4]);
+			curentVehicle = Vehicle(std::stoi(vehicleData[0]), vehicleData[1], std::stoi(vehicleData[2]), vehicleData[3], vehicleData[4]);
+			QDateTime date = QDateTime::fromString(QString::fromStdString(vehicleData[4]), "dd-MM-yyyy HH:mm:ss");
+			int dayOfWeek = date.date().dayOfWeek();
+			int hour = date.time().hour();
 
-			if (vehicleData.size() == 6)
-				vehicle.setTimeParked(vehicleData[5]);
+			if (vehicleData.size() == 5)
+				enterStatistics[dayOfWeek - 1][hour]++;
+			else
+			{
+				curentVehicle.setTimeParked(vehicleData[5]);
+				curentVehicle.setTotalAmount(std::stoi(vehicleData[6]));
+				exitStatistics[dayOfWeek - 1][hour]++;
+			}
 
-			vehicles.push_back(vehicle);
+			vehicles.push_back(curentVehicle);
 			vehicleData.clear();
 		}
 		else
@@ -127,30 +202,64 @@ void MainWindow::uploadDataBase()
 
 void MainWindow::processUploadedVehicle()
 {
-	displayText = vehicle.getLicensePlate() + "\n" + vehicle.getTime();
+	displayText = curentVehicle.getLicensePlate() + "\n" + curentVehicle.getTime();
 
-	if (!vehicle.getTimeParked().empty())
-		displayText += '\n' + vehicle.getTimeParked();
+	if (!curentVehicle.getTimeParked().empty())
+		displayText += '\n' + curentVehicle.getTimeParked() + '\n' + std::to_string(curentVehicle.getTotalAmount()) + " RON";
 
 	QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
-	item->setData(Qt::UserRole, vehicle.getId());
+	item->setData(Qt::UserRole, curentVehicle.getId());
 
-	if (vehicle.getTimeParked().empty())
+	if (curentVehicle.getTimeParked().empty())
+	{
 		entriesListWidget->addItem(item);
+		vehiclesStatus[curentVehicle.getTicket()] = true;
+	}
 	else
+	{
 		exitsListWidget->addItem(item);
+		vehiclesStatus[curentVehicle.getTicket()] = false;
+	}
 }
 
 void MainWindow::uploadVehicles()
 {
-	for (const auto& uploadedVehicle : vehicles)
+	for (const auto& vehicle : vehicles)
 	{
-		vehicle = uploadedVehicle;
+		curentVehicle = vehicle;
 		processUploadedVehicle();
 	}
 }
 
-void MainWindow::getVehicle()
+void MainWindow::setNumberOccupiedParkingLots()
+{
+	for (const auto& vehicle : vehiclesStatus)
+	{
+		if (vehicle.second)
+			numberOccupiedParkingLots++;
+	}
+
+	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
+}
+
+bool MainWindow::verifyCapacity()
+{
+	if (pressedButton == enterButton && numberOccupiedParkingLots >= numberParkingLots)
+	{
+		QMessageBox::warning(this, "Parking Full", "All parking lots are occupied.");
+		return false;
+	}
+
+	if (pressedButton == exitButton && numberOccupiedParkingLots < 1)
+	{
+		QMessageBox::warning(this, "No Cars", "There are no cars in the parking lot.");
+		return false;
+	}
+
+	return true;
+}
+
+bool MainWindow::getVehicle()
 {
 	cv::Mat cvImage(image.height(), image.width(), CV_8UC4, const_cast<uchar*>(image.bits()), image.bytesPerLine());
 	std::string text = textFromImage(cvImage, cvImage);
@@ -163,12 +272,14 @@ void MainWindow::getVehicle()
 	if (firstPosition != std::string::npos && lastPosition != std::string::npos)
 		ticket = imagePath.mid(firstPosition + 1, lastPosition - firstPosition - 1).toInt();
 
-	imagePath = QString::fromStdString(databasePath) + QString::number(vehicles.size()) + ".jpg";
 	size_t plate = text.find('\n');
 	size_t time = text.find('\n', plate + 1);
 
-	vehicle = Vehicle(vehicles.size(), imagePath.toStdString(), ticket, text.substr(0, plate), text.substr(plate + 1, time - plate - 1));
-	vehicles.push_back(vehicle);
+	imagePath = QString::fromStdString(databasePath) + QString::number(vehicles.size()) + ".jpg";
+
+	curentVehicle = Vehicle(vehicles.size(), imagePath.toStdString(), ticket, text.substr(0, plate), text.substr(plate + 1, time - plate - 1));
+
+	return true;
 }
 
 void MainWindow::clearPreviousItems()
@@ -201,17 +312,17 @@ std::string MainWindow::timeParked()
 {
 	std::vector<Vehicle>::reverse_iterator it = vehicles.rend();
 
-	if (vehicle.getLicensePlate() != "necunoscut")
+	if (curentVehicle.getLicensePlate() != "necunoscut")
 	{
-		it = std::find_if(vehicles.rbegin() + 1, vehicles.rend(), [&](const Vehicle& auxVehicle) {
-			return vehicle.getLicensePlate() == auxVehicle.getLicensePlate();
+		it = std::find_if(vehicles.rbegin(), vehicles.rend(), [&](const Vehicle& auxVehicle) {
+			return curentVehicle.getLicensePlate() == auxVehicle.getLicensePlate();
 			});
 	}
 
-	if (it == vehicles.rend() && vehicle.getTicket())
+	if (it == vehicles.rend() && curentVehicle.getTicket())
 	{
-		it = std::find_if(vehicles.rbegin() + 1, vehicles.rend(), [&](const Vehicle& auxVehicle) {
-			return vehicle.getTicket() == auxVehicle.getTicket();
+		it = std::find_if(vehicles.rbegin(), vehicles.rend(), [&](const Vehicle& auxVehicle) {
+			return curentVehicle.getTicket() == auxVehicle.getTicket();
 			});
 	}
 
@@ -223,7 +334,7 @@ std::string MainWindow::timeParked()
 	{
 		std::tm tmIn = {}, tmOut = {};
 		std::istringstream inStr(it->getTime());
-		std::istringstream outStr(vehicle.getTime());
+		std::istringstream outStr(curentVehicle.getTime());
 		inStr >> std::get_time(&tmIn, "%d-%m-%Y %H:%M:%S");
 		outStr >> std::get_time(&tmOut, "%d-%m-%Y %H:%M:%S");
 		auto inTime = std::mktime(&tmIn);
@@ -246,33 +357,68 @@ std::string MainWindow::timeParked()
 	return timeStream.str();
 }
 
+int MainWindow::calculateTotalAmount(const std::string& time)
+{
+	int hours = std::stoi(time.substr(0, 2)) + 1;
+
+	return hours * fee;
+}
+
+void MainWindow::updateStatistics()
+{
+	QDateTime date = QDateTime::fromString(QString::fromStdString(curentVehicle.getTime()), "dd-MM-yyyy HH:mm:ss");
+	int dayOfWeek = date.date().dayOfWeek();
+	int hour = date.time().hour();
+
+	if (curentVehicle.getTimeParked() != "")
+		enterStatistics[dayOfWeek - 1][hour]++;
+	else
+		exitStatistics[dayOfWeek - 1][hour]++;
+}
+
 void MainWindow::processLastVehicle()
 {
-	QPushButton* button = qobject_cast<QPushButton*>(sender());
+	displayText = curentVehicle.getLicensePlate() + "\n" + curentVehicle.getTime();
 
-	displayText = vehicle.getLicensePlate() + "\n" + vehicle.getTime();
-
-	if (button == exitButton)
+	if (pressedButton == exitButton)
 	{
 		std::string time = timeParked();
-		displayText += '\n' + time;
-		vehicle.setTimeParked(time);
+		int totalAmount = calculateTotalAmount(time);
+
+		displayText += '\n' + time + '\n' + std::to_string(totalAmount) + " RON";
+
+		curentVehicle.setTimeParked(time);
+		curentVehicle.setTotalAmount(totalAmount);
+
+		numberOccupiedParkingLots--;
 	}
+	else
+		numberOccupiedParkingLots++;
+
+	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
 
 	QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
-	item->setData(Qt::UserRole, vehicle.getId());
+	item->setData(Qt::UserRole, curentVehicle.getId());
 
-	if (button == exitButton)
+	if (pressedButton == exitButton)
 		exitsListWidget->addItem(item);
 	else
 		entriesListWidget->addItem(item);
 
+	updateStatistics();
+	vehicles.push_back(curentVehicle);
+
 	image.save(imagePath);
-	writeFile << vehicle;
+	writeFile << curentVehicle;
 }
 
 void MainWindow::uploadImage()
 {
+	pressedButton = qobject_cast<QPushButton*>(sender());
+
+	if (!verifyCapacity())
+		return;
+
 	imagePath = QFileDialog::getOpenFileName(this, "Upload Image", "", "Images (*.png *.jpg *.bmp *.gif)");
 
 	if (imagePath.isEmpty())
@@ -280,7 +426,9 @@ void MainWindow::uploadImage()
 
 	image.load(imagePath);
 
-	getVehicle();
+	if (!getVehicle())
+		return;
+
 	clearPreviousItems();
 	createNewPixmapItem();
 	setGraphicsViewProperties();
@@ -296,6 +444,47 @@ void MainWindow::displayImage(QListWidgetItem* item)
 	clearPreviousItems();
 	createNewPixmapItem();
 	setGraphicsViewProperties();
+}
+
+void MainWindow::setNumberParkingLots(const QString& numberParkingLots)
+{
+	this->numberParkingLots = numberParkingLots.toInt();
+}
+
+void MainWindow::setFee(const QString& fee)
+{
+	this->fee = fee.toInt();
+}
+
+void MainWindow::search(const QString& text)
+{
+	historyLogListWidget->clear();
+
+	std::string str = text.toStdString();
+
+	if (str == "")
+		return;
+
+	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
+
+	for (const auto& vehicle : vehicles)
+		if (vehicle.getLicensePlate().find(str) != std::string::npos)
+		{
+			displayText = vehicle.getLicensePlate() + "\n" + vehicle.getTime();
+			if (vehicle.getTimeParked() != "")
+				displayText += '\n' + vehicle.getTimeParked() + '\n' + std::to_string(vehicle.getTotalAmount()) + " RON";
+
+			QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
+			item->setData(Qt::UserRole, curentVehicle.getId());
+			historyLogListWidget->addItem(item);
+		}
+}
+
+void MainWindow::showStatistics()
+{
+	StatisticsWindow* statisticsWindow = new StatisticsWindow(enterStatistics, exitStatistics);
+
+	statisticsWindow->show();
 }
 
 MainWindow::~MainWindow()

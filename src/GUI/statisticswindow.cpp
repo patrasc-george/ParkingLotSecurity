@@ -1,50 +1,40 @@
 ﻿#include "statisticswindow.h"
 
-#include <QVBoxLayout>
 #include <QHeaderView>
 #include <QBrush>
 #include <QLabel>
+#include <QComboBox>
 
-StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& enterStatistics, const std::vector<std::vector<int>>& exitStatistics, QWidget* parent) : QWidget(parent)
+StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupancyStatistics, const std::vector<std::vector<int>>& enterStatistics, const std::vector<std::vector<int>>& exitStatistics, QWidget* parent) :
+	occupancyStatistics(occupancyStatistics),
+	enterStatistics(enterStatistics),
+	exitStatistics(exitStatistics),
+	QWidget(parent)
 {
 	setWindowTitle("Statistics");
-	setFixedSize(1000, 500);
+	setFixedSize(1000, 300);
 
 	setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
 
-	enterTable = new QTableWidget(7, 24, this);
-	exitTable = new QTableWidget(7, 24, this);
+	layout = new QVBoxLayout(this);
+	table = new QTableWidget(7, 24, this);
 
-	normalizedEnterStatistics = std::vector<std::vector<double>>(7, std::vector<double>(24, 0));
-	normalizedExitStatistics = std::vector<std::vector<double>>(7, std::vector<double>(24, 0));
-
-	normalize(enterStatistics, normalizedEnterStatistics);
-	normalize(exitStatistics, normalizedExitStatistics);
-
-	QVBoxLayout* layout = new QVBoxLayout(this);
-
-	QLabel* enterLabel = new QLabel("Entries", this);
-	QLabel* exitLabel = new QLabel("Exits", this);
-
-	enterLabel->setAlignment(Qt::AlignCenter);
-	exitLabel->setAlignment(Qt::AlignCenter);
-
-	layout->addWidget(enterLabel);
-	setupTable(enterTable);
-	applyColor(enterTable, normalizedEnterStatistics);
-	layout->addWidget(enterTable);
-
-	layout->addWidget(exitLabel);
-	setupTable(exitTable);
-	applyColor(exitTable, normalizedExitStatistics);
-	layout->addWidget(exitTable);
+	QComboBox* chooseTable = new QComboBox(this);
+	chooseTable->addItem("Occupancy");
+	chooseTable->addItem("Entries");
+	chooseTable->addItem("Exits");
+	chooseTable->setFixedSize(100, 30);
 
 	QPushButton* closeButton = new QPushButton("Close", this);
 	closeButton->setFixedSize(100, 30);
 
-	layout->addWidget(closeButton);
-	layout->setAlignment(closeButton, Qt::AlignCenter);
+	layout->addWidget(chooseTable);
+	layout->addWidget(table);
+	layout->addWidget(closeButton, 0, Qt::AlignCenter);
 
+	setTable(0);
+
+	connect(chooseTable, &QComboBox::currentIndexChanged, this, &StatisticsWindow::setTable);
 	connect(closeButton, &QPushButton::clicked, this, &StatisticsWindow::close);
 
 	setLayout(layout);
@@ -117,14 +107,33 @@ void StatisticsWindow::applyColor(QTableWidget* table, const std::vector<std::ve
 			int blueValue = static_cast<int>(255 * value);
 			QColor color(255 - blueValue, 255 - blueValue, 255);
 
-			QTableWidgetItem* item = new QTableWidgetItem();
+			QTableWidgetItem* item = new QTableWidgetItem(QString::number(value, 'f', 2));
 			item->setBackground(QBrush(color));
 			item->setFlags(Qt::NoItemFlags);
+			item->setTextAlignment(Qt::AlignLeft | Qt::AlignBottom);
 			table->setItem(i + 1, j + 1, item);
 		}
 }
 
-//void StatisticsWindow::closeWindow()
-//{
-//    this->close();
-//}
+void StatisticsWindow::setTable(const int& choise)
+{
+	std::vector<std::vector<int>> statistics;
+	switch (choise)
+	{
+	case 0:
+		statistics = occupancyStatistics;
+		break;
+	case 1:
+		statistics = enterStatistics;
+		break;
+	case 2:
+		statistics = exitStatistics;
+		break;
+	}
+
+	std::vector<std::vector<double>> normalizedStatistics(7, std::vector<double>(24, 0.0));
+	normalize(statistics, normalizedStatistics);
+
+	setupTable(table);
+	applyColor(table, normalizedStatistics);
+}

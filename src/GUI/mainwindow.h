@@ -50,7 +50,12 @@ private slots:
 
 	void search(const QString& text);
 
+	void increaseOccupancyStatistics(const std::string& startTime, const std::string& entTime);
+
+	void calculateOccupancyStatistics();
+
 	void showStatistics();
+
 private:
 	/**
 	 * @brief Sets up the user interface for the main window.
@@ -115,6 +120,8 @@ private:
 	 */
 	void setGraphicsViewProperties();
 
+	Vehicle findVehicle(const bool& direction = true, int index = -1);
+
 	/**
 	 * @brief Calculates the time a vehicle has been parked.
 	 * @details Compares the current vehicle's entry or exit time with previous records to calculate the duration of parking.
@@ -156,6 +163,7 @@ private:
 	std::string displayText;
 	std::vector<Vehicle> vehicles;
 	std::unordered_map<int, bool> vehiclesStatus;
+	std::vector<std::vector<int>> occupancyStatistics;
 	std::vector<std::vector<int>> enterStatistics;
 	std::vector<std::vector<int>> exitStatistics;
 	std::ofstream writeFile;

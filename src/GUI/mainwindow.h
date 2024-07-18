@@ -11,6 +11,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QLineEdit>
+#include <QComboBox>
 
 class MainWindow : public QMainWindow
 {
@@ -55,6 +56,8 @@ private slots:
 	void calculateOccupancyStatistics();
 
 	void showStatistics();
+
+	void setLanguage(const int& choise);
 
 private:
 	/**
@@ -156,10 +159,12 @@ private:
 	QLineEdit* occupiedParkingLotsEdit;
 	QLineEdit* feeEdit;
 	QLineEdit* historyLogEdit;
+	QComboBox* chooseLanguage;
 	QString imagePath;
 	QImage image;
 	Vehicle curentVehicle;
 	std::string databasePath;
+	std::string translationsPath;
 	std::string displayText;
 	std::vector<Vehicle> vehicles;
 	std::unordered_map<int, bool> vehiclesStatus;

@@ -1,4 +1,5 @@
-:: Crează un director pentru build-uri
+lrelease translations/gui_eng.ts
+lrelease translations/gui_ro.ts
 mkdir build
 cd build
 cmake ../

@@ -7,8 +7,10 @@ add_definitions(-DUI_EXPORTS)
 set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC ON)
 
-# Set the root directory for the GUI
-# set(GUI_ROOT_DIR "${ROOT_DIR}/src/GUI")
+set(TRANSLATIONS 
+	"${CMAKE_SOURCE_DIR}/translations/gui_en.ts"
+    "${CMAKE_SOURCE_DIR}/translations/gui_ro.ts"
+	)
 
 # Collect every header and source in the directory
 file(GLOB HEADER_FILES "*.h")

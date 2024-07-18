@@ -9,6 +9,9 @@
 #include <QScreen>
 #include <QGuiApplication>
 #include <QMessageBox>
+#include <QTranslator>
+
+QTranslator translator;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -39,6 +42,7 @@ void MainWindow::setupUI()
 	connect(feeEdit, &QLineEdit::textChanged, this, &MainWindow::setFee);
 	connect(historyLogEdit, &QLineEdit::textChanged, this, &MainWindow::search);
 	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
+	connect(chooseLanguage, &QComboBox::currentIndexChanged, this, &MainWindow::setLanguage);
 
 	writeFile = std::ofstream(databasePath + "vehicles.txt", std::ios::app);
 	uploadDataBase();
@@ -49,33 +53,49 @@ void MainWindow::setupUI()
 void MainWindow::isDevelopment()
 {
 	if (std::filesystem::exists("../../../database"))
+	{
 		databasePath = "../../../database/";
+		translationsPath = "../../../translations/";
+	}
 	else
+	{
 		databasePath = "database/";
+		translationsPath = "translations/";
+	}
 }
 
 void MainWindow::setupButtons()
 {
 	enterButton = new QPushButton(this);
-	std::string enterPath = databasePath + "entrance.png";
+	std::string enterPath = databasePath + tr("entrance.png").toStdString();
 	QPixmap enterPixmap(enterPath.c_str());
 	enterButton->setIcon(QIcon(enterPixmap));
 	enterButton->setIconSize(enterPixmap.size() / 5);
 	enterButton->setFixedSize(enterPixmap.size() / 5);
 
 	exitButton = new QPushButton(this);
-	std::string exitPath = databasePath + "exit.png";
+	std::string exitPath = databasePath + tr("exit.png").toStdString();
 	QPixmap exitPixmap(exitPath.c_str());
 	exitButton->setIcon(QIcon(exitPixmap));
 	exitButton->setIconSize(exitPixmap.size() / 5);
 	exitButton->setFixedSize(exitPixmap.size() / 5);
 
 	statisticsButton = new QPushButton(this);
-	std::string statisticsPath = databasePath + "statistics.png";
+	std::string statisticsPath = databasePath + tr("statistics.png").toStdString();
 	QPixmap statisticsPixmap(statisticsPath.c_str());
 	statisticsButton->setIcon(QIcon(statisticsPixmap));
 	statisticsButton->setIconSize(statisticsPixmap.size() / 5);
 	statisticsButton->setFixedSize(statisticsPixmap.size() / 5);
+
+	chooseLanguage = new QComboBox(this);
+	chooseLanguage->addItem("ENG");
+	chooseLanguage->addItem("RO");
+	chooseLanguage->setFixedSize(60, 30);
+
+	if (translator.language() == "eng")
+		chooseLanguage->setCurrentIndex(0);
+	else if (translator.language() == "ro")
+		chooseLanguage->setCurrentIndex(1);
 }
 
 void MainWindow::setupLayouts()
@@ -86,21 +106,21 @@ void MainWindow::setupLayouts()
 	buttonLayout->addWidget(statisticsButton, 0, Qt::AlignCenter);
 
 	entriesListWidget = new QListWidget(this);
-	QLabel* entriesLabel = new QLabel("Entries", this);
+	QLabel* entriesLabel = new QLabel(tr("Entries"), this);
 	entriesLabel->setAlignment(Qt::AlignCenter);
 
 	exitsListWidget = new QListWidget(this);
-	QLabel* exitsLabel = new QLabel("Exits", this);
+	QLabel* exitsLabel = new QLabel(tr("Exits"), this);
 	exitsLabel->setAlignment(Qt::AlignCenter);
 
 	historyLogListWidget = new QListWidget(this);
-	QLabel* historyLogLabel = new QLabel("History Log", this);
+	QLabel* historyLogLabel = new QLabel(tr("History Log"), this);
 	historyLogLabel->setAlignment(Qt::AlignCenter);
 	historyLogEdit = new QLineEdit(this);
 
-	QLabel* parkingLotsLabel = new QLabel("Capacity:", this);
-	QLabel* occupiedParkingLotsLabel = new QLabel("Occupacity:", this);
-	QLabel* feeLabel = new QLabel("Fee:", this);
+	QLabel* parkingLotsLabel = new QLabel(tr("Capacity:"), this);
+	QLabel* occupiedParkingLotsLabel = new QLabel(tr("Occupancy:"), this);
+	QLabel* feeLabel = new QLabel(tr("Fee:"), this);
 
 	occupiedParkingLotsEdit = new QLineEdit(this);
 	occupiedParkingLotsEdit->setReadOnly(true);
@@ -114,6 +134,7 @@ void MainWindow::setupLayouts()
 	feeEdit->setText(QString::number(fee));
 
 	QHBoxLayout* topLayout = new QHBoxLayout();
+	topLayout->addWidget(chooseLanguage);
 	topLayout->addWidget(parkingLotsLabel);
 	topLayout->addWidget(parkingLotsEdit);
 	topLayout->addWidget(occupiedParkingLotsLabel);
@@ -251,13 +272,13 @@ bool MainWindow::verifyCapacity()
 {
 	if (pressedButton == enterButton && numberOccupiedParkingLots >= numberParkingLots)
 	{
-		QMessageBox::warning(this, "Parking Full", "All parking lots are occupied.");
+		QMessageBox::warning(this, tr("Parking Full"), tr("All parking lots are occupied."));
 		return false;
 	}
 
 	if (pressedButton == exitButton && numberOccupiedParkingLots < 1)
 	{
-		QMessageBox::warning(this, "No Cars", "There are no cars in the parking lot.");
+		QMessageBox::warning(this, tr("No Vehicles"), tr("There are no vehicles in the parking lot."));
 		return false;
 	}
 
@@ -559,6 +580,25 @@ void MainWindow::showStatistics()
 	StatisticsWindow* statisticsWindow = new StatisticsWindow(occupancyStatistics, enterStatistics, exitStatistics);
 
 	statisticsWindow->show();
+}
+
+void MainWindow::setLanguage(const int& choise)
+{
+	switch (choise)
+	{
+	case 0:
+		if (translator.load(QString::fromStdString(translationsPath + "gui_eng.qm")))
+			qApp->installTranslator(&translator);
+		break;
+	case 1:
+		if (translator.load(QString::fromStdString(translationsPath + "gui_ro.qm")))
+			qApp->installTranslator(&translator);
+		break;
+	}
+
+	this->close();
+	MainWindow* refresh = new MainWindow();
+	refresh->show();
 }
 
 MainWindow::~MainWindow()

@@ -49,3 +49,6 @@ file(GLOB DATABASE
 	"${CMAKE_SOURCE_DIR}/database/vehicles.txt"
 	)
 install(FILES ${DATABASE} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/database")
+
+file(GLOB TRANSLATIONS "${CMAKE_SOURCE_DIR}/translations/*.qm" )
+install(FILES ${TRANSLATIONS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/translations")

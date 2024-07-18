@@ -11,7 +11,7 @@ StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupanc
 	exitStatistics(exitStatistics),
 	QWidget(parent)
 {
-	setWindowTitle("Statistics");
+	setWindowTitle(tr("Statistics"));
 	setFixedSize(1000, 300);
 
 	setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
@@ -20,12 +20,12 @@ StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupanc
 	table = new QTableWidget(7, 24, this);
 
 	QComboBox* chooseTable = new QComboBox(this);
-	chooseTable->addItem("Occupancy");
-	chooseTable->addItem("Entries");
-	chooseTable->addItem("Exits");
+	chooseTable->addItem(tr("Occupancy"));
+	chooseTable->addItem(tr("Entries"));
+	chooseTable->addItem(tr("Exits"));
 	chooseTable->setFixedSize(100, 30);
 
-	QPushButton* closeButton = new QPushButton("Close", this);
+	QPushButton* closeButton = new QPushButton(tr("Close"), this);
 	closeButton->setFixedSize(100, 30);
 
 	layout->addWidget(chooseTable);
@@ -59,7 +59,7 @@ void StatisticsWindow::normalize(const std::vector<std::vector<int>>& statistics
 
 void StatisticsWindow::setupTable(QTableWidget* table)
 {
-	QStringList days = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+	QStringList days = { tr("Monday"), tr("Tuesday"), tr("Wednesday"), tr("Thursday"), tr("Friday"), tr("Saturday"), tr("Sunday") };
 	QStringList hours;
 	for (int i = 0; i < 24; ++i)
 		hours << QString::number(i);

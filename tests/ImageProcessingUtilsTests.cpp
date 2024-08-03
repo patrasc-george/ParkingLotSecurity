@@ -1709,17 +1709,17 @@ public:
 
 		text = textFromImage(src, dst);
 		plate = text.find('\n');
-		Assert::IsTrue(text.substr(0, plate) == "necunoscut");
+		Assert::IsTrue(text.substr(0, plate) == "N/A");
 
 		src = cv::Mat::zeros(100, 100, CV_8UC3);
 		text = textFromImage(src, dst);
 		plate = text.find('\n');
-		Assert::IsTrue(text.substr(0, plate) == "necunoscut");
+		Assert::IsTrue(text.substr(0, plate) == "N/A");
 
 		src = cv::Mat::zeros(100, 100, CV_16FC1);
 		text = textFromImage(src, dst);
 		plate = text.find('\n');
-		Assert::IsTrue(text.substr(0, plate) == "necunoscut");
+		Assert::IsTrue(text.substr(0, plate) == "N/A");
 	}
 
 	TEST_METHOD(textFromImage_ValidInput)

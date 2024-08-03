@@ -20,9 +20,9 @@ std::string Vehicle::getLicensePlate() const
 	return licensePlate;
 }
 
-std::string Vehicle::getTime() const
+std::string Vehicle::getDateTime() const
 {
-	return time;
+	return dateTime;
 }
 
 void Vehicle::setTimeParked(const std::string& timeParked)
@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)
 	os << vehicle.getPath() << std::endl;
 	os << vehicle.getTicket() << std::endl;
 	os << vehicle.getLicensePlate() << std::endl;
-	os << vehicle.getTime() << std::endl;
+	os << vehicle.getDateTime() << std::endl;
 
 	if (!vehicle.getTimeParked().empty())
 	{

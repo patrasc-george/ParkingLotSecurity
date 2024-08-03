@@ -526,9 +526,9 @@ class IMAGEPROCESSINGUTILS_API Algorithm
 	 * @param[in] text The text to be displayed along with the time and confidence score.
 	 * @param[in] confidence The confidence score associated with the text, formatted as part of the display text.
 	 */
-	static void drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const std::string& text, const float& confidence);
+	static void drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& dateTime, const std::string& text, const float& confidence);
 
-	friend std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);
+	friend std::string IMAGEPROCESSINGUTILS_API textFromImage(const std::string& imagePath, const std::string& savePath);
 
 	friend class AlgorithmTests;
 };
@@ -545,4 +545,4 @@ class IMAGEPROCESSINGUTILS_API Algorithm
  * @param[out] dst The destination image, which is a copy of the source annotated with recognized text and other relevant information.
  * @return A string containing the recognized text and the time of extraction.
  */
-std::string IMAGEPROCESSINGUTILS_API textFromImage(const cv::Mat& src, cv::Mat& dst);
+std::string IMAGEPROCESSINGUTILS_API textFromImage(const std::string& imagePath, const std::string& savePath);

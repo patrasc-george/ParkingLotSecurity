@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "vehicle.h"
+#include "vehiclemanager.h"
 #include "statisticswindow.h"
 
 #include <fstream>
@@ -25,12 +25,6 @@ public:
 	 */
 	MainWindow(QWidget* parent = nullptr);
 
-	/**
-	 * @brief Destroys the MainWindow object.
-	 * @details Ensures that resources are released properly, including closing any open file streams.
-	 */
-	~MainWindow();
-
 private slots:
 	/**
 	 * @brief Handles the uploading of an image for processing.
@@ -49,11 +43,9 @@ private slots:
 
 	void setFee(const QString& fee);
 
-	void search(const QString& text);
+	void search(QString text);
 
-	void increaseOccupancyStatistics(const std::string& startTime, const std::string& entTime);
-
-	void calculateOccupancyStatistics();
+	void updateOccupancyStatistics(const std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
 
 	void showStatistics();
 
@@ -79,6 +71,8 @@ private:
 
 	void centerWindow();
 
+	void updateStatistics(const std::string& dateTime, const bool& statistics);
+
 	/**
 	 * @brief Loads vehicle data from the database file into the application.
 	 * @details Reads vehicle information from a text file and stores it in the application's memory.
@@ -86,24 +80,7 @@ private:
 	 */
 	void uploadDataBase();
 
-	/**
-	 * @brief Processes and displays the information of an uploaded vehicle.
-	 * @details Adds the uploaded vehicle's information to the appropriate list widget (entries or exits)
-	 * based on whether the vehicle has a parked time recorded.
-	 */
-	void processUploadedVehicle();
-
-	/**
-	 * @brief Processes each uploaded vehicle stored in memory.
-	 * @details Iterates through the vector of vehicles loaded from the database and calls processUploadedVehicle for each one to display their information in the UI.
-	 */
-	void uploadVehicles();
-
-	void setNumberOccupiedParkingLots();
-
 	bool verifyCapacity();
-
-	bool getVehicle();
 
 	/**
 	 * @brief Clears all items from the graphics scene.
@@ -123,20 +100,6 @@ private:
 	 */
 	void setGraphicsViewProperties();
 
-	Vehicle findVehicle(const bool& direction = true, int index = -1);
-
-	/**
-	 * @brief Calculates the time a vehicle has been parked.
-	 * @details Compares the current vehicle's entry or exit time with previous records to calculate the duration of parking.
-	 * Formats and returns this duration as a string.
-	 * @return A string representing the parked duration in the format HH:MM:SS.
-	 */
-	std::string timeParked();
-
-	int calculateTotalAmount(const std::string& time);
-
-	void updateStatistics();
-
 	/**
 	 * @brief Processes the most recently added vehicle, updating the UI accordingly.
 	 * @details Determines whether the vehicle is entering or exiting based on the pressed button.
@@ -154,24 +117,16 @@ private:
 	QPushButton* enterButton;
 	QPushButton* exitButton;
 	QPushButton* statisticsButton;
-	QPushButton* pressedButton;
 	QLineEdit* parkingLotsEdit;
 	QLineEdit* occupiedParkingLotsEdit;
 	QLineEdit* feeEdit;
 	QLineEdit* historyLogEdit;
 	QComboBox* chooseLanguage;
-	QString imagePath;
 	QImage image;
-	Vehicle curentVehicle;
-	std::string databasePath;
+	VehicleManager vehicleManager;
+	std::string dataBasePath;
 	std::string translationsPath;
-	std::string displayText;
-	std::vector<Vehicle> vehicles;
-	std::unordered_map<int, bool> vehiclesStatus;
-	std::vector<std::vector<int>> occupancyStatistics;
-	std::vector<std::vector<int>> enterStatistics;
-	std::vector<std::vector<int>> exitStatistics;
-	std::ofstream writeFile;
+	bool pressedButton;
 	int numberParkingLots = 100;
 	int numberOccupiedParkingLots = 0;
 	int fee = 1;

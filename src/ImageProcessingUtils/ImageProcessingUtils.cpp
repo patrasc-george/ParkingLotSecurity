@@ -1352,7 +1352,7 @@ bool Algorithm::readText(const cv::Mat& src, std::string& text, float& confidenc
 	return true;
 }
 
-void Algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const std::string& text, const float& confidence)
+void Algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& dateTime, const std::string& text, const float& confidence)
 {
 	if (text.empty() || confidence < 0)
 		return;
@@ -1369,14 +1369,14 @@ void Algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const
 	std::stringstream ss;
 	ss << std::put_time(std::localtime(&toTimeT), "%d-%m-%Y %X");
 
-	time = ss.str();
+	dateTime = ss.str();
 
 	if (dst.empty())
 		return;
 
 	std::ostringstream stream;
 	stream << std::fixed << std::setprecision(2) << confidence;
-	std::string displayText = time + " / " + text + " / " + "Score: " + stream.str();
+	std::string displayText = dateTime + " / " + text + " / " + "Score: " + stream.str();
 
 	cv::putText(dst, displayText, cv::Point(10, dst.rows - 30), cv::FONT_HERSHEY_SIMPLEX, 4, cv::Scalar(0, 0, 0), 18, cv::LINE_AA);
 	cv::putText(dst, displayText, cv::Point(10, dst.rows - 30), cv::FONT_HERSHEY_SIMPLEX, 4, cv::Scalar(255, 255, 255), 9, cv::LINE_AA);
@@ -1392,17 +1392,19 @@ void Algorithm::drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& time, const
 	cv::rectangle(dst, roi, cv::Scalar(0, 255, 0), 5);
 }
 
-std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
+std::string textFromImage(const std::string& srcPath, const std::string& dstPath)
 {
-	std::string time;
+	cv::Mat src, dst;
+	std::string dateTime;
 	std::string plate;
 	float confidence = 0;
 
+	src = cv::imread(srcPath, cv::IMREAD_COLOR);
 	if (src.empty() || (src.type() != CV_8UC4 && src.type() != CV_8UC3))
 	{
-		plate = "necunoscut";
-		Algorithm::drawBBoxes(cv::Mat(), cv::Rect(), time, plate, confidence);
-		return plate + "\n" + time;
+		plate = "N/A";
+		Algorithm::drawBBoxes(cv::Mat(), cv::Rect(), dateTime, plate, confidence);
+		return plate + "\n" + dateTime;
 	}
 
 	cv::Mat bgrSrc;
@@ -1411,7 +1413,7 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 	else
 		bgrSrc = src.clone();
 
-	cv::Mat bgrDst = bgrSrc.clone();
+	dst = bgrSrc.clone();
 
 	cv::resize(bgrSrc, bgrSrc, cv::Size(bgrSrc.cols / 2, bgrSrc.rows / 2));
 
@@ -1535,11 +1537,11 @@ std::string textFromImage(const cv::Mat& src, cv::Mat& dst)
 	}
 
 	if (plate.empty())
-		plate = "necunoscut";
+		plate = "N/A";
 
-	Algorithm::drawBBoxes(bgrDst, roiConnectedComponent, time, plate, confidence);
+	Algorithm::drawBBoxes(dst, roiConnectedComponent, dateTime, plate, confidence);
 
-	cv::cvtColor(bgrDst, dst, cv::COLOR_BGR2RGB);
+	cv::imwrite(dstPath, dst);
 
-	return plate + "\n" + time;
+	return plate + "\n" + dateTime;
 }

@@ -28,21 +28,19 @@ file(
 add_library(${PROJECT_NAME} STATIC ${GUI_FILES})
 
 # Add dependencies
-add_dependencies(${PROJECT_NAME} ImageProcessingUtils)
+add_dependencies(${PROJECT_NAME} VehicleManager)
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC
-    "${CMAKE_SOURCE_DIR}/src/ImageProcessingUtils"
+    "${CMAKE_SOURCE_DIR}/src/VehicleManager"
     "${CMAKE_SOURCE_DIR}/src/GUI"
-    ${OpenCV_INCLUDE_DIRS}
 	)
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}
-    ImageProcessingUtils
+    VehicleManager
     Qt6::Widgets 
     Qt6::Core
-    ${OpenCV_LIBS}
 	)
 
 # Link to the runtime output directory

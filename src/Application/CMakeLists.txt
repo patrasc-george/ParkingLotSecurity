@@ -10,26 +10,13 @@ add_executable(${PROJECT_NAME} WIN32 ${HEADER_FILES} ${SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "ParkingLotsSecurityCamera")
 
 # Add dependencies to libraries from other subprojects
-add_dependencies(${PROJECT_NAME}
-    ImageProcessingUtils
-    UserInterface
-	)
+add_dependencies(${PROJECT_NAME} UserInterface)
 
 # Allow headers to be included in main.cpp
-target_include_directories(${PROJECT_NAME} PUBLIC
-    "${CMAKE_SOURCE_DIR}/src/ImageProcessingUtils"
-    "${CMAKE_SOURCE_DIR}/src/GUI"
-    ${OpenCV_INCLUDE_DIRS}
-	)
+target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/src/GUI")
 
 # Link to the required libraries
-target_link_libraries(${PROJECT_NAME}
-    ImageProcessingUtils
-    UserInterface
-    Qt6::Core
-    Qt6::Widgets
-	${OpenCV_LIBS}
-	)
+target_link_libraries(${PROJECT_NAME} UserInterface)
 
 # Link to the runtime output directory
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -49,6 +36,8 @@ file(GLOB DATABASE
 	"${CMAKE_SOURCE_DIR}/database/vehicles.txt"
 	)
 install(FILES ${DATABASE} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/database")
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/DeliveryPack/database/vehicles")
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/DeliveryPack/database/qr")
 
 file(GLOB TRANSLATIONS "${CMAKE_SOURCE_DIR}/translations/*.qm" )
 install(FILES ${TRANSLATIONS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/translations")

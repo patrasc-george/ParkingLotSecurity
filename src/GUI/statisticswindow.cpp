@@ -5,9 +5,9 @@
 #include <QLabel>
 #include <QComboBox>
 
-StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupancyStatistics, const std::vector<std::vector<int>>& enterStatistics, const std::vector<std::vector<int>>& exitStatistics, QWidget* parent) :
+StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupancyStatistics, const std::vector<std::vector<int>>& entriesStatistics, const std::vector<std::vector<int>>& exitStatistics, QWidget* parent) :
 	occupancyStatistics(occupancyStatistics),
-	enterStatistics(enterStatistics),
+	entriesStatistics(entriesStatistics),
 	exitStatistics(exitStatistics),
 	QWidget(parent)
 {
@@ -124,7 +124,7 @@ void StatisticsWindow::setTable(const int& choise)
 		statistics = occupancyStatistics;
 		break;
 	case 1:
-		statistics = enterStatistics;
+		statistics = entriesStatistics;
 		break;
 	case 2:
 		statistics = exitStatistics;

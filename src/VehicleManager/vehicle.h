@@ -7,8 +7,8 @@ class Vehicle
 public:
 	Vehicle() = default;
 
-	Vehicle(const int& id, const std::string& path, const int& ticket, const std::string& licensePlate, const std::string& time)
-		: id(id), path(path), ticket(ticket), licensePlate(licensePlate), time(time) {}
+	Vehicle(const int& id, const std::string& path, const int& ticket, const std::string& licensePlate, const std::string& dateTime)
+		: id(id), path(path), ticket(ticket), licensePlate(licensePlate), dateTime(dateTime) {}
 
 public:
 	/**
@@ -44,7 +44,14 @@ public:
 	 * @details This could represent the time the vehicle was parked, entered a certain location, or any other significant timestamp.
 	 * @return A string representing the time.
 	 */
-	std::string getTime() const;
+	std::string getDateTime() const;
+
+	/**
+	* @brief Retrieves the parked time of the vehicle.
+	* @details Useful for audits, billing, or simply tracking how long a vehicle has been parked.
+	* @return A string representing the parked time.
+	*/
+	std::string getTimeParked() const;
 
 	/**
 	 * @brief Sets the parked time for the vehicle.
@@ -53,16 +60,9 @@ public:
 	 */
 	void setTimeParked(const std::string& timeParked);
 
-	/**
-	 * @brief Retrieves the parked time of the vehicle.
-	 * @details Useful for audits, billing, or simply tracking how long a vehicle has been parked.
-	 * @return A string representing the parked time.
-	 */
-	std::string getTimeParked() const;
+	int getTotalAmount() const;
 
 	void setTotalAmount(const int& totalAmount);
-
-	int getTotalAmount() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle);
 
@@ -71,7 +71,7 @@ private:
 	std::string path;
 	int ticket;
 	std::string licensePlate;
-	std::string time;
+	std::string dateTime;
 	std::string timeParked;
 	int totalAmount;
 };

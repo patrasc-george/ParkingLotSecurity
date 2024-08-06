@@ -19,14 +19,16 @@ class VEHICLEMANAGER_API VehicleManager
 public:
 	VehicleManager() = default;
 
+	~VehicleManager();
+
 public:
-	void uploadDataBase(const std::string& dataBasePath, std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes);
+	void uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes);
 
 	void uploadVehicles(std::unordered_map<int, std::string>& entriesList, std::unordered_map<int, std::string>& exitsList);
 
 	void setNumberOccupiedParkingLots(int& numberOccupiedParkingLots);
 
-	void getVehicle(const std::string& imagePath, std::string& savePath, const std::string& dataBasePath);
+	void getVehicle(const std::string& imagePath, std::string& savePath);
 
 	Vehicle findVehicle(const bool& direction = true, int index = -1);
 
@@ -34,13 +36,15 @@ public:
 
 	int calculateTotalAmount(const std::string& time, const int& fee);
 
-	void processLastVehicle(int& id, std::string& dateTime, std::string& displayText, int& numberOccupiedParkingLots, const int& fee, const bool& pressedButton);
+	bool processLastVehicle(int& id, std::string& dateTime, std::string& displayText, const int& fee, const bool& pressedButton, const std::string& QRPath = "");
 
 	void search(std::string text, std::unordered_map<int, std::string>& historyLogList);
 
 	void calculateOccupancyStatistics(std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
 
 public:
+	void setDataBasePath(const std::string& dataBasePath);
+
 	std::string getImagePath(const int& id) const;
 
 	void increaseOccupancyStatistics(const int& day, const int& hour);
@@ -55,13 +59,12 @@ public:
 
 	std::vector<std::vector<int>> getExitStatistics() const;
 
-	~VehicleManager();
-
 private:
-	std::string databasePath;
+	std::string dataBasePath;
 	std::ofstream writeFile;
 	Vehicle curentVehicle;
 	std::vector<Vehicle> vehicles;
+	QRCode qr;
 	std::vector<std::vector<int>> occupancyStatistics;
 	std::vector<std::vector<int>> entranceStatistics;
 	std::vector<std::vector<int>> exitStatistics;

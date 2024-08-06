@@ -1703,20 +1703,10 @@ public:
 
 	TEST_METHOD(textFromImage_InvalidInput)
 	{
-		cv::Mat src, dst;
+		std::string src, dst;
 		std::string text;
 		size_t plate;
 
-		text = textFromImage(src, dst);
-		plate = text.find('\n');
-		Assert::IsTrue(text.substr(0, plate) == "N/A");
-
-		src = cv::Mat::zeros(100, 100, CV_8UC3);
-		text = textFromImage(src, dst);
-		plate = text.find('\n');
-		Assert::IsTrue(text.substr(0, plate) == "N/A");
-
-		src = cv::Mat::zeros(100, 100, CV_16FC1);
 		text = textFromImage(src, dst);
 		plate = text.find('\n');
 		Assert::IsTrue(text.substr(0, plate) == "N/A");
@@ -1724,10 +1714,10 @@ public:
 
 	TEST_METHOD(textFromImage_ValidInput)
 	{
-		cv::Mat src, dst;
+		std::string src, dst;
 		std::string text;
 
-		src = cv::imread(absolutePath("10_d1.jpg"));
+		src = absolutePath("10_d1.jpg");
 		text = textFromImage(src, dst);
 		size_t plate = text.find('\n');
 		Assert::IsTrue(text.substr(0, plate) == "CT36NLA");

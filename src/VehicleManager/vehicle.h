@@ -32,12 +32,16 @@ public:
 	 */
 	int getTicket() const;
 
+	void setTicket(const int& ticket);
+
 	/**
 	 * @brief Retrieves the license plate of the vehicle.
 	 * @details The license plate number is crucial for vehicle identification and is often used in logging, tracking, and regulatory compliance.
 	 * @return A string representing the license plate.
 	 */
 	std::string getLicensePlate() const;
+
+	void setLicensePlate(const std::string& licensePlate);
 
 	/**
 	 * @brief Retrieves the time associated with the vehicle.

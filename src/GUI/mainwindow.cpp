@@ -1,5 +1,5 @@
 ﻿#include "mainwindow.h"
-#include "qrencode.h"
+#include "uploadqrwindow.h"
 
 #include <QFileDialog>
 #include <QVBoxLayout>
@@ -44,6 +44,7 @@ void MainWindow::setupUI()
 	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
 	connect(chooseLanguage, &QComboBox::currentIndexChanged, this, &MainWindow::setLanguage);
 
+	vehicleManager.setDataBasePath(dataBasePath);
 	uploadDataBase();
 }
 
@@ -202,7 +203,7 @@ void MainWindow::uploadDataBase()
 {
 	std::vector<std::string> entranceDateTimes;
 	std::vector<std::string> exitDateTimes;
-	vehicleManager.uploadDataBase(dataBasePath, entranceDateTimes, exitDateTimes);
+	vehicleManager.uploadDataBase(entranceDateTimes, exitDateTimes);
 	for (const auto& dateTime : entranceDateTimes)
 		updateStatistics(dateTime, false);
 	for (const auto& dateTime : exitDateTimes)
@@ -271,37 +272,37 @@ void MainWindow::setGraphicsViewProperties()
 	graphicsView->fitInView(imageRect, Qt::KeepAspectRatio);
 }
 
-QImage qrCodeToQImage(const QRcode* qrcode, int scale) {
-	int size = qrcode->width;
-	QImage qrImage(size, size, QImage::Format_Mono);
-
-	// Populăm imaginea cu datele QR
-	for (int y = 0; y < size; ++y) {
-		for (int x = 0; x < size; ++x) {
-			unsigned char bit = qrcode->data[y * size + x];
-			qrImage.setPixel(x, y, (bit & 1) ? Qt::black : Qt::white);
-		}
-	}
-
-	// Scalare imagine pentru a fi mai mare
-	QImage scaledImage = qrImage.scaled(size * scale, size * scale, Qt::KeepAspectRatio, Qt::FastTransformation);
-	return scaledImage;
-}
-
-void MainWindow::processLastVehicle()
+void MainWindow::processLastVehicle(const QString& QRPath)
 {
 	int id;
 	std::string dateTime;
 	std::string displayText;
-	vehicleManager.processLastVehicle(id, dateTime, displayText, numberOccupiedParkingLots, fee, pressedButton);
+
+	if (!QRPath.isEmpty())
+		vehicleManager.processLastVehicle(id, dateTime, displayText, fee, pressedButton, QRPath.toStdString());
+	else if (!vehicleManager.processLastVehicle(id, dateTime, displayText, fee, pressedButton))
+	{
+		UploadQRWindow* uploadQRWindow = new UploadQRWindow(enterButton->size(), this);
+		connect(uploadQRWindow, &UploadQRWindow::getQRPath, this, &MainWindow::processLastVehicle);
+
+		QEventLoop loop;
+		connect(uploadQRWindow, &UploadQRWindow::getQRPath, &loop, &QEventLoop::quit);
+		uploadQRWindow->show();
+		loop.exec();
+
+		return;
+	}
 
 	updateStatistics(dateTime, pressedButton);
 
+	if (pressedButton)
+		numberOccupiedParkingLots--;
+	else
+		numberOccupiedParkingLots++;
 	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
 
 	QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
 	item->setData(Qt::UserRole, id);
-
 	if (pressedButton)
 		exitsListWidget->addItem(item);
 	else
@@ -324,13 +325,13 @@ void MainWindow::uploadImage()
 		return;
 
 	std::string savePath;
-	vehicleManager.getVehicle(imagePath.toStdString(), savePath, dataBasePath);
+	vehicleManager.getVehicle(imagePath.toStdString(), savePath);
 	image = QImage(QString::fromStdString(savePath));
 
+	processLastVehicle();
 	clearPreviousItems();
 	createNewPixmapItem();
 	setGraphicsViewProperties();
-	processLastVehicle();
 }
 
 void MainWindow::displayImage(QListWidgetItem* item)

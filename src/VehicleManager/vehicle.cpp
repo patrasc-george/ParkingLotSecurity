@@ -15,9 +15,19 @@ int Vehicle::getTicket() const
 	return ticket;
 }
 
+void Vehicle::setTicket(const int& ticket)
+{
+	this->ticket = ticket;
+}
+
 std::string Vehicle::getLicensePlate() const
 {
 	return licensePlate;
+}
+
+void Vehicle::setLicensePlate(const std::string& licensePlate)
+{
+	this->licensePlate = licensePlate;
 }
 
 std::string Vehicle::getDateTime() const

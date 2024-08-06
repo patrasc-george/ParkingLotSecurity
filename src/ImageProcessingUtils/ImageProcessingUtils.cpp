@@ -1541,7 +1541,8 @@ std::string textFromImage(const std::string& srcPath, const std::string& dstPath
 
 	Algorithm::drawBBoxes(dst, roiConnectedComponent, dateTime, plate, confidence);
 
-	cv::imwrite(dstPath, dst);
+	if (!dstPath.empty())
+		cv::imwrite(dstPath, dst);
 
 	return plate + "\n" + dateTime;
 }

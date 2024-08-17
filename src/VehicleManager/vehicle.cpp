@@ -10,16 +10,6 @@ std::string Vehicle::getPath() const
 	return path;
 }
 
-std::string Vehicle::getTicket() const
-{
-	return ticket;
-}
-
-void Vehicle::setTicket(const std::string& ticket)
-{
-	this->ticket = ticket;
-}
-
 std::string Vehicle::getLicensePlate() const
 {
 	return licensePlate;
@@ -35,9 +25,14 @@ std::string Vehicle::getDateTime() const
 	return dateTime;
 }
 
-void Vehicle::setTimeParked(const std::string& timeParked)
+std::string Vehicle::getTicket() const
 {
-	this->timeParked = timeParked;
+	return ticket;
+}
+
+void Vehicle::setTicket(const std::string& ticket)
+{
+	this->ticket = ticket;
 }
 
 std::string Vehicle::getTimeParked() const
@@ -45,14 +40,29 @@ std::string Vehicle::getTimeParked() const
 	return timeParked;
 }
 
-void Vehicle::setTotalAmount(const int& totalAmount)
+void Vehicle::setTimeParked(const std::string& timeParked)
 {
-	this->totalAmount = totalAmount;
+	this->timeParked = timeParked;
 }
 
 int Vehicle::getTotalAmount() const
 {
 	return totalAmount;
+}
+
+void Vehicle::setTotalAmount(const int& totalAmount)
+{
+	this->totalAmount = totalAmount;
+}
+
+bool Vehicle::getIsPaid()
+{
+	return isPaid;
+}
+
+void Vehicle::setIsPaid()
+{
+	this->isPaid = true;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)

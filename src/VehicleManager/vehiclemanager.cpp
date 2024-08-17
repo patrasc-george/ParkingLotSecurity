@@ -131,6 +131,9 @@ std::string VehicleManager::timeParked()
 {
 	Vehicle auxVehicle = findVehicle();
 
+	if (!auxVehicle.getIsPaid())
+		return "unpaid";
+
 	if (auxVehicle.getLicensePlate().empty())
 	{
 		if (curentVehicle.getTicket().empty())
@@ -180,7 +183,7 @@ int VehicleManager::calculateTotalAmount(const std::string& time, const int& fee
 	return hours * fee + fee;
 }
 
-bool VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::string& displayText, const int& fee, const bool& pressedButton, const std::string& QRPath)
+int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::string& displayText, const int& fee, const bool& pressedButton, const std::string& QRPath)
 {
 	id = curentVehicle.getId();
 	dateTime = curentVehicle.getDateTime();
@@ -203,8 +206,11 @@ bool VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::str
 			displayText = curentVehicle.getLicensePlate() + displayText.substr(rest);
 		}
 
+		if (time == "unpaid")
+			return 1;
+
 		if (time.empty())
-			return false;
+			return 2;
 
 		int totalAmount = calculateTotalAmount(time, fee);
 
@@ -222,7 +228,7 @@ bool VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::str
 	vehicles.push_back(curentVehicle);
 	writeFile << curentVehicle;
 
-	return true;
+	return 0;
 }
 
 void VehicleManager::search(std::string text, std::unordered_map<int, std::string>& historyLogList)
@@ -268,9 +274,38 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 		}
 }
 
-void VehicleManager::pay(const std::string& licensePlate)
+bool VehicleManager::pay(const std::string& licensePlate, const bool& isTicket)
 {
-	std::cout << "S a platit " << licensePlate << std::endl;
+	curentVehicle = Vehicle();
+
+	Vehicle auxVehicle;
+
+	if (isTicket)
+	{
+		std::string ticket = qr.decodeQR(licensePlate);
+		curentVehicle.setTicket(ticket);
+	}
+	else
+		curentVehicle.setLicensePlate(licensePlate);
+
+	auxVehicle = findVehicle();
+
+	if (!isTicket && auxVehicle.getTimeParked() != "")
+		return false;
+
+	for (int i = vehicles.size() - 1; i >= 0; i--)
+		if (auxVehicle.getTicket() == vehicles[i].getTicket())
+		{
+			vehicles[i].setIsPaid();
+			return true;
+		}
+
+	return false;
+}
+
+std::string VehicleManager::getDataBasePath() const
+{
+	return dataBasePath;
 }
 
 void VehicleManager::setDataBasePath(const std::string& dataBasePath)

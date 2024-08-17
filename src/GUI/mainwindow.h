@@ -34,13 +34,6 @@ private slots:
 	void uploadImage();
 
 	/**
-	 * @brief Processes the most recently added vehicle, updating the UI accordingly.
-	 * @details Determines whether the vehicle is entering or exiting based on the pressed button.
-	 * Updates the vehicle's parked time if exiting and displays the vehicle's information in the appropriate list widget.
-	 */
-	void processLastVehicle(const QString& QRPath = "");
-
-	/**
 	 * @brief Displays the selected vehicle's image in the graphics view.
 	 * @details Based on the user's selection in the list widget, finds and displays the corresponding vehicle image in the graphics scene.
 	 * @param item The list widget item that was clicked, containing the vehicle's ID as user data.
@@ -89,6 +82,15 @@ private:
 	void uploadDataBase();
 
 	bool verifyCapacity();
+
+	bool checkResult(const int& result);
+
+	/**
+	* @brief Processes the most recently added vehicle, updating the UI accordingly.
+	* @details Determines whether the vehicle is entering or exiting based on the pressed button.
+	* Updates the vehicle's parked time if exiting and displays the vehicle's information in the appropriate list widget.
+	*/
+	void processLastVehicle(const QString& QRPath = "");
 
 	/**
 	 * @brief Clears all items from the graphics scene.

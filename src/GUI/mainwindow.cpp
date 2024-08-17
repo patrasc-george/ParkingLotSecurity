@@ -248,6 +248,53 @@ bool MainWindow::verifyCapacity()
 	return true;
 }
 
+bool MainWindow::checkResult(const int& result)
+{
+	switch (result)
+	{
+	case 0:
+		return true;
+	case 1:
+		QMessageBox::warning(this, tr("Parking fee"), tr("The parking fee was not paid."));
+		return false;
+	case 2:
+		UploadQRWindow * uploadQRWindow = new UploadQRWindow(enterButton->size(), this);
+		connect(uploadQRWindow, &UploadQRWindow::getQRPath, this, &MainWindow::processLastVehicle);
+
+		QEventLoop loop;
+		connect(uploadQRWindow, &UploadQRWindow::getQRPath, &loop, &QEventLoop::quit);
+		uploadQRWindow->show();
+		loop.exec();
+
+		return false;
+	}
+}
+
+void MainWindow::processLastVehicle(const QString& QRPath)
+{
+	int id, result;
+	std::string dateTime;
+	std::string displayText;
+
+	if (!checkResult(vehicleManager.processLastVehicle(id, dateTime, displayText, fee, pressedButton, QRPath.toStdString())))
+		return;
+
+	updateStatistics(dateTime, pressedButton);
+
+	if (pressedButton)
+		numberOccupiedParkingLots--;
+	else
+		numberOccupiedParkingLots++;
+	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
+
+	QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
+	item->setData(Qt::UserRole, id);
+	if (pressedButton)
+		exitsListWidget->addItem(item);
+	else
+		entriesListWidget->addItem(item);
+}
+
 void MainWindow::clearPreviousItems()
 {
 	QList<QGraphicsItem*> items = scene->items();
@@ -272,43 +319,6 @@ void MainWindow::setGraphicsViewProperties()
 	QRectF imageRect = pixmapItem->boundingRect();
 	graphicsView->setSceneRect(imageRect);
 	graphicsView->fitInView(imageRect, Qt::KeepAspectRatio);
-}
-
-void MainWindow::processLastVehicle(const QString& QRPath)
-{
-	int id;
-	std::string dateTime;
-	std::string displayText;
-
-	if (!QRPath.isEmpty())
-		vehicleManager.processLastVehicle(id, dateTime, displayText, fee, pressedButton, QRPath.toStdString());
-	else if (!vehicleManager.processLastVehicle(id, dateTime, displayText, fee, pressedButton))
-	{
-		UploadQRWindow* uploadQRWindow = new UploadQRWindow(enterButton->size(), this);
-		connect(uploadQRWindow, &UploadQRWindow::getQRPath, this, &MainWindow::processLastVehicle);
-
-		QEventLoop loop;
-		connect(uploadQRWindow, &UploadQRWindow::getQRPath, &loop, &QEventLoop::quit);
-		uploadQRWindow->show();
-		loop.exec();
-
-		return;
-	}
-
-	updateStatistics(dateTime, pressedButton);
-
-	if (pressedButton)
-		numberOccupiedParkingLots--;
-	else
-		numberOccupiedParkingLots++;
-	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
-
-	QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
-	item->setData(Qt::UserRole, id);
-	if (pressedButton)
-		exitsListWidget->addItem(item);
-	else
-		entriesListWidget->addItem(item);
 }
 
 void MainWindow::uploadImage()

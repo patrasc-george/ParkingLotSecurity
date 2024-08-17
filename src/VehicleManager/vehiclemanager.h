@@ -12,7 +12,6 @@
 
 #include <fstream>
 #include <vector>
-#include <unordered_map>
 
 class VEHICLEMANAGER_API VehicleManager
 {
@@ -39,15 +38,17 @@ public:
 
 	int calculateTotalAmount(const std::string& time, const int& fee);
 
-	bool processLastVehicle(int& id, std::string& dateTime, std::string& displayText, const int& fee, const bool& pressedButton, const std::string& QRPath = "");
+	int processLastVehicle(int& id, std::string& dateTime, std::string& displayText, const int& fee, const bool& pressedButton, const std::string& QRPath = "");
 
 	void search(std::string text, std::unordered_map<int, std::string>& historyLogList);
 
 	void calculateOccupancyStatistics(std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
 
-	void pay(const std::string& licensePlate);
+	bool pay(const std::string& licensePlate, const bool& isTicket = false);
 
 public:
+	std::string getDataBasePath() const;
+
 	void setDataBasePath(const std::string& dataBasePath);
 
 	std::string getImagePath(const int& id) const;

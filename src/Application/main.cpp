@@ -1,12 +1,14 @@
-﻿#include <QApplication>
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
+#include "httpServer.h"
 
 int main(int argc, char* argv[])
 {
-	QApplication a(argc, argv);
+	QApplication app(argc, argv);
 
-	MainWindow w;
-	w.show();
+	MainWindow window;
+	window.show();
 
-	return a.exec();
+	Server server;
+
+	return app.exec();
 }

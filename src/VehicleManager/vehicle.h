@@ -8,7 +8,7 @@ public:
 	Vehicle() = default;
 
 	Vehicle(const int& id, const std::string& path, const std::string& licensePlate, const std::string& dateTime)
-		: id(id), path(path), licensePlate(licensePlate), dateTime(dateTime) {}
+		: id(id), path(path), licensePlate(licensePlate), dateTime(dateTime), isPaid(false) {}
 
 public:
 	/**
@@ -26,15 +26,6 @@ public:
 	std::string getPath() const;
 
 	/**
-	 * @brief Retrieves the ticket number of the vehicle.
-	 * @details The ticket number is used to identify the vehicle's parking session or other related transactions.
-	 * @return The ticket number as an integer.
-	 */
-	std::string getTicket() const;
-
-	void setTicket(const std::string& ticket);
-
-	/**
 	 * @brief Retrieves the license plate of the vehicle.
 	 * @details The license plate number is crucial for vehicle identification and is often used in logging, tracking, and regulatory compliance.
 	 * @return A string representing the license plate.
@@ -49,6 +40,15 @@ public:
 	 * @return A string representing the time.
 	 */
 	std::string getDateTime() const;
+
+	/**
+	* @brief Retrieves the ticket number of the vehicle.
+	* @details The ticket number is used to identify the vehicle's parking session or other related transactions.
+	* @return The ticket number as an integer.
+	*/
+	std::string getTicket() const;
+
+	void setTicket(const std::string& ticket);
 
 	/**
 	* @brief Retrieves the parked time of the vehicle.
@@ -68,16 +68,21 @@ public:
 
 	void setTotalAmount(const int& totalAmount);
 
+	bool getIsPaid();
+
+	void setIsPaid();
+
 	friend std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle);
 
 private:
 	int id;
 	std::string path;
-	std::string ticket;
 	std::string licensePlate;
 	std::string dateTime;
+	std::string ticket;
 	std::string timeParked;
 	int totalAmount;
+	bool isPaid;
 };
 
 /**

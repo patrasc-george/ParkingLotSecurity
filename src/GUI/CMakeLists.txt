@@ -1,9 +1,7 @@
 project(UserInterface)
 
-# Define UI exports
 add_definitions(-DUI_EXPORTS)
 
-# Disable automatic UI compilation
 set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC ON)
 
@@ -12,11 +10,9 @@ set(TRANSLATIONS
     "${CMAKE_SOURCE_DIR}/translations/gui_ro.ts"
 	)
 
-# Collect every header and source in the directory
 file(GLOB HEADER_FILES "*.h")
 file(GLOB SOURCE_FILES "*.c*")
 
-# Collect all headers and sources in the directory
 file(
     GLOB_RECURSE GUI_FILES
     LIST_DIRECTORIES false
@@ -24,24 +20,19 @@ file(
 	${SOURCE_FILES}
 	)
 
-# Add the library
 add_library(${PROJECT_NAME} STATIC ${GUI_FILES})
 
-# Add dependencies
 add_dependencies(${PROJECT_NAME} VehicleManager)
 
-# Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_SOURCE_DIR}/src/VehicleManager"
     "${CMAKE_SOURCE_DIR}/src/GUI"
 	)
 
-# Link libraries
 target_link_libraries(${PROJECT_NAME}
     VehicleManager
     Qt6::Widgets 
     Qt6::Core
 	)
 
-# Link to the runtime output directory
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

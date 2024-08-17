@@ -1,24 +1,27 @@
 project(Application)
 
-# Add the executable
 file(GLOB HEADER_FILES "*.h")
 file(GLOB SOURCE_FILES "*.cpp")
 
-add_executable(${PROJECT_NAME} WIN32 ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
-# Set executable properties
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "ParkingLotsSecurityCamera")
 
-# Add dependencies to libraries from other subprojects
-add_dependencies(${PROJECT_NAME} UserInterface)
+add_dependencies(${PROJECT_NAME} 
+	UserInterface
+	HttpServer	
+	)
 
-# Allow headers to be included in main.cpp
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/src/GUI")
+target_include_directories(${PROJECT_NAME} PUBLIC 
+	"${CMAKE_SOURCE_DIR}/src/GUI"
+	"${CMAKE_SOURCE_DIR}/src/HttpServer"
+	)
 
-# Link to the required libraries
-target_link_libraries(${PROJECT_NAME} UserInterface)
+target_link_libraries(${PROJECT_NAME} 
+	UserInterface
+	HttpServer
+	)
 
-# Link to the runtime output directory
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack")
@@ -40,6 +43,7 @@ file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/DeliveryPack/database/vehicles")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/DeliveryPack/database/qr")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/qr")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/uploadedQr")
 
 file(GLOB TRANSLATIONS "${CMAKE_SOURCE_DIR}/translations/*.qm" )
 install(FILES ${TRANSLATIONS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/translations")

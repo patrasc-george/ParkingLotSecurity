@@ -18,7 +18,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	${Tesseract_LIBRARY_DEBUG}
 	)
 
-#Link this project with the runtime output dir.
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 add_test(

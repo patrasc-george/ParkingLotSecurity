@@ -1,5 +1,11 @@
 #include "vehiclemanager.h"
 
+VehicleManager& VehicleManager::getInstance()
+{
+	static VehicleManager instance;
+	return instance;
+}
+
 void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes)
 {
 	writeFile = std::ofstream(dataBasePath + "vehicles.txt", std::ios::app);
@@ -14,7 +20,9 @@ void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes,
 	{
 		if (line.empty())
 		{
-			curentVehicle = Vehicle(std::stoi(vehicleData[0]), vehicleData[1], std::stoi(vehicleData[2]), vehicleData[3], vehicleData[4]);
+			curentVehicle = Vehicle(std::stoi(vehicleData[0]), vehicleData[1], vehicleData[3], vehicleData[4]);
+
+			curentVehicle.setTicket(vehicleData[2]);
 
 			if (vehicleData.size() == 5)
 				entranceDateTimes.push_back(vehicleData[4]);
@@ -75,7 +83,7 @@ void VehicleManager::getVehicle(const std::string& imagePath, std::string& saveP
 	size_t plate = text.find('\n');
 	size_t dateTime = text.find('\n', plate + 1);
 
-	curentVehicle = Vehicle(vehicles.size(), savePath, vehicles.size(), text.substr(0, plate), text.substr(plate + 1, dateTime - plate - 1));
+	curentVehicle = Vehicle(vehicles.size(), savePath, text.substr(0, plate), text.substr(plate + 1, dateTime - plate - 1));
 }
 
 Vehicle VehicleManager::findVehicle(const bool& direction, int index)
@@ -87,7 +95,7 @@ Vehicle VehicleManager::findVehicle(const bool& direction, int index)
 
 	if (direction)
 	{
-		if (curentVehicle.getTicket() != vehicles.size())
+		if (!curentVehicle.getTicket().empty())
 		{
 			for (int i = index - 1; i >= 0; i--)
 				if (curentVehicle.getTicket() == vehicles[i].getTicket())
@@ -102,7 +110,7 @@ Vehicle VehicleManager::findVehicle(const bool& direction, int index)
 	}
 	else
 	{
-		if (curentVehicle.getTicket() != vehicles.size())
+		if (!curentVehicle.getTicket().empty())
 		{
 			for (int i = index + 1; i < vehicles.size(); i++)
 				if (curentVehicle.getTicket() == vehicles[i].getTicket())
@@ -125,10 +133,13 @@ std::string VehicleManager::timeParked()
 
 	if (auxVehicle.getLicensePlate().empty())
 	{
-		if (curentVehicle.getTicket() == vehicles.size())
+		if (curentVehicle.getTicket().empty())
 			return "";
 		else
+		{
+			curentVehicle.setTicket("00-00-0000 00:00:00");
 			return "00:00:00";
+		}
 	}
 
 	curentVehicle.setLicensePlate(auxVehicle.getLicensePlate());
@@ -183,7 +194,7 @@ bool VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::str
 			time = timeParked();
 		else
 		{
-			int ticket = qr.decodeQR(QRPath);
+			std::string ticket = qr.decodeQR(QRPath);
 			curentVehicle.setTicket(ticket);
 
 			time = timeParked();
@@ -203,7 +214,10 @@ bool VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::str
 		curentVehicle.setTotalAmount(totalAmount);
 	}
 	else
-		qr.generateQR(vehicles.size(), dataBasePath);
+	{
+		qr.generateQR(dateTime, curentVehicle.getLicensePlate(), dataBasePath);
+		curentVehicle.setTicket(dateTime);
+	}
 
 	vehicles.push_back(curentVehicle);
 	writeFile << curentVehicle;
@@ -252,6 +266,11 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 				occupancyDateTimes.push_back(std::make_pair(vehicles[i].getDateTime(), ss.str()));
 			}
 		}
+}
+
+void VehicleManager::pay(const std::string& licensePlate)
+{
+	std::cout << "S a platit " << licensePlate << std::endl;
 }
 
 void VehicleManager::setDataBasePath(const std::string& dataBasePath)

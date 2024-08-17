@@ -11,7 +11,7 @@
 class QRCODEUTILS_API QRCode
 {
 public:
-	void generateQR(const int& id, const std::string& dataBasePath);
+	void generateQR(const std::string& dateTime, const std::string& licensePlate, const std::string& dataBasePath);
 
-	int decodeQR(const std::string& path);
+	std::string decodeQR(const std::string& path);
 };

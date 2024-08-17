@@ -10,12 +10,12 @@ std::string Vehicle::getPath() const
 	return path;
 }
 
-int Vehicle::getTicket() const
+std::string Vehicle::getTicket() const
 {
 	return ticket;
 }
 
-void Vehicle::setTicket(const int& ticket)
+void Vehicle::setTicket(const std::string& ticket)
 {
 	this->ticket = ticket;
 }

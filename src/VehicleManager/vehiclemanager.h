@@ -16,12 +16,15 @@
 
 class VEHICLEMANAGER_API VehicleManager
 {
-public:
+private:
 	VehicleManager() = default;
 
+public:
 	~VehicleManager();
 
 public:
+	static VehicleManager& getInstance();
+
 	void uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes);
 
 	void uploadVehicles(std::unordered_map<int, std::string>& entriesList, std::unordered_map<int, std::string>& exitsList);
@@ -41,6 +44,8 @@ public:
 	void search(std::string text, std::unordered_map<int, std::string>& historyLogList);
 
 	void calculateOccupancyStatistics(std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
+
+	void pay(const std::string& licensePlate);
 
 public:
 	void setDataBasePath(const std::string& dataBasePath);
@@ -68,5 +73,5 @@ private:
 	std::vector<std::vector<int>> occupancyStatistics;
 	std::vector<std::vector<int>> entranceStatistics;
 	std::vector<std::vector<int>> exitStatistics;
-	std::unordered_map<int, bool> vehiclesStatus;
+	std::unordered_map<std::string, bool> vehiclesStatus;
 };

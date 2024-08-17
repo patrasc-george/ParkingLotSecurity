@@ -13,7 +13,9 @@
 
 QTranslator translator;
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget* parent) :
+	QMainWindow(parent),
+	vehicleManager(VehicleManager::getInstance())
 {
 	setupUI();
 }

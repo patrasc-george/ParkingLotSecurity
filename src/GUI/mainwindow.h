@@ -4,6 +4,7 @@
 #include "statisticswindow.h"
 
 #include <fstream>
+#include <QApplication>
 #include <QMainWindow>
 #include <QListWidget>
 #include <QPushButton>
@@ -123,7 +124,7 @@ private:
 	QLineEdit* historyLogEdit;
 	QComboBox* chooseLanguage;
 	QImage image;
-	VehicleManager vehicleManager;
+	VehicleManager& vehicleManager;
 	std::string dataBasePath;
 	std::string translationsPath;
 	bool pressedButton;

@@ -7,8 +7,8 @@ class Vehicle
 public:
 	Vehicle() = default;
 
-	Vehicle(const int& id, const std::string& path, const int& ticket, const std::string& licensePlate, const std::string& dateTime)
-		: id(id), path(path), ticket(ticket), licensePlate(licensePlate), dateTime(dateTime) {}
+	Vehicle(const int& id, const std::string& path, const std::string& licensePlate, const std::string& dateTime)
+		: id(id), path(path), licensePlate(licensePlate), dateTime(dateTime) {}
 
 public:
 	/**
@@ -30,9 +30,9 @@ public:
 	 * @details The ticket number is used to identify the vehicle's parking session or other related transactions.
 	 * @return The ticket number as an integer.
 	 */
-	int getTicket() const;
+	std::string getTicket() const;
 
-	void setTicket(const int& ticket);
+	void setTicket(const std::string& ticket);
 
 	/**
 	 * @brief Retrieves the license plate of the vehicle.
@@ -73,7 +73,7 @@ public:
 private:
 	int id;
 	std::string path;
-	int ticket;
+	std::string ticket;
 	std::string licensePlate;
 	std::string dateTime;
 	std::string timeParked;

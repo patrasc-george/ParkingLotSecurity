@@ -3,7 +3,7 @@ project(Application)
 file(GLOB HEADER_FILES "*.h")
 file(GLOB SOURCE_FILES "*.cpp")
 
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} WIN32 ${HEADER_FILES} ${SOURCE_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "ParkingLotsSecurityCamera")
 
@@ -33,6 +33,8 @@ install(DIRECTORY ${Qt6_DLLS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack" USE
 file(GLOB Tesseract_DLLS "${Tesseract_INCLUDE_DIRS}/../bin/*.dll")
 install(FILES ${Tesseract_DLLS} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack")
 
+install(FILES ${QRENCODE_LIBRARIES} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack")
+
 file(GLOB DATABASE 
 	"${CMAKE_SOURCE_DIR}/database/*.png" 
 	"${CMAKE_SOURCE_DIR}/database/I.jpg" 
@@ -41,6 +43,7 @@ file(GLOB DATABASE
 install(FILES ${DATABASE} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/database")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/DeliveryPack/database/vehicles")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/DeliveryPack/database/qr")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/DeliveryPack/database/uploadedQr")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/qr")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/uploadedQr")

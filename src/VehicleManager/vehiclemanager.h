@@ -32,7 +32,7 @@ public:
 
 	void getVehicle(const std::string& imagePath, std::string& savePath);
 
-	Vehicle findVehicle(const bool& direction = true, int index = -1);
+	Vehicle* findVehicle(const std::string& licensePlate, const std::string& ticket, const bool& isEntered, const bool& direction = true, const int& index = -1);
 
 	std::string timeParked();
 
@@ -44,7 +44,7 @@ public:
 
 	void calculateOccupancyStatistics(std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
 
-	bool pay(const std::string& licensePlate, const bool& isTicket = false);
+	bool pay(const std::string& vehicle, const bool& isTicket = false);
 
 public:
 	std::string getDataBasePath() const;

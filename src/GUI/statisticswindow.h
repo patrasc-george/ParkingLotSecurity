@@ -18,7 +18,9 @@ private slots:
 
 private:
 	void normalize(const std::vector<std::vector<int>>& data, std::vector<std::vector<double>>& normalizedData);
+
 	void setupTable(QTableWidget* table);
+
 	void applyColor(QTableWidget* table, const std::vector<std::vector<double>>& normalizedData);
 
 private:

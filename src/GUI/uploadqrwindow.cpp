@@ -16,10 +16,10 @@ UploadQRWindow::UploadQRWindow(const QSize& buttonSize, QWidget* parent) : QDial
 	QPixmap errorIcon = QMessageBox::standardIcon(QMessageBox::Warning);
 	iconLabel->setPixmap(errorIcon);
 
-	QLabel* messageLabel = new QLabel("The license plate number was not recognized. Please upload the QR code.", this);
+	QLabel* messageLabel = new QLabel(tr("The license plate number was not recognized. Please upload the QR code."), this);
 
-	QPushButton* uploadButton = new QPushButton("Upload", this);
-	QPushButton* cancelButton = new QPushButton("Cancel", this);
+	QPushButton* uploadButton = new QPushButton(tr("Upload"), this);
+	QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
 
 	uploadButton->setFixedSize(buttonSize);
 	cancelButton->setFixedSize(buttonSize);
@@ -49,8 +49,8 @@ void UploadQRWindow::upload()
 {
 	QString path = QFileDialog::getOpenFileName(this, "Upload QR", "", "Image Files (*.png *.jpg *.bmp)");
 
+	this->close();
+
 	if (!path.isEmpty())
 		emit getQRPath(path);
-
-	this->close();
 }

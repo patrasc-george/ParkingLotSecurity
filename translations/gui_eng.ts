@@ -3,17 +3,17 @@
 <TS version="2.1" language="eng">
   <context>
     <name>MainWindow</name>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="69"/>
       <source>entrance.png</source>
       <translation>entrance.png</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="76"/>
       <source>exit.png</source>
       <translation>exit.png</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="83"/>
       <source>statistics.png</source>
       <translation>statistics.png</translation>
@@ -69,6 +69,7 @@
       <translation>There are no vehicles in the parking lot.</translation>
     </message>
   </context>
+
   <context>
     <name>StatisticsWindow</name>
     <message>
@@ -130,6 +131,49 @@
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Sunday</source>
       <translation>Sunday</translation>
+    </message>
+  </context>
+
+  <context>
+    <name>UploadQRWindow</name>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="13"/>
+      <source>Upload QR</source>
+      <translation>Upload QR</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="19"/>
+      <source>The license plate number was not recognized. Please upload the QR code.</source>
+      <translation>The license plate number was not recognized. Please upload the QR code.</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="21"/>
+      <source>Upload</source>
+      <translation>Upload</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="22"/>
+      <source>Cancel</source>
+      <translation>Cancel</translation>
+    </message>
+  </context>
+
+  <context>
+    <name>UnpaidWindow</name>
+    <message>
+      <location filename="../src/GUI/unpaidwindow.cpp" line="13"/>
+      <source>Unpaid</source>
+      <translation>Unpaid</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/unpaidwindow.cpp" line="19"/>
+      <source>The parking fee was not paid.</source>
+      <translation>The parking fee was not paid.</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/unpaidwindow.cpp" line="21"/>
+      <source>Close</source>
+      <translation>Close</translation>
     </message>
   </context>
 </TS>

@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "uploadqrwindow.h"
+#include "unpaidwindow.h"
 
 #include <QFileDialog>
 #include <QVBoxLayout>
@@ -255,10 +256,19 @@ bool MainWindow::checkResult(const int& result)
 	case 0:
 		return true;
 	case 1:
-		QMessageBox::warning(this, tr("Parking fee"), tr("The parking fee was not paid."));
+	{
+		UnpaidWindow* unpaidWindow = new UnpaidWindow(enterButton->size(), this);
+
+		QEventLoop loop;
+		connect(unpaidWindow, &QDialog::rejected, &loop, &QEventLoop::quit);
+		unpaidWindow->show();
+		loop.exec();
+
 		return false;
+	}
 	case 2:
-		UploadQRWindow * uploadQRWindow = new UploadQRWindow(enterButton->size(), this);
+	{
+		UploadQRWindow* uploadQRWindow = new UploadQRWindow(enterButton->size(), this);
 		connect(uploadQRWindow, &UploadQRWindow::getQRPath, this, &MainWindow::processLastVehicle);
 
 		QEventLoop loop;
@@ -268,6 +278,9 @@ bool MainWindow::checkResult(const int& result)
 
 		return false;
 	}
+	}
+
+	return false;
 }
 
 void MainWindow::processLastVehicle(const QString& QRPath)
@@ -293,6 +306,10 @@ void MainWindow::processLastVehicle(const QString& QRPath)
 		exitsListWidget->addItem(item);
 	else
 		entriesListWidget->addItem(item);
+
+	clearPreviousItems();
+	createNewPixmapItem();
+	setGraphicsViewProperties();
 }
 
 void MainWindow::clearPreviousItems()
@@ -341,9 +358,6 @@ void MainWindow::uploadImage()
 	image = QImage(QString::fromStdString(savePath));
 
 	processLastVehicle();
-	clearPreviousItems();
-	createNewPixmapItem();
-	setGraphicsViewProperties();
 }
 
 void MainWindow::displayImage(QListWidgetItem* item)

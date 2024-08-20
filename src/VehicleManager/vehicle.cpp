@@ -69,11 +69,13 @@ std::ostream& operator<<(std::ostream& os, const Vehicle& vehicle)
 {
 	os << vehicle.getId() << std::endl;
 	os << vehicle.getPath() << std::endl;
-	os << vehicle.getTicket() << std::endl;
 	os << vehicle.getLicensePlate() << std::endl;
 	os << vehicle.getDateTime() << std::endl;
+	os << vehicle.getTicket() << std::endl;
 
-	if (!vehicle.getTimeParked().empty())
+	if (vehicle.getTimeParked().empty())
+		os << "false" << std::endl;
+	else
 	{
 		os << vehicle.getTimeParked() << std::endl;
 		os << vehicle.getTotalAmount() << std::endl;

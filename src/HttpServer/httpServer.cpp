@@ -30,12 +30,15 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 	{
 		auto licensePlate = request.get_param_value("licensePlate");
 
+		std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), [](unsigned char c) {
+			return std::toupper(c); });
+
 		if (vehicleManager.pay(licensePlate))
 			paymentSuccess = true;
 		else
 		{
 			response.status = 400;
-			response.set_content("Invalid license plate", "text/plain");
+			response.set_content("false", "text/plain");
 			return;
 		}
 	}
@@ -53,7 +56,7 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 		else
 		{
 			response.status = 400;
-			response.set_content("Invalid QR code", "text/plain");
+			response.set_content("false", "text/plain");
 			return;
 		}
 	}

@@ -3,32 +3,32 @@
 <TS version="2.1" language="ro">
   <context>
     <name>MainWindow</name>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="69"/>
       <source>entrance.png</source>
       <translation>intrare.png</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="76"/>
       <source>exit.png</source>
       <translation>iesire.png</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="83"/>
       <source>statistics.png</source>
       <translation>statistici.png</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="89"/>
       <source>Entries</source>
       <translation>Intrări</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="93"/>
       <source>Exits</source>
       <translation>Ieșiri</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="97"/>
       <source>History Log</source>
       <translation>Istoric</translation>
@@ -38,18 +38,18 @@
       <source>Capacity:</source>
       <translation>Capacitate:</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="102"/>
       <source>Occupancy:</source>
       <translation>Ocupare:</translation>
-    </message>   
-	<message>
+    </message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="103"/>
       <source>Fee:</source>
       <translation>Taxa:</translation>
     </message>
-	<message>
-	  <location filename="../src/GUI/mainwindow.cpp" line="254"/>
+    <message>
+      <location filename="../src/GUI/mainwindow.cpp" line="254"/>
       <source>Parking Full</source>
       <translation>Parcarea este plină</translation>
     </message>
@@ -63,73 +63,117 @@
       <source>No Vehicles</source>
       <translation>Nu există vehicule</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/mainwindow.cpp" line="260"/>
       <source>There are no vehicles in the parking lot.</source>
       <translation>Nu există niciun vehicul în parcare.</translation>
     </message>
   </context>
+
   <context>
-	<name>StatisticsWindow</name>
-	<message>
+    <name>StatisticsWindow</name>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="14"/>
       <source>Statistics</source>
       <translation>Statistici</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="23"/>
       <source>Occupancy</source>
       <translation>Ocupare</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="24"/>
       <source>Entries</source>
       <translation>Intrări</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="25"/>
       <source>Exits</source>
       <translation>Ieșiri</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="28"/>
       <source>Close</source>
       <translation>Închide</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Monday</source>
       <translation>Luni</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Tuesday</source>
       <translation>Marți</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Wednesday</source>
       <translation>Miercuri</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Thursday</source>
       <translation>Joi</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Friday</source>
       <translation>Vineri</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Saturday</source>
       <translation>Sâmbătă</translation>
     </message>
-	<message>
+    <message>
       <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Sunday</source>
       <translation>Duminică</translation>
+    </message>
+  </context>
+
+  <context>
+    <name>UploadQRWindow</name>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="13"/>
+      <source>Upload QR</source>
+      <translation>Încarcă QR</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="19"/>
+      <source>The license plate number was not recognized. Please upload the QR code.</source>
+      <translation>Numărul de înmatriculare nu a fost recunoscut. Vă rugăm să încărcați codul QR.</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="21"/>
+      <source>Upload</source>
+      <translation>Încarcă</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/uploadqrwindow.cpp" line="22"/>
+      <source>Cancel</source>
+      <translation>Anulează</translation>
+    </message>
+  </context>
+
+  <context>
+    <name>UnpaidWindow</name>
+    <message>
+      <location filename="../src/GUI/unpaidwindow.cpp" line="13"/>
+      <source>Unpaid</source>
+      <translation>Neplătit</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/unpaidwindow.cpp" line="19"/>
+      <source>The parking fee was not paid.</source>
+      <translation>Taxa de parcare nu a fost plătită.</translation>
+    </message>
+    <message>
+      <location filename="../src/GUI/unpaidwindow.cpp" line="21"/>
+      <source>Close</source>
+      <translation>Închide</translation>
     </message>
   </context>
 </TS>

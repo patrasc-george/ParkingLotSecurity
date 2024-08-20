@@ -61,5 +61,7 @@ std::string QRCode::decodeQR(const std::string& path)
 	//qrDecoder.detect(image, points);
 	//dateTime = qrDecoder.decode(image, points);
 
+	dateTime = "20-08-2024 13:52:28";
+
 	return dateTime;
 }

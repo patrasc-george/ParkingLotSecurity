@@ -541,8 +541,8 @@ class IMAGEPROCESSINGUTILS_API Algorithm
  * It applies various image processing techniques to prepare regions of interest for OCR,
  * aiming to extract readable text and corresponding confidence levels.
  * The output is annotated with the recognized text, processing time, and confidence scores.
- * @param[in] src The source image from which text is to be extracted.
- * @param[out] dst The destination image, which is a copy of the source annotated with recognized text and other relevant information.
+ * @param[in] imagePath The source image path from which text is to be extracted.
+ * @param[out] savePath The destination image path, which is a copy of the source annotated with recognized text and other relevant information.
  * @return A string containing the recognized text and the time of extraction.
  */
 std::string IMAGEPROCESSINGUTILS_API textFromImage(const std::string& imagePath, const std::string& savePath);

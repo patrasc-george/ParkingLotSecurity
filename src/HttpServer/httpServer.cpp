@@ -24,48 +24,52 @@ Server::~Server()
 
 void Server::handlePost(const httplib::Request& request, httplib::Response& response)
 {
-	bool paymentSuccess = false;
+	std::string licensePlate;
+	std::string dateTime;
+	std::string jsonResponse;
 
 	if (request.has_param("licensePlate"))
 	{
-		auto licensePlate = request.get_param_value("licensePlate");
+		auto data = request.get_param_value("licensePlate");
 
-		std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), [](unsigned char c) {
+		std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c) {
 			return std::toupper(c); });
 
-		if (vehicleManager.pay(licensePlate))
-			paymentSuccess = true;
-		else
+		if (!vehicleManager.pay(data, licensePlate, dateTime))
 		{
 			response.status = 400;
-			response.set_content("false", "text/plain");
+			jsonResponse = R"({"success": false})";
+			response.set_content(jsonResponse, "application/json");
 			return;
 		}
 	}
 	else if (request.has_file("qrCodeImage"))
 	{
-		const auto& file = request.get_file_value("qrCodeImage");
+		auto data = request.get_file_value("qrCodeImage");
 
-		std::string savePath = vehicleManager.getDataBasePath() + "uploadedQr/" + file.filename;
+		std::string savePath = vehicleManager.getDataBasePath() + "uploadedQr/" + data.filename;
 		std::ofstream ofs(savePath, std::ios::binary);
-		ofs << file.content;
+		ofs << data.content;
 		ofs.close();
 
-		if (vehicleManager.pay(savePath, true))
-			paymentSuccess = true;
-		else
+		if (!vehicleManager.pay(savePath, licensePlate, dateTime, true))
 		{
 			response.status = 400;
-			response.set_content("false", "text/plain");
+			jsonResponse = R"({"success": false})";
+			response.set_content(jsonResponse, "application/json");
 			return;
 		}
 	}
 
-	if (paymentSuccess)
-		response.set_content("true", "text/plain");
+	if (!licensePlate.empty() && !dateTime.empty())
+	{
+		jsonResponse = "{ \"success\": true, \"licensePlate\": \"" + licensePlate + "\", \"dateTime\": \"" + dateTime + "\" }";
+		response.set_content(jsonResponse, "application/json");
+	}
 	else
 	{
 		response.status = 400;
-		response.set_content("false", "text/plain");
+		jsonResponse = R"({"success": false})";
+		response.set_content(jsonResponse, "application/json");
 	}
 }

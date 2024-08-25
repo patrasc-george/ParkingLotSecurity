@@ -44,7 +44,7 @@ public:
 
 	void calculateOccupancyStatistics(std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
 
-	bool pay(const std::string& vehicle, const bool& isTicket = false);
+	bool pay(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket = false);
 
 public:
 	std::string getDataBasePath() const;
@@ -52,6 +52,8 @@ public:
 	void setDataBasePath(const std::string& dataBasePath);
 
 	std::string getImagePath(const int& id) const;
+
+	void setName(const std::string& name);
 
 	void increaseOccupancyStatistics(const int& day, const int& hour);
 
@@ -71,6 +73,7 @@ private:
 	Vehicle curentVehicle;
 	std::vector<Vehicle> vehicles;
 	QRCode qr;
+	std::string name;
 	std::vector<std::vector<int>> occupancyStatistics;
 	std::vector<std::vector<int>> entranceStatistics;
 	std::vector<std::vector<int>> exitStatistics;

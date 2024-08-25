@@ -41,6 +41,7 @@ void MainWindow::setupUI()
 	connect(entriesListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
 	connect(exitsListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
 	connect(historyLogListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
+	connect(nameEdit, &QLineEdit::textChanged, this, &MainWindow::setName);
 	connect(parkingLotsEdit, &QLineEdit::textChanged, this, &MainWindow::setNumberParkingLots);
 	connect(feeEdit, &QLineEdit::textChanged, this, &MainWindow::setFee);
 	connect(historyLogEdit, &QLineEdit::textChanged, this, &MainWindow::search);
@@ -119,16 +120,19 @@ void MainWindow::setupLayouts()
 	historyLogLabel->setAlignment(Qt::AlignCenter);
 	historyLogEdit = new QLineEdit(this);
 
+	QLabel* nameLabel = new QLabel(tr("Name:"), this);
 	QLabel* parkingLotsLabel = new QLabel(tr("Capacity:"), this);
 	QLabel* occupiedParkingLotsLabel = new QLabel(tr("Occupancy:"), this);
 	QLabel* feeLabel = new QLabel(tr("Fee:"), this);
 
-	occupiedParkingLotsEdit = new QLineEdit(this);
-	occupiedParkingLotsEdit->setReadOnly(true);
+	nameEdit = new QLineEdit(this);
 
 	parkingLotsEdit = new QLineEdit(this);
 	parkingLotsEdit->setValidator(new QIntValidator(0, 1000000, this));
 	parkingLotsEdit->setText(QString::number(numberParkingLots));
+
+	occupiedParkingLotsEdit = new QLineEdit(this);
+	occupiedParkingLotsEdit->setReadOnly(true);
 
 	feeEdit = new QLineEdit(this);
 	feeEdit->setValidator(new QIntValidator(0, 1000000, this));
@@ -136,6 +140,8 @@ void MainWindow::setupLayouts()
 
 	QHBoxLayout* topLayout = new QHBoxLayout();
 	topLayout->addWidget(chooseLanguage);
+	topLayout->addWidget(nameLabel);
+	topLayout->addWidget(nameEdit);
 	topLayout->addWidget(parkingLotsLabel);
 	topLayout->addWidget(parkingLotsEdit);
 	topLayout->addWidget(occupiedParkingLotsLabel);
@@ -368,6 +374,11 @@ void MainWindow::displayImage(QListWidgetItem* item)
 	clearPreviousItems();
 	createNewPixmapItem();
 	setGraphicsViewProperties();
+}
+
+void MainWindow::setName(const QString& name)
+{
+	vehicleManager.setName(name.toStdString());
 }
 
 void MainWindow::setNumberParkingLots(const QString& numberParkingLots)

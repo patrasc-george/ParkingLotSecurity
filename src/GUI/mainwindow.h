@@ -32,6 +32,8 @@ private slots:
 
 	void displayImage(QListWidgetItem* item);
 
+	void setName(const QString& name);
+
 	void setNumberParkingLots(const QString& numberParkingLots);
 
 	void setFee(const QString& fee);
@@ -81,6 +83,7 @@ private:
 	QPushButton* enterButton;
 	QPushButton* exitButton;
 	QPushButton* statisticsButton;
+	QLineEdit* nameEdit;
 	QLineEdit* parkingLotsEdit;
 	QLineEdit* occupiedParkingLotsEdit;
 	QLineEdit* feeEdit;

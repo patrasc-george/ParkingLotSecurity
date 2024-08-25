@@ -212,11 +212,14 @@ int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::stri
 
 		curentVehicle.setTimeParked(time);
 		curentVehicle.setTotalAmount(totalAmount);
+
+		qr.generateQR(curentVehicle.getTicket(), name, curentVehicle.getLicensePlate(), dataBasePath, curentVehicle.getDateTime(), time, totalAmount);
 	}
 	else
 	{
-		qr.generateQR(dateTime, curentVehicle.getLicensePlate(), dataBasePath);
 		curentVehicle.setTicket(dateTime);
+
+		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), dataBasePath);
 	}
 
 	vehicles.push_back(curentVehicle);
@@ -267,7 +270,7 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 		}
 }
 
-bool VehicleManager::pay(const std::string& vehicle, const bool& isTicket)
+bool VehicleManager::pay(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket)
 {
 	curentVehicle = Vehicle();
 
@@ -285,6 +288,8 @@ bool VehicleManager::pay(const std::string& vehicle, const bool& isTicket)
 		return false;
 
 	auxVehicle->setIsPaid();
+	licensePlate = auxVehicle->getLicensePlate();
+	dateTime = auxVehicle->getDateTime();
 
 	std::ifstream readFile(dataBasePath + "vehicles.txt");
 	std::vector<std::string> lines;
@@ -317,6 +322,11 @@ void VehicleManager::setDataBasePath(const std::string& dataBasePath)
 std::string VehicleManager::getImagePath(const int& id) const
 {
 	return vehicles[id].getPath();
+}
+
+void VehicleManager::setName(const std::string& name)
+{
+	this->name = name;
 }
 
 void VehicleManager::increaseOccupancyStatistics(const int& day, const int& hour)

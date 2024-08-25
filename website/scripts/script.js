@@ -27,7 +27,7 @@ document.querySelector('.payButton').addEventListener('click', function() {
     const licensePlate = licensePlateInput.value;
 
     errorMessageElement.textContent = '';
-	
+    
     if (!licensePlate && !selectedFile) {
         errorMessageElement.textContent = 'Please enter a license plate number or upload a QR code.';
         return;
@@ -38,7 +38,7 @@ document.querySelector('.payButton').addEventListener('click', function() {
         fileNameElement.style.display = 'none';
     }
 
-	if (licensePlate) {
+    if (licensePlate) {
         const urlEncodedData = new URLSearchParams();
         urlEncodedData.append('licensePlate', licensePlate);
 
@@ -49,7 +49,7 @@ document.querySelector('.payButton').addEventListener('click', function() {
             },
             body: urlEncodedData
         })
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
             handleServerResponse(data);
         })
@@ -65,7 +65,7 @@ document.querySelector('.payButton').addEventListener('click', function() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
             handleServerResponse(data);
         })
@@ -83,16 +83,17 @@ function handleServerResponse(data) {
     successMessageElement.textContent = '';
 
     setTimeout(() => {
-        if (licensePlateInput.value && data.toLowerCase() === 'false') {
-            errorMessageElement.textContent = 'The vehicle was not found. Please upload the QR code.';
-            successMessageElement.style.display = 'none';
-            errorMessageElement.style.display = 'block';
-        } else if (selectedFile && data.toLowerCase() === 'false') {
+        if (data.success === false) {
             errorMessageElement.textContent = 'The vehicle was not found. Please upload the QR code again.';
             successMessageElement.style.display = 'none';
             errorMessageElement.style.display = 'block';
-        } else if (data.toLowerCase() === 'true') {
-            successMessageElement.textContent = 'The vehicle was found. The parking fee has been paid.';
+        } else if (data.success === true) {
+            // Display the additional info from the server response
+            const licensePlate = data.licensePlate || licensePlateInput.value;
+            const dateTime = data.dateTime || new Date().toLocaleString();
+
+            // Modify the success message to reflect the entry time to the parking lot
+            successMessageElement.textContent = `The vehicle with license plate number ${licensePlate} was found. The parking fee has been paid. The vehicle entered the parking lot on ${dateTime}.`;
             errorMessageElement.style.display = 'none';
             successMessageElement.style.display = 'block';
         } else {
@@ -102,3 +103,4 @@ function handleServerResponse(data) {
         }
     }, 1000);
 }
+

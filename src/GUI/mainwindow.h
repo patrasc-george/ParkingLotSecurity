@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "vehiclemanager.h"
-#include "statisticswindow.h"
 
 #include <fstream>
 #include <QApplication>
@@ -30,7 +29,7 @@ private slots:
 
 	void uploadImage();
 
-	void displayImage(QListWidgetItem* item);
+	void showImage(QListWidgetItem* item);
 
 	void setName(const QString& name);
 
@@ -41,6 +40,8 @@ private slots:
 	void search(QString text);
 
 	void updateOccupancyStatistics(const std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
+
+	void showSubscriptions();
 
 	void showStatistics();
 
@@ -82,6 +83,7 @@ private:
 	QListWidget* historyLogListWidget;
 	QPushButton* enterButton;
 	QPushButton* exitButton;
+	QPushButton* subscriptionsButton;
 	QPushButton* statisticsButton;
 	QLineEdit* nameEdit;
 	QLineEdit* parkingLotsEdit;

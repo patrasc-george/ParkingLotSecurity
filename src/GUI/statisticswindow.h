@@ -11,7 +11,7 @@ class StatisticsWindow : public QWidget
 	Q_OBJECT
 
 public:
-	StatisticsWindow(const std::vector<std::vector<int>>& occupancyStatistics, const std::vector<std::vector<int>>& entriesStatistics, const std::vector<std::vector<int>>& exitStatistics, QWidget* parent = nullptr);
+	StatisticsWindow(const std::vector<std::vector<int>>& occupancyStatistics, const std::vector<std::vector<int>>& entriesStatistics, const std::vector<std::vector<int>>& exitStatistics, const QSize& buttonSize, QWidget* parent = nullptr);
 
 private slots:
 	void setTable(const int& choice);

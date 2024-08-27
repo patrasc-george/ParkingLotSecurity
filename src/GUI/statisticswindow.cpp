@@ -5,7 +5,7 @@
 #include <QLabel>
 #include <QComboBox>
 
-StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupancyStatistics, const std::vector<std::vector<int>>& entriesStatistics, const std::vector<std::vector<int>>& exitStatistics, QWidget* parent) :
+StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupancyStatistics, const std::vector<std::vector<int>>& entriesStatistics, const std::vector<std::vector<int>>& exitStatistics, const QSize& buttonSize, QWidget* parent) :
 	occupancyStatistics(occupancyStatistics),
 	entriesStatistics(entriesStatistics),
 	exitStatistics(exitStatistics),
@@ -23,21 +23,20 @@ StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupanc
 	chooseTable->addItem(tr("Occupancy"));
 	chooseTable->addItem(tr("Entries"));
 	chooseTable->addItem(tr("Exits"));
-	chooseTable->setFixedSize(100, 30);
+	chooseTable->setFixedSize(buttonSize);
 
 	QPushButton* closeButton = new QPushButton(tr("Close"), this);
-	closeButton->setFixedSize(100, 30);
+	closeButton->setFixedSize(buttonSize);
 
 	layout->addWidget(chooseTable);
 	layout->addWidget(table);
 	layout->addWidget(closeButton, 0, Qt::AlignCenter);
 
 	setTable(0);
+	setLayout(layout);
 
 	connect(chooseTable, &QComboBox::currentIndexChanged, this, &StatisticsWindow::setTable);
 	connect(closeButton, &QPushButton::clicked, this, &StatisticsWindow::close);
-
-	setLayout(layout);
 }
 
 void StatisticsWindow::normalize(const std::vector<std::vector<int>>& statistics, std::vector<std::vector<double>>& normalizedStatistics)

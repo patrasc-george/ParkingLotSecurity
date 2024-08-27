@@ -55,6 +55,10 @@ public:
 
 	void setName(const std::string& name);
 
+	std::unordered_map<std::string, std::vector<std::string>> getSubscriptions() const;
+
+	void setSubscriptions(const std::unordered_map<std::string, std::vector<std::string>>& subscriptions);
+
 	void increaseOccupancyStatistics(const int& day, const int& hour);
 
 	void increaseEntranceStatistics(const int& day, const int& hour);
@@ -74,6 +78,7 @@ private:
 	std::vector<Vehicle> vehicles;
 	QRCode qr;
 	std::string name;
+	std::unordered_map<std::string, std::vector<std::string>> subscriptions;
 	std::vector<std::vector<int>> occupancyStatistics;
 	std::vector<std::vector<int>> entranceStatistics;
 	std::vector<std::vector<int>> exitStatistics;

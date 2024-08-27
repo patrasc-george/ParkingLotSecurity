@@ -1,4 +1,6 @@
 ﻿#include "mainwindow.h"
+#include "subscriptionswindow.h"
+#include "statisticswindow.h"
 #include "uploadqrwindow.h"
 #include "unpaidwindow.h"
 
@@ -38,13 +40,14 @@ void MainWindow::setupUI()
 
 	connect(enterButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
 	connect(exitButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
-	connect(entriesListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
-	connect(exitsListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
-	connect(historyLogListWidget, &QListWidget::itemClicked, this, &MainWindow::displayImage);
+	connect(entriesListWidget, &QListWidget::itemClicked, this, &MainWindow::showImage);
+	connect(exitsListWidget, &QListWidget::itemClicked, this, &MainWindow::showImage);
+	connect(historyLogListWidget, &QListWidget::itemClicked, this, &MainWindow::showImage);
 	connect(nameEdit, &QLineEdit::textChanged, this, &MainWindow::setName);
 	connect(parkingLotsEdit, &QLineEdit::textChanged, this, &MainWindow::setNumberParkingLots);
 	connect(feeEdit, &QLineEdit::textChanged, this, &MainWindow::setFee);
 	connect(historyLogEdit, &QLineEdit::textChanged, this, &MainWindow::search);
+	connect(subscriptionsButton, &QPushButton::clicked, this, &MainWindow::showSubscriptions);
 	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
 	connect(chooseLanguage, &QComboBox::currentIndexChanged, this, &MainWindow::setLanguage);
 
@@ -81,6 +84,13 @@ void MainWindow::setupButtons()
 	exitButton->setIcon(QIcon(exitPixmap));
 	exitButton->setIconSize(exitPixmap.size() / 5);
 	exitButton->setFixedSize(exitPixmap.size() / 5);
+
+	subscriptionsButton = new QPushButton(this);
+	std::string subscriptionsPath = dataBasePath + tr("subscriptions.png").toStdString();
+	QPixmap subscriptionsPixmap(subscriptionsPath.c_str());
+	subscriptionsButton->setIcon(QIcon(subscriptionsPixmap));
+	subscriptionsButton->setIconSize(subscriptionsPixmap.size() / 5);
+	subscriptionsButton->setFixedSize(subscriptionsPixmap.size() / 5);
 
 	statisticsButton = new QPushButton(this);
 	std::string statisticsPath = dataBasePath + tr("statistics.png").toStdString();
@@ -165,6 +175,7 @@ void MainWindow::setupLayouts()
 	historyLogLayout->addWidget(historyLogLabel);
 	historyLogLayout->addWidget(historyLogEdit);
 	historyLogLayout->addWidget(historyLogListWidget);
+	historyLogLayout->addWidget(subscriptionsButton, 0, Qt::AlignCenter);
 
 	QHBoxLayout* listsLayout = new QHBoxLayout();
 	listsLayout->addLayout(entriesLayout);
@@ -366,7 +377,7 @@ void MainWindow::uploadImage()
 	processLastVehicle();
 }
 
-void MainWindow::displayImage(QListWidgetItem* item)
+void MainWindow::showImage(QListWidgetItem* item)
 {
 	int id = item->data(Qt::UserRole).toInt();
 	image.load(QString::fromStdString(vehicleManager.getImagePath(id)));
@@ -425,13 +436,25 @@ void MainWindow::updateOccupancyStatistics(const std::vector<std::pair<std::stri
 	}
 }
 
+void MainWindow::showSubscriptions()
+{
+	SubscriptionsWindow* subscriptionsWindow = new SubscriptionsWindow(vehicleManager.getSubscriptions(), enterButton->size(), this);
+
+	connect(subscriptionsWindow, &SubscriptionsWindow::getSubscriptions,
+		[this](const std::unordered_map<std::string, std::vector<std::string>>& subscriptions) {
+			vehicleManager.setSubscriptions(subscriptions);
+		});
+
+	subscriptionsWindow->show();
+}
+
 void MainWindow::showStatistics()
 {
 	std::vector<std::pair<std::string, std::string>> occupancyDateTimes;
 	vehicleManager.calculateOccupancyStatistics(occupancyDateTimes);
 	updateOccupancyStatistics(occupancyDateTimes);
 
-	StatisticsWindow* statisticsWindow = new StatisticsWindow(vehicleManager.getOccupancyStatistics(), vehicleManager.getEntranceStatistics(), vehicleManager.getExitStatistics());
+	StatisticsWindow* statisticsWindow = new StatisticsWindow(vehicleManager.getOccupancyStatistics(), vehicleManager.getEntranceStatistics(), vehicleManager.getExitStatistics(), enterButton->size());
 
 	statisticsWindow->show();
 }

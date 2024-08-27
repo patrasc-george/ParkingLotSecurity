@@ -4,67 +4,62 @@
   <context>
     <name>MainWindow</name>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="69"/>
       <source>entrance.png</source>
       <translation>entrance.png</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="76"/>
       <source>exit.png</source>
       <translation>exit.png</translation>
     </message>
+	<message>
+      <source>subscriptions.png</source>
+      <translation>subscriptions.png</translation>
+    </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="83"/>
       <source>statistics.png</source>
       <translation>statistics.png</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="89"/>
       <source>Entries</source>
       <translation>Entries</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="93"/>
       <source>Exits</source>
       <translation>Exits</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="97"/>
       <source>History Log</source>
       <translation>History Log</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="101"/>
+      <source>Name:</source>
+      <translation>Name:</translation>
+    </message>
+    <message>
       <source>Capacity:</source>
       <translation>Capacity:</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="102"/>
       <source>Occupancy:</source>
       <translation>Occupancy:</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="103"/>
       <source>Fee:</source>
       <translation>Fee:</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="254"/>
       <source>Parking Full</source>
       <translation>Parking Full</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="254"/>
       <source>All parking lots are occupied.</source>
       <translation>All parking lots are occupied.</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="260"/>
       <source>No Vehicles</source>
       <translation>No Vehicles</translation>
     </message>
     <message>
-      <location filename="../src/GUI/mainwindow.cpp" line="260"/>
       <source>There are no vehicles in the parking lot.</source>
       <translation>There are no vehicles in the parking lot.</translation>
     </message>
@@ -73,62 +68,50 @@
   <context>
     <name>StatisticsWindow</name>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="14"/>
       <source>Statistics</source>
       <translation>Statistics</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="23"/>
       <source>Occupancy</source>
       <translation>Occupancy</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="24"/>
       <source>Entries</source>
       <translation>Entries</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="25"/>
       <source>Exits</source>
       <translation>Exits</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="28"/>
       <source>Close</source>
       <translation>Close</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Monday</source>
       <translation>Monday</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Tuesday</source>
       <translation>Tuesday</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Wednesday</source>
       <translation>Wednesday</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Thursday</source>
       <translation>Thursday</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Friday</source>
       <translation>Friday</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Saturday</source>
       <translation>Saturday</translation>
     </message>
     <message>
-      <location filename="../src/GUI/statisticswindow.cpp" line="62"/>
       <source>Sunday</source>
       <translation>Sunday</translation>
     </message>
@@ -137,22 +120,18 @@
   <context>
     <name>UploadQRWindow</name>
     <message>
-      <location filename="../src/GUI/uploadqrwindow.cpp" line="13"/>
       <source>Upload QR</source>
       <translation>Upload QR</translation>
     </message>
     <message>
-      <location filename="../src/GUI/uploadqrwindow.cpp" line="19"/>
       <source>The license plate number was not recognized. Please upload the QR code.</source>
       <translation>The license plate number was not recognized. Please upload the QR code.</translation>
     </message>
     <message>
-      <location filename="../src/GUI/uploadqrwindow.cpp" line="21"/>
       <source>Upload</source>
       <translation>Upload</translation>
     </message>
     <message>
-      <location filename="../src/GUI/uploadqrwindow.cpp" line="22"/>
       <source>Cancel</source>
       <translation>Cancel</translation>
     </message>
@@ -161,17 +140,34 @@
   <context>
     <name>UnpaidWindow</name>
     <message>
-      <location filename="../src/GUI/unpaidwindow.cpp" line="13"/>
       <source>Unpaid</source>
       <translation>Unpaid</translation>
     </message>
     <message>
-      <location filename="../src/GUI/unpaidwindow.cpp" line="19"/>
       <source>The parking fee was not paid.</source>
       <translation>The parking fee was not paid.</translation>
     </message>
     <message>
-      <location filename="../src/GUI/unpaidwindow.cpp" line="21"/>
+      <source>Close</source>
+      <translation>Close</translation>
+    </message>
+  </context>
+  
+  <context>
+    <name>SubscriptionsWindow</name>
+    <message>
+      <source>Subscriptions</source>
+      <translation>Subscriptions</translation>
+    </message>
+    <message>
+      <source>Vehicles</source>
+      <translation>Vehicles</translation>
+    </message>
+    <message>
+      <source>Add</source>
+      <translation>Add</translation>
+    </message>
+    <message>
       <source>Close</source>
       <translation>Close</translation>
     </message>

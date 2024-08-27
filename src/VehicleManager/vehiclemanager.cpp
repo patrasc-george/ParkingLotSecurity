@@ -329,6 +329,16 @@ void VehicleManager::setName(const std::string& name)
 	this->name = name;
 }
 
+std::unordered_map<std::string, std::vector<std::string>> VehicleManager::getSubscriptions() const
+{
+	return subscriptions;
+}
+
+void VehicleManager::setSubscriptions(const std::unordered_map<std::string, std::vector<std::string>>& subscriptions)
+{
+	this->subscriptions = subscriptions;
+}
+
 void VehicleManager::increaseOccupancyStatistics(const int& day, const int& hour)
 {
 	occupancyStatistics[day - 1][hour]++;

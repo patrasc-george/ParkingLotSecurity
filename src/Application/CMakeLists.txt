@@ -39,6 +39,7 @@ file(GLOB DATABASE
 	"${CMAKE_SOURCE_DIR}/database/*.png" 
 	"${CMAKE_SOURCE_DIR}/database/I.jpg" 
 	"${CMAKE_SOURCE_DIR}/database/vehicles.txt"
+	"${CMAKE_SOURCE_DIR}/database/subscriptions.txt"
 	)
 install(FILES ${DATABASE} DESTINATION "${CMAKE_SOURCE_DIR}/DeliveryPack/database")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/DeliveryPack/database/vehicles")

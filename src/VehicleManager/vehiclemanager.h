@@ -28,6 +28,8 @@ public:
 
 	void uploadVehicles(std::unordered_map<int, std::string>& entriesList, std::unordered_map<int, std::string>& exitsList);
 
+	void uploadSubscriptions();
+
 	void setNumberOccupiedParkingLots(int& numberOccupiedParkingLots);
 
 	void getVehicle(const std::string& imagePath, std::string& savePath);

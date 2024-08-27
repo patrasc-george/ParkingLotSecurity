@@ -72,6 +72,26 @@ void VehicleManager::uploadVehicles(std::unordered_map<int, std::string>& entrie
 	}
 }
 
+void VehicleManager::uploadSubscriptions()
+{
+	std::ifstream readFile(dataBasePath + "subscriptions.txt");
+
+	std::vector<std::string> subscritionData;
+	std::string line;
+	while (std::getline(readFile, line))
+		if (line.empty())
+		{
+			subscriptions[subscritionData[0]] = std::vector<std::string>();
+
+			for (int i = 1; i < subscritionData.size(); i++)
+				subscriptions[subscritionData[0]].push_back(subscritionData[i]);
+
+			subscritionData.clear();
+		}
+		else
+			subscritionData.push_back(line);
+}
+
 void VehicleManager::setNumberOccupiedParkingLots(int& numberOccupiedParkingLots)
 {
 	for (const auto& vehicle : vehiclesStatus)
@@ -337,6 +357,18 @@ std::unordered_map<std::string, std::vector<std::string>> VehicleManager::getSub
 void VehicleManager::setSubscriptions(const std::unordered_map<std::string, std::vector<std::string>>& subscriptions)
 {
 	this->subscriptions = subscriptions;
+
+	std::ofstream subscriptionsFile(dataBasePath + "subscriptions.txt", std::ios::out | std::ios::trunc);
+
+	for (const auto& subscription : subscriptions)
+	{
+		subscriptionsFile << subscription.first << std::endl;
+
+		for (const auto& vehicle : subscription.second)
+			subscriptionsFile << vehicle << std::endl;
+
+		subscriptionsFile << std::endl;
+	}
 }
 
 void VehicleManager::increaseOccupancyStatistics(const int& day, const int& hour)

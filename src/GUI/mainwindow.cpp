@@ -245,6 +245,8 @@ void MainWindow::uploadDataBase()
 		exitsListWidget->addItem(item);
 	}
 
+	vehicleManager.uploadSubscriptions();
+
 	vehicleManager.setNumberOccupiedParkingLots(numberOccupiedParkingLots);
 	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
 }

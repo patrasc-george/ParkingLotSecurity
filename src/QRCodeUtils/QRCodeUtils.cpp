@@ -38,9 +38,10 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 	double fontScale = scale / 10.0;
 	int thickness = scale / 3;
 
-	cv::Size nameSize = cv::getTextSize(name, cv::FONT_HERSHEY_SIMPLEX, fontScale * 1.5, thickness * 1.5, nullptr);
+	cv::Size nameSize = cv::getTextSize(name, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
 	int nameX = (width - nameSize.width) / 2;
-	cv::putText(ticket, name, cv::Point(nameX, qrY / 2), cv::FONT_HERSHEY_SIMPLEX, fontScale * 1.5, cv::Scalar(0), thickness * 1.5);
+	int nameY = (qrY + nameSize.height) / 2;
+	cv::putText(ticket, name, cv::Point(nameX, nameY), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
 
 	cv::Size licensePlateSize = cv::getTextSize(licensePlate, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
 	int licensePlateX = (width - licensePlateSize.width) / 2;

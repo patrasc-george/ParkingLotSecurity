@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "vehiclemanager.h"
+#include "subscriptionmanager.h"
 
 #include <fstream>
 #include <QApplication>
@@ -93,6 +94,7 @@ private:
 	QComboBox* chooseLanguage;
 	QImage image;
 	VehicleManager& vehicleManager;
+	SubscriptionManager* subscriptionManager;
 	std::string dataBasePath;
 	std::string translationsPath;
 	bool pressedButton;

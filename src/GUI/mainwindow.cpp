@@ -53,6 +53,9 @@ void MainWindow::setupUI()
 
 	vehicleManager.setDataBasePath(dataBasePath);
 	uploadDataBase();
+
+	subscriptionManager = vehicleManager.getSubscriptionManager();
+	subscriptionManager->uploadSubscriptions(dataBasePath);
 }
 
 void MainWindow::isDevelopment()
@@ -244,8 +247,6 @@ void MainWindow::uploadDataBase()
 		item->setData(Qt::UserRole, pair.first);
 		exitsListWidget->addItem(item);
 	}
-
-	vehicleManager.uploadSubscriptions();
 
 	vehicleManager.setNumberOccupiedParkingLots(numberOccupiedParkingLots);
 	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
@@ -440,13 +441,7 @@ void MainWindow::updateOccupancyStatistics(const std::vector<std::pair<std::stri
 
 void MainWindow::showSubscriptions()
 {
-	SubscriptionsWindow* subscriptionsWindow = new SubscriptionsWindow(vehicleManager.getSubscriptions(), enterButton->size(), this);
-
-	connect(subscriptionsWindow, &SubscriptionsWindow::getSubscriptions,
-		[this](const std::unordered_map<std::string, std::vector<std::string>>& subscriptions) {
-			vehicleManager.setSubscriptions(subscriptions);
-		});
-
+	SubscriptionsWindow* subscriptionsWindow = new SubscriptionsWindow(subscriptionManager, enterButton->size(), this);
 	subscriptionsWindow->show();
 }
 

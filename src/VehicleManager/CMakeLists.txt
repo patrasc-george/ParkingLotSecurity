@@ -1,6 +1,8 @@
 project(VehicleManager)
 
 add_definitions(-DVEHICLEMANAGER_EXPORTS)
+add_definitions(-DSUBSCRIPTION_EXPORTS)
+add_definitions(-DSUBSCRIPTIONMANAGER_EXPORTS)
 
 file(GLOB HEADER_FILES "*.h")
 file(GLOB SOURCE_FILES "*.cpp")

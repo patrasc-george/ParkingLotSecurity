@@ -1,5 +1,7 @@
 #include "vehiclemanager.h"
 
+#include <iomanip>
+
 VehicleManager& VehicleManager::getInstance()
 {
 	static VehicleManager instance;
@@ -8,8 +10,10 @@ VehicleManager& VehicleManager::getInstance()
 
 void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes)
 {
-	writeFile = std::ofstream(dataBasePath + "vehicles.txt", std::ios::app);
+	subscriptionManager = new SubscriptionManager();
+
 	std::ifstream readFile(dataBasePath + "vehicles.txt");
+	writeFile = std::ofstream(dataBasePath + "vehicles.txt", std::ios::app);
 
 	entranceStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
 	exitStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
@@ -44,8 +48,6 @@ void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes,
 		else
 			vehicleData.push_back(line);
 	}
-
-	readFile.close();
 }
 
 void VehicleManager::uploadVehicles(std::unordered_map<int, std::string>& entriesList, std::unordered_map<int, std::string>& exitsList)
@@ -72,26 +74,6 @@ void VehicleManager::uploadVehicles(std::unordered_map<int, std::string>& entrie
 	}
 }
 
-void VehicleManager::uploadSubscriptions()
-{
-	std::ifstream readFile(dataBasePath + "subscriptions.txt");
-
-	std::vector<std::string> subscritionData;
-	std::string line;
-	while (std::getline(readFile, line))
-		if (line.empty())
-		{
-			subscriptions[subscritionData[0]] = std::vector<std::string>();
-
-			for (int i = 1; i < subscritionData.size(); i++)
-				subscriptions[subscritionData[0]].push_back(subscritionData[i]);
-
-			subscritionData.clear();
-		}
-		else
-			subscritionData.push_back(line);
-}
-
 void VehicleManager::setNumberOccupiedParkingLots(int& numberOccupiedParkingLots)
 {
 	for (const auto& vehicle : vehiclesStatus)
@@ -105,8 +87,8 @@ void VehicleManager::getVehicle(const std::string& imagePath, std::string& saveP
 
 	std::string text = textFromImage(imagePath, savePath);
 
-	size_t plate = text.find('\n');
-	size_t dateTime = text.find('\n', plate + 1);
+	int plate = text.find('\n');
+	int dateTime = text.find('\n', plate + 1);
 
 	curentVehicle = Vehicle(vehicles.size(), savePath, text.substr(0, plate), text.substr(plate + 1, dateTime - plate - 1));
 }
@@ -153,7 +135,7 @@ std::string VehicleManager::timeParked()
 		}
 	}
 
-	if (!auxVehicle->getIsPaid())
+	if (!auxVehicle->getIsPaid() && !subscriptionManager->checkSubscription(curentVehicle.getLicensePlate()))
 		return "unpaid";
 
 	if (auxVehicle->getLicensePlate() != "N/A")
@@ -292,9 +274,9 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 
 bool VehicleManager::pay(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket)
 {
-	curentVehicle = Vehicle();
-
+	std::ifstream readFile(dataBasePath + "vehicles.txt");
 	Vehicle* auxVehicle;
+	curentVehicle = Vehicle();
 
 	if (isTicket)
 	{
@@ -311,7 +293,6 @@ bool VehicleManager::pay(const std::string& vehicle, std::string& licensePlate, 
 	licensePlate = auxVehicle->getLicensePlate();
 	dateTime = auxVehicle->getDateTime();
 
-	std::ifstream readFile(dataBasePath + "vehicles.txt");
 	std::vector<std::string> lines;
 	std::string line;
 	while (std::getline(readFile, line))
@@ -327,6 +308,75 @@ bool VehicleManager::pay(const std::string& vehicle, std::string& licensePlate, 
 		writeFile << line << std::endl;
 
 	return true;
+}
+
+std::vector<std::vector<std::string>> VehicleManager::subscriptionVehicles(const Subscription& subscription)
+{
+	std::vector<std::vector<std::string>> subscribedVehicles(subscription.getVehicles().size());
+
+	for (int i = 0; i < subscription.getVehicles().size(); i++)
+	{
+		std::string licensePlate = subscription.getVehicles()[i];
+		bool lastActivity = false;
+		int totalSeconds = 0;
+		int payment = 0;
+		bool status = false;
+
+		subscribedVehicles[i].push_back(licensePlate);
+
+		for (int j = vehicles.size() - 1; j >= 0; j--)
+		{
+			if (vehicles[j].getLicensePlate() == licensePlate)
+			{
+				if (!lastActivity)
+				{
+					if (vehicles[j].getTimeParked().empty())
+					{
+						subscribedVehicles[i].push_back("from " + vehicles[j].getDateTime());
+						status = true;
+					}
+					else
+						subscribedVehicles[i].push_back("from " + vehicles[j].getTicket() + " to " + vehicles[j].getDateTime());
+
+					lastActivity = true;
+				}
+
+				if (!vehicles[j].getTimeParked().empty())
+				{
+					int hours, minutes, seconds;
+					std::string time = vehicles[j].getTimeParked();
+
+					std::replace(time.begin(), time.end(), ':', ' ');
+					std::istringstream ss(time);
+					ss >> hours >> minutes >> seconds;
+
+					totalSeconds += hours * 3600 + minutes * 60 + seconds;
+					payment += vehicles[j].getTotalAmount();
+				}
+			}
+		}
+
+		std::tm timeParked = {};
+		timeParked.tm_hour = totalSeconds / 3600;
+		timeParked.tm_min = (totalSeconds % 3600) / 60;
+		timeParked.tm_sec = totalSeconds % 60;
+
+		std::ostringstream ss;
+		ss << std::setw(2) << std::setfill('0') << timeParked.tm_hour << ":"
+			<< std::setw(2) << std::setfill('0') << timeParked.tm_min << ":"
+			<< std::setw(2) << std::setfill('0') << timeParked.tm_sec;
+		subscribedVehicles[i].push_back(ss.str());
+
+		subscribedVehicles[i].push_back(std::to_string(payment) + " RON");
+
+		if (status)
+			subscribedVehicles[i].push_back("Active");
+		else
+			subscribedVehicles[i].push_back("Inactive");
+
+	}
+
+	return subscribedVehicles;
 }
 
 std::string VehicleManager::getDataBasePath() const
@@ -349,26 +399,9 @@ void VehicleManager::setName(const std::string& name)
 	this->name = name;
 }
 
-std::unordered_map<std::string, std::vector<std::string>> VehicleManager::getSubscriptions() const
+SubscriptionManager* VehicleManager::getSubscriptionManager() const
 {
-	return subscriptions;
-}
-
-void VehicleManager::setSubscriptions(const std::unordered_map<std::string, std::vector<std::string>>& subscriptions)
-{
-	this->subscriptions = subscriptions;
-
-	std::ofstream subscriptionsFile(dataBasePath + "subscriptions.txt", std::ios::out | std::ios::trunc);
-
-	for (const auto& subscription : subscriptions)
-	{
-		subscriptionsFile << subscription.first << std::endl;
-
-		for (const auto& vehicle : subscription.second)
-			subscriptionsFile << vehicle << std::endl;
-
-		subscriptionsFile << std::endl;
-	}
+	return subscriptionManager;
 }
 
 void VehicleManager::increaseOccupancyStatistics(const int& day, const int& hour)

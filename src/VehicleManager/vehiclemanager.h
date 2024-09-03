@@ -7,6 +7,7 @@
 #endif
 
 #include "vehicle.h"
+#include "subscriptionmanager.h"
 #include "ImageProcessingUtils.h"
 #include "QRCodeUtils.h"
 
@@ -28,8 +29,6 @@ public:
 
 	void uploadVehicles(std::unordered_map<int, std::string>& entriesList, std::unordered_map<int, std::string>& exitsList);
 
-	void uploadSubscriptions();
-
 	void setNumberOccupiedParkingLots(int& numberOccupiedParkingLots);
 
 	void getVehicle(const std::string& imagePath, std::string& savePath);
@@ -48,6 +47,8 @@ public:
 
 	bool pay(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket = false);
 
+	std::vector<std::vector<std::string>> subscriptionVehicles(const Subscription& subscription);
+
 public:
 	std::string getDataBasePath() const;
 
@@ -57,9 +58,7 @@ public:
 
 	void setName(const std::string& name);
 
-	std::unordered_map<std::string, std::vector<std::string>> getSubscriptions() const;
-
-	void setSubscriptions(const std::unordered_map<std::string, std::vector<std::string>>& subscriptions);
+	SubscriptionManager* getSubscriptionManager() const;
 
 	void increaseOccupancyStatistics(const int& day, const int& hour);
 
@@ -78,9 +77,9 @@ private:
 	std::ofstream writeFile;
 	Vehicle curentVehicle;
 	std::vector<Vehicle> vehicles;
+	SubscriptionManager* subscriptionManager;
 	QRCode qr;
 	std::string name;
-	std::unordered_map<std::string, std::vector<std::string>> subscriptions;
 	std::vector<std::vector<int>> occupancyStatistics;
 	std::vector<std::vector<int>> entranceStatistics;
 	std::vector<std::vector<int>> exitStatistics;

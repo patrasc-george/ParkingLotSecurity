@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <div class="container">
+        <p id="errorMessage" style="color:red;"></p>
+        
+        <label for="name">Name:</label>
+        <input id="name" type="text" required />
+        
+        <label for="password">Password:</label>
+        <input id="password" type="password" required />
+
+        <button id="loginButton">Login</button>
+
+        <p>Do you want to create a new subscription? <a href="create_subscription.html" id="createNewSubscriptionLink">Create a new subscription</a></p>
+    </div>
+
+    <script src="scripts/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <div class="container full-width">
+		<p id="tableErrorMessage" style="color:red;"></p>
+
+        <table id="vehiclesTable">
+            <thead>
+                <tr>
+                    <th>License Plate Number</th>
+                    <th>Last Activity</th>
+                    <th>Time Parked</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <div class="buttons">
+            <button id="addButton">Add</button>
+            <button id="editButton" disabled>Edit</button>
+            <button id="deleteButton" disabled>Delete</button>
+        </div>
+    </div>
+
+    <script src="scripts/subscription.js"></script>
+</body>
+</html>

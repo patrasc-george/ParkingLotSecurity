@@ -10,21 +10,28 @@ SubscriptionsWindow::SubscriptionsWindow(SubscriptionManager* subscriptionManage
 	QWidget(parent)
 {
 	setWindowTitle(tr("Subscriptions"));
-	setFixedSize(500, 600);
+	setFixedSize(800, 600);
 
 	setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
 
+	accountsListWidget = new QListWidget(this);
 	subscriptionsListWidget = new QListWidget(this);
 	vehiclesListWidget = new QListWidget(this);
 
+	QLabel* accountsLabel = new QLabel(tr("Accounts"), this);
 	QLabel* subscriptionsLabel = new QLabel(tr("Subscriptions"), this);
 	QLabel* vehiclesLabel = new QLabel(tr("Vehicles"), this);
 
+	accountsLabel->setAlignment(Qt::AlignCenter);
 	subscriptionsLabel->setAlignment(Qt::AlignCenter);
 	vehiclesLabel->setAlignment(Qt::AlignCenter);
 
 	QPushButton* closeButton = new QPushButton(tr("Close"), this);
 	closeButton->setFixedSize(buttonSize);
+
+	QVBoxLayout* accountsLayout = new QVBoxLayout();
+	accountsLayout->addWidget(accountsLabel);
+	accountsLayout->addWidget(accountsListWidget);
 
 	QVBoxLayout* subscriptionsLayout = new QVBoxLayout();
 	subscriptionsLayout->addWidget(subscriptionsLabel);
@@ -35,6 +42,7 @@ SubscriptionsWindow::SubscriptionsWindow(SubscriptionManager* subscriptionManage
 	vehiclesLayout->addWidget(vehiclesListWidget);
 
 	QHBoxLayout* listsLayout = new QHBoxLayout();
+	listsLayout->addLayout(accountsLayout);
 	listsLayout->addLayout(subscriptionsLayout);
 	listsLayout->addLayout(vehiclesLayout);
 
@@ -44,10 +52,29 @@ SubscriptionsWindow::SubscriptionsWindow(SubscriptionManager* subscriptionManage
 
 	setLayout(mainLayout);
 
-	connect(subscriptionsListWidget, &QListWidget::itemClicked, this, &SubscriptionsWindow::showVehicles);
+	connect(accountsListWidget, &QListWidget::itemClicked, this, &SubscriptionsWindow::showSubscriptions);
+	connect(subscriptionsListWidget, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
+		showVehicles(accountsListWidget->currentItem(), item);
+		});
 	connect(closeButton, &QPushButton::clicked, this, &SubscriptionsWindow::closeWindow);
 
-	for (const auto& subscription : subscriptionManager->getSubscriptions())
+	for (const auto& account : subscriptionManager->getAccounts())
+	{
+		QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(account.first.getEmail()));
+		item->setData(Qt::UserRole, QString::fromStdString(account.first.getEmail()));
+		accountsListWidget->addItem(item);
+	}
+}
+
+void SubscriptionsWindow::showSubscriptions(QListWidgetItem* item)
+{
+	std::string email = item->data(Qt::UserRole).toString().toStdString();
+	Account* account = subscriptionManager->getAccount(email);
+
+	subscriptionsListWidget->clear();
+	vehiclesListWidget->clear();
+
+	for (const auto& subscription : *subscriptionManager->getSubscriptions(*account))
 	{
 		QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(subscription.getName()));
 		item->setData(Qt::UserRole, QString::fromStdString(subscription.getName()));
@@ -55,16 +82,23 @@ SubscriptionsWindow::SubscriptionsWindow(SubscriptionManager* subscriptionManage
 	}
 }
 
-void SubscriptionsWindow::showVehicles(QListWidgetItem* item)
+void SubscriptionsWindow::showVehicles(QListWidgetItem* accountsItem, QListWidgetItem* subscriptionItem)
 {
-	std::string name = item->data(Qt::UserRole).toString().toStdString();
-	Subscription subscription = subscriptionManager->find(name);
+	std::string email = accountsItem->data(Qt::UserRole).toString().toStdString();
+	Account* account = subscriptionManager->getAccount(email);
+
+	std::string name = subscriptionItem->data(Qt::UserRole).toString().toStdString();
+	Subscription* subscription = subscriptionManager->getSubscription(*account, name);
 
 	vehiclesListWidget->clear();
-	for (const auto& vehicle : subscription.getVehicles())
+
+	if (subscription)
 	{
-		QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(vehicle));
-		vehiclesListWidget->addItem(item);
+		for (const auto& vehicle : subscription->getVehicles())
+		{
+			QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(vehicle));
+			vehiclesListWidget->addItem(item);
+		}
 	}
 }
 

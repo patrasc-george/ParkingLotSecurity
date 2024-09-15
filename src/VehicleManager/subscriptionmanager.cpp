@@ -4,89 +4,169 @@
 #include <iomanip>
 #include <sstream>
 
+inline std::vector<std::string> split(const std::string& string, const std::string& delimiter)
+{
+	if (string.empty())
+		return std::vector<std::string>();
+
+	std::vector<std::string> substrings;
+	std::string::size_type start = 0;
+	std::string::size_type end = string.find(delimiter);
+
+	while (end != std::string::npos)
+	{
+		substrings.push_back(string.substr(start, end - start));
+		start = end + delimiter.length();
+		end = string.find(delimiter, start);
+	}
+
+	substrings.push_back(string.substr(start));
+	return substrings;
+}
+
 void SubscriptionManager::uploadSubscriptions(const std::string& dataBasePath)
 {
-	this->dataBasePath = dataBasePath;
+	std::vector<std::string> accountsData = databaseManager.getAccounts();
 
-	std::ifstream readFile(dataBasePath + "subscriptions.txt");
-	std::ofstream writeFile(dataBasePath + "subscriptions.txt", std::ios::app);
+	for (const auto& accountData : accountsData)
+	{
+		std::vector<std::string> data;
 
-	std::vector<std::string> subscritionData;
-	std::string line;
-	while (std::getline(readFile, line))
-		if (line.empty())
+		data = split(accountData, ", ");
+		Account account(data[0], data[1]);
+		accounts[account] = {};
+
+		std::unordered_map<std::string, std::pair<std::string, std::string>> subscriptionsData = databaseManager.getSubscriptions(account.getEmail());
+		for (const auto& subscriptionData : subscriptionsData)
 		{
-			Subscription subscription(subscritionData[0], subscritionData[1], subscritionData[2]);
+			Subscription subscription(subscriptionData.first);
 
-			for (int i = 3; i < subscritionData.size(); i++)
-				subscription.addVehicle(subscritionData[i]);
+			data = split(subscriptionData.second.first, ", ");
+			for (const auto& dateTime : data)
+				subscription.addDateTime(dateTime);
 
-			subscriptions.push_back(subscription);
-			subscritionData.clear();
+			data = split(subscriptionData.second.second, ", ");
+			for (const auto& vehicle : data)
+				subscription.addVehicle(vehicle);
+
+			accounts[account].push_back(subscription);
 		}
-		else
-			subscritionData.push_back(line);
-
-	readFile.close();
-	writeFile.close();
+	}
 }
 
 bool SubscriptionManager::checkSubscription(const std::string& licensePlate)
 {
-	for (const auto& subscription : subscriptions)
-		for (const auto& vehicle : subscription.getVehicles())
-			if (vehicle == licensePlate)
-				return true;
+	for (const auto& account : accounts)
+		for (const auto& subscription : account.second)
+			for (const auto& vehicle : subscription.getVehicles())
+				if (vehicle == licensePlate)
+					return true;
 
 	return false;
 }
 
-Subscription SubscriptionManager::find(const std::string& name)
+bool SubscriptionManager::verifyCredentials(const std::string& email, const std::string& password)
 {
-	for (const auto& subscription : subscriptions)
-		if (subscription.getName() == name)
-			return subscription;
+	for (const auto& account : accounts)
+		if (account.first.getEmail() == email && account.first.getPassword() == password)
+			return true;
 
-	return Subscription();
+	return nullptr;
 }
 
-bool SubscriptionManager::addSubscription(const std::string& name, const std::string& password)
+std::map<Account, std::vector<Subscription>> SubscriptionManager::getAccounts() const
 {
-	std::ofstream writeFile(dataBasePath + "subscriptions.txt", std::ios::app);
+	return accounts;
+}
 
-	if (find(name).getName() != "")
+Account* SubscriptionManager::getAccount(const std::string& email) const
+{
+	for (const auto& pair : accounts)
+		if (pair.first.getEmail() == email)
+			return const_cast<Account*>(&pair.first);
+
+	return nullptr;
+}
+
+std::vector<Subscription>* SubscriptionManager::getSubscriptions(const Account& account) const
+{
+	for (const auto& pair : accounts)
+		if (pair.first == account)
+			return const_cast<std::vector<Subscription>*>(&pair.second);
+
+	return nullptr;
+}
+
+Subscription* SubscriptionManager::getSubscription(const Account& account, const std::string& name)
+{
+	for (const auto& subscription : accounts[account])
+		if (subscription.getName() == name)
+			return const_cast<Subscription*>(&subscription);
+
+	return nullptr;
+}
+
+bool SubscriptionManager::addAccount(const std::string& email, const std::string& password)
+{
+	if (getAccount(email) != nullptr)
 		return false;
 
-	auto now = std::chrono::system_clock::now();
-	auto toTimeT = std::chrono::system_clock::to_time_t(now);
-
-	std::stringstream ss;
-	ss << std::put_time(std::localtime(&toTimeT), "%d-%m-%Y %X");
-
-	std::string dateTime = ss.str();
-
-	Subscription subscription(name, password, dateTime);
-	subscriptions.push_back(subscription);
-
-	writeFile << name << std::endl;
-	writeFile << password << std::endl;
-	writeFile << dateTime << std::endl;
-
-	writeFile.close();
+	Account account(email, password);
+	accounts[account] = std::vector<Subscription>();
+	databaseManager.addAccount(email, password);
 
 	return true;
 }
 
-bool SubscriptionManager::verifyCredentials(const std::string& name, const std::string& password)
+bool SubscriptionManager::addSubscription(const Account& account, const std::string& name)
 {
-	for (const auto& subscription : subscriptions)
-		if (subscription.getName() == name && subscription.getPassword() == password)
-			return true;
+	if (getSubscription(account, name) != nullptr)
+		return false;
+
+	Subscription subscription(name);
+	accounts[account].push_back(subscription);
+	databaseManager.addSubscription(account.getEmail(), name);
+
+	return true;
+}
+
+bool SubscriptionManager::addVehicle(const Account& account, Subscription& subscription, const std::string& licensePlate)
+{
+	if (!subscription.addVehicle(licensePlate))
+		return false;
+
+	databaseManager.addLicensePlate(account.getEmail(), subscription.getName(), licensePlate);
+
+	return true;
+}
+
+bool SubscriptionManager::deleteSubscription(const Account& account, const std::string& name)
+{
+	auto it = accounts.find(account);
+	if (it == accounts.end())
+		return false;
+
+	auto& subscriptions = it->second;
+	auto subscription = std::remove_if(subscriptions.begin(), subscriptions.end(), [&name](const Subscription& subscription) {
+		return subscription.getName() == name;
+		});
+
+	if (subscription != subscriptions.end())
+	{
+		subscriptions.erase(subscription);
+		databaseManager.deleteSubscription(account.getEmail(), name);
+		return true;
+	}
 
 	return false;
 }
 
-std::vector<Subscription> SubscriptionManager::getSubscriptions() const
+bool SubscriptionManager::deleteVehicle(const Account& account, Subscription& subscription, const std::string& licensePlate)
 {
-	return subscriptions;
+	if (!subscription.deleteVehicle(licensePlate))
+		return false;
+
+	databaseManager.deleteLicensePlate(account.getEmail(), subscription.getName(), licensePlate);
+
+	return true;
 }

@@ -51,7 +51,6 @@ void MainWindow::setupUI()
 	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
 	connect(chooseLanguage, &QComboBox::currentIndexChanged, this, &MainWindow::setLanguage);
 
-	vehicleManager.setDataBasePath(dataBasePath);
 	uploadDataBase();
 
 	subscriptionManager = vehicleManager.getSubscriptionManager();

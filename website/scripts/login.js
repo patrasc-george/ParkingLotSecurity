@@ -42,10 +42,12 @@ function handleServerResponse(data) {
             errorMessageElement.style.display = 'block';
         } else if (data.success === true) {
             errorMessageElement.style.display = 'none';
-            if (data.vehiclesTable) {
-                localStorage.setItem('vehiclesTable', JSON.stringify(data.vehiclesTable));
+            if (data.subscriptionsTable) {
+                localStorage.setItem('subscriptionsTable', JSON.stringify(data.subscriptionsTable));
             }
-            window.location.href = 'subscription.html';
+            localStorage.setItem('subscriptionsData', JSON.stringify(data.subscriptions));
+            localStorage.setItem('name', nameInput.value);
+            window.location.href = 'subscriptions.html';
         } else {
             errorMessageElement.textContent = 'An unexpected response was received. Please try again.';
             errorMessageElement.style.display = 'block';

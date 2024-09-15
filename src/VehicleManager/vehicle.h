@@ -8,7 +8,7 @@ public:
 	Vehicle() = default;
 
 	Vehicle(const int& id, const std::string& path, const std::string& licensePlate, const std::string& dateTime)
-		: id(id), path(path), licensePlate(licensePlate), dateTime(dateTime), isPaid(false) {}
+		: id(id), path(path), licensePlate(licensePlate), dateTime(dateTime), timeParked(""), totalAmount(0), isPaid(false) {}
 
 public:
 	/**

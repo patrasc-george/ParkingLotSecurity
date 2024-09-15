@@ -8,45 +8,56 @@ VehicleManager& VehicleManager::getInstance()
 	return instance;
 }
 
+inline std::vector<std::string> split(const std::string& string, const std::string& delimiter)
+{
+	if (string.empty())
+		return std::vector<std::string>();
+
+	std::vector<std::string> substrings;
+	std::string::size_type start = 0;
+	std::string::size_type end = string.find(delimiter);
+
+	while (end != std::string::npos)
+	{
+		substrings.push_back(string.substr(start, end - start));
+		start = end + delimiter.length();
+		end = string.find(delimiter, start);
+	}
+
+	substrings.push_back(string.substr(start));
+	return substrings;
+}
+
 void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes)
 {
 	subscriptionManager = new SubscriptionManager();
 
-	std::ifstream readFile(dataBasePath + "vehicles.txt");
-	writeFile = std::ofstream(dataBasePath + "vehicles.txt", std::ios::app);
-
 	entranceStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
 	exitStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
 
-	std::vector<std::string> vehicleData;
-	std::string line;
-	while (std::getline(readFile, line))
+	std::vector<std::string> vehiclesData = databaseManager.getVehicles();
+	for (const auto& vehicleData : vehiclesData)
 	{
-		if (line.empty())
+		std::vector<std::string> data = split(vehicleData, ", ");
+
+		curentVehicle = Vehicle(std::stoi(data[0]), data[1], data[2], data[3]);
+		curentVehicle.setTicket(data[4]);
+
+		if (data[5].empty())
 		{
-			curentVehicle = Vehicle(std::stoi(vehicleData[0]), vehicleData[1], vehicleData[2], vehicleData[3]);
+			if (data[7] == "true")
+				curentVehicle.setIsPaid();
 
-			curentVehicle.setTicket(vehicleData[4]);
-
-			if (vehicleData.size() == 6)
-			{
-				if (vehicleData[5] == "true")
-					curentVehicle.setIsPaid();
-
-				entranceDateTimes.push_back(vehicleData[4]);
-			}
-			else
-			{
-				curentVehicle.setTimeParked(vehicleData[5]);
-				curentVehicle.setTotalAmount(std::stoi(vehicleData[6]));
-				exitDateTimes.push_back(vehicleData[4]);
-			}
-
-			vehicles.push_back(curentVehicle);
-			vehicleData.clear();
+			entranceDateTimes.push_back(data[4]);
 		}
 		else
-			vehicleData.push_back(line);
+		{
+			curentVehicle.setTimeParked(data[5]);
+			curentVehicle.setTotalAmount(std::stoi(data[6]));
+			exitDateTimes.push_back(data[4]);
+		}
+
+		vehicles.push_back(curentVehicle);
 	}
 }
 
@@ -83,7 +94,7 @@ void VehicleManager::setNumberOccupiedParkingLots(int& numberOccupiedParkingLots
 
 void VehicleManager::getVehicle(const std::string& imagePath, std::string& savePath)
 {
-	savePath = dataBasePath + "vehicles/" + std::to_string(vehicles.size()) + ".jpg";
+	savePath = databaseManager.getPath() + "vehicles/" + std::to_string(vehicles.size()) + ".jpg";
 
 	std::string text = textFromImage(imagePath, savePath);
 
@@ -215,17 +226,16 @@ int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::stri
 		curentVehicle.setTimeParked(time);
 		curentVehicle.setTotalAmount(totalAmount);
 
-		qr.generateQR(curentVehicle.getTicket(), name, curentVehicle.getLicensePlate(), dataBasePath, curentVehicle.getDateTime(), time, totalAmount);
+		qr.generateQR(curentVehicle.getTicket(), name, curentVehicle.getLicensePlate(), databaseManager.getPath(), curentVehicle.getDateTime(), time, totalAmount);
 	}
 	else
 	{
 		curentVehicle.setTicket(dateTime);
 
-		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), dataBasePath);
+		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), databaseManager.getPath());
 	}
-
+	databaseManager.addVehicle(vehicles.size(), curentVehicle.getPath(), curentVehicle.getLicensePlate(), curentVehicle.getDateTime(), curentVehicle.getTicket(), curentVehicle.getTimeParked(), curentVehicle.getTotalAmount(), "false");
 	vehicles.push_back(curentVehicle);
-	writeFile << curentVehicle;
 
 	return 0;
 }
@@ -274,7 +284,6 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 
 bool VehicleManager::pay(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket)
 {
-	std::ifstream readFile(dataBasePath + "vehicles.txt");
 	Vehicle* auxVehicle;
 	curentVehicle = Vehicle();
 
@@ -293,19 +302,7 @@ bool VehicleManager::pay(const std::string& vehicle, std::string& licensePlate, 
 	licensePlate = auxVehicle->getLicensePlate();
 	dateTime = auxVehicle->getDateTime();
 
-	std::vector<std::string> lines;
-	std::string line;
-	while (std::getline(readFile, line))
-		lines.push_back(line);
-
-	auto it = std::find(lines.begin(), lines.end(), std::to_string(auxVehicle->getId()));
-	int index = std::distance(lines.begin(), it) + 5;
-	lines[index] = "true";
-
-	writeFile.close();
-	writeFile.open(dataBasePath + "vehicles.txt", std::ios::out | std::ios::trunc);
-	for (const auto& line : lines)
-		writeFile << line << std::endl;
+	databaseManager.setIsPaid(auxVehicle->getId());
 
 	return true;
 }
@@ -332,11 +329,19 @@ std::vector<std::vector<std::string>> VehicleManager::subscriptionVehicles(const
 				{
 					if (vehicles[j].getTimeParked().empty())
 					{
-						subscribedVehicles[i].push_back("from " + vehicles[j].getDateTime());
+						subscribedVehicles[i].push_back(vehicles[j].getDateTime());
+						subscribedVehicles[i].push_back("");
+						subscribedVehicles[i].push_back("");
+						subscribedVehicles[i].push_back("");
 						status = true;
 					}
 					else
-						subscribedVehicles[i].push_back("from " + vehicles[j].getTicket() + " to " + vehicles[j].getDateTime());
+					{
+						subscribedVehicles[i].push_back(vehicles[j].getTicket());
+						subscribedVehicles[i].push_back(vehicles[j].getDateTime());
+						subscribedVehicles[i].push_back(vehicles[j].getTimeParked());
+						subscribedVehicles[i].push_back(std::to_string(vehicles[j].getTotalAmount()) + " RON");
+					}
 
 					lastActivity = true;
 				}
@@ -354,6 +359,14 @@ std::vector<std::vector<std::string>> VehicleManager::subscriptionVehicles(const
 					payment += vehicles[j].getTotalAmount();
 				}
 			}
+		}
+
+		if (subscribedVehicles[i].size() == 1)
+		{
+			subscribedVehicles[i].push_back("");
+			subscribedVehicles[i].push_back("");
+			subscribedVehicles[i].push_back("");
+			subscribedVehicles[i].push_back("");
 		}
 
 		std::tm timeParked = {};
@@ -379,14 +392,23 @@ std::vector<std::vector<std::string>> VehicleManager::subscriptionVehicles(const
 	return subscribedVehicles;
 }
 
-std::string VehicleManager::getDataBasePath() const
+std::vector<std::vector<std::string>> VehicleManager::getVehicleHistory(const std::string& licensePlate)
 {
-	return dataBasePath;
-}
+	std::vector<std::vector<std::string>> history;
+	for (int i = vehicles.size() - 1; i >= 0; i--)
+	{
+		if (vehicles[i].getLicensePlate() == licensePlate && !vehicles[i].getTimeParked().empty())
+		{
+			history.push_back(std::vector<std::string>());
 
-void VehicleManager::setDataBasePath(const std::string& dataBasePath)
-{
-	this->dataBasePath = dataBasePath;
+			history[history.size() - 1].push_back(vehicles[i].getTicket());
+			history[history.size() - 1].push_back(vehicles[i].getDateTime());
+			history[history.size() - 1].push_back(vehicles[i].getTimeParked());
+			history[history.size() - 1].push_back(std::to_string(vehicles[i].getTotalAmount()) + " RON");
+		}
+	}
+
+	return history;
 }
 
 std::string VehicleManager::getImagePath(const int& id) const
@@ -432,9 +454,4 @@ std::vector<std::vector<int>> VehicleManager::getEntranceStatistics() const
 std::vector<std::vector<int>> VehicleManager::getExitStatistics() const
 {
 	return exitStatistics;
-}
-
-VehicleManager::~VehicleManager()
-{
-	writeFile.close();
 }

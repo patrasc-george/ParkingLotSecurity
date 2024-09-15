@@ -13,6 +13,7 @@ find_package(Tesseract REQUIRED)
 
 add_subdirectory(tests)
 add_subdirectory(src/Application)
+add_subdirectory(src/DatabaseManager)
 add_subdirectory(src/ImageProcessingUtils)
 add_subdirectory(src/QRCodeUtils)
 add_subdirectory(src/VehicleManager)

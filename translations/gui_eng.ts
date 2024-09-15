@@ -155,6 +155,10 @@
   
   <context>
     <name>SubscriptionsWindow</name>
+	<message>
+      <source>Accounts</source>
+      <translation>Accounts</translation>
+    </message>
     <message>
       <source>Subscriptions</source>
       <translation>Subscriptions</translation>
@@ -163,13 +167,9 @@
       <source>Vehicles</source>
       <translation>Vehicles</translation>
     </message>
-    <message>
-      <source>Add</source>
-      <translation>Add</translation>
-    </message>
-    <message>
+	<message>
       <source>Close</source>
-      <translation>Close</translation>
+      <translation>Închide</translation>
     </message>
   </context>
 </TS>

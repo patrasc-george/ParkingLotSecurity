@@ -7,26 +7,33 @@
     <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
+    <header>
+        <nav>
+            <button id="logoutButton">Log out</button>
+        </nav>
+    </header>
+    
     <div class="container full-width">
-		<p id="tableErrorMessage" style="color:red;"></p>
+        <p id="tableErrorMessage" style="color: red;"></p>
 
         <table id="vehiclesTable">
-            <thead>
-                <tr>
-                    <th>License Plate Number</th>
-                    <th>Last Activity</th>
-                    <th>Time Parked</th>
-                    <th>Payment</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
+            <tr>
+                <th rowspan="2">License Plate Number</th>
+                <th colspan="4">Activity</th>
+                <th rowspan="2">Total Time Parked</th>
+                <th rowspan="2">Total Payment</th>
+                <th rowspan="2">Status</th>
+            </tr>
+            <tr>
+                <th>Entered</th>
+                <th>Exit</th>
+                <th>Time Parked</th>
+                <th>Payment</th>
+            </tr>
         </table>
 
         <div class="buttons">
             <button id="addButton">Add</button>
-            <button id="editButton" disabled>Edit</button>
             <button id="deleteButton" disabled>Delete</button>
         </div>
     </div>

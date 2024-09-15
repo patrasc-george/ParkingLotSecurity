@@ -155,6 +155,10 @@
   
   <context>
     <name>SubscriptionsWindow</name>
+	<message>
+      <source>Accounts</source>
+      <translation>Conturi</translation>
+    </message>
     <message>
       <source>Subscriptions</source>
       <translation>Abonamente</translation>
@@ -163,11 +167,7 @@
       <source>Vehicles</source>
       <translation>Vehicule</translation>
     </message>
-    <message>
-      <source>Add</source>
-      <translation>Adaugă</translation>
-    </message>
-    <message>
+	<message>
       <source>Close</source>
       <translation>Închide</translation>
     </message>

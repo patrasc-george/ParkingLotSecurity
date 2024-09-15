@@ -6,10 +6,10 @@
 #define VEHICLEMANAGER_API __declspec(dllimport)
 #endif
 
-#include "vehicle.h"
-#include "subscriptionmanager.h"
 #include "ImageProcessingUtils.h"
 #include "QRCodeUtils.h"
+#include "vehicle.h"
+#include "subscriptionmanager.h"
 
 #include <fstream>
 #include <vector>
@@ -17,10 +17,7 @@
 class VEHICLEMANAGER_API VehicleManager
 {
 private:
-	VehicleManager() = default;
-
-public:
-	~VehicleManager();
+	VehicleManager() : databaseManager(DatabaseManager::getInstance()) {}
 
 public:
 	static VehicleManager& getInstance();
@@ -49,11 +46,9 @@ public:
 
 	std::vector<std::vector<std::string>> subscriptionVehicles(const Subscription& subscription);
 
+	std::vector<std::vector<std::string>> getVehicleHistory(const std::string& licensePlate);
+
 public:
-	std::string getDataBasePath() const;
-
-	void setDataBasePath(const std::string& dataBasePath);
-
 	std::string getImagePath(const int& id) const;
 
 	void setName(const std::string& name);
@@ -73,8 +68,7 @@ public:
 	std::vector<std::vector<int>> getExitStatistics() const;
 
 private:
-	std::string dataBasePath;
-	std::ofstream writeFile;
+	DatabaseManager& databaseManager;
 	Vehicle curentVehicle;
 	std::vector<Vehicle> vehicles;
 	SubscriptionManager* subscriptionManager;

@@ -12,23 +12,25 @@
 class SUBSCRIPTION_API Subscription
 {
 public:
-	Subscription(const std::string& name, const std::string& password, const std::string& dateTime)
-		: name(name), password(password), dateTime(dateTime) {}
+	Subscription(const std::string name) : name(name) {}
 
 	Subscription() = default;
 
 public:
 	std::string getName() const;
 
-	std::string getPassword() const;
+	std::vector<std::string> getDateTimes() const;
+
+	void addDateTime(const std::string& dateTime);
 
 	std::vector<std::string> getVehicles() const;
 
-	void addVehicle(const std::string& vehicle);
+	bool addVehicle(const std::string& vehicle);
+
+	bool deleteVehicle(const std::string& vehicle);
 
 private:
 	std::string name;
-	std::string password;
-	std::string dateTime;
+	std::vector<std::string> dateTimes;
 	std::vector<std::string> vehicles;
 };

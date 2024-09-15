@@ -10,6 +10,14 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 		this->handlePost(request, response);
 		});
 
+	server.Post("/api/createSubscription", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleCreateSubscription(request, response);
+		});
+
 	server.Post("/api/login", [this](const httplib::Request& request, httplib::Response& response) {
 		response.set_header("Access-Control-Allow-Origin", "*");
 		response.set_header("Access-Control-Allow-Methods", "POST");
@@ -18,12 +26,52 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 		this->handleLogin(request, response);
 		});
 
-	server.Post("/api/createSubscription", [this](const httplib::Request& request, httplib::Response& response) {
+	server.Post("/api/getSubscriptionVehicles", [this](const httplib::Request& request, httplib::Response& response) {
 		response.set_header("Access-Control-Allow-Origin", "*");
 		response.set_header("Access-Control-Allow-Methods", "POST");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleCreateSubscription(request, response);
+		this->handleGetSubscriptionVehicles(request, response);
+		});
+
+	server.Post("/api/addSubscription", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleAddSubscription(request, response);
+		});
+
+	server.Post("/api/deleteSubscription", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleDeleteSubscription(request, response);
+		});
+
+	server.Post("/api/getVehicleHistory", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleGetVehicleHistory(request, response);
+		});
+
+	server.Post("/api/addVehicle", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleAddVehicle(request, response);
+		});
+
+	server.Post("/api/deleteVehicle", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleDeleteVehicle(request, response);
 		});
 
 	thread = std::thread([this]() { server.listen("localhost", 8080); });
@@ -61,7 +109,7 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 	{
 		auto data = request.get_file_value("qrCodeImage");
 
-		std::string savePath = vehicleManager.getDataBasePath() + "uploadedQr/" + data.filename;
+		std::string savePath = DatabaseManager::getInstance().getPath() + "uploadedQr/" + data.filename;
 		std::ofstream ofs(savePath, std::ios::binary);
 		ofs << data.content;
 		ofs.close();
@@ -99,19 +147,19 @@ void Server::handleCreateSubscription(const httplib::Request& request, httplib::
 	if (name.empty() || password.empty())
 	{
 		response.status = 400;
-		response.set_content(R"({"success": false, "message": "Name and password are required."})", "application/json");
+		response.set_content(R"({"success": false})", "application/json");
 		return;
 	}
 
-	if (subscriptionManager->addSubscription(name, password))
+	if (subscriptionManager->addAccount(name, password))
 	{
 		response.status = 200;
-		response.set_content(R"({"success": true, "message": "Subscription created successfully."})", "application/json");
+		response.set_content(R"({"success": true})", "application/json");
 	}
 	else
 	{
 		response.status = 400;
-		response.set_content(R"({"success": false, "message": "Failed to create subscription."})", "application/json");
+		response.set_content(R"({"success": false})", "application/json");
 	}
 }
 
@@ -130,31 +178,228 @@ void Server::handleLogin(const httplib::Request& request, httplib::Response& res
 
 	if (subscriptionManager->verifyCredentials(name, password))
 	{
-		Subscription subscription = subscriptionManager->find(name);
-		std::vector<std::vector<std::string>> vehiclesTable = vehicleManager.subscriptionVehicles(subscription);
+		Account* account = subscriptionManager->getAccount(name);
+		std::vector<Subscription>* subscriptions = subscriptionManager->getSubscriptions(*account);
 
-		std::string vehiclesJson = "[";
-		for (int i = 0; i < vehiclesTable.size(); i++)
+		std::string subscriptionsJson = "[";
+		for (int i = 0; i < subscriptions->size(); i++)
 		{
-			vehiclesJson += "[";
-			for (int j = 0; j < vehiclesTable[i].size(); j++)
-			{
-				vehiclesJson += "\"" + vehiclesTable[i][j] + "\"";
-				if (j < vehiclesTable[i].size() - 1)
-					vehiclesJson += ",";
-			}
-			vehiclesJson += "]";
-			if (i < vehiclesTable.size() - 1)
+			subscriptionsJson += "[\"" + subscriptions->at(i).getName() + "\"]";
+			if (i < subscriptions->size() - 1)
+				subscriptionsJson += ",";
+		}
+		subscriptionsJson += "]";
+
+		response.status = 200;
+		response.set_content("{\"success\": true, \"subscriptionsTable\": " + subscriptionsJson + "}", "application/json");
+	}
+	else
+	{
+		response.status = 401;
+		response.set_content(R"({"success": false})", "application/json");
+	}
+}
+
+void Server::handleGetSubscriptionVehicles(const httplib::Request& request, httplib::Response& response)
+{
+	std::string name;
+	std::string subscriptionName;
+
+	if (request.has_param("name"))
+		name = request.get_param_value("name");
+
+	if (request.has_param("subscriptionName"))
+		subscriptionName = request.get_param_value("subscriptionName");
+
+	Account* account = subscriptionManager->getAccount(name);
+	Subscription* subscription = subscriptionManager->getSubscription(*account, subscriptionName);
+	std::vector<std::vector<std::string>> vehiclesTable = vehicleManager.subscriptionVehicles(*subscription);
+
+	std::string vehiclesJson = "[";
+	for (int i = 0; i < vehiclesTable.size(); i++)
+	{
+		vehiclesJson += "[";
+		for (int j = 0; j < vehiclesTable[i].size(); j++)
+		{
+			vehiclesJson += "\"" + vehiclesTable[i][j] + "\"";
+			if (j < vehiclesTable[i].size() - 1)
 				vehiclesJson += ",";
 		}
 		vehiclesJson += "]";
+		if (i < vehiclesTable.size() - 1)
+			vehiclesJson += ",";
+	}
+	vehiclesJson += "]";
+
+	response.status = 200;
+	response.set_content("{\"success\": true, \"vehiclesTable\": " + vehiclesJson + "}", "application/json");
+}
+
+void Server::handleAddSubscription(const httplib::Request& request, httplib::Response& response)
+{
+	std::string name;
+	std::string subscriptionName;
+
+	if (request.has_param("name"))
+		name = request.get_param_value("name");
+
+	if (request.has_param("subscriptionName"))
+		subscriptionName = request.get_param_value("subscriptionName");
+
+	Account* account = subscriptionManager->getAccount(name);
+
+	if (subscriptionManager->addSubscription(*account, subscriptionName))
+	{
+		response.status = 200;
+		response.set_content(R"({"success": true})", "application/json");
+	}
+	else
+	{
+		response.status = 400;
+		response.set_content(R"({"success": false})", "application/json");
+	}
+}
+
+void Server::handleDeleteSubscription(const httplib::Request& request, httplib::Response& response)
+{
+	std::string name;
+	std::string subscriptionName;
+
+	if (request.has_param("name"))
+		name = request.get_param_value("name");
+
+	if (request.has_param("subscriptionName"))
+		subscriptionName = request.get_param_value("subscriptionName");
+
+	Account* account = subscriptionManager->getAccount(name);
+
+	if (subscriptionManager->deleteSubscription(*account, subscriptionName))
+	{
+		response.status = 200;
+		response.set_content(R"({"success": true})", "application/json");
+	}
+	else
+	{
+		response.status = 400;
+		response.set_content(R"({"success": false})", "application/json");
+	}
+}
+
+void Server::handleGetVehicleHistory(const httplib::Request& request, httplib::Response& response)
+{
+	std::string licensePlate;
+
+	if (request.has_param("licensePlate"))
+	{
+		licensePlate = request.get_param_value("licensePlate");
+		std::vector<std::vector<std::string>> history = vehicleManager.getVehicleHistory(licensePlate);
+
+		if (!history.empty())
+		{
+			std::string historyJson = "[";
+
+			for (int i = 0; i < history.size(); ++i)
+			{
+				historyJson += "[";
+
+				for (int j = 0; j < history[i].size(); ++j)
+				{
+					historyJson += "\"" + history[i][j] + "\"";
+					if (j < history[i].size() - 1)
+						historyJson += ",";
+				}
+
+				historyJson += "]";
+				if (i < history.size() - 1)
+					historyJson += ",";
+			}
+
+			historyJson += "]";
+
+			response.status = 200;
+			response.set_content("{\"success\": true, \"history\": " + historyJson + "}", "application/json");
+		}
+		else
+		{
+			response.status = 404;
+			response.set_content(R"({"success": false})", "application/json");
+		}
+	}
+	else
+	{
+		response.status = 400;
+		response.set_content(R"({"success": false})", "application/json");
+	}
+}
+
+void Server::handleAddVehicle(const httplib::Request& request, httplib::Response& response)
+{
+	std::string name;
+	std::string subscriptionName;
+	std::string licensePlate;
+
+	if (request.has_param("name"))
+		name = request.get_param_value("name");
+
+	if (request.has_param("subscriptionName"))
+		subscriptionName = request.get_param_value("subscriptionName");
+
+	if (request.has_param("licensePlate"))
+		licensePlate = request.get_param_value("licensePlate");
+
+	Account* account = subscriptionManager->getAccount(name);
+	Subscription* subscription = subscriptionManager->getSubscription(*account, subscriptionName);
+	std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), ::toupper);
+
+	if (subscriptionManager->addVehicle(*account, *subscription, licensePlate))
+	{
+		std::vector<std::vector<std::string>> vehiclesTable = vehicleManager.subscriptionVehicles(*subscription);
+		std::string vehiclesJson = "[[";
+		for (int i = 0; i < vehiclesTable[vehiclesTable.size() - 1].size(); i++)
+		{
+			vehiclesJson += "\"" + vehiclesTable[vehiclesTable.size() - 1][i] + "\"";
+			if (i < vehiclesTable[vehiclesTable.size() - 1].size() - 1)
+				vehiclesJson += ",";
+		}
+		vehiclesJson += "]]";
 
 		response.status = 200;
 		response.set_content("{\"success\": true, \"vehiclesTable\": " + vehiclesJson + "}", "application/json");
 	}
 	else
 	{
-		response.status = 401;
-		response.set_content(R"({"success": false, "message": "Invalid credentials."})", "application/json");
+		response.status = 400;
+		response.set_content(R"({"success": false})", "application/json");
+	}
+}
+
+void Server::handleDeleteVehicle(const httplib::Request& request, httplib::Response& response)
+{
+	std::string name;
+	std::string subscriptionName;
+	std::string licensePlate;
+
+	if (request.has_param("name"))
+		name = request.get_param_value("name");
+
+	if (request.has_param("subscriptionName"))
+		subscriptionName = request.get_param_value("subscriptionName");
+
+	if (request.has_param("licensePlate"))
+		licensePlate = request.get_param_value("licensePlate");
+
+	Account* account = subscriptionManager->getAccount(name);
+	Subscription* subscription = subscriptionManager->getSubscription(*account, subscriptionName);
+	std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), ::toupper);
+
+	if (subscription && subscriptionManager->deleteVehicle(*account, *subscription, licensePlate))
+	{
+		response.status = 200;
+		response.set_content(R"({"success": true})", "application/json");
+	}
+	else
+	{
+		response.status = 400;
+		response.set_content(R"({"success": false})", "application/json");
 	}
 }

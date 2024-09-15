@@ -89,7 +89,8 @@ nav {
     justify-content: flex-end;
 }
 
-#subscriptionsButton {
+#subscriptionsButton,
+#logoutButton {
     padding: 10px 20px;
     background-color: #ffc107;
     color: #ffffff;
@@ -100,7 +101,8 @@ nav {
     transition: background-color 0.3s ease;
 }
 
-#subscriptionsButton:hover {
+#subscriptionsButton:hover,
+#logoutButton:hover {
     background-color: #e0a800;
 }
 
@@ -116,7 +118,7 @@ table {
 }
 
 th, td {
-    padding: 12px;
+    padding: 8px;
     text-align: left;
     border: 1px solid #ddd;
 }
@@ -158,4 +160,12 @@ tbody tr:hover {
 
 .selected-row {
     background-color: #d3d3d3;
+}
+
+table th[rowspan="2"] {
+    vertical-align: middle;
+}
+
+table th[colspan="4"] {
+    text-align: center;
 }

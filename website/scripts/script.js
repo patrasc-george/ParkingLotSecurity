@@ -4,7 +4,7 @@ const qrCodeButton = document.getElementById('qrCode');
 const qrInput = document.getElementById('qrInput');
 const fileNameElement = document.getElementById('fileName');
 const errorMessageElement = document.getElementById('errorMessage');
-const successMessageElement = document.getElementById('successMessage'); // Corectare ID-ului
+const successMessageElement = document.getElementById('successMessage');
 const licensePlateInput = document.getElementById('licensePlate');
 let selectedFile = null;
 
@@ -78,7 +78,7 @@ function handleServerResponse(data) {
 
     setTimeout(() => {
         if (data.success === false) {
-            errorMessageElement.textContent = 'The vehicle was not found. Please upload the QR code again.';
+            errorMessageElement.textContent = 'The vehicle was not found. Please upload the QR code.';
             successMessageElement.style.display = 'none';
             errorMessageElement.style.display = 'block';
         } else if (data.success === true) {

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscriptions</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <button id="logoutButton">Log out</button>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <p id="tableErrorMessage" style="color: red;"></p>
+
+        <table id="subscriptionsTable">
+            <th>Subscriptions</th>
+        </table>
+
+        <div class="buttons">
+            <button id="addButton">Add</button>
+            <button id="deleteButton" disabled>Delete</button>
+        </div>
+    </div>
+
+    <script src="scripts/subscriptions.js"></script>
+</body>
+</html>

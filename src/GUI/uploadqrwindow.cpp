@@ -11,6 +11,7 @@
 UploadQRWindow::UploadQRWindow(const QSize& buttonSize, QWidget* parent) : QDialog(parent)
 {
 	setWindowTitle("Upload QR");
+	setWindowModality(Qt::ApplicationModal);
 
 	QLabel* iconLabel = new QLabel(this);
 	QPixmap errorIcon = QMessageBox::standardIcon(QMessageBox::Warning);

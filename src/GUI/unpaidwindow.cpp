@@ -11,6 +11,7 @@
 UnpaidWindow::UnpaidWindow(const QSize& buttonSize, QWidget* parent) : QDialog(parent)
 {
 	setWindowTitle(tr("Unpaid"));
+	setWindowModality(Qt::ApplicationModal);
 
 	QLabel* iconLabel = new QLabel(this);
 	QPixmap errorIcon = QMessageBox::standardIcon(QMessageBox::Warning);

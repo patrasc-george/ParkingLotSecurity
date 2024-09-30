@@ -231,8 +231,8 @@ void MainWindow::uploadDataBase()
 	for (const auto& dateTime : exitDateTimes)
 		updateStatistics(dateTime, true);
 
-	std::unordered_map<int, std::string> entriesList;
-	std::unordered_map<int, std::string> exitsList;
+	std::map<int, std::string> entriesList;
+	std::map<int, std::string> exitsList;
 	vehicleManager.uploadVehicles(entriesList, exitsList);
 	for (const auto& pair : entriesList)
 	{

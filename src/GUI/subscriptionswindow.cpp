@@ -13,6 +13,7 @@ SubscriptionsWindow::SubscriptionsWindow(SubscriptionManager* subscriptionManage
 	setFixedSize(800, 600);
 
 	setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+	setWindowModality(Qt::ApplicationModal);
 
 	accountsListWidget = new QListWidget(this);
 	subscriptionsListWidget = new QListWidget(this);

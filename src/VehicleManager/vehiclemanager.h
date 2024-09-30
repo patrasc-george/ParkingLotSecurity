@@ -24,7 +24,7 @@ public:
 
 	void uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes);
 
-	void uploadVehicles(std::unordered_map<int, std::string>& entriesList, std::unordered_map<int, std::string>& exitsList);
+	void uploadVehicles(std::map<int, std::string>& entriesList, std::map<int, std::string>& exitsList);
 
 	void setNumberOccupiedParkingLots(int& numberOccupiedParkingLots);
 

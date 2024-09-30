@@ -48,20 +48,21 @@ void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes,
 			if (data[7] == "true")
 				curentVehicle.setIsPaid();
 
-			entranceDateTimes.push_back(data[4]);
+			entranceDateTimes.push_back(data[3]);
 		}
 		else
 		{
 			curentVehicle.setTimeParked(data[5]);
 			curentVehicle.setTotalAmount(std::stoi(data[6]));
-			exitDateTimes.push_back(data[4]);
+
+			exitDateTimes.push_back(data[3]);
 		}
 
 		vehicles.push_back(curentVehicle);
 	}
 }
 
-void VehicleManager::uploadVehicles(std::unordered_map<int, std::string>& entriesList, std::unordered_map<int, std::string>& exitsList)
+void VehicleManager::uploadVehicles(std::map<int, std::string>& entriesList, std::map<int, std::string>& exitsList)
 {
 	for (const auto& vehicle : vehicles)
 	{
@@ -274,8 +275,16 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 				auto now = std::chrono::system_clock::now();
 				auto toTimeT = std::chrono::system_clock::to_time_t(now);
 
+				std::tm* timeStruct = std::localtime(&toTimeT);
+
+				timeStruct->tm_hour += 1;
+				timeStruct->tm_min = 0;
+				timeStruct->tm_sec = 0;
+
+				toTimeT = std::mktime(timeStruct);
+
 				std::stringstream ss;
-				ss << std::put_time(std::localtime(&toTimeT), "%d-%m-%Y %X");
+				ss << std::put_time(timeStruct, "%d-%m-%Y %X");
 
 				occupancyDateTimes.push_back(std::make_pair(vehicles[i].getDateTime(), ss.str()));
 			}

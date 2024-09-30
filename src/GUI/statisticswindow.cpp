@@ -15,6 +15,7 @@ StatisticsWindow::StatisticsWindow(const std::vector<std::vector<int>>& occupanc
 	setFixedSize(1000, 300);
 
 	setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+	setWindowModality(Qt::ApplicationModal);
 
 	layout = new QVBoxLayout(this);
 	table = new QTableWidget(7, 24, this);

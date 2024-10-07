@@ -1,4 +1,3 @@
-const loginButton = document.getElementById("loginButton");
 const nameInput = document.getElementById("name");
 const passwordInput = document.getElementById("password");
 const errorMessageElement = document.getElementById("errorMessage");

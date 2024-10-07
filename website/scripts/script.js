@@ -1,7 +1,5 @@
 const serverUrl = 'http://localhost:8080/api/endpoint';
 
-const qrCodeButton = document.getElementById('qrCode');
-const qrInput = document.getElementById('qrInput');
 const fileNameElement = document.getElementById('fileName');
 const errorMessageElement = document.getElementById('errorMessage');
 const successMessageElement = document.getElementById('successMessage');
@@ -47,12 +45,12 @@ document.querySelector('.payButton').addEventListener('click', function () {
             },
             body: urlEncodedData
         })
-            .then(response => response.json())
-            .then(data => handleServerResponse(data))
-            .catch(error => {
-                console.error('Error:', error);
-                errorMessageElement.textContent = 'An error occurred. Please try again later.';
-            });
+        .then(response => response.json())
+        .then(data => handleServerResponse(data))
+        .catch(error => {
+            console.error('Error:', error);
+            errorMessageElement.textContent = 'An error occurred. Please try again later.';
+        });
     } else if (selectedFile) {
         const formData = new FormData();
         formData.append('qrCodeImage', selectedFile, selectedFile.name);
@@ -61,12 +59,12 @@ document.querySelector('.payButton').addEventListener('click', function () {
             method: 'POST',
             body: formData
         })
-            .then(response => response.json())
-            .then(data => handleServerResponse(data))
-            .catch(error => {
-                console.error('Error:', error);
-                errorMessageElement.textContent = 'An error occurred. Please try again later.';
-            });
+        .then(response => response.json())
+        .then(data => handleServerResponse(data))
+        .catch(error => {
+            console.error('Error:', error);
+            errorMessageElement.textContent = 'An error occurred. Please try again later.';
+        });
     }
 });
 

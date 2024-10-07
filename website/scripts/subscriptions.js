@@ -9,30 +9,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tableBody = document.querySelector('#subscriptionsTable');
     const tableErrorMessage = document.getElementById('tableErrorMessage');
-    const addButton = document.getElementById('addButton');
-    const deleteButton = document.getElementById('deleteButton');
-    
-    let selectedRow = null;
+    let selectedRows = [];
 
     function appendRow(subscription) {
         const row = document.createElement('tr');
-        let clickTimeout;
-
         const cell = document.createElement('td');
-        cell.textContent = subscription;
-        row.appendChild(cell);
+        cell.classList.add('subscription-cell');
 
-        row.addEventListener('dblclick', (event) => {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('cell-wrapper');
+
+        const checkboxTextWrapper = document.createElement('div');
+        checkboxTextWrapper.classList.add('checkbox-text-wrapper');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                row.classList.add('selected-row');
+                selectedRows.push(row);
+            } else {
+                row.classList.remove('selected-row');
+                selectedRows = selectedRows.filter(selectedRow => selectedRow !== row);
+            }
+            deleteButton.disabled = selectedRows.length === 0;
+            uncheckAllButton.disabled = selectedRows.length === 0;
+        });
+
+        const subscriptionText = document.createElement('span');
+        subscriptionText.textContent = subscription;
+
+        checkboxTextWrapper.appendChild(checkbox);
+        checkboxTextWrapper.appendChild(subscriptionText);
+
+        const viewButton = document.createElement('button');
+        const viewButtonIcon = document.createElement('img');
+        viewButtonIcon.src = 'data/select.png';
+        viewButtonIcon.alt = 'View';
+        viewButtonIcon.classList.add('icon');
+
+        viewButton.appendChild(viewButtonIcon);
+        viewButton.classList.add('view-button');
+
+        viewButton.addEventListener('click', (event) => {
             event.stopPropagation();
-            clearTimeout(clickTimeout);
-        
-            const subscriptionName = row.cells[0].textContent;
+            const subscriptionName = subscriptionText.textContent;
             const name = localStorage.getItem('name');
-        
+
             const urlEncodedData = new URLSearchParams();
             urlEncodedData.append('name', name);
             urlEncodedData.append('subscriptionName', subscriptionName);
-        
+
             fetch('http://localhost:8080/api/getSubscriptionVehicles', {
                 method: 'POST',
                 headers: {
@@ -54,39 +82,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error:', error);
                 tableErrorMessage.textContent = 'Error communicating with the server.';
             });
-        });        
-
-        row.addEventListener('click', () => {
-            clickTimeout = setTimeout(() => {
-                if (row === selectedRow) {
-                    row.classList.remove('selected-row');
-                    selectedRow = null;
-                    deleteButton.disabled = true;
-                } else {
-                    if (selectedRow) {
-                        selectedRow.classList.remove('selected-row');
-                    }
-                    row.classList.add('selected-row');
-                    selectedRow = row;
-                    deleteButton.disabled = false;
-                }
-            }, 200);
         });
 
+        wrapper.appendChild(checkboxTextWrapper);
+        wrapper.appendChild(viewButton);
+        cell.appendChild(wrapper);
+        row.appendChild(cell);
         tableBody.appendChild(row);
     }
 
     subscriptionsTable.forEach(subscription => appendRow(subscription));
 
+    uncheckAllButton.addEventListener('click', () => {
+        selectedRows.forEach(row => {
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = false;
+                row.classList.remove('selected-row');
+            }
+        });
+        selectedRows = [];
+        deleteButton.disabled = true;
+        uncheckAllButton.disabled = true;
+    });
+
+    checkAllButton.addEventListener('click', () => {
+        const checkboxes = tableBody.querySelectorAll('input[type="checkbox"]');
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = !allChecked;
+            const row = checkbox.closest('tr');
+            if (checkbox.checked) {
+                row.classList.add('selected-row');
+                if (!selectedRows.includes(row)) {
+                    selectedRows.push(row);
+                }
+            } else {
+                row.classList.remove('selected-row');
+                selectedRows = selectedRows.filter(selectedRow => selectedRow !== row);
+            }
+        });
+
+        deleteButton.disabled = selectedRows.length === 0;
+        uncheckAllButton.disabled = selectedRows.length === 0;
+    });
+
     addButton.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('#subscriptionsTable input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            const row = checkbox.closest('tr');
+            if (row) {
+                row.classList.remove('selected-row');
+            }
+        });
+
         const newRow = document.createElement('tr');
-        
         const newSubscriptionCell = document.createElement('td');
         newSubscriptionCell.contentEditable = 'true';
         newSubscriptionCell.textContent = '';
-        
-        let isSaved = false; // Flag pentru a preveni salvarea de două ori
-        
+        let isSaved = false;
+
         function saveChanges() {
             if (newSubscriptionCell.textContent.trim() === '') {
                 newRow.remove();
@@ -94,11 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const subscriptionName = newSubscriptionCell.textContent.trim();
                 if (subscriptionName) {
                     const name = localStorage.getItem('name');
-                    
+
                     const urlEncodedData = new URLSearchParams();
                     urlEncodedData.append('name', name);
                     urlEncodedData.append('subscriptionName', subscriptionName);
-                    
+
                     fetch('http://localhost:8080/api/addSubscription', {
                         method: 'POST',
                         headers: {
@@ -129,13 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 isSaved = true;
             }
         }
-    
+
         newSubscriptionCell.addEventListener('focusout', () => {
             if (!isSaved) {
                 saveChanges();
             }
         });
-    
+
         newSubscriptionCell.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -144,21 +201,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-    
+
         newRow.appendChild(newSubscriptionCell);
         tableBody.appendChild(newRow);
         newSubscriptionCell.focus();
-    });    
-    
+
+        deleteButton.disabled = true;
+        uncheckAllButton.disabled = true;
+    });
+
     deleteButton.addEventListener('click', () => {
-        if (selectedRow) {
-            const subscriptionName = selectedRow.textContent;
+        selectedRows.forEach(row => {
+            const subscriptionName = row.querySelector('span').textContent.trim();
             const name = localStorage.getItem('name');
-    
+
             const urlEncodedData = new URLSearchParams();
             urlEncodedData.append('name', name);
             urlEncodedData.append('subscriptionName', subscriptionName);
-    
+
             fetch('http://localhost:8080/api/deleteSubscription', {
                 method: 'POST',
                 headers: {
@@ -169,12 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    selectedRow.remove();
+                    row.remove();
                     subscriptionsTable = subscriptionsTable.filter(sub => sub !== subscriptionName);
                     localStorage.setItem('subscriptionsTable', JSON.stringify(subscriptionsTable));
-    
-                    selectedRow = null;
-                    deleteButton.disabled = true;
                 } else {
                     tableErrorMessage.textContent = 'Failed to delete subscription. Please try again.';
                 }
@@ -183,12 +240,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error:', error);
                 tableErrorMessage.textContent = 'An error occurred. Please try again later.';
             });
-        }
-    });    
+        });
 
-    const logoutButton = document.getElementById('logoutButton');
-    logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('subscriptionsTable');
+        selectedRows = [];
+        deleteButton.disabled = true;
+        uncheckAllButton.disabled = true;
+    });
+
+    accountIcon.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('accountDropdown');
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        event.stopPropagation();
+    });
+    
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('accountDropdown');
+        if (event.target !== dropdown && event.target !== document.getElementById('accountIcon')) {
+            dropdown.style.display = 'none';
+        }
+    });  
+
+    subscriptionsOption.addEventListener('click', function() {
+        window.location.href = 'subscriptions.html';
+    });
+
+    logoutOption.addEventListener('click', function() {
         window.location.href = 'login.html';
     });
 });

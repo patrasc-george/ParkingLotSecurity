@@ -294,36 +294,28 @@ void Server::handleGetVehicleHistory(const httplib::Request& request, httplib::R
 		licensePlate = request.get_param_value("licensePlate");
 		std::vector<std::vector<std::string>> history = vehicleManager.getVehicleHistory(licensePlate);
 
-		if (!history.empty())
+		std::string historyJson = "[";
+
+		for (int i = 0; i < history.size(); ++i)
 		{
-			std::string historyJson = "[";
+			historyJson += "[";
 
-			for (int i = 0; i < history.size(); ++i)
+			for (int j = 0; j < history[i].size(); ++j)
 			{
-				historyJson += "[";
-
-				for (int j = 0; j < history[i].size(); ++j)
-				{
-					historyJson += "\"" + history[i][j] + "\"";
-					if (j < history[i].size() - 1)
-						historyJson += ",";
-				}
-
-				historyJson += "]";
-				if (i < history.size() - 1)
+				historyJson += "\"" + history[i][j] + "\"";
+				if (j < history[i].size() - 1)
 					historyJson += ",";
 			}
 
 			historyJson += "]";
+			if (i < history.size() - 1)
+				historyJson += ",";
+		}
 
-			response.status = 200;
-			response.set_content("{\"success\": true, \"history\": " + historyJson + "}", "application/json");
-		}
-		else
-		{
-			response.status = 404;
-			response.set_content(R"({"success": false})", "application/json");
-		}
+		historyJson += "]";
+
+		response.status = 200;
+		response.set_content("{\"success\": true, \"history\": " + historyJson + "}", "application/json");
 	}
 	else
 	{

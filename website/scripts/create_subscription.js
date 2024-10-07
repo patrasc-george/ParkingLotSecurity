@@ -1,4 +1,3 @@
-const createButton = document.getElementById("createButton");
 const nameInput = document.getElementById("name");
 const passwordInput = document.getElementById("password");
 const confirmPasswordInput = document.getElementById("confirmPassword");

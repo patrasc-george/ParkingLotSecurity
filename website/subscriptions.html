@@ -1,31 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subscriptions</title>
     <link rel="stylesheet" href="styles/styles.css">
 </head>
-<body>
-    <header>
+
+<body class="style2">
+    <header class="site-header">
         <nav>
-            <button id="logoutButton">Log out</button>
+            <div class="accountIconContainer">
+                <img src="data/account.png" alt="Account" class="accountIcon" id="accountIcon">
+            </div>
+            <div id="accountDropdown" class="dropdown" style="display: none;">
+                <ul>
+                    <li id="settingsOption">Settings</li>
+                    <li id="subscriptionsOption">Subscriptions</li>
+                    <li id="logoutOption">Log out</li>
+                </ul>
+            </div>
         </nav>
-    </header>
-    
+    </header>       
+
     <div class="container">
         <p id="tableErrorMessage" style="color: red;"></p>
 
+        <div class="buttons">
+            <button id="uncheckAllButton" disabled>
+                <img src="data/uncheck.png" alt="Uncheck all" class="icon">
+            </button>
+            <button id="checkAllButton">
+                <img src="data/check.png" alt="Check all" class="icon">
+            </button>
+            <button id="addButton">
+                <img src="data/add.png" alt="Add" class="icon">
+            </button>
+            <button id="deleteButton" disabled>
+                <img src="data/delete.png" alt="Delete" class="icon">
+            </button>
+        </div>
+        
         <table id="subscriptionsTable">
             <th>Subscriptions</th>
         </table>
-
-        <div class="buttons">
-            <button id="addButton">Add</button>
-            <button id="deleteButton" disabled>Delete</button>
-        </div>
     </div>
 
     <script src="scripts/subscriptions.js"></script>
 </body>
+
 </html>

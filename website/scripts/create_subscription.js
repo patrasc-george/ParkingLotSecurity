@@ -15,7 +15,7 @@ createButton.addEventListener("click", function () {
         return;
     }
 
-    if (!validateEmail(name)) {
+    if (!validateName(name)) {
         errorMessageElement.textContent = "Please enter a valid email address.";
         return;
     }
@@ -63,7 +63,7 @@ function handleServerResponse(data, name) {
     }, 1000);
 }
 
-function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+function validateName(name) {
+    const nameRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return nameRegex.test(name);
 }

@@ -88,6 +88,22 @@ Account* SubscriptionManager::getAccount(const std::string& email) const
 	return nullptr;
 }
 
+void SubscriptionManager::updateAccountEmail(const std::string& email, const std::string& newEmail)
+{
+	Account* account = getAccount(email);
+	account->setEmail(newEmail);
+
+	databaseManager.setEmail(email, newEmail);
+}
+
+void SubscriptionManager::updateAccountPassword(const std::string& email, const std::string& newPassword)
+{
+	Account* account = getAccount(email);
+	account->setPassword(newPassword);
+
+	databaseManager.setPassword(email, newPassword);
+}
+
 std::vector<Subscription>* SubscriptionManager::getSubscriptions(const Account& account) const
 {
 	for (const auto& pair : accounts)

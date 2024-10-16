@@ -74,6 +74,22 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 		this->handleDeleteVehicle(request, response);
 		});
 
+	server.Post("/api/updateName", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleUpdateName(request, response);
+		});
+
+	server.Post("/api/updatePassword", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleUpdatePassword(request, response);
+		});
+
 	thread = std::thread([this]() { server.listen("localhost", 8080); });
 }
 
@@ -143,13 +159,6 @@ void Server::handleCreateSubscription(const httplib::Request& request, httplib::
 
 	if (request.has_param("password"))
 		password = request.get_param_value("password");
-
-	if (name.empty() || password.empty())
-	{
-		response.status = 400;
-		response.set_content(R"({"success": false})", "application/json");
-		return;
-	}
 
 	if (subscriptionManager->addAccount(name, password))
 	{
@@ -386,6 +395,71 @@ void Server::handleDeleteVehicle(const httplib::Request& request, httplib::Respo
 
 	if (subscription && subscriptionManager->deleteVehicle(*account, *subscription, licensePlate))
 	{
+		response.status = 200;
+		response.set_content(R"({"success": true})", "application/json");
+	}
+	else
+	{
+		response.status = 400;
+		response.set_content(R"({"success": false})", "application/json");
+	}
+}
+
+void Server::handleUpdateName(const httplib::Request& request, httplib::Response& response)
+{
+	std::string name;
+	std::string currentPassword;
+	std::string newName;
+
+	if (request.has_param("name"))
+		name = request.get_param_value("name");
+
+	if (request.has_param("currentPassword"))
+		currentPassword = request.get_param_value("currentPassword");
+
+	if (request.has_param("newName"))
+		newName = request.get_param_value("newName");
+
+	if (!subscriptionManager->verifyCredentials(name, currentPassword))
+	{
+		response.status = 400;
+		response.set_content(R"({"success": false, "message": "The current password is incorrect."})", "application/json");
+		return;
+	}
+
+	if (subscriptionManager->getAccount(newName) == nullptr)
+	{
+		subscriptionManager->updateAccountEmail(name, newName);
+
+		response.status = 200;
+		response.set_content(R"({"success": true})", "application/json");
+	}
+	else
+	{
+		response.status = 400;
+		response.set_content(R"({"success": false, "message": "Email already exists."})", "application/json");
+	}
+}
+
+void Server::handleUpdatePassword(const httplib::Request& request, httplib::Response& response)
+{
+	std::string name;
+	std::string currentPassword;
+	std::string newPassword;
+
+	if (request.has_param("name"))
+		name = request.get_param_value("name");
+
+	if (request.has_param("currentPassword"))
+		currentPassword = request.get_param_value("currentPassword");
+
+	if (request.has_param("newPassword"))
+		newPassword = request.get_param_value("newPassword");
+
+	if (subscriptionManager->verifyCredentials(name, currentPassword))
+	{
+		subscriptionManager->updateAccountPassword(name, newPassword);
+
 		response.status = 200;
 		response.set_content(R"({"success": true})", "application/json");
 	}

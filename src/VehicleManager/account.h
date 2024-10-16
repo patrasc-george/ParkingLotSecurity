@@ -27,7 +27,11 @@ public:
 public:
 	std::string getEmail() const;
 
+	void setEmail(const std::string& email);
+
 	std::string getPassword() const;
+
+	void setPassword(const std::string& password);
 
 	bool operator<(const Account& account) const;
 

@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableErrorMessage = document.getElementById('tableErrorMessage');
     let selectedRows = [];
 
+    uncheckAllButton.title = "Uncheck all";
+    checkAllButton.title = "Check all";
+    viewAllButton.title = "View history of all"
+    addButton.title = "Add";
+    deleteButton.title = "Delete";
+
     function appendRow(vehicle) {
         const row = document.createElement('tr');
         const firstCell = document.createElement('td');
@@ -44,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
         checkboxTextWrapper.appendChild(licensePlateText);
 
         const viewButton = document.createElement('button');
+        viewButton.title = "View history";
+
         const viewButtonIcon = document.createElement('img');
         viewButtonIcon.src = 'data/view_history.png';
         viewButtonIcon.alt = 'View';
@@ -358,6 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });  
 
+    settingsOption.addEventListener('click', function() {
+        window.location.href = 'account.html';
+    });
+    
     subscriptionsOption.addEventListener('click', function() {
         window.location.href = 'subscriptions.html';
     });

@@ -9,7 +9,7 @@ loginButton.addEventListener("click", function () {
     errorMessageElement.textContent = '';
 
     if (!name || !password) {
-        errorMessageElement.textContent = "Please enter both name and password.";
+        errorMessageElement.textContent = "Please enter both email and password.";
         return;
     }
 

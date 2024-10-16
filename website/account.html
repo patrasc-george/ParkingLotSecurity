@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+
+<body class="style2">
+    <header class="site-header">
+        <nav>
+            <div class="accountIconContainer">
+                <img src="data/account.png" alt="Account" class="accountIcon" id="accountIcon">
+            </div>
+            <div id="accountDropdown" class="dropdown hidden">
+                <ul>
+                    <li id="settingsOption">Settings</li>
+                    <li id="subscriptionsOption">Subscriptions</li>
+                    <li id="logoutOption">Log out</li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <p id="errorMessage" style="color:red;"></p>
+        <p id="successMessage" style="color:green;"></p>
+        <br>
+        <div class="dropdown-text">
+            <span>Email Address</span>
+            <div class="buttons">
+                <button type="button" id="nameDropdownButton">
+                    <img src="data/edit.png" alt="Edit" class="icon">
+                </button>
+            </div>
+        </div>
+        <div id="nameDropdownContent" class="dropdown-content">
+            <form id="nameForm">
+                <label for="currentPasswordName">Current password:</label>
+                <input type="password" id="currentPasswordName">
+
+                <label for="newName">New email address:</label>
+                <input type="name" id="newName">
+
+                <button type="submit">Save</button>
+            </form>
+        </div>
+
+        <div class="dropdown-text">
+            <span>Password</span>
+            <div class="buttons">
+                <button type="button" id="passwordDropdownButton">
+                    <img src="data/edit.png" alt="Edit" class="icon">
+                </button>
+            </div>
+        </div>
+        <div id="passwordDropdownContent" class="dropdown-content">
+            <form id="passwordForm">
+                <label for="currentPassword">Current password:</label>
+                <input type="password" id="currentPassword">
+
+                <label for="newPassword">New password:</label>
+                <input type="password" id="newPassword">
+
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="scripts/account.js"></script>
+</body>
+
+</html>

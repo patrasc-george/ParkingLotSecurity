@@ -4,9 +4,10 @@ const fileNameElement = document.getElementById('fileName');
 const errorMessageElement = document.getElementById('errorMessage');
 const successMessageElement = document.getElementById('successMessage');
 const licensePlateInput = document.getElementById('licensePlate');
+const payButton = document.getElementById('payButton');
 let selectedFile = null;
 
-qrCodeButton.addEventListener('click', function () {
+qrCode.addEventListener('click', function () {
     qrInput.click();
 });
 

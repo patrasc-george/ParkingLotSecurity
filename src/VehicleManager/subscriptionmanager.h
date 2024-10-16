@@ -31,6 +31,10 @@ public:
 
 	Account* getAccount(const std::string& email) const;
 
+	void updateAccountEmail(const std::string& email, const std::string& newEmail);
+
+	void updateAccountPassword(const std::string& email, const std::string& newPassword);
+
 	std::vector<Subscription>* getSubscriptions(const Account& account) const;
 
 	Subscription* getSubscription(const Account& account, const std::string& name);

@@ -30,6 +30,10 @@ private:
 
 	void handleDeleteVehicle(const httplib::Request& request, httplib::Response& response);
 
+	void handleUpdateName(const httplib::Request& request, httplib::Response& response);
+
+	void handleUpdatePassword(const httplib::Request& request, httplib::Response& response);
+
 private:
 	httplib::Server server;
 	std::thread thread;

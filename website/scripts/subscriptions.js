@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableErrorMessage = document.getElementById('tableErrorMessage');
     let selectedRows = [];
 
+    uncheckAllButton.title = "Uncheck all";
+    checkAllButton.title = "Check all";
+    addButton.title = "Add";
+    deleteButton.title = "Delete";
+
     function appendRow(subscription) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
@@ -44,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
         checkboxTextWrapper.appendChild(subscriptionText);
 
         const viewButton = document.createElement('button');
+        viewButton.title = "View";
+        
         const viewButtonIcon = document.createElement('img');
         viewButtonIcon.src = 'data/select.png';
         viewButtonIcon.alt = 'View';
@@ -259,6 +266,10 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdown.style.display = 'none';
         }
     });  
+
+    settingsOption.addEventListener('click', function() {
+        window.location.href = 'account.html';
+    });
 
     subscriptionsOption.addEventListener('click', function() {
         window.location.href = 'subscriptions.html';

@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 project(DatabaseManager)
 
 add_definitions(-DDATABASEMANAGER_EXPORTS)
@@ -7,6 +8,8 @@ file(GLOB SOURCE_FILES "*.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 
-find_package(unofficial-sqlite3 CONFIG REQUIRED)
+find_package(sqlcipher REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::sqlite3::sqlite3)
+target_compile_definitions(${PROJECT_NAME} PRIVATE -DSQLITE_HAS_CODEC)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sqlcipher)

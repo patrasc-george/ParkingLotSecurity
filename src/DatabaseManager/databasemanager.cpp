@@ -1,6 +1,7 @@
 ﻿#include "databasemanager.h"
 #include <sys/stat.h>
 #include <ctime>
+#include <fstream>
 
 DatabaseManager::DatabaseManager() : db(nullptr)
 {
@@ -16,61 +17,66 @@ DatabaseManager::DatabaseManager() : db(nullptr)
 
 void DatabaseManager::initializeDatabase()
 {
-	sqlite3_open((path + "database.db").c_str(), &db);
+	std::ifstream file(path + "key.txt");
+	std::string key;
+	file >> key;
+
+	sqlite3_open((path + "/database.db").c_str(), &db);
+	sqlite3_key(db, key.c_str(), key.size());
 
 	const char* sqlCreateTables = R"(
-        CREATE TABLE IF NOT EXISTS vehicles (
-            id INTEGER PRIMARY KEY,
-            image_path TEXT NOT NULL,
-            license_plate TEXT NOT NULL,
-            date_time TEXT NOT NULL,
-            ticket TEXT NOT NULL,
-            time_parked TEXT,
-            total_amount REAL,
-            is_paid TEXT NOT NULL
-        );
+			CREATE TABLE IF NOT EXISTS vehicles (
+				id INTEGER PRIMARY KEY,
+				image_path TEXT NOT NULL,
+				license_plate TEXT NOT NULL,
+				date_time TEXT NOT NULL,
+				ticket TEXT NOT NULL,
+				time_parked TEXT,
+				total_amount REAL,
+				is_paid TEXT NOT NULL
+			);
 
-        CREATE TABLE IF NOT EXISTS accounts (
-            email TEXT PRIMARY KEY,
-            password TEXT NOT NULL
-        );
+			CREATE TABLE IF NOT EXISTS accounts (
+				email TEXT PRIMARY KEY,
+				password TEXT NOT NULL
+			);
 
-        CREATE TABLE IF NOT EXISTS payments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date DATE NOT NULL
-        );
+			CREATE TABLE IF NOT EXISTS payments (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				date DATE NOT NULL
+			);
 
-        CREATE TABLE IF NOT EXISTS licensePlates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            number TEXT NOT NULL
-        );
+			CREATE TABLE IF NOT EXISTS licensePlates (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				number TEXT NOT NULL
+			);
 
-        CREATE TABLE IF NOT EXISTS subscriptions (
-            name TEXT PRIMARY KEY
-        );
+			CREATE TABLE IF NOT EXISTS subscriptions (
+				name TEXT PRIMARY KEY
+			);
 
-		CREATE TABLE IF NOT EXISTS subscriptionPayments (
-			subscription_name TEXT,
-			payment_id INTEGER,
-			PRIMARY KEY (subscription_name, payment_id),
-			FOREIGN KEY (subscription_name) REFERENCES accountsSubscriptions(subscription_name) ON DELETE CASCADE,
-			FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
-		);
+			CREATE TABLE IF NOT EXISTS subscriptionPayments (
+				subscription_name TEXT,
+				payment_id INTEGER,
+				PRIMARY KEY (subscription_name, payment_id),
+				FOREIGN KEY (subscription_name) REFERENCES accountsSubscriptions(subscription_name) ON DELETE CASCADE,
+				FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
+			);
 
-		CREATE TABLE IF NOT EXISTS subscriptionLicensePlates (
-			subscription_name TEXT,
-			license_plate_id INTEGER,
-			PRIMARY KEY (subscription_name, license_plate_id),
-			FOREIGN KEY (subscription_name) REFERENCES accountsSubscriptions(subscription_name) ON DELETE CASCADE,
-			FOREIGN KEY (license_plate_id) REFERENCES licensePlates(id) ON DELETE CASCADE
-		);
+			CREATE TABLE IF NOT EXISTS subscriptionLicensePlates (
+				subscription_name TEXT,
+				license_plate_id INTEGER,
+				PRIMARY KEY (subscription_name, license_plate_id),
+				FOREIGN KEY (subscription_name) REFERENCES accountsSubscriptions(subscription_name) ON DELETE CASCADE,
+				FOREIGN KEY (license_plate_id) REFERENCES licensePlates(id) ON DELETE CASCADE
+			);
 
-        CREATE TABLE IF NOT EXISTS accountsSubscriptions (
-            email TEXT,
-            subscription_name TEXT,
-            FOREIGN KEY (email) REFERENCES accounts(email) ON DELETE CASCADE,
-            PRIMARY KEY (email, subscription_name)
-        );
+			CREATE TABLE IF NOT EXISTS accountsSubscriptions (
+				email TEXT,
+				subscription_name TEXT,
+				FOREIGN KEY (email) REFERENCES accounts(email) ON DELETE CASCADE,
+				PRIMARY KEY (email, subscription_name)
+			);
     )";
 
 	sqlite3_exec(db, sqlCreateTables, nullptr, nullptr, nullptr);
@@ -223,6 +229,36 @@ void DatabaseManager::setIsPaid(const int& id)
 
 	if (sqlite3_step(stmt) != SQLITE_DONE)
 		return;
+
+	sqlite3_finalize(stmt);
+}
+
+void DatabaseManager::setEmail(const std::string& email, const std::string& newEmail)
+{
+	const char* sql = "UPDATE accounts SET email = ? WHERE email = ?";
+
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+	sqlite3_bind_text(stmt, 1, newEmail.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
+
+	sqlite3_step(stmt);
+
+	sqlite3_finalize(stmt);
+}
+
+void DatabaseManager::setPassword(const std::string& email, const std::string& newPassword)
+{
+	const char* sql = "UPDATE accounts SET password = ? WHERE email = ?";
+
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+	sqlite3_bind_text(stmt, 1, newPassword.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
+
+	sqlite3_step(stmt);
 
 	sqlite3_finalize(stmt);
 }

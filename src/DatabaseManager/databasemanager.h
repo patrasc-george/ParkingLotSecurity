@@ -6,7 +6,7 @@
 #define DATABASEMANAGER_API __declspec(dllimport)
 #endif
 
-#include <sqlite3.h>
+#include <sqlcipher/sqlite3.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -34,6 +34,10 @@ public:
 	std::unordered_map<std::string, std::pair<std::string, std::string>> getSubscriptions(const std::string& email) const;
 
 	void setIsPaid(const int& id);
+
+	void setEmail(const std::string& email, const std::string& newEmail);
+
+	void setPassword(const std::string& email, const std::string& newPassword);
 
 	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const int& totalAmount, const std::string& isPaid);
 

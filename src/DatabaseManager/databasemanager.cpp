@@ -3,26 +3,10 @@
 #include <ctime>
 #include <fstream>
 
-DatabaseManager::DatabaseManager() : db(nullptr)
+bool DatabaseManager::initializeDatabase(const std::string& password)
 {
-	struct stat info;
-	stat("../../../database", &info);
-	if (info.st_mode & S_IFDIR)
-		path = "../../../database/";
-	else
-		path = "database/";
-
-	initializeDatabase();
-}
-
-void DatabaseManager::initializeDatabase()
-{
-	std::ifstream file(path + "key.txt");
-	std::string key;
-	file >> key;
-
 	sqlite3_open((path + "/database.db").c_str(), &db);
-	sqlite3_key(db, key.c_str(), key.size());
+	sqlite3_key(db, password.c_str(), password.size());
 
 	const char* sqlCreateTables = R"(
 			CREATE TABLE IF NOT EXISTS vehicles (
@@ -79,12 +63,15 @@ void DatabaseManager::initializeDatabase()
 			);
     )";
 
-	sqlite3_exec(db, sqlCreateTables, nullptr, nullptr, nullptr);
+	if (sqlite3_exec(db, sqlCreateTables, nullptr, nullptr, nullptr) != SQLITE_OK)
+		return false;
+
+	return true;
 }
 
-DatabaseManager& DatabaseManager::getInstance()
+DatabaseManager& DatabaseManager::getInstance(const std::string& path)
 {
-	static DatabaseManager instance;
+	static DatabaseManager instance(path);
 	return instance;
 }
 

@@ -6,9 +6,15 @@ int main(int argc, char* argv[])
 	QApplication app(argc, argv);
 
 	MainWindow window;
-	window.show();
 
-	Server server;
+	if (window.getIsPassword())
+	{
+		window.show();
 
-	return app.exec();
+		Server server;
+
+		return app.exec();
+	}
+
+	return 0;
 }

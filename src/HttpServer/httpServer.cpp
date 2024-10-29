@@ -116,7 +116,6 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 
 		if (!vehicleManager.pay(data, licensePlate, dateTime))
 		{
-			response.status = 400;
 			response.set_content(R"({"success": false})", "application/json");
 			return;
 		}
@@ -132,7 +131,6 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 
 		if (!vehicleManager.pay(savePath, licensePlate, dateTime, true))
 		{
-			response.status = 400;
 			response.set_content(R"({"success": false})", "application/json");
 			return;
 		}
@@ -141,10 +139,7 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 	if (!licensePlate.empty() && !dateTime.empty())
 		response.set_content("{ \"success\": true, \"licensePlate\": \"" + licensePlate + "\", \"dateTime\": \"" + dateTime + "\" }", "application/json");
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleCreateSubscription(const httplib::Request& request, httplib::Response& response)
@@ -161,15 +156,9 @@ void Server::handleCreateSubscription(const httplib::Request& request, httplib::
 		password = request.get_param_value("password");
 
 	if (subscriptionManager->addAccount(name, password))
-	{
-		response.status = 200;
 		response.set_content(R"({"success": true})", "application/json");
-	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleLogin(const httplib::Request& request, httplib::Response& response)
@@ -199,14 +188,10 @@ void Server::handleLogin(const httplib::Request& request, httplib::Response& res
 		}
 		subscriptionsJson += "]";
 
-		response.status = 200;
 		response.set_content("{\"success\": true, \"subscriptionsTable\": " + subscriptionsJson + "}", "application/json");
 	}
 	else
-	{
-		response.status = 401;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleGetSubscriptionVehicles(const httplib::Request& request, httplib::Response& response)
@@ -240,7 +225,6 @@ void Server::handleGetSubscriptionVehicles(const httplib::Request& request, http
 	}
 	vehiclesJson += "]";
 
-	response.status = 200;
 	response.set_content("{\"success\": true, \"vehiclesTable\": " + vehiclesJson + "}", "application/json");
 }
 
@@ -258,15 +242,9 @@ void Server::handleAddSubscription(const httplib::Request& request, httplib::Res
 	Account* account = subscriptionManager->getAccount(name);
 
 	if (subscriptionManager->addSubscription(*account, subscriptionName))
-	{
-		response.status = 200;
 		response.set_content(R"({"success": true})", "application/json");
-	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleDeleteSubscription(const httplib::Request& request, httplib::Response& response)
@@ -283,15 +261,9 @@ void Server::handleDeleteSubscription(const httplib::Request& request, httplib::
 	Account* account = subscriptionManager->getAccount(name);
 
 	if (subscriptionManager->deleteSubscription(*account, subscriptionName))
-	{
-		response.status = 200;
 		response.set_content(R"({"success": true})", "application/json");
-	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleGetVehicleHistory(const httplib::Request& request, httplib::Response& response)
@@ -323,14 +295,10 @@ void Server::handleGetVehicleHistory(const httplib::Request& request, httplib::R
 
 		historyJson += "]";
 
-		response.status = 200;
 		response.set_content("{\"success\": true, \"history\": " + historyJson + "}", "application/json");
 	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleAddVehicle(const httplib::Request& request, httplib::Response& response)
@@ -364,14 +332,10 @@ void Server::handleAddVehicle(const httplib::Request& request, httplib::Response
 		}
 		vehiclesJson += "]]";
 
-		response.status = 200;
 		response.set_content("{\"success\": true, \"vehiclesTable\": " + vehiclesJson + "}", "application/json");
 	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleDeleteVehicle(const httplib::Request& request, httplib::Response& response)
@@ -394,15 +358,9 @@ void Server::handleDeleteVehicle(const httplib::Request& request, httplib::Respo
 	std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), ::toupper);
 
 	if (subscription && subscriptionManager->deleteVehicle(*account, *subscription, licensePlate))
-	{
-		response.status = 200;
 		response.set_content(R"({"success": true})", "application/json");
-	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }
 
 void Server::handleUpdateName(const httplib::Request& request, httplib::Response& response)
@@ -422,7 +380,6 @@ void Server::handleUpdateName(const httplib::Request& request, httplib::Response
 
 	if (!subscriptionManager->verifyCredentials(name, currentPassword))
 	{
-		response.status = 400;
 		response.set_content(R"({"success": false, "message": "The current password is incorrect."})", "application/json");
 		return;
 	}
@@ -430,15 +387,10 @@ void Server::handleUpdateName(const httplib::Request& request, httplib::Response
 	if (subscriptionManager->getAccount(newName) == nullptr)
 	{
 		subscriptionManager->updateAccountEmail(name, newName);
-
-		response.status = 200;
 		response.set_content(R"({"success": true})", "application/json");
 	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false, "message": "Email already exists."})", "application/json");
-	}
 }
 
 void Server::handleUpdatePassword(const httplib::Request& request, httplib::Response& response)
@@ -459,13 +411,8 @@ void Server::handleUpdatePassword(const httplib::Request& request, httplib::Resp
 	if (subscriptionManager->verifyCredentials(name, currentPassword))
 	{
 		subscriptionManager->updateAccountPassword(name, newPassword);
-
-		response.status = 200;
 		response.set_content(R"({"success": true})", "application/json");
 	}
 	else
-	{
-		response.status = 400;
 		response.set_content(R"({"success": false})", "application/json");
-	}
 }

@@ -1,4 +1,5 @@
 ﻿#include "mainwindow.h"
+#include "passwordWindow.h"
 #include "subscriptionswindow.h"
 #include "statisticswindow.h"
 #include "uploadqrwindow.h"
@@ -17,8 +18,7 @@
 QTranslator translator;
 
 MainWindow::MainWindow(QWidget* parent) :
-	QMainWindow(parent),
-	vehicleManager(VehicleManager::getInstance())
+	QMainWindow(parent)
 {
 	setupUI();
 }
@@ -51,9 +51,30 @@ void MainWindow::setupUI()
 	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
 	connect(chooseLanguage, &QComboBox::currentIndexChanged, this, &MainWindow::setLanguage);
 
+	DatabaseManager& databaseManager(DatabaseManager::getInstance(dataBasePath));
+
+	bool isPasswordWrong = false;
+	std::string password;
+	do
+	{
+		PasswordWindow* passwordWindow = new PasswordWindow(enterButton->size(), dataBasePath, isPasswordWrong, password);
+		passwordWindow->exec();
+
+		if (!password.empty())
+			isPassword = true;
+		else
+		{
+			isPassword = false;
+			return;
+		}
+
+		isPasswordWrong = true;
+	} while (!databaseManager.initializeDatabase(password));
+
+	vehicleManager = &VehicleManager::getInstance();
 	uploadDataBase();
 
-	subscriptionManager = vehicleManager.getSubscriptionManager();
+	subscriptionManager = vehicleManager->getSubscriptionManager();
 	subscriptionManager->uploadSubscriptions(dataBasePath);
 }
 
@@ -216,16 +237,16 @@ void MainWindow::updateStatistics(const std::string& dateTime, const bool& stati
 	int hour = date.time().hour();
 
 	if (statistics)
-		vehicleManager.increaseExitStatistics(dayOfWeek, hour);
+		vehicleManager->increaseExitStatistics(dayOfWeek, hour);
 	else
-		vehicleManager.increaseEntranceStatistics(dayOfWeek, hour);
+		vehicleManager->increaseEntranceStatistics(dayOfWeek, hour);
 }
 
 void MainWindow::uploadDataBase()
 {
 	std::vector<std::string> entranceDateTimes;
 	std::vector<std::string> exitDateTimes;
-	vehicleManager.uploadDataBase(entranceDateTimes, exitDateTimes);
+	vehicleManager->uploadDataBase(entranceDateTimes, exitDateTimes);
 	for (const auto& dateTime : entranceDateTimes)
 		updateStatistics(dateTime, false);
 	for (const auto& dateTime : exitDateTimes)
@@ -233,7 +254,7 @@ void MainWindow::uploadDataBase()
 
 	std::map<int, std::string> entriesList;
 	std::map<int, std::string> exitsList;
-	vehicleManager.uploadVehicles(entriesList, exitsList);
+	vehicleManager->uploadVehicles(entriesList, exitsList);
 	for (const auto& pair : entriesList)
 	{
 		QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(pair.second));
@@ -247,7 +268,7 @@ void MainWindow::uploadDataBase()
 		exitsListWidget->addItem(item);
 	}
 
-	vehicleManager.setNumberOccupiedParkingLots(numberOccupiedParkingLots);
+	vehicleManager->setNumberOccupiedParkingLots(numberOccupiedParkingLots);
 	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
 }
 
@@ -308,7 +329,7 @@ void MainWindow::processLastVehicle(const QString& QRPath)
 	std::string dateTime;
 	std::string displayText;
 
-	if (!checkResult(vehicleManager.processLastVehicle(id, dateTime, displayText, fee, pressedButton, QRPath.toStdString())))
+	if (!checkResult(vehicleManager->processLastVehicle(id, dateTime, displayText, fee, pressedButton, QRPath.toStdString())))
 		return;
 
 	updateStatistics(dateTime, pressedButton);
@@ -373,7 +394,7 @@ void MainWindow::uploadImage()
 		return;
 
 	std::string savePath;
-	vehicleManager.getVehicle(imagePath.toStdString(), savePath);
+	vehicleManager->getVehicle(imagePath.toStdString(), savePath);
 	image = QImage(QString::fromStdString(savePath));
 
 	processLastVehicle();
@@ -382,7 +403,7 @@ void MainWindow::uploadImage()
 void MainWindow::showImage(QListWidgetItem* item)
 {
 	int id = item->data(Qt::UserRole).toInt();
-	image.load(QString::fromStdString(vehicleManager.getImagePath(id)));
+	image.load(QString::fromStdString(vehicleManager->getImagePath(id)));
 
 	clearPreviousItems();
 	createNewPixmapItem();
@@ -391,7 +412,7 @@ void MainWindow::showImage(QListWidgetItem* item)
 
 void MainWindow::setName(const QString& name)
 {
-	vehicleManager.setName(name.toStdString());
+	vehicleManager->setName(name.toStdString());
 }
 
 void MainWindow::setNumberParkingLots(const QString& numberParkingLots)
@@ -407,7 +428,7 @@ void MainWindow::setFee(const QString& fee)
 void MainWindow::search(QString text)
 {
 	std::unordered_map<int, std::string> historyLogList;
-	vehicleManager.search(text.toStdString(), historyLogList);
+	vehicleManager->search(text.toStdString(), historyLogList);
 
 	historyLogListWidget->clear();
 
@@ -431,7 +452,7 @@ void MainWindow::updateOccupancyStatistics(const std::vector<std::pair<std::stri
 			int day = start.date().dayOfWeek();
 			int hour = start.time().hour();
 
-			vehicleManager.increaseOccupancyStatistics(day, hour);
+			vehicleManager->increaseOccupancyStatistics(day, hour);
 
 			start = start.addSecs(3600);
 		}
@@ -447,10 +468,10 @@ void MainWindow::showSubscriptions()
 void MainWindow::showStatistics()
 {
 	std::vector<std::pair<std::string, std::string>> occupancyDateTimes;
-	vehicleManager.calculateOccupancyStatistics(occupancyDateTimes);
+	vehicleManager->calculateOccupancyStatistics(occupancyDateTimes);
 	updateOccupancyStatistics(occupancyDateTimes);
 
-	StatisticsWindow* statisticsWindow = new StatisticsWindow(vehicleManager.getOccupancyStatistics(), vehicleManager.getEntranceStatistics(), vehicleManager.getExitStatistics(), enterButton->size());
+	StatisticsWindow* statisticsWindow = new StatisticsWindow(vehicleManager->getOccupancyStatistics(), vehicleManager->getEntranceStatistics(), vehicleManager->getExitStatistics(), enterButton->size());
 
 	statisticsWindow->show();
 }
@@ -472,4 +493,9 @@ void MainWindow::setLanguage(const int& choise)
 	this->close();
 	MainWindow* refresh = new MainWindow();
 	refresh->show();
+}
+
+bool MainWindow::getIsPassword() const
+{
+	return isPassword;
 }

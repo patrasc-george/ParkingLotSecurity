@@ -27,7 +27,6 @@ public:
 	MainWindow(QWidget* parent = nullptr);
 
 private slots:
-
 	void uploadImage();
 
 	void showImage(QListWidgetItem* item);
@@ -75,6 +74,9 @@ private:
 
 	void setGraphicsViewProperties();
 
+public:
+	bool getIsPassword() const;
+
 private:
 	QGraphicsView* graphicsView;
 	QGraphicsScene* scene;
@@ -93,10 +95,11 @@ private:
 	QLineEdit* historyLogEdit;
 	QComboBox* chooseLanguage;
 	QImage image;
-	VehicleManager& vehicleManager;
+	VehicleManager* vehicleManager;
 	SubscriptionManager* subscriptionManager;
 	std::string dataBasePath;
 	std::string translationsPath;
+	bool isPassword;
 	bool pressedButton;
 	int numberParkingLots = 100;
 	int numberOccupiedParkingLots = 0;

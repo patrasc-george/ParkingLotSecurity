@@ -15,15 +15,14 @@
 class DATABASEMANAGER_API DatabaseManager
 {
 private:
-	DatabaseManager();
+	DatabaseManager(const std::string& path) : path(path), db(nullptr) {};
 
 	~DatabaseManager();
 
-private:
-	void initializeDatabase();
-
 public:
-	static DatabaseManager& getInstance();
+	static DatabaseManager& getInstance(const std::string& path = "");
+
+	bool initializeDatabase(const std::string& password);
 
 	std::string getPath() const;
 

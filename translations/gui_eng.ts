@@ -11,7 +11,7 @@
       <source>exit.png</source>
       <translation>exit.png</translation>
     </message>
-	<message>
+    <message>
       <source>subscriptions.png</source>
       <translation>subscriptions.png</translation>
     </message>
@@ -152,10 +152,10 @@
       <translation>Close</translation>
     </message>
   </context>
-  
+
   <context>
     <name>SubscriptionsWindow</name>
-	<message>
+    <message>
       <source>Accounts</source>
       <translation>Accounts</translation>
     </message>
@@ -167,9 +167,49 @@
       <source>Vehicles</source>
       <translation>Vehicles</translation>
     </message>
-	<message>
+    <message>
       <source>Close</source>
-      <translation>Închide</translation>
+      <translation>Close</translation>
+    </message>
+  </context>
+
+  <context>
+    <name>PasswordWindow</name>
+    <message>
+      <source>Password</source>
+      <translation>Password</translation>
+    </message>
+    <message>
+      <source>Database was found.</source>
+      <translation>Database was found.</translation>
+    </message>
+    <message>
+      <source>The password is wrong. Please try again.</source>
+      <translation>The password is wrong. Please try again.</translation>
+    </message>
+    <message>
+      <source>Enter password:</source>
+      <translation>Enter password:</translation>
+    </message>
+    <message>
+      <source>No database was found.</source>
+      <translation>No database was found.</translation>
+    </message>
+    <message>
+      <source>Confirm password:</source>
+      <translation>Confirm password:</translation>
+    </message>
+    <message>
+      <source>Submit</source>
+      <translation>Submit</translation>
+    </message>
+    <message>
+      <source>Please enter a password.</source>
+      <translation>Please enter a password.</translation>
+    </message>
+    <message>
+      <source>Passwords do not match. Please try again.</source>
+      <translation>Passwords do not match. Please try again.</translation>
     </message>
   </context>
 </TS>

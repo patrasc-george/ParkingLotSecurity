@@ -11,7 +11,7 @@
       <source>exit.png</source>
       <translation>iesire.png</translation>
     </message>
-	<message>
+    <message>
       <source>subscriptions.png</source>
       <translation>abonamente.png</translation>
     </message>
@@ -152,10 +152,10 @@
       <translation>Închide</translation>
     </message>
   </context>
-  
+
   <context>
     <name>SubscriptionsWindow</name>
-	<message>
+    <message>
       <source>Accounts</source>
       <translation>Conturi</translation>
     </message>
@@ -167,9 +167,49 @@
       <source>Vehicles</source>
       <translation>Vehicule</translation>
     </message>
-	<message>
+    <message>
       <source>Close</source>
       <translation>Închide</translation>
+    </message>
+  </context>
+
+  <context>
+    <name>PasswordWindow</name>
+    <message>
+      <source>Password</source>
+      <translation>Parolă</translation>
+    </message>
+    <message>
+      <source>Database was found.</source>
+      <translation>Baza de date a fost găsită.</translation>
+    </message>
+    <message>
+      <source>The password is wrong. Please try again.</source>
+      <translation>Parola este greșită. Te rugăm să încerci din nou.</translation>
+    </message>
+    <message>
+      <source>Enter password:</source>
+      <translation>Introdu parola:</translation>
+    </message>
+    <message>
+      <source>No database was found.</source>
+      <translation>Nu a fost găsită nicio bază de date.</translation>
+    </message>
+    <message>
+      <source>Confirm password:</source>
+      <translation>Confirma parola:</translation>
+    </message>
+    <message>
+      <source>Submit</source>
+      <translation>Trimite</translation>
+    </message>
+    <message>
+      <source>Please enter a password.</source>
+      <translation>Te rugăm să introduci o parolă.</translation>
+    </message>
+    <message>
+      <source>Passwords do not match. Please try again.</source>
+      <translation>Parolele nu se potrivesc. Te rugăm să încerci din nou.</translation>
     </message>
   </context>
 </TS>

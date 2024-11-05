@@ -1,22 +1,17 @@
 ﻿#include "httpServer.h"
-#include <Poco/Net/SMTPClientSession.h>
-#include <Poco/Net/MailMessage.h>
-#include <Poco/Net/SSLManager.h>
-#include <Poco/Net/ConsoleCertificateHandler.h>
-#include <Poco/Net/AcceptCertificateHandler.h>
-#include <Poco/Net/SecureStreamSocket.h>
-#include <Poco/Net/SecureSMTPClientSession.h>
-#include <Poco/Net/DNS.h>
-#include <Poco/Net/MailMessage.h>
-#include <Poco/AutoPtr.h>
-#include <Poco/UUIDGenerator.h>
-#include <Poco/DigestEngine.h>
-#include <Poco/SHA1Engine.h>
-#include <Poco/Random.h>
-#include <Poco/RandomStream.h>
 
-Server::Server() : vehicleManager(VehicleManager::getInstance())
+Server::Server() : vehicleManager(VehicleManager::getInstance()), session("smtp.mail.yahoo.com", 587)
 {
+	subscriptionManager = vehicleManager.getSubscriptionManager();
+
+	pCert = new Poco::Net::AcceptCertificateHandler(false);
+	pContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_RELAXED);
+	Poco::Net::SSLManager::instance().initializeClient(0, pCert, pContext);
+
+	session.open();
+	session.startTLS();
+	session.login(Poco::Net::SMTPClientSession::AUTH_PLAIN, "patrasc_george@yahoo.com", "xksjsjusdlteprrc");
+
 	server.Post("/api/endpoint", [this](const httplib::Request& request, httplib::Response& response) {
 		response.set_header("Access-Control-Allow-Origin", "*");
 		response.set_header("Access-Control-Allow-Methods", "POST");
@@ -156,15 +151,6 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 	thread = std::thread([this]() { server.listen("localhost", 8080); });
 }
 
-Server::~Server()
-{
-	if (thread.joinable())
-	{
-		server.stop();
-		thread.join();
-	}
-}
-
 void Server::handlePost(const httplib::Request& request, httplib::Response& response)
 {
 	std::string licensePlate;
@@ -207,27 +193,18 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 
 void Server::handleCreateAccount(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
-	std::string email;
-	std::string password;
-	std::string phone;
+	std::string name, email, password, phone;
 
 	if (request.has_param("name"))
 		name = request.get_param_value("name");
-
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
-
 	if (request.has_param("password"))
 		password = request.get_param_value("password");
-
 	if (request.has_param("phone"))
 		phone = request.get_param_value("phone");
 
-	Poco::UUIDGenerator uuidGenerator;
 	std::string token = uuidGenerator.createRandom().toString();
-
-	subscriptionManager = vehicleManager.getSubscriptionManager();
 
 	if (!subscriptionManager->addTempAccount(name, email, password, phone, token))
 	{
@@ -244,17 +221,7 @@ void Server::handleCreateAccount(const httplib::Request& request, httplib::Respo
 	message.setContent(content);
 	message.setContentType("text/plain; charset=UTF-8");
 
-	Poco::Net::SecureSMTPClientSession session("smtp.mail.yahoo.com", 587);
-	Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCert = new Poco::Net::AcceptCertificateHandler(false);
-	Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_RELAXED);
-	Poco::Net::SSLManager::instance().initializeClient(0, pCert, pContext);
-
-	session.open();
-	session.startTLS();
-	session.login(Poco::Net::SMTPClientSession::AUTH_PLAIN, "patrasc_george@yahoo.com", "");
-
 	session.sendMessage(message);
-	session.close();
 
 	response.set_content(R"({"success": true})", "application/json");
 }
@@ -265,8 +232,6 @@ void Server::handleValidate(const httplib::Request& request, httplib::Response& 
 
 	if (request.has_param("token"))
 		token = request.get_param_value("token");
-
-	subscriptionManager = vehicleManager.getSubscriptionManager();
 
 	if (subscriptionManager->addAccount(token))
 		response.set_content(R"({"success": true})", "application/json");
@@ -284,8 +249,6 @@ void Server::handleLogin(const httplib::Request& request, httplib::Response& res
 
 	if (request.has_param("password"))
 		password = request.get_param_value("password");
-
-	subscriptionManager = vehicleManager.getSubscriptionManager();
 
 	if (subscriptionManager->verifyCredentials(email, password))
 	{
@@ -314,7 +277,6 @@ void Server::handleRecoverPassword(const httplib::Request& request, httplib::Res
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
-	subscriptionManager = vehicleManager.getSubscriptionManager();
 	Account* account = subscriptionManager->getAccount(email);
 
 	if (account == nullptr)
@@ -334,20 +296,11 @@ void Server::handleRecoverPassword(const httplib::Request& request, httplib::Res
 	message.setContent(content);
 	message.setContentType("text/plain; charset=UTF-8");
 
-	Poco::Net::SecureSMTPClientSession session("smtp.mail.yahoo.com", 587);
-	Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCert = new Poco::Net::AcceptCertificateHandler(false);
-	Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_RELAXED);
-	Poco::Net::SSLManager::instance().initializeClient(0, pCert, pContext);
-
-	session.open();
-	session.startTLS();
-	session.login(Poco::Net::SMTPClientSession::AUTH_PLAIN, "patrasc_george@yahoo.com", "");
-
 	session.sendMessage(message);
-	session.close();
 
 	response.set_content(R"({"success": true})", "application/json");
 }
+
 
 void Server::handleResetPassword(const httplib::Request& request, httplib::Response& response)
 {
@@ -359,8 +312,6 @@ void Server::handleResetPassword(const httplib::Request& request, httplib::Respo
 
 	if (request.has_param("newPassword"))
 		newPassword = request.get_param_value("newPassword");
-
-	subscriptionManager = vehicleManager.getSubscriptionManager();
 
 	if (subscriptionManager->updateAccountPassword(email, newPassword))
 		response.set_content(R"({"success": true})", "application/json");
@@ -613,4 +564,15 @@ void Server::handleUpdatePhone(const httplib::Request& request, httplib::Respons
 	}
 	else
 		response.set_content(R"({"success": false})", "application/json");
+}
+
+Server::~Server()
+{
+	if (thread.joinable())
+	{
+		server.stop();
+		thread.join();
+	}
+
+	session.close();
 }

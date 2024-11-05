@@ -4,11 +4,27 @@
 
 #include <thread>
 #include <iostream>
+#include <Poco/Net/SMTPClientSession.h>
+#include <Poco/Net/MailMessage.h>
+#include <Poco/Net/SSLManager.h>
+#include <Poco/Net/ConsoleCertificateHandler.h>
+#include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/SecureStreamSocket.h>
+#include <Poco/Net/SecureSMTPClientSession.h>
+#include <Poco/Net/DNS.h>
+#include <Poco/Net/MailMessage.h>
+#include <Poco/AutoPtr.h>
+#include <Poco/UUIDGenerator.h>
+#include <Poco/DigestEngine.h>
+#include <Poco/SHA1Engine.h>
+#include <Poco/Random.h>
+#include <Poco/RandomStream.h>
 
 class Server
 {
 public:
 	Server();
+
 	~Server();
 
 private:
@@ -47,4 +63,8 @@ private:
 	std::thread thread;
 	VehicleManager& vehicleManager;
 	SubscriptionManager* subscriptionManager;
+	Poco::UUIDGenerator uuidGenerator;
+	Poco::Net::SecureSMTPClientSession session;
+	Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCert;
+	Poco::Net::Context::Ptr pContext;
 };

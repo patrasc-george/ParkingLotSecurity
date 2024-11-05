@@ -22,7 +22,9 @@ bool DatabaseManager::initializeDatabase(const std::string& password)
 
 			CREATE TABLE IF NOT EXISTS accounts (
 				email TEXT PRIMARY KEY,
-				password TEXT NOT NULL
+				name TEXT NOT NULL,
+				password TEXT NOT NULL,
+				phone TEXT NOT NULL
 			);
 
 			CREATE TABLE IF NOT EXISTS payments (
@@ -63,7 +65,7 @@ bool DatabaseManager::initializeDatabase(const std::string& password)
 			);
     )";
 
-	if (sqlite3_exec(db, sqlCreateTables, nullptr, nullptr, nullptr) != SQLITE_OK)
+	if (sqlite3_exec(db, sqlCreateTables, nullptr, nullptr, nullptr) == SQLITE_NOTADB)
 		return false;
 
 	return true;
@@ -112,7 +114,7 @@ std::vector<std::string> DatabaseManager::getVehicles() const
 std::vector<std::string> DatabaseManager::getAccounts() const
 {
 	std::vector<std::string> accounts;
-	const char* sql = "SELECT email, password FROM accounts;";
+	const char* sql = "SELECT name, email, password, phone FROM accounts;";
 	sqlite3_stmt* stmt;
 
 	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
@@ -120,9 +122,11 @@ std::vector<std::string> DatabaseManager::getAccounts() const
 
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 	{
-		std::string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-		std::string password = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-		accounts.push_back(email + ", " + password);
+		std::string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+		std::string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+		std::string password = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+		std::string phone = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+		accounts.push_back(name + ", " + email + ", " + password + ", " + phone);
 	}
 
 	sqlite3_finalize(stmt);
@@ -220,6 +224,21 @@ void DatabaseManager::setIsPaid(const int& id)
 	sqlite3_finalize(stmt);
 }
 
+void DatabaseManager::setName(const std::string& email, const std::string& newName)
+{
+	const char* sql = "UPDATE accounts SET name = ? WHERE email = ?";
+
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+	sqlite3_bind_text(stmt, 1, newName.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
+
+	sqlite3_step(stmt);
+
+	sqlite3_finalize(stmt);
+}
+
 void DatabaseManager::setEmail(const std::string& email, const std::string& newEmail)
 {
 	const char* sql = "UPDATE accounts SET email = ? WHERE email = ?";
@@ -243,6 +262,21 @@ void DatabaseManager::setPassword(const std::string& email, const std::string& n
 	sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
 
 	sqlite3_bind_text(stmt, 1, newPassword.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
+
+	sqlite3_step(stmt);
+
+	sqlite3_finalize(stmt);
+}
+
+void DatabaseManager::setPhone(const std::string& email, const std::string& newPhone)
+{
+	const char* sql = "UPDATE accounts SET phone = ? WHERE email = ?";
+
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+	sqlite3_bind_text(stmt, 1, newPhone.c_str(), -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
 
 	sqlite3_step(stmt);
@@ -280,11 +314,11 @@ void DatabaseManager::addVehicle(const int& id, const std::string& imagePath, co
 	sqlite3_finalize(stmt);
 }
 
-void DatabaseManager::addAccount(const std::string& email, const std::string& password)
+void DatabaseManager::addAccount(const std::string& name, const std::string& email, const std::string& password, const std::string& phone)
 {
 	const char* sql = R"(
-        INSERT INTO accounts (email, password)
-        VALUES (?, ?);
+        INSERT INTO accounts (name, email, password, phone)
+        VALUES (?, ?, ?, ?);
     )";
 
 	sqlite3_stmt* stmt;
@@ -295,8 +329,10 @@ void DatabaseManager::addAccount(const std::string& email, const std::string& pa
 		return;
 	}
 
-	sqlite3_bind_text(stmt, 1, email.c_str(), -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 3, password.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 4, phone.c_str(), -1, SQLITE_STATIC);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE)
 	{

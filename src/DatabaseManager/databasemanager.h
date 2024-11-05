@@ -34,13 +34,17 @@ public:
 
 	void setIsPaid(const int& id);
 
+	void setName(const std::string& email, const std::string& newName);
+
 	void setEmail(const std::string& email, const std::string& newEmail);
 
 	void setPassword(const std::string& email, const std::string& newPassword);
 
+	void setPhone(const std::string& email, const std::string& newPhone);
+
 	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const int& totalAmount, const std::string& isPaid);
 
-	void addAccount(const std::string& email, const std::string& password);
+	void addAccount(const std::string& name, const std::string& email, const std::string& password, const std::string& phone);
 
 	void addSubscription(const std::string& email, const std::string& name);
 

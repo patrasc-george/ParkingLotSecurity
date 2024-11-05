@@ -12,7 +12,7 @@
 
 #include <fstream>
 #include <map>
-
+#include <unordered_set>
 
 class SUBSCRIPTIONMANAGER_API SubscriptionManager
 {
@@ -29,17 +29,25 @@ public:
 public:
 	std::map<Account, std::vector<Subscription>> getAccounts() const;
 
+	std::string getTempAccount(const std::string& email) const;
+
 	Account* getAccount(const std::string& email) const;
 
 	void updateAccountEmail(const std::string& email, const std::string& newEmail);
 
-	void updateAccountPassword(const std::string& email, const std::string& newPassword);
+	bool updateAccountPassword(const std::string& email, const std::string& newPassword);
+
+	void updateAccountPhone(const std::string& email, const std::string& newPhone);
 
 	std::vector<Subscription>* getSubscriptions(const Account& account) const;
 
 	Subscription* getSubscription(const Account& account, const std::string& name);
 
-	bool addAccount(const std::string& name, const std::string& password);
+	bool addTempAccount(const std::string& name, const std::string& email, const std::string& password, const std::string& phone, const std::string& token);
+
+	bool addAccount(const std::string& token);
+
+	bool addTempPassword(const std::string& email);
 
 	bool addSubscription(const Account& account, const std::string& name);
 
@@ -53,4 +61,6 @@ private:
 	DatabaseManager& databaseManager;
 	std::string dataBasePath;
 	std::map<Account, std::vector<Subscription>> accounts;
+	std::unordered_map<std::string, std::string> tempAccounts;
+	std::unordered_set<std::string> tempPasswords;
 };

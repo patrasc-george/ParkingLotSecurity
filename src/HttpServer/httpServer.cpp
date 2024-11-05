@@ -1,4 +1,19 @@
 ﻿#include "httpServer.h"
+#include <Poco/Net/SMTPClientSession.h>
+#include <Poco/Net/MailMessage.h>
+#include <Poco/Net/SSLManager.h>
+#include <Poco/Net/ConsoleCertificateHandler.h>
+#include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/SecureStreamSocket.h>
+#include <Poco/Net/SecureSMTPClientSession.h>
+#include <Poco/Net/DNS.h>
+#include <Poco/Net/MailMessage.h>
+#include <Poco/AutoPtr.h>
+#include <Poco/UUIDGenerator.h>
+#include <Poco/DigestEngine.h>
+#include <Poco/SHA1Engine.h>
+#include <Poco/Random.h>
+#include <Poco/RandomStream.h>
 
 Server::Server() : vehicleManager(VehicleManager::getInstance())
 {
@@ -10,12 +25,28 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 		this->handlePost(request, response);
 		});
 
-	server.Post("/api/createSubscription", [this](const httplib::Request& request, httplib::Response& response) {
+	server.Post("/api/createAccount", [this](const httplib::Request& request, httplib::Response& response) {
 		response.set_header("Access-Control-Allow-Origin", "*");
 		response.set_header("Access-Control-Allow-Methods", "POST");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleCreateSubscription(request, response);
+		this->handleCreateAccount(request, response);
+		});
+
+	server.Post("/api/validate", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleValidate(request, response);
+		});
+
+	server.Options("/api/validate", [](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		response.status = 200;
 		});
 
 	server.Post("/api/login", [this](const httplib::Request& request, httplib::Response& response) {
@@ -24,6 +55,30 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
 		this->handleLogin(request, response);
+		});
+
+	server.Post("/api/recoverPassword", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleRecoverPassword(request, response);
+		});
+
+	server.Post("/api/resetPassword", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleResetPassword(request, response);
+		});
+
+	server.Options("/api/resetPassword", [](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		response.status = 200;
 		});
 
 	server.Post("/api/getSubscriptionVehicles", [this](const httplib::Request& request, httplib::Response& response) {
@@ -90,6 +145,14 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 		this->handleUpdatePassword(request, response);
 		});
 
+	server.Post("/api/updatePhone", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleUpdatePhone(request, response);
+		});
+
 	thread = std::thread([this]() { server.listen("localhost", 8080); });
 }
 
@@ -116,7 +179,7 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 
 		if (!vehicleManager.pay(data, licensePlate, dateTime))
 		{
-			response.set_content(R"({"success": false})", "application/json");
+			response.set_content(R"({"success": false, "message": "The vehicle was not found. Please upload the QR code."})", "application/json");
 			return;
 		}
 	}
@@ -131,31 +194,81 @@ void Server::handlePost(const httplib::Request& request, httplib::Response& resp
 
 		if (!vehicleManager.pay(savePath, licensePlate, dateTime, true))
 		{
-			response.set_content(R"({"success": false})", "application/json");
+			response.set_content(R"({"success": false, "message": "The vehicle was not found. Please upload the QR code again."})", "application/json");
 			return;
 		}
 	}
 
 	if (!licensePlate.empty() && !dateTime.empty())
-		response.set_content("{ \"success\": true, \"licensePlate\": \"" + licensePlate + "\", \"dateTime\": \"" + dateTime + "\" }", "application/json");
+		response.set_content("{ \"success\": true, \"message\": \"The vehicle with license plate number " + licensePlate + " was found. The parking fee has been paid. The vehicle entered the parking lot on " + dateTime + ".\", \"licensePlate\": \"" + licensePlate + "\", \"dateTime\": \"" + dateTime + "\" }", "application/json");
 	else
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void Server::handleCreateSubscription(const httplib::Request& request, httplib::Response& response)
+void Server::handleCreateAccount(const httplib::Request& request, httplib::Response& response)
 {
 	std::string name;
+	std::string email;
 	std::string password;
-
-	subscriptionManager = vehicleManager.getSubscriptionManager();
+	std::string phone;
 
 	if (request.has_param("name"))
 		name = request.get_param_value("name");
 
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
+
 	if (request.has_param("password"))
 		password = request.get_param_value("password");
 
-	if (subscriptionManager->addAccount(name, password))
+	if (request.has_param("phone"))
+		phone = request.get_param_value("phone");
+
+	Poco::UUIDGenerator uuidGenerator;
+	std::string token = uuidGenerator.createRandom().toString();
+
+	subscriptionManager = vehicleManager.getSubscriptionManager();
+
+	if (!subscriptionManager->addTempAccount(name, email, password, phone, token))
+	{
+		response.set_content(R"({"success": false, "message": "An account with this email address already exists."})", "application/json");
+		return;
+	}
+
+	std::string content = "Hello, " + name + ",\n\nThank you for registering!\n\nTo complete the setup of your account, please validate your email address by clicking the link below: http://localhost:4200/validate?token=" + token;
+
+	Poco::Net::MailMessage message;
+	message.setSender("patrasc_george@yahoo.com");
+	message.addRecipient(Poco::Net::MailRecipient(Poco::Net::MailRecipient::PRIMARY_RECIPIENT, email));
+	message.setSubject("Validate Account");
+	message.setContent(content);
+	message.setContentType("text/plain; charset=UTF-8");
+
+	Poco::Net::SecureSMTPClientSession session("smtp.mail.yahoo.com", 587);
+	Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCert = new Poco::Net::AcceptCertificateHandler(false);
+	Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_RELAXED);
+	Poco::Net::SSLManager::instance().initializeClient(0, pCert, pContext);
+
+	session.open();
+	session.startTLS();
+	session.login(Poco::Net::SMTPClientSession::AUTH_PLAIN, "patrasc_george@yahoo.com", "");
+
+	session.sendMessage(message);
+	session.close();
+
+	response.set_content(R"({"success": true})", "application/json");
+}
+
+void Server::handleValidate(const httplib::Request& request, httplib::Response& response)
+{
+	std::string token;
+
+	if (request.has_param("token"))
+		token = request.get_param_value("token");
+
+	subscriptionManager = vehicleManager.getSubscriptionManager();
+
+	if (subscriptionManager->addAccount(token))
 		response.set_content(R"({"success": true})", "application/json");
 	else
 		response.set_content(R"({"success": false})", "application/json");
@@ -163,20 +276,20 @@ void Server::handleCreateSubscription(const httplib::Request& request, httplib::
 
 void Server::handleLogin(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string password;
 
-	subscriptionManager = vehicleManager.getSubscriptionManager();
-
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("password"))
 		password = request.get_param_value("password");
 
-	if (subscriptionManager->verifyCredentials(name, password))
+	subscriptionManager = vehicleManager.getSubscriptionManager();
+
+	if (subscriptionManager->verifyCredentials(email, password))
 	{
-		Account* account = subscriptionManager->getAccount(name);
+		Account* account = subscriptionManager->getAccount(email);
 		std::vector<Subscription>* subscriptions = subscriptionManager->getSubscriptions(*account);
 
 		std::string subscriptionsJson = "[";
@@ -194,18 +307,79 @@ void Server::handleLogin(const httplib::Request& request, httplib::Response& res
 		response.set_content(R"({"success": false})", "application/json");
 }
 
+void Server::handleRecoverPassword(const httplib::Request& request, httplib::Response& response)
+{
+	std::string email;
+
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
+
+	subscriptionManager = vehicleManager.getSubscriptionManager();
+	Account* account = subscriptionManager->getAccount(email);
+
+	if (account == nullptr)
+	{
+		response.set_content(R"({"success": false})", "application/json");
+		return;
+	}
+
+	subscriptionManager->addTempPassword(email);
+
+	std::string content = "Hello, " + account->getName() + ",\n\nTo reset the password for your account, please click the link below: http://localhost:4200/reset-password?email=" + email;
+
+	Poco::Net::MailMessage message;
+	message.setSender("patrasc_george@yahoo.com");
+	message.addRecipient(Poco::Net::MailRecipient(Poco::Net::MailRecipient::PRIMARY_RECIPIENT, email));
+	message.setSubject("Reset Password");
+	message.setContent(content);
+	message.setContentType("text/plain; charset=UTF-8");
+
+	Poco::Net::SecureSMTPClientSession session("smtp.mail.yahoo.com", 587);
+	Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCert = new Poco::Net::AcceptCertificateHandler(false);
+	Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_RELAXED);
+	Poco::Net::SSLManager::instance().initializeClient(0, pCert, pContext);
+
+	session.open();
+	session.startTLS();
+	session.login(Poco::Net::SMTPClientSession::AUTH_PLAIN, "patrasc_george@yahoo.com", "");
+
+	session.sendMessage(message);
+	session.close();
+
+	response.set_content(R"({"success": true})", "application/json");
+}
+
+void Server::handleResetPassword(const httplib::Request& request, httplib::Response& response)
+{
+	std::string email;
+	std::string newPassword;
+
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
+
+	if (request.has_param("newPassword"))
+		newPassword = request.get_param_value("newPassword");
+
+	subscriptionManager = vehicleManager.getSubscriptionManager();
+
+	if (subscriptionManager->updateAccountPassword(email, newPassword))
+		response.set_content(R"({"success": true})", "application/json");
+	else
+		response.set_content(R"({"success": false})", "application/json");
+}
+
 void Server::handleGetSubscriptionVehicles(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string subscriptionName;
 
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("subscriptionName"))
 		subscriptionName = request.get_param_value("subscriptionName");
 
-	Account* account = subscriptionManager->getAccount(name);
+	Account* account = subscriptionManager->getAccount(email);
 	Subscription* subscription = subscriptionManager->getSubscription(*account, subscriptionName);
 	std::vector<std::vector<std::string>> vehiclesTable = vehicleManager.subscriptionVehicles(*subscription);
 
@@ -230,16 +404,16 @@ void Server::handleGetSubscriptionVehicles(const httplib::Request& request, http
 
 void Server::handleAddSubscription(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string subscriptionName;
 
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("subscriptionName"))
 		subscriptionName = request.get_param_value("subscriptionName");
 
-	Account* account = subscriptionManager->getAccount(name);
+	Account* account = subscriptionManager->getAccount(email);
 
 	if (subscriptionManager->addSubscription(*account, subscriptionName))
 		response.set_content(R"({"success": true})", "application/json");
@@ -249,16 +423,16 @@ void Server::handleAddSubscription(const httplib::Request& request, httplib::Res
 
 void Server::handleDeleteSubscription(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string subscriptionName;
 
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("subscriptionName"))
 		subscriptionName = request.get_param_value("subscriptionName");
 
-	Account* account = subscriptionManager->getAccount(name);
+	Account* account = subscriptionManager->getAccount(email);
 
 	if (subscriptionManager->deleteSubscription(*account, subscriptionName))
 		response.set_content(R"({"success": true})", "application/json");
@@ -303,12 +477,12 @@ void Server::handleGetVehicleHistory(const httplib::Request& request, httplib::R
 
 void Server::handleAddVehicle(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string subscriptionName;
 	std::string licensePlate;
 
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("subscriptionName"))
 		subscriptionName = request.get_param_value("subscriptionName");
@@ -316,7 +490,7 @@ void Server::handleAddVehicle(const httplib::Request& request, httplib::Response
 	if (request.has_param("licensePlate"))
 		licensePlate = request.get_param_value("licensePlate");
 
-	Account* account = subscriptionManager->getAccount(name);
+	Account* account = subscriptionManager->getAccount(email);
 	Subscription* subscription = subscriptionManager->getSubscription(*account, subscriptionName);
 	std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), ::toupper);
 
@@ -340,12 +514,12 @@ void Server::handleAddVehicle(const httplib::Request& request, httplib::Response
 
 void Server::handleDeleteVehicle(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string subscriptionName;
 	std::string licensePlate;
 
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("subscriptionName"))
 		subscriptionName = request.get_param_value("subscriptionName");
@@ -353,7 +527,7 @@ void Server::handleDeleteVehicle(const httplib::Request& request, httplib::Respo
 	if (request.has_param("licensePlate"))
 		licensePlate = request.get_param_value("licensePlate");
 
-	Account* account = subscriptionManager->getAccount(name);
+	Account* account = subscriptionManager->getAccount(email);
 	Subscription* subscription = subscriptionManager->getSubscription(*account, subscriptionName);
 	std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), ::toupper);
 
@@ -365,28 +539,28 @@ void Server::handleDeleteVehicle(const httplib::Request& request, httplib::Respo
 
 void Server::handleUpdateName(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string currentPassword;
-	std::string newName;
+	std::string newEmail;
 
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("currentPassword"))
 		currentPassword = request.get_param_value("currentPassword");
 
-	if (request.has_param("newName"))
-		newName = request.get_param_value("newName");
+	if (request.has_param("newEmail"))
+		newEmail = request.get_param_value("newEmail");
 
-	if (!subscriptionManager->verifyCredentials(name, currentPassword))
+	if (!subscriptionManager->verifyCredentials(email, currentPassword))
 	{
 		response.set_content(R"({"success": false, "message": "The current password is incorrect."})", "application/json");
 		return;
 	}
 
-	if (subscriptionManager->getAccount(newName) == nullptr)
+	if (subscriptionManager->getAccount(newEmail) == nullptr)
 	{
-		subscriptionManager->updateAccountEmail(name, newName);
+		subscriptionManager->updateAccountEmail(email, newEmail);
 		response.set_content(R"({"success": true})", "application/json");
 	}
 	else
@@ -395,12 +569,12 @@ void Server::handleUpdateName(const httplib::Request& request, httplib::Response
 
 void Server::handleUpdatePassword(const httplib::Request& request, httplib::Response& response)
 {
-	std::string name;
+	std::string email;
 	std::string currentPassword;
 	std::string newPassword;
 
-	if (request.has_param("name"))
-		name = request.get_param_value("name");
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
 
 	if (request.has_param("currentPassword"))
 		currentPassword = request.get_param_value("currentPassword");
@@ -408,9 +582,33 @@ void Server::handleUpdatePassword(const httplib::Request& request, httplib::Resp
 	if (request.has_param("newPassword"))
 		newPassword = request.get_param_value("newPassword");
 
-	if (subscriptionManager->verifyCredentials(name, currentPassword))
+	if (subscriptionManager->verifyCredentials(email, currentPassword))
 	{
-		subscriptionManager->updateAccountPassword(name, newPassword);
+		subscriptionManager->updateAccountPassword(email, newPassword);
+		response.set_content(R"({"success": true})", "application/json");
+	}
+	else
+		response.set_content(R"({"success": false})", "application/json");
+}
+
+void Server::handleUpdatePhone(const httplib::Request& request, httplib::Response& response)
+{
+	std::string email;
+	std::string currentPassword;
+	std::string newPhone;
+
+	if (request.has_param("email"))
+		email = request.get_param_value("email");
+
+	if (request.has_param("currentPassword"))
+		currentPassword = request.get_param_value("currentPassword");
+
+	if (request.has_param("newPhone"))
+		newPhone = request.get_param_value("newPhone");
+
+	if (subscriptionManager->verifyCredentials(email, currentPassword))
+	{
+		subscriptionManager->updateAccountPhone(email, newPhone);
 		response.set_content(R"({"success": true})", "application/json");
 	}
 	else

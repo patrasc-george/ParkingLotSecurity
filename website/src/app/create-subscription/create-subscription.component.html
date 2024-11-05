@@ -1,0 +1,47 @@
+<div class="container" style="width: 450px;" [formGroup]="signUpForm">
+    <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
+
+    <label for="name">Name:</label>
+    <input id="name" type="text" formControlName="name" required />
+    <div *ngIf="signUpForm.get('name')?.invalid && signUpForm.get('name')?.touched" style="line-height: 0;">
+        <small style="color: red;" *ngIf="signUpForm.get('name')?.errors?.['invalidName']">Enter a valid name.</small>
+    </div>
+
+    <label for="email">Email address:</label>
+    <input id="email" type="text" formControlName="email" required />
+    <div *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched" style="line-height: 0;">
+        <small style="color: red;" *ngIf="signUpForm.get('email')?.errors?.['invalidEmail']">Enter a valid email
+            address.</small>
+    </div>
+
+    <label for="password">Password:</label>
+    <input id="password" type="password" formControlName="password" required />
+    <div *ngIf="signUpForm.get('password')?.invalid && signUpForm.get('password')?.touched">
+        <ul class="error-list">
+            <li *ngIf="signUpForm.get('password')?.errors?.['uppercaseRequired']">1 uppercase letter minimum</li>
+            <li *ngIf="signUpForm.get('password')?.errors?.['numberRequired']">1 number minimum</li>
+            <li *ngIf="signUpForm.get('password')?.errors?.['minLength']">8 characters minimum</li>
+        </ul>
+    </div>
+
+    <label for="confirmPassword">Confirm password:</label>
+    <input id="confirmPassword" type="password" formControlName="confirmPassword" required />
+    <div *ngIf="signUpForm.get('confirmPassword')?.invalid && signUpForm.get('confirmPassword')?.touched"
+        style="line-height: 0;">
+        <small style="color: red;" *ngIf="signUpForm.get('confirmPassword')?.errors?.['passwordMismatch']">Passwords do
+            not match.</small>
+    </div>
+
+    <label for="phone">Phone number:</label>
+    <input id="phone" type="text" formControlName="phone" required />
+    <div *ngIf="signUpForm.get('phone')?.invalid && signUpForm.get('phone')?.touched" style="line-height: 0;">
+        <small style="color: red;" *ngIf="signUpForm.get('phone')?.errors?.['invalidPhone']">Enter a valid
+            phone number.</small>
+    </div>
+
+    <button (click)="onSignUp()">Sign up</button>
+
+    <p>Already have an account?
+        <a routerLink="/login" id="backToLoginLink">Back to login</a>
+    </p>
+</div>

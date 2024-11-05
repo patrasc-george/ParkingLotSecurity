@@ -12,7 +12,7 @@
 class ACCOUNT_API Account
 {
 public:
-	Account(const std::string& email, const std::string& password) : email(email), password(password) {}
+	Account(const std::string& name, const std::string& email, const std::string& password, const std::string& phone) : name(name), email(email), password(password), phone(phone) {}
 
 	Account() = default;
 
@@ -25,6 +25,10 @@ public:
 	Account& operator=(Account&&) noexcept = default;
 
 public:
+	std::string getName() const;
+
+	void setName(const std::string& name);
+
 	std::string getEmail() const;
 
 	void setEmail(const std::string& email);
@@ -33,13 +37,19 @@ public:
 
 	void setPassword(const std::string& password);
 
+	std::string getPhone() const;
+
+	void setPhone(const std::string& phone);
+
 	bool operator<(const Account& account) const;
 
 	bool operator==(const Account& account) const;
 
 private:
+	std::string name;
 	std::string email;
 	std::string password;
+	std::string phone;
 };
 
 struct AccountHash

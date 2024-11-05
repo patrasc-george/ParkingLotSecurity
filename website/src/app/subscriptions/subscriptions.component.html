@@ -1,0 +1,51 @@
+<header class="site-header">
+  <nav>
+    <div class="accountIconContainer">
+      <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()" />
+    </div>
+    <div *ngIf="dropdownVisible" class="dropdown">
+      <ul>
+        <li (click)="navigateTo('account')">Settings</li>
+        <li (click)="navigateTo('subscriptions')">Subscriptions</li>
+        <li (click)="logout()">Log out</li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<div class="container" style="width: 450px;">
+  <p *ngIf="tableErrorMessage" style="color: red;">{{ tableErrorMessage }}</p>
+
+  <div class="buttons">
+    <button (click)="uncheckAll()" [disabled]="!selectedRows.size">
+      <img src="assets/uncheck.png" alt="Uncheck all" class="icon" />
+    </button>
+    <button (click)="checkAll()">
+      <img src="assets/check.png" alt="Check all" class="icon" />
+    </button>
+    <button (click)="addSubscription()">
+      <img src="assets/add.png" alt="Add" class="icon" />
+    </button>
+    <button (click)="deleteSelected()" [disabled]="!selectedRows.size">
+      <img src="assets/delete.png" alt="Delete" class="icon" />
+    </button>
+  </div>
+
+  <table id="subscriptionsTable">
+    <th>Subscriptions</th>
+    <tbody #tableBody>
+      <tr *ngFor="let subscription of subscriptionsTable" [attr.data-subscription]="subscription">
+        <td>
+          <div class="cell-wrapper">
+            <div class="checkbox-text-wrapper">
+              <input type="checkbox" (change)="toggleSelection(subscription)" />
+              <span>{{ subscription }}</span>
+            </div>
+            <button title="View" class="view-button" (click)="viewSubscription(subscription)">
+              <img src="assets/select.png" alt="View" class="icon" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>

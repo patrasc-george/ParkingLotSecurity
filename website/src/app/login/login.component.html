@@ -1,0 +1,21 @@
+<div class="container" style="width: 450px;">
+  <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
+  <p *ngIf="successMessage" style="color: green;">{{ successMessage }}</p>
+
+  <label for="email">Email address:</label>
+  <input id="email" type="text" [(ngModel)]="email" required />
+
+  <label for="password">Password:</label>
+  <input id="password" type="password" [(ngModel)]="password" required />
+
+  <button (click)="onLogin()">Log in</button>
+
+  <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+    <p style="margin: 0;">
+      <a routerLink="/recover-password" id="resetPasswordLink">Recover your password</a>
+    </p>
+    <p style="margin: 0;">
+      <a routerLink="/create-subscription" id="createNewSubscriptionLink">Create an account</a>
+    </p>
+  </div>
+</div>

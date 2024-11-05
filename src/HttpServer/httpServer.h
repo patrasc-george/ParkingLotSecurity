@@ -14,9 +14,15 @@ public:
 private:
 	void handlePost(const httplib::Request& request, httplib::Response& response);
 
-	void handleCreateSubscription(const httplib::Request& request, httplib::Response& response);
+	void handleCreateAccount(const httplib::Request& request, httplib::Response& response);
+
+	void handleValidate(const httplib::Request& request, httplib::Response& response);
 
 	void handleLogin(const httplib::Request& request, httplib::Response& response);
+
+	void handleRecoverPassword(const httplib::Request& request, httplib::Response& response);
+
+	void handleResetPassword(const httplib::Request& request, httplib::Response& response);
 
 	void handleGetSubscriptionVehicles(const httplib::Request& request, httplib::Response& response);
 
@@ -33,6 +39,8 @@ private:
 	void handleUpdateName(const httplib::Request& request, httplib::Response& response);
 
 	void handleUpdatePassword(const httplib::Request& request, httplib::Response& response);
+
+	void handleUpdatePhone(const httplib::Request& request, httplib::Response& response);
 
 private:
 	httplib::Server server;

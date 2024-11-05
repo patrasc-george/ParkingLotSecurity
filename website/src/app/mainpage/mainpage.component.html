@@ -1,0 +1,26 @@
+<header>
+  <nav>
+    <button id="subscriptionsButton" (click)="onLogin()">Log in</button>
+  </nav>
+</header>
+
+<div class="container" style="width: 450px;">
+  <p *ngIf="errorMessage" style="color: red; padding: 10px;">{{ errorMessage }}</p>
+  <p *ngIf="successMessage" style="color: green; padding: 10px;">{{ successMessage }}</p>
+  <p *ngIf="!errorMessage && !successMessage"></p>
+
+  <label for="licensePlate">Enter the license plate number:</label>
+  <input id="licensePlate" type="text" [(ngModel)]="licensePlate" />
+
+  <p>or</p>
+
+  <button (click)="onUploadQrCode()">Upload QR Code</button>
+  <input type="file" id="qrInput" (change)="onFileSelected($event)" accept="image/*" style="display: none;" />
+  <br>
+
+  <span *ngIf="fileName" id="fileName">Uploaded file: {{ fileName }}</span>
+
+  <br>
+
+  <button (click)="onPay()" class="payButton">Pay</button>
+</div>

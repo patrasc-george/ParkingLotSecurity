@@ -1,0 +1,45 @@
+<div class="container">
+    <p *ngIf="errorMessage" style="color:red;">{{ errorMessage }}</p>
+    <p *ngIf="successMessage" style="color:green;">{{ successMessage }}</p>
+    <br>
+
+    <div class="dropdown-text">
+        <span>Email Address</span>
+        <div class="buttons">
+            <button type="button" (click)="updateEmail()">
+                <img src="data/edit.png" alt="Edit" class="icon">
+            </button>
+        </div>
+    </div>
+    <div>
+        <form (ngSubmit)="updateEmail()">
+            <label for="currentPasswordName">Current password:</label>
+            <input type="password" [(ngModel)]="currentPasswordName" name="currentPasswordName">
+
+            <label for="newName">New email address:</label>
+            <input type="email" [(ngModel)]="newName" name="newName">
+
+            <button type="submit">Save</button>
+        </form>
+    </div>
+
+    <div class="dropdown-text">
+        <span>Password</span>
+        <div class="buttons">
+            <button type="button" (click)="updatePassword()">
+                <img src="data/edit.png" alt="Edit" class="icon">
+            </button>
+        </div>
+    </div>
+    <div>
+        <form (ngSubmit)="updatePassword()">
+            <label for="currentPassword">Current password:</label>
+            <input type="password" [(ngModel)]="currentPassword" name="currentPassword">
+
+            <label for="newPassword">New password:</label>
+            <input type="password" [(ngModel)]="newPassword" name="newPassword">
+
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>

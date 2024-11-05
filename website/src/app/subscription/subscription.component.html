@@ -1,0 +1,69 @@
+<header class="site-header">
+    <nav>
+        <div class="accountIconContainer">
+            <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
+        </div>
+        <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
+            <ul>
+                <li (click)="navigateTo('account')">Settings</li>
+                <li (click)="navigateTo('subscriptions')">Subscriptions</li>
+                <li (click)="navigateTo('login')">Log out</li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div class="container full-width">
+    <p id="tableErrorMessage" style="color: red;">{{ tableErrorMessage }}</p>
+    <div class="buttons">
+        <button (click)="uncheckAll()" [disabled]="selectedRows.size === 0">
+            <img src="assets/uncheck.png" alt="Uncheck all" class="icon">
+        </button>
+        <button (click)="checkAll()">
+            <img src="assets/check.png" alt="Check all" class="icon">
+        </button>
+        <button (click)="viewSelected()" [disabled]="selectedRows.size === 0">
+            <img src="assets/view_history.png" alt="View all" class="icon">
+        </button>
+        <button (click)="addVehicleRow()">
+            <img src="assets/add.png" alt="Add" class="icon">
+        </button>
+        <button (click)="deleteSelected()" [disabled]="selectedRows.size === 0">
+            <img src="assets/delete.png" alt="Delete" class="icon">
+        </button>
+    </div>
+
+    <table id="vehiclesTable">
+        <thead>
+            <tr>
+                <th rowspan="2">License Plate Number</th>
+                <th colspan="4">Activity</th>
+                <th rowspan="2">Total Time Parked</th>
+                <th rowspan="2">Total Payment</th>
+                <th rowspan="2">Status</th>
+            </tr>
+            <tr>
+                <th>Entered</th>
+                <th>Exit</th>
+                <th>Time Parked</th>
+                <th>Payment</th>
+            </tr>
+        </thead>
+        <tbody #tableBody>
+            <tr *ngFor="let vehicle of vehiclesTable">
+                <td class="subscription-cell">
+                    <div class="cell-wrapper">
+                        <div class="checkbox-text-wrapper">
+                            <input type="checkbox" (change)="onRowSelect($event, vehicle)">
+                            <span>{{ vehicle[0] }}</span>
+                        </div>
+                        <button title="View history" class="view-button" (click)="viewHistory(vehicle[0])">
+                            <img src="assets/view_history.png" alt="View" class="icon">
+                        </button>
+                    </div>
+                </td>
+                <td *ngFor="let cell of vehicle.slice(1)" [style.color]="cell === 'active' ? 'green' : 'red'">{{ cell }}</td>
+            </tr>
+        </tbody>
+    </table>    
+</div>

@@ -12,7 +12,7 @@ cmake --install . --config Release
 cd ..
 
 cd website
-npm install
+npm install --legacy-peer-deps
 cd ..
 
 pause

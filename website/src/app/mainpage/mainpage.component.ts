@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -14,11 +14,68 @@ export class MainpageComponent {
   errorMessage: string = '';
   successMessage: string = '';
   selectedFile: File | null = null;
+  dropdownVisible = false;
 
   constructor(private http: HttpClient, private router: Router) { }
 
   onLogin() {
     this.router.navigate(['/login']);
+  }
+
+  toggleDropdown(): void {
+    this.dropdownVisible = !this.dropdownVisible;
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeDropdown(event: MouseEvent): void {
+    const dropdown = document.getElementById('accountDropdown');
+    const accountIcon = document.querySelector('.accountIconContainer');
+
+    if (this.dropdownVisible && dropdown && !dropdown.contains(event.target as Node) && !accountIcon?.contains(event.target as Node)) {
+      this.dropdownVisible = false;
+    }
+  }
+
+  navigateTo(destination: string): void {
+    const routes: { [key: string]: string } = {
+      mainpage: '/',
+      login: '/login',
+      createAccount: '/create-subscription',
+      contact: '/contact'
+    };
+
+    const route = routes[destination];
+
+    if (route === "/") {
+      window.location.reload();
+    } else {
+      this.router.navigate([route]);
+    }
+  }
+
+  footerNavigateTo(destination: string): void {
+    localStorage.setItem('policy', destination);
+    this.router.navigateByUrl('/').then(() => {
+      this.router.navigate(['/terms-and-conditions']);
+    });
+  }
+
+  subscribeNewsletter(email: string): void {
+    (document.querySelector('form input') as HTMLInputElement).value = '';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email))
+      return;
+
+    const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('email', email);
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+
+    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+      .subscribe();
   }
 
   onUploadQrCode() {

@@ -1,0 +1,84 @@
+<header class="site-header">
+    <div class="logo-container">
+        <a href="/">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+        </a>
+    </div>
+    <nav>
+        <div class="accountIconContainer">
+            <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
+        </div>
+        <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
+            <ul>
+                <li (click)="navigateTo('mainpage')">Pay</li>
+                <li (click)="navigateTo('login')">Log in</li>
+                <li (click)="navigateTo('createAccount')">Create account</li>
+                <li (click)="navigateTo('contact')">Contact</li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div class="site-header-invisible">
+    <h1 class="page-title">VALIDATION</h1>
+</div>
+
+<div class="container" style="width: 400px;">
+    <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
+    <h2 class="validation-title">Enter the 6-digit validation code:</h2>
+
+    <div class="code-input-container">
+        <input type="text" maxlength="1" class="code-input" [(ngModel)]="code[0]" (keydown)="onKeyDown($event, 0)" />
+        <input type="text" maxlength="1" class="code-input" [(ngModel)]="code[1]" (keydown)="onKeyDown($event, 1)" />
+        <input type="text" maxlength="1" class="code-input" [(ngModel)]="code[2]" (keydown)="onKeyDown($event, 2)" />
+        <input type="text" maxlength="1" class="code-input" [(ngModel)]="code[3]" (keydown)="onKeyDown($event, 3)" />
+        <input type="text" maxlength="1" class="code-input" [(ngModel)]="code[4]" (keydown)="onKeyDown($event, 4)" />
+        <input type="text" maxlength="1" class="code-input" [(ngModel)]="code[5]" (keydown)="onKeyDown($event, 5)" />
+    </div>
+
+    <div style="text-align: left;" class="resend-container">
+        <p>
+            <span>Didn't receive the SMS? </span>
+            <ng-container *ngIf="timer > 0">
+                Resend SMS in {{ timer }} seconds.
+            </ng-container>
+            <ng-container *ngIf="timer === 0">
+                <button (click)="resendSMS()">Resend SMS now.</button>
+            </ng-container>
+        </p>
+    </div>
+
+    <button (click)="validateToken()">Validate</button>
+</div>
+
+<footer>
+    <div class="footer-container">
+        <div class="footer-contact">
+            <h3>Contact Us</h3>
+            <p>Phone number:</p>
+            <p>+1 631 337 8380</p>
+            <p>Email address:</p>
+            <p>parking.info&#64;yahoo.com</p>
+        </div>
+        <div class="footer-links">
+            <h3>Useful Links</h3>
+            <ul>
+                <li><a href="javascript:void(0)" (click)="footerNavigateTo('terms')">Terms and Conditions</a></li>
+                <li><a href="javascript:void(0)" (click)="footerNavigateTo('privacy')">Privacy Policy</a></li>
+                <li><a href="javascript:void(0)" (click)="footerNavigateTo('cookies')">Cookies Policy</a></li>
+                <li><a href="/unsubscribe">Unsubscribe</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-newsletter">
+            <h3>Subscribe to our Newsletter</h3>
+            <form class="footer-form" (ngSubmit)="subscribeNewsletter(emailInput.value)" #newsletterForm="ngForm">
+                <input type="email" name="email" ngModel #emailInput="ngModel" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <p>&copy; 2024 ParkPass. All rights reserved.</p>
+    </div>
+</footer>

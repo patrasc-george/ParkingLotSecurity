@@ -24,6 +24,71 @@ inline std::vector<std::string> split(const std::string& string, const std::stri
 	return substrings;
 }
 
+std::string getCurrentTime()
+{
+	auto now = std::chrono::system_clock::now();
+	auto nowTime = std::chrono::system_clock::to_time_t(now);
+
+	std::ostringstream oss;
+	oss << std::put_time(std::localtime(&nowTime), "%Y-%m-%d %H:%M:%S");
+	return oss.str();
+}
+
+int timeDifference(const std::string& time)
+{
+	std::string currentTime = getCurrentTime();
+	std::tm tmIn = {}, tmOut = {};
+	std::istringstream inStr(time);
+	std::istringstream outStr(currentTime);
+
+	inStr >> std::get_time(&tmIn, "%d-%m-%Y %H:%M:%S");
+	outStr >> std::get_time(&tmOut, "%d-%m-%Y %H:%M:%S");
+
+	auto inTime = std::mktime(&tmIn);
+	auto outTime = std::mktime(&tmOut);
+
+	if (inTime != -1 && outTime != -1)
+	{
+		auto duration = std::difftime(outTime, inTime);
+
+		int minutes = static_cast<int>(duration) / 600;
+		return minutes;
+	}
+
+	return 0;
+}
+
+void removeExpiredToken(std::unordered_map<std::string, std::string>& container, const int& timeIndex, const int& limit)
+{
+	std::vector<std::string> data;
+	int difference;
+
+	for (auto iterator = container.begin(); iterator != container.end(); )
+	{
+		data = split(iterator->second, ", ");
+		difference = timeDifference(data[timeIndex]);
+
+		if (difference >= limit)
+			iterator = container.erase(iterator);
+		else
+			iterator++;
+	}
+}
+
+SubscriptionManager::SubscriptionManager() : databaseManager(DatabaseManager::getInstance())
+{
+	thread = std::thread([this]()
+		{
+			while (true)
+			{
+				removeExpiredToken(tempAccounts, 5, 10);
+				removeExpiredToken(tempRecoveredPasswords, 1, 10);
+				removeExpiredToken(tempUpdatedAccounts, 3, 10);
+				std::this_thread::sleep_for(std::chrono::minutes(5));
+			}
+		});
+}
+
 void SubscriptionManager::uploadSubscriptions(const std::string& dataBasePath)
 {
 	std::vector<std::string> accountsData = databaseManager.getAccounts();
@@ -33,7 +98,7 @@ void SubscriptionManager::uploadSubscriptions(const std::string& dataBasePath)
 		std::vector<std::string> data;
 
 		data = split(accountData, ", ");
-		Account account(data[0], data[1], data[2], data[3]);
+		Account account(data[0], data[1], data[2], data[3], data[4]);
 		accounts[account] = {};
 
 		std::unordered_map<std::string, std::pair<std::string, std::string>> subscriptionsData = databaseManager.getSubscriptions(account.getEmail());
@@ -52,6 +117,8 @@ void SubscriptionManager::uploadSubscriptions(const std::string& dataBasePath)
 			accounts[account].push_back(subscription);
 		}
 	}
+
+	newsletter = databaseManager.getNewsletter();
 }
 
 bool SubscriptionManager::checkSubscription(const std::string& licensePlate)
@@ -65,11 +132,20 @@ bool SubscriptionManager::checkSubscription(const std::string& licensePlate)
 	return false;
 }
 
-bool SubscriptionManager::verifyCredentials(const std::string& email, const std::string& password)
+Account* SubscriptionManager::verifyCredentials(const std::string& input, const std::string& password)
 {
-	for (const auto& account : accounts)
-		if (account.first.getEmail() == email && account.first.getPassword() == password)
-			return true;
+	if (input.find('@') != std::string::npos)
+	{
+		for (const auto& account : accounts)
+			if (account.first.getEmail() == input && account.first.getPassword() == password)
+				return const_cast<Account*>(&account.first);
+	}
+	else
+	{
+		for (const auto& account : accounts)
+			if (account.first.getPhone() == input && account.first.getPassword() == password)
+				return const_cast<Account*>(&account.first);
+	}
 
 	return nullptr;
 }
@@ -79,19 +155,61 @@ std::map<Account, std::vector<Subscription>> SubscriptionManager::getAccounts() 
 	return accounts;
 }
 
-std::string SubscriptionManager::getTempAccount(const std::string& email) const
+std::vector<std::string> SubscriptionManager::getTempAccount(const std::string& token) const
 {
 	for (const auto& account : tempAccounts)
 	{
-		std::vector<std::string>data = split(account.second, ", ");
-		if (data[1] == email)
-			return account.first;
+		std::vector<std::string> data = split(account.second, ", ");
+		if (data[6] == token)
+			return data;
 	}
 
-	return "";
+	return std::vector<std::string>();
 }
 
-Account* SubscriptionManager::getAccount(const std::string& email) const
+std::string SubscriptionManager::getTempAccountToken(const std::string& email)
+{
+	if (tempAccounts.find(email) == tempAccounts.end())
+		return "";
+
+	std::vector<std::string> data = split(tempAccounts[email], ", ");
+
+	return data[6];
+}
+
+std::string SubscriptionManager::getTempRecoveredPasswordToken(const std::string& email)
+{
+	if (tempRecoveredPasswords.find(email) == tempRecoveredPasswords.end())
+		return "";
+
+	std::vector<std::string> data = split(tempRecoveredPasswords[email], ", ");
+
+	return data[0];
+}
+
+std::string SubscriptionManager::getTempUpdatedAccountToken(const std::string& email)
+{
+	if (tempUpdatedAccounts.find(email) == tempUpdatedAccounts.end())
+		return "";
+
+	std::vector<std::string> data = split(tempUpdatedAccounts[email], ", ");
+
+	return data[4];
+}
+
+std::vector<std::string> SubscriptionManager::getTempUpdatedAccount(const std::string& token)
+{
+	for (const auto& account : tempUpdatedAccounts)
+	{
+		std::vector<std::string> data = split(account.second, ", ");
+		if (data[4] == token)
+			return data;
+	}
+
+	return std::vector<std::string>();
+}
+
+Account* SubscriptionManager::getAccountByEmail(const std::string& email) const
 {
 	for (const auto& pair : accounts)
 		if (pair.first.getEmail() == email)
@@ -100,33 +218,13 @@ Account* SubscriptionManager::getAccount(const std::string& email) const
 	return nullptr;
 }
 
-void SubscriptionManager::updateAccountEmail(const std::string& email, const std::string& newEmail)
+Account* SubscriptionManager::getAccountByPhone(const std::string& phone) const
 {
-	Account* account = getAccount(email);
-	account->setEmail(newEmail);
+	for (const auto& pair : accounts)
+		if (pair.first.getPhone() == phone)
+			return const_cast<Account*>(&pair.first);
 
-	databaseManager.setEmail(email, newEmail);
-}
-
-bool SubscriptionManager::updateAccountPassword(const std::string& email, const std::string& newPassword)
-{
-	if (tempPasswords.find(email) == tempPasswords.end())
-		return false;
-
-	Account* account = getAccount(email);
-	account->setPassword(newPassword);
-
-	databaseManager.setPassword(email, newPassword);
-
-	return true;
-}
-
-void SubscriptionManager::updateAccountPhone(const std::string& email, const std::string& newPhone)
-{
-	Account* account = getAccount(email);
-	account->setPhone(newPhone);
-
-	databaseManager.setPhone(email, newPhone);
+	return nullptr;
 }
 
 std::vector<Subscription>* SubscriptionManager::getSubscriptions(const Account& account) const
@@ -147,39 +245,85 @@ Subscription* SubscriptionManager::getSubscription(const Account& account, const
 	return nullptr;
 }
 
-bool SubscriptionManager::addTempAccount(const std::string& name, const std::string& email, const std::string& password, const std::string& phone, const std::string& token)
+void SubscriptionManager::addTempAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone)
 {
-	if (getAccount(email) != nullptr)
+	tempAccounts[email] = name + ", " + lastName + ", " + email + ", " + password + ", " + phone + ", " + getCurrentTime();
+}
+
+bool SubscriptionManager::setToken(const std::string& email, const std::string& token)
+{
+	if (tempAccounts.find(email) == tempAccounts.end())
 		return false;
 
-	tempAccounts.erase(getTempAccount(email));
-	tempAccounts[token] = name + ", " + email + ", " + password + ", " + phone;
+	tempAccounts[email] += ", " + token + ", " + "false";
 
 	return true;
 }
 
-bool SubscriptionManager::addAccount(const std::string& token)
+std::string SubscriptionManager::addAccount(const std::string& token)
 {
-	if (tempAccounts.find(token) == tempAccounts.end())
+	std::vector<std::string> data = getTempAccount(token);
+
+	if (data.empty())
+		return "";
+
+	Account account(data[0], data[1], data[2], data[3], data[4]);
+	if (data[7] == "false")
+	{
+		accounts[account] = std::vector<Subscription>();
+		databaseManager.addAccount(data[0], data[1], data[2], data[3], data[4]);
+
+		tempAccounts[data[2]] = data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3] + ", " + data[4] + ", " + data[5] + ", " + data[6] + ", " + "true";
+	}
+	else
+		tempAccounts.erase(data[2]);
+
+	return account.getEmail();
+}
+
+bool SubscriptionManager::addTempRecoveredPasswords(const std::string& email, const std::string& token)
+{
+	if (getAccountByEmail(email) == nullptr)
 		return false;
 
-	std::vector<std::string> data = split(tempAccounts[token], ", ");
-
-	Account account(data[0], data[1], data[2], data[3]);
-	accounts[account] = std::vector<Subscription>();
-	databaseManager.addAccount(data[0], data[1], data[2], data[3]);
-
-	tempAccounts.erase(token);
+	tempRecoveredPasswords[email] = token + ", " + getCurrentTime();
 
 	return true;
 }
 
-bool SubscriptionManager::addTempPassword(const std::string& email)
+std::string SubscriptionManager::verifyTempRecoveredPasswordsToken(const std::string& token)
 {
-	if (getAccount(email) == nullptr)
+	std::string email;
+	for (const auto& tempRecoveredPassword : tempRecoveredPasswords)
+	{
+		std::vector<std::string> data = split(tempRecoveredPassword.second, ", ");
+
+		if (data[0] == token)
+		{
+			email = tempRecoveredPassword.first;
+			return email;
+		}
+	}
+
+	return "";
+}
+
+bool SubscriptionManager::addTempUpdatedAccount(const std::string& email, const std::string& newEmail, const std::string& newPassword)
+{
+	if (!newEmail.empty() && getAccountByEmail(newEmail) != nullptr)
 		return false;
 
-	tempPasswords.insert(email);
+	tempUpdatedAccounts[email] = email + ", " + newEmail + ", " + newPassword + ", " + getCurrentTime();
+
+	return true;
+}
+
+bool SubscriptionManager::setUpdateToken(const std::string& email, const std::string& token)
+{
+	if (tempUpdatedAccounts.find(email) == tempUpdatedAccounts.end())
+		return false;
+
+	tempUpdatedAccounts[email] += ", " + token + ", " + "false";
 
 	return true;
 }
@@ -204,6 +348,92 @@ bool SubscriptionManager::addVehicle(const Account& account, Subscription& subsc
 	databaseManager.addLicensePlate(account.getEmail(), subscription.getName(), licensePlate);
 
 	return true;
+}
+
+bool SubscriptionManager::subscribeNewsletter(const std::string& email)
+{
+	if (newsletter.find(email) != newsletter.end())
+		return false;
+
+	newsletter.insert(email);
+	databaseManager.subscribeNewsletter(email);
+
+	return true;
+}
+
+bool SubscriptionManager::unsubscribeNewsletter(const std::string& email)
+{
+	if (newsletter.find(email) == newsletter.end())
+		return false;
+
+	newsletter.erase(email);
+	databaseManager.unsubscribeNewsletter(email);
+
+	return true;
+}
+
+bool SubscriptionManager::updateAccountPassword(const std::string& email, const std::string& newPassword)
+{
+	if (tempRecoveredPasswords.find(email) == tempRecoveredPasswords.end())
+		return false;
+
+	tempRecoveredPasswords.erase(email);
+
+	Account* account = getAccountByEmail(email);
+	account->setPassword(newPassword);
+
+	databaseManager.setPassword(email, newPassword);
+
+	return true;
+}
+
+bool SubscriptionManager::updateAccountInformation(const std::string& email, const std::string& name, const std::string& lastName, const std::string& phone)
+{
+	Account* account = getAccountByEmail(email);
+
+	if (account == nullptr)
+		return false;
+
+	account->setName(name);
+	account->setLastName(lastName);
+	account->setPhone(phone);
+
+	databaseManager.setName(email, name);
+	databaseManager.setLastName(email, lastName);
+	databaseManager.setPhone(email, phone);
+
+	return true;
+}
+
+std::string SubscriptionManager::updateAccount(const std::string& token)
+{
+	std::vector<std::string> data = getTempUpdatedAccount(token);
+
+	if (data.empty())
+		return "";
+
+	if (data[5] == "true")
+	{
+		tempUpdatedAccounts.erase(data[0]);
+
+		if (!data[1].empty())
+			return data[1];
+
+		return data[0];
+	}
+
+	std::string email = data[0];
+	Account* account = getAccountByEmail(email);
+
+	account->setPassword(data[2]);
+	account->setEmail(data[1]);
+
+	databaseManager.setPassword(email, data[2]);
+	databaseManager.setEmail(email, data[1]);
+
+	tempUpdatedAccounts[email] = data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3] + ", " + data[4] + ", " + "true";
+
+	return account->getEmail();
 }
 
 bool SubscriptionManager::deleteSubscription(const Account& account, const std::string& name)

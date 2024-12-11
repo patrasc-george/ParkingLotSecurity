@@ -1,0 +1,13 @@
+<div class="container" style="width: 800px;">
+  <h2>{{ message }}</h2>
+
+  <div class="circle-timer">
+    <svg>
+      <circle cx="50" cy="50" r="45"></circle>
+      <circle cx="50" cy="50" r="45" [ngStyle]="{'stroke-dashoffset': strokeOffset}"></circle>
+    </svg>
+    <div class="timer-text">{{ remainingTime }}s</div>
+  </div>
+
+  <button (click)="redirectToAccount()">Go now</button>
+</div>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-validate-account',
@@ -24,16 +24,27 @@ export class ValidateAccountComponent implements OnInit {
   }
 
   validateAccount(token: string): void {
-    const url = `http://localhost:8080/api/validate?token=${token}`;
+    const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('token', token);
 
-    this.http.post<{ success: boolean, message?: string }>(url, {})
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+
+    this.http.post('http://localhost:8080/api/validate', urlEncodedData.toString(), { headers })
       .subscribe(
-        (data) => {
-          this.router.navigate(['/login'], { queryParams: { fromValidate: true } });
+        (data: any) => {
+          if (data.success) {
+            if (data.email != '') {
+              localStorage.setItem('email', data.email);
+            }
+            localStorage.setItem('fromValidate', 'true');
+            this.router.navigate(['/redirect']);
+          } else {
+            localStorage.setItem('invalidLink', 'true');
+            this.router.navigate(['/login']);
+          }
         },
         (error) => {
           console.error('Error:', error);
-          this.router.navigate(['/login']);
         }
       );
   }

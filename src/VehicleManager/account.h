@@ -12,7 +12,13 @@
 class ACCOUNT_API Account
 {
 public:
-	Account(const std::string& name, const std::string& email, const std::string& password, const std::string& phone) : name(name), email(email), password(password), phone(phone) {}
+	Account(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone)
+		: name(name),
+		lastName(lastName),
+		email(email),
+		password(password),
+		phone(phone)
+	{}
 
 	Account() = default;
 
@@ -28,6 +34,10 @@ public:
 	std::string getName() const;
 
 	void setName(const std::string& name);
+
+	std::string getLastName() const;
+
+	void setLastName(const std::string& lastName);
 
 	std::string getEmail() const;
 
@@ -47,6 +57,7 @@ public:
 
 private:
 	std::string name;
+	std::string lastName;
 	std::string email;
 	std::string password;
 	std::string phone;

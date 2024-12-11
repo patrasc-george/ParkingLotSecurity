@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -10,7 +10,8 @@ import { Router } from '@angular/router';
 })
 export class CreateAccountComponent {
   signUpForm: FormGroup;
-  errorMessage: string = '';
+  dropdownVisible = false;
+  captchaResponse: string | null = '';
 
   constructor(
     private fb: FormBuilder,
@@ -19,27 +20,136 @@ export class CreateAccountComponent {
   ) {
     this.signUpForm = this.fb.group({
       name: ['', [Validators.required, this.nameValidator]],
+      lastName: ['', [Validators.required, this.nameValidator]],
       email: ['', [Validators.required, this.emailValidator]],
       password: ['', [Validators.required, this.passwordValidator]],
       confirmPassword: ['', [Validators.required, this.matchPasswordValidator.bind(this)]],
-      phone: ['', [Validators.required, this.phoneValidator]]
+      phone: ['', [Validators.required, this.phoneValidator]],
+      terms: [false, [Validators.requiredTrue]],
+      privacy: [false, [Validators.requiredTrue]],
+      cookies: [false, [Validators.requiredTrue]],
+      captcha: [null, [Validators.required]]
     });
   }
 
-  onSignUp() {
-    this.errorMessage = '';
+  toggleDropdown(): void {
+    this.dropdownVisible = !this.dropdownVisible;
+  }
 
-    if (this.signUpForm.invalid) {
+  @HostListener('document:click', ['$event'])
+  closeDropdown(event: MouseEvent): void {
+    const dropdown = document.getElementById('accountDropdown');
+    const accountIcon = document.querySelector('.accountIconContainer');
+
+    if (this.dropdownVisible && dropdown && !dropdown.contains(event.target as Node) && !accountIcon?.contains(event.target as Node)) {
+      this.dropdownVisible = false;
+    }
+  }
+
+  navigateTo(destination: string): void {
+    const routes: { [key: string]: string } = {
+      mainpage: '/',
+      login: '/login',
+      createAccount: '/create-subscription',
+      contact: '/contact'
+    };
+
+    const route = routes[destination];
+
+    if (this.router.url === route) {
+      this.router.navigateByUrl('/').then(() => {
+        this.router.navigate([route]);
+      });
+    } else {
+      this.router.navigate([route]);
+    }
+  }
+
+  footerNavigateTo(destination: string): void {
+    localStorage.setItem('policy', destination);
+    this.router.navigateByUrl('/').then(() => {
+      this.router.navigate(['/terms-and-conditions']);
+    });
+  }
+
+  policyNavigateTo(destination: string, event: MouseEvent): void {
+    event.preventDefault();
+    localStorage.setItem('policy', destination);
+    this.router.navigateByUrl('/').then(() => {
+      this.router.navigate(['/terms-and-conditions']);
+    });
+  }
+
+  subscribeNewsletter(email: string): void {
+    (document.querySelector('form input') as HTMLInputElement).value = '';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email))
       return;
+
+    const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('email', email);
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+
+    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+      .subscribe();
+  }
+
+  captchaResolved(response: string | null) {
+    if (response) {
+      this.captchaResponse = response;
+    } else {
+      this.captchaResponse = '';
+    }
+  }
+
+  onSignUp() {
+    if (!this.captchaResponse) {
+      this.signUpForm.get('captcha')?.markAsTouched();
     }
 
-    const { name, email, password, confirmPassword, phone } = this.signUpForm.value;
+    Object.keys(this.signUpForm.controls).forEach(field => {
+      const control = this.signUpForm.get(field);
+      control?.markAsTouched({ onlySelf: true });
+    });
+
+    const firstInvalidField = Object.keys(this.signUpForm.controls).find(field => {
+      const control = this.signUpForm.get(field);
+      return control && control.invalid;
+    });
+
+    if (firstInvalidField) {
+      let elementToFocus: HTMLElement | null = null;
+
+      if (firstInvalidField !== 'captcha') {
+        elementToFocus = document.querySelector(`[formControlName="${firstInvalidField}"]`) as HTMLElement;
+      }
+
+      if (elementToFocus) {
+        elementToFocus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        elementToFocus.focus();
+        return;
+      }
+    }
+
+    if (this.signUpForm.get('captcha')?.invalid) {
+      const captchaField = document.querySelector('.recaptcha-container') as HTMLElement;
+      captchaField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      captchaField?.focus();
+    }
+
+    const { name, lastName, email, password, confirmPassword, phone } = this.signUpForm.value;
 
     const urlEncodedData = new URLSearchParams();
     urlEncodedData.append('name', name);
+    urlEncodedData.append('lastName', lastName);
     urlEncodedData.append('email', email);
     urlEncodedData.append('password', password);
     urlEncodedData.append('phone', phone);
+    urlEncodedData.append('captchaToken', this.captchaResponse || '');
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -47,21 +157,39 @@ export class CreateAccountComponent {
 
     this.http.post('http://localhost:8080/api/createAccount', urlEncodedData.toString(), { headers })
       .subscribe(
-        (data: any) => this.handleServerResponse(data),
+        data => {
+          localStorage.setItem('name', name);
+          localStorage.setItem('lastName', lastName);
+          localStorage.setItem('email', email);
+          localStorage.setItem('phone', phone);
+          this.handleServerResponse(data)
+        },
         error => {
           console.error('Error:', error);
-          this.errorMessage = 'An unexpected response was received. Please try again.';
         }
       );
   }
 
   handleServerResponse(data: any) {
     if (data.success === false) {
-      this.errorMessage = data.message;
+      this.captchaResponse = '';
+      this.signUpForm.get('captcha')?.setErrors({ captchaInvalid: true });
+      window.grecaptcha.reset();
+
+      if (data.message === 'An account with this email address already exists.') {
+        this.signUpForm.get('email')?.setErrors({ emailExists: true });
+        const emailField = document.querySelector(`[formControlName="email"]`);
+        emailField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (emailField as HTMLElement)?.focus();
+      } else if (data.message === 'An account with this phone number already exists.') {
+        this.signUpForm.get('phone')?.setErrors({ phoneExists: true });
+        const phoneField = document.querySelector(`[formControlName="phone"]`);
+        phoneField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (phoneField as HTMLElement)?.focus();
+      }
     } else if (data.success === true) {
-      this.router.navigate(['/login'], { queryParams: { fromCreateAccount: true } });
-    } else {
-      this.errorMessage = 'An unexpected response was received. Please try again.';
+      localStorage.setItem('fromCreateSubscription', 'true');
+      this.router.navigate(['/validation-selector']);
     }
   }
 
@@ -88,7 +216,17 @@ export class CreateAccountComponent {
 
   matchPasswordValidator(control: AbstractControl): ValidationErrors | null {
     const password = this.signUpForm?.get('password')?.value;
-    return control.value === password ? null : { passwordMismatch: true };
+    const confirmPassword = control.value;
+
+    if (password === '') {
+      return { passwordMismatch: true };
+    }
+
+    if (confirmPassword && password !== confirmPassword) {
+      return { passwordMismatch: true };
+    }
+
+    return null;
   }
 
   phoneValidator(control: AbstractControl): ValidationErrors | null {

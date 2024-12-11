@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 class DATABASEMANAGER_API DatabaseManager
 {
@@ -30,11 +31,15 @@ public:
 
 	std::vector<std::string> getAccounts() const;
 
+	std::unordered_set<std::string> getNewsletter() const;
+
 	std::unordered_map<std::string, std::pair<std::string, std::string>> getSubscriptions(const std::string& email) const;
 
 	void setIsPaid(const int& id);
 
 	void setName(const std::string& email, const std::string& newName);
+
+	void setLastName(const std::string& email, const std::string& newLastName);
 
 	void setEmail(const std::string& email, const std::string& newEmail);
 
@@ -44,11 +49,15 @@ public:
 
 	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const int& totalAmount, const std::string& isPaid);
 
-	void addAccount(const std::string& name, const std::string& email, const std::string& password, const std::string& phone);
+	void addAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone);
 
 	void addSubscription(const std::string& email, const std::string& name);
 
 	void addLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate);
+
+	void subscribeNewsletter(const std::string& email);
+
+	void unsubscribeNewsletter(const std::string& email);
 
 	void deleteSubscription(const std::string& email, const std::string& name);
 

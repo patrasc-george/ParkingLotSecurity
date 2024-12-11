@@ -11,56 +11,83 @@
 #include "databasemanager.h"
 
 #include <fstream>
+#include <thread>
 #include <map>
+#include <unordered_set>
 #include <unordered_set>
 
 class SUBSCRIPTIONMANAGER_API SubscriptionManager
 {
 public:
-	SubscriptionManager() : databaseManager(DatabaseManager::getInstance()) {}
+	SubscriptionManager();
 
 public:
 	void uploadSubscriptions(const std::string& dataBasePath);
 
 	bool checkSubscription(const std::string& licensePlate);
 
-	bool verifyCredentials(const std::string& name, const std::string& password);
+	Account* verifyCredentials(const std::string& input, const std::string& password);
 
 public:
 	std::map<Account, std::vector<Subscription>> getAccounts() const;
 
-	std::string getTempAccount(const std::string& email) const;
+	std::vector<std::string> getTempAccount(const std::string& token) const;
 
-	Account* getAccount(const std::string& email) const;
+	std::string getTempAccountToken(const std::string& email);
 
-	void updateAccountEmail(const std::string& email, const std::string& newEmail);
+	std::string getTempRecoveredPasswordToken(const std::string& email);
 
-	bool updateAccountPassword(const std::string& email, const std::string& newPassword);
+	std::string getTempUpdatedAccountToken(const std::string& email);
 
-	void updateAccountPhone(const std::string& email, const std::string& newPhone);
+	std::vector<std::string> getTempUpdatedAccount(const std::string& token);
+
+	Account* getAccountByEmail(const std::string& email) const;
+
+	Account* getAccountByPhone(const std::string& phone) const;
 
 	std::vector<Subscription>* getSubscriptions(const Account& account) const;
 
 	Subscription* getSubscription(const Account& account, const std::string& name);
 
-	bool addTempAccount(const std::string& name, const std::string& email, const std::string& password, const std::string& phone, const std::string& token);
+	void addTempAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone);
 
-	bool addAccount(const std::string& token);
+	bool setToken(const std::string& email, const std::string& token);
 
-	bool addTempPassword(const std::string& email);
+	std::string addAccount(const std::string& token);
+
+	bool addTempRecoveredPasswords(const std::string& email, const std::string& token);
+
+	std::string verifyTempRecoveredPasswordsToken(const std::string& token);
+
+	bool addTempUpdatedAccount(const std::string& email, const std::string& newEmail, const std::string& newPassword);
+
+	bool setUpdateToken(const std::string& email, const std::string& token);
 
 	bool addSubscription(const Account& account, const std::string& name);
 
 	bool addVehicle(const Account& account, Subscription& subscription, const std::string& licensePlate);
+
+	bool subscribeNewsletter(const std::string& email);
+
+	bool unsubscribeNewsletter(const std::string& email);
+
+	bool updateAccountPassword(const std::string& email, const std::string& newPassword);
+
+	bool updateAccountInformation(const std::string& email, const std::string& name, const std::string& lastName, const std::string& phone);
+
+	std::string updateAccount(const std::string& token);
 
 	bool deleteSubscription(const Account& account, const std::string& name);
 
 	bool deleteVehicle(const Account& account, Subscription& subscription, const std::string& licensePlate);
 
 private:
+	std::thread thread;
 	DatabaseManager& databaseManager;
 	std::string dataBasePath;
+	std::unordered_set<std::string> newsletter;
 	std::map<Account, std::vector<Subscription>> accounts;
 	std::unordered_map<std::string, std::string> tempAccounts;
-	std::unordered_set<std::string> tempPasswords;
+	std::unordered_map<std::string, std::string> tempRecoveredPasswords;
+	std::unordered_map<std::string, std::string> tempUpdatedAccounts;
 };

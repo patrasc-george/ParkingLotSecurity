@@ -23,6 +23,7 @@ bool DatabaseManager::initializeDatabase(const std::string& password)
 			CREATE TABLE IF NOT EXISTS accounts (
 				email TEXT PRIMARY KEY,
 				name TEXT NOT NULL,
+				last_name TEXT NOT NULL,
 				password TEXT NOT NULL,
 				phone TEXT NOT NULL
 			);
@@ -62,6 +63,10 @@ bool DatabaseManager::initializeDatabase(const std::string& password)
 				subscription_name TEXT,
 				FOREIGN KEY (email) REFERENCES accounts(email) ON DELETE CASCADE,
 				PRIMARY KEY (email, subscription_name)
+			);
+
+			CREATE TABLE IF NOT EXISTS newsletter (
+				email TEXT
 			);
     )";
 
@@ -111,10 +116,26 @@ std::vector<std::string> DatabaseManager::getVehicles() const
 	return vehicles;
 }
 
+std::unordered_set<std::string> DatabaseManager::getNewsletter() const
+{
+	std::unordered_set<std::string> newsletter;
+	const char* sql = "SELECT email FROM newsletter;";
+	sqlite3_stmt* stmt;
+
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+		return newsletter;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+		newsletter.insert(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+
+	sqlite3_finalize(stmt);
+	return newsletter;
+}
+
 std::vector<std::string> DatabaseManager::getAccounts() const
 {
 	std::vector<std::string> accounts;
-	const char* sql = "SELECT name, email, password, phone FROM accounts;";
+	const char* sql = "SELECT name, last_name, email, password, phone FROM accounts;";
 	sqlite3_stmt* stmt;
 
 	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
@@ -123,10 +144,11 @@ std::vector<std::string> DatabaseManager::getAccounts() const
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 	{
 		std::string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-		std::string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-		std::string password = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-		std::string phone = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-		accounts.push_back(name + ", " + email + ", " + password + ", " + phone);
+		std::string lastName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+		std::string email = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+		std::string password = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+		std::string phone = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+		accounts.push_back(name + ", " + lastName + ", " + email + ", " + password + ", " + phone);
 	}
 
 	sqlite3_finalize(stmt);
@@ -226,6 +248,9 @@ void DatabaseManager::setIsPaid(const int& id)
 
 void DatabaseManager::setName(const std::string& email, const std::string& newName)
 {
+	if (newName.empty())
+		return;
+
 	const char* sql = "UPDATE accounts SET name = ? WHERE email = ?";
 
 	sqlite3_stmt* stmt;
@@ -239,14 +264,17 @@ void DatabaseManager::setName(const std::string& email, const std::string& newNa
 	sqlite3_finalize(stmt);
 }
 
-void DatabaseManager::setEmail(const std::string& email, const std::string& newEmail)
+void DatabaseManager::setLastName(const std::string& email, const std::string& newLastName)
 {
-	const char* sql = "UPDATE accounts SET email = ? WHERE email = ?";
+	if (newLastName.empty())
+		return;
+
+	const char* sql = "UPDATE accounts SET last_name = ? WHERE email = ?";
 
 	sqlite3_stmt* stmt;
 	sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
 
-	sqlite3_bind_text(stmt, 1, newEmail.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, newLastName.c_str(), -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
 
 	sqlite3_step(stmt);
@@ -254,8 +282,52 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 	sqlite3_finalize(stmt);
 }
 
+void DatabaseManager::setEmail(const std::string& email, const std::string& newEmail)
+{
+	if (newEmail.empty())
+		return;
+
+	const char* beginTransaction = "BEGIN TRANSACTION";
+	sqlite3_exec(db, beginTransaction, nullptr, nullptr, nullptr);
+
+	const char* sqlAccounts = "UPDATE accounts SET email = ? WHERE email = ?";
+	sqlite3_stmt* stmtAccounts;
+	sqlite3_prepare_v2(db, sqlAccounts, -1, &stmtAccounts, nullptr);
+
+	sqlite3_bind_text(stmtAccounts, 1, newEmail.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmtAccounts, 2, email.c_str(), -1, SQLITE_STATIC);
+
+	if (sqlite3_step(stmtAccounts) != SQLITE_DONE)
+	{
+		sqlite3_finalize(stmtAccounts);
+		sqlite3_exec(db, "ROLLBACK", nullptr, nullptr, nullptr);
+		return;
+	}
+	sqlite3_finalize(stmtAccounts);
+
+	const char* sqlSubscriptions = "UPDATE accountsSubscriptions SET email = ? WHERE email = ?";
+	sqlite3_stmt* stmtSubscriptions;
+	sqlite3_prepare_v2(db, sqlSubscriptions, -1, &stmtSubscriptions, nullptr);
+
+	sqlite3_bind_text(stmtSubscriptions, 1, newEmail.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmtSubscriptions, 2, email.c_str(), -1, SQLITE_STATIC);
+
+	if (sqlite3_step(stmtSubscriptions) != SQLITE_DONE)
+	{
+		sqlite3_finalize(stmtSubscriptions);
+		sqlite3_exec(db, "ROLLBACK", nullptr, nullptr, nullptr);
+		return;
+	}
+	sqlite3_finalize(stmtSubscriptions);
+
+	sqlite3_exec(db, "COMMIT", nullptr, nullptr, nullptr);
+}
+
 void DatabaseManager::setPassword(const std::string& email, const std::string& newPassword)
 {
+	if (newPassword.empty())
+		return;
+
 	const char* sql = "UPDATE accounts SET password = ? WHERE email = ?";
 
 	sqlite3_stmt* stmt;
@@ -271,6 +343,9 @@ void DatabaseManager::setPassword(const std::string& email, const std::string& n
 
 void DatabaseManager::setPhone(const std::string& email, const std::string& newPhone)
 {
+	if (newPhone.empty())
+		return;
+
 	const char* sql = "UPDATE accounts SET phone = ? WHERE email = ?";
 
 	sqlite3_stmt* stmt;
@@ -314,11 +389,11 @@ void DatabaseManager::addVehicle(const int& id, const std::string& imagePath, co
 	sqlite3_finalize(stmt);
 }
 
-void DatabaseManager::addAccount(const std::string& name, const std::string& email, const std::string& password, const std::string& phone)
+void DatabaseManager::addAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone)
 {
 	const char* sql = R"(
-        INSERT INTO accounts (name, email, password, phone)
-        VALUES (?, ?, ?, ?);
+        INSERT INTO accounts (name, last_name, email, password, phone)
+        VALUES (?, ?, ?, ?, ?);
     )";
 
 	sqlite3_stmt* stmt;
@@ -330,9 +405,10 @@ void DatabaseManager::addAccount(const std::string& name, const std::string& ema
 	}
 
 	sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, email.c_str(), -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 3, password.c_str(), -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 4, phone.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, lastName.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 3, email.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 4, password.c_str(), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 5, phone.c_str(), -1, SQLITE_STATIC);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE)
 	{
@@ -340,7 +416,7 @@ void DatabaseManager::addAccount(const std::string& name, const std::string& ema
 		return;
 	}
 
-	sqlite3_finalize(stmt);
+	int result = sqlite3_finalize(stmt);
 }
 
 void DatabaseManager::addSubscription(const std::string& email, const std::string& name)
@@ -495,6 +571,52 @@ void DatabaseManager::addLicensePlate(const std::string& email, const std::strin
 
 	if (sqlite3_step(stmt) != SQLITE_DONE)
 		return;
+
+	sqlite3_finalize(stmt);
+}
+
+void DatabaseManager::subscribeNewsletter(const std::string& email)
+{
+	sqlite3_stmt* stmt;
+
+	const char* subscribeSQL = R"(
+        INSERT INTO newsletter (email) 
+        VALUES (?);
+    )";
+
+	if (sqlite3_prepare_v2(db, subscribeSQL, -1, &stmt, nullptr) != SQLITE_OK)
+		return;
+
+	sqlite3_bind_text(stmt, 1, email.c_str(), -1, SQLITE_STATIC);
+
+	if (sqlite3_step(stmt) != SQLITE_DONE)
+	{
+		sqlite3_finalize(stmt);
+		return;
+	}
+
+	sqlite3_finalize(stmt);
+}
+
+void DatabaseManager::unsubscribeNewsletter(const std::string& email)
+{
+	sqlite3_stmt* stmt;
+
+	const char* unsubscribeSQL = R"(
+        DELETE FROM newsletter 
+        WHERE email = ?;
+    )";
+
+	if (sqlite3_prepare_v2(db, unsubscribeSQL, -1, &stmt, nullptr) != SQLITE_OK)
+		return;
+
+	sqlite3_bind_text(stmt, 1, email.c_str(), -1, SQLITE_STATIC);
+
+	if (sqlite3_step(stmt) != SQLITE_DONE)
+	{
+		sqlite3_finalize(stmt);
+		return;
+	}
 
 	sqlite3_finalize(stmt);
 }

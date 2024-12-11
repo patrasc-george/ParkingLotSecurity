@@ -1,5 +1,13 @@
 <header class="site-header">
+    <div class="logo-container">
+        <a href="#" (click)="redirectToSubscriptions($event)">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+        </a>
+    </div>
     <nav>
+        <div class="account-info">
+            <span class="welcome-text">Hello, {{ name }}</span>
+        </div>
         <div class="accountIconContainer">
             <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
         </div>
@@ -8,10 +16,14 @@
                 <li (click)="navigateTo('account')">Settings</li>
                 <li (click)="navigateTo('subscriptions')">Subscriptions</li>
                 <li (click)="navigateTo('login')">Log out</li>
+                <li (click)="navigateTo('contact')">Contact</li>
             </ul>
         </div>
     </nav>
 </header>
+<div class="site-header-invisible">
+    <h1 class="page-title">{{ pageTitle }}</h1>
+</div>
 
 <div class="container full-width">
     <p id="tableErrorMessage" style="color: red;">{{ tableErrorMessage }}</p>
@@ -22,7 +34,7 @@
         <button (click)="checkAll()">
             <img src="assets/check.png" alt="Check all" class="icon">
         </button>
-        <button (click)="viewSelected()" [disabled]="selectedRows.size === 0">
+        <button (click)="viewAllHistory()" [disabled]="selectedRows.size === 0">
             <img src="assets/view_history.png" alt="View all" class="icon">
         </button>
         <button (click)="addVehicleRow()">
@@ -62,8 +74,11 @@
                         </button>
                     </div>
                 </td>
-                <td *ngFor="let cell of vehicle.slice(1)" [style.color]="cell === 'active' ? 'green' : 'red'">{{ cell }}</td>
+                <td *ngFor="let cell of vehicle.slice(1, -1)" style="color: black">{{ cell }}</td>
+                <td [style.color]="vehicle[vehicle.length - 1] === 'Active' ? 'green' : 'red'">
+                    {{ vehicle[vehicle.length - 1] }}
+                </td>
             </tr>
         </tbody>
-    </table>    
+    </table>
 </div>

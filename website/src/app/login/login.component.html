@@ -1,9 +1,33 @@
-<div class="container" style="width: 450px;">
+<header class="site-header">
+  <div class="logo-container">
+    <a href="/">
+      <img src="assets/logo.png" alt="Logo" class="logo">
+    </a>
+  </div>
+  <nav>
+    <div class="accountIconContainer">
+      <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
+    </div>
+    <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
+      <ul>
+        <li (click)="navigateTo('mainpage')">Pay</li>
+        <li (click)="navigateTo('login')">Log in</li>
+        <li (click)="navigateTo('createAccount')">Create account</li>
+        <li (click)="navigateTo('contact')">Contact</li>
+      </ul>
+    </div>
+  </nav>
+</header>
+<div class="site-header-invisible">
+  <h1 class="page-title">LOG IN</h1>
+</div>
+
+<div class="container" style="width: 350px;">
   <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
   <p *ngIf="successMessage" style="color: green;">{{ successMessage }}</p>
 
-  <label for="email">Email address:</label>
-  <input id="email" type="text" [(ngModel)]="email" required />
+  <label for="input">Email address or phone number:</label>
+  <input id="input" type="text" [(ngModel)]="input" required />
 
   <label for="password">Password:</label>
   <input id="password" type="password" [(ngModel)]="password" required />
@@ -12,10 +36,42 @@
 
   <div style="display: flex; justify-content: space-between; margin-top: 20px;">
     <p style="margin: 0;">
-      <a routerLink="/recover-password" id="resetPasswordLink">Recover your password</a>
+      <a routerLink="/recover-selector" id="resetPasswordLink">Recover your password</a>
     </p>
     <p style="margin: 0;">
       <a routerLink="/create-subscription" id="createNewSubscriptionLink">Create an account</a>
     </p>
   </div>
 </div>
+
+<footer>
+  <div class="footer-container">
+    <div class="footer-contact">
+      <h3>Contact Us</h3>
+      <p>Phone number:</p>
+      <p>+1 631 337 8380</p>
+      <p>Email address:</p>
+      <p>parking.info&#64;yahoo.com</p>
+    </div>
+    <div class="footer-links">
+      <h3>Useful Links</h3>
+      <ul>
+        <li><a href="javascript:void(0)" (click)="footerNavigateTo('terms')">Terms and Conditions</a></li>
+        <li><a href="javascript:void(0)" (click)="footerNavigateTo('privacy')">Privacy Policy</a></li>
+        <li><a href="javascript:void(0)" (click)="footerNavigateTo('cookies')">Cookies Policy</a></li>
+        <li><a href="/unsubscribe">Unsubscribe</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-newsletter">
+      <h3>Subscribe to our Newsletter</h3>
+      <form class="footer-form" (ngSubmit)="subscribeNewsletter(emailInput.value)" #newsletterForm="ngForm">
+        <input type="email" name="email" ngModel #emailInput="ngModel" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+  <div class="footer-copyright">
+    <p>&copy; 2024 ParkPass. All rights reserved.</p>
+  </div>
+</footer>

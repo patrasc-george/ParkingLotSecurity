@@ -70,7 +70,7 @@ SubscriptionsWindow::SubscriptionsWindow(SubscriptionManager* subscriptionManage
 void SubscriptionsWindow::showSubscriptions(QListWidgetItem* item)
 {
 	std::string email = item->data(Qt::UserRole).toString().toStdString();
-	Account* account = subscriptionManager->getAccount(email);
+	Account* account = subscriptionManager->getAccountByEmail(email);
 
 	subscriptionsListWidget->clear();
 	vehiclesListWidget->clear();
@@ -86,7 +86,7 @@ void SubscriptionsWindow::showSubscriptions(QListWidgetItem* item)
 void SubscriptionsWindow::showVehicles(QListWidgetItem* accountsItem, QListWidgetItem* subscriptionItem)
 {
 	std::string email = accountsItem->data(Qt::UserRole).toString().toStdString();
-	Account* account = subscriptionManager->getAccount(email);
+	Account* account = subscriptionManager->getAccountByEmail(email);
 
 	std::string name = subscriptionItem->data(Qt::UserRole).toString().toStdString();
 	Subscription* subscription = subscriptionManager->getSubscription(*account, name);

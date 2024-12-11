@@ -10,7 +10,7 @@ describe('SubscriptionComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SubscriptionComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(SubscriptionComponent);
     component = fixture.componentInstance;

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
@@ -8,41 +9,107 @@ import { Router, ActivatedRoute } from '@angular/router';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  email: string = '';
+  input: string = '';
   password: string = '';
   successMessage: string = '';
   errorMessage: string = '';
+  dropdownVisible = false;
 
   constructor(
     private http: HttpClient,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
+    this.authService.logout();
+
     this.route.queryParams.subscribe(params => {
-      if (params['fromCreateAccount']) {
+      if (localStorage.getItem('fromValidationSelector') === 'true') {
         this.successMessage = 'A validation email has been sent to your address.';
-      } else if (params['fromValidate']) {
-        this.successMessage = 'The account has been successfully validated.';
-      } else if (params['fromRecoverPassword']) {
-        this.successMessage = 'A password reset email has been sent to your address.';
-      } else if (params['fromResetPassword'])
-        this.successMessage = 'The password has been successfully changed.';
+        localStorage.setItem('fromValidationSelector', 'false');
+      }
+      if (localStorage.getItem('fromRecoverPassword') === 'true') {
+        this.successMessage = 'A password recovery email has been sent to your address.';
+        localStorage.setItem('fromRecoverPassword', 'false');
+      }
+      if (localStorage.getItem('invalidLink') === 'true') {
+        this.errorMessage = 'The link is invalid.';
+        localStorage.setItem('invalidLink', 'false');
+      }
     });
+  }
+
+  toggleDropdown(): void {
+    this.dropdownVisible = !this.dropdownVisible;
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeDropdown(event: MouseEvent): void {
+    const dropdown = document.getElementById('accountDropdown');
+    const accountIcon = document.querySelector('.accountIconContainer');
+
+    if (this.dropdownVisible && dropdown && !dropdown.contains(event.target as Node) && !accountIcon?.contains(event.target as Node)) {
+      this.dropdownVisible = false;
+    }
+  }
+
+  navigateTo(destination: string): void {
+    const routes: { [key: string]: string } = {
+      mainpage: '/',
+      login: '/login',
+      createAccount: '/create-subscription',
+      contact: '/contact'
+    };
+
+    const route = routes[destination];
+
+    if (this.router.url === route) {
+      this.router.navigateByUrl('/').then(() => {
+        this.router.navigate([route]);
+      });
+    } else {
+      this.router.navigate([route]);
+    }
+  }
+
+  footerNavigateTo(destination: string): void {
+    localStorage.setItem('policy', destination);
+    this.router.navigateByUrl('/').then(() => {
+      this.router.navigate(['/terms-and-conditions']);
+    });
+  }
+
+  subscribeNewsletter(email: string): void {
+    (document.querySelector('form input') as HTMLInputElement).value = '';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email))
+      return;
+
+    const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('email', email);
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+
+    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+      .subscribe();
   }
 
   onLogin() {
     this.successMessage = '';
     this.errorMessage = '';
 
-    if (!this.email || !this.password) {
+    if (!this.input || !this.password) {
       this.errorMessage = 'Please enter both email and password.';
       return;
     }
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('email', this.email);
+    urlEncodedData.append('input', this.input);
     urlEncodedData.append('password', this.password);
 
     const headers = new HttpHeaders({
@@ -52,12 +119,10 @@ export class LoginComponent implements OnInit {
     this.http.post('http://localhost:8080/api/login', urlEncodedData.toString(), { headers })
       .subscribe(
         data => {
-          console.log('Login response:', data);
           this.handleServerResponse(data);
         },
         error => {
           console.error('Error:', error);
-          this.errorMessage = 'An error occurred. Please try again later.';
         }
       );
   }
@@ -69,8 +134,11 @@ export class LoginComponent implements OnInit {
     if (data.success === false) {
       this.errorMessage = data.message || 'Login failed. Please check your credentials.';
     } else if (data.success === true) {
-      localStorage.setItem('subscriptionsData', JSON.stringify(data.subscriptions));
-      localStorage.setItem('email', this.email);
+      localStorage.setItem('subscriptionsTable', JSON.stringify(data.subscriptionsTable));
+      localStorage.setItem('name', data.name);
+      localStorage.setItem('lastName', data.lastName);
+      localStorage.setItem('email', data.email);
+      localStorage.setItem('phone', data.phone);
       this.router.navigate(['/subscriptions']);
     } else {
       this.errorMessage = 'An unexpected response was received. Please try again.';

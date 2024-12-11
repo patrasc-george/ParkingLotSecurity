@@ -1,17 +1,49 @@
-<div class="container" style="width: 450px;" [formGroup]="signUpForm">
-    <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
+<header class="site-header">
+    <div class="logo-container">
+        <a href="/">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+        </a>
+    </div>
+    <nav>
+        <div class="accountIconContainer">
+            <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
+        </div>
+        <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
+            <ul>
+                <li (click)="navigateTo('mainpage')">Pay</li>
+                <li (click)="navigateTo('login')">Log in</li>
+                <li (click)="navigateTo('createAccount')">Create account</li>
+                <li (click)="navigateTo('contact')">Contact</li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<div class="site-header-invisible">
+    <h1 class="page-title">CREATE ACCOUNT</h1>
+</div>
 
-    <label for="name">Name:</label>
+<div class="container" style="width: 350px;" [formGroup]="signUpForm">
+    <label for="name">First name:</label>
     <input id="name" type="text" formControlName="name" required />
-    <div *ngIf="signUpForm.get('name')?.invalid && signUpForm.get('name')?.touched" style="line-height: 0;">
+    <div *ngIf="signUpForm.get('name')?.invalid && signUpForm.get('name')?.touched" style="line-height: 0.1;">
         <small style="color: red;" *ngIf="signUpForm.get('name')?.errors?.['invalidName']">Enter a valid name.</small>
+    </div>
+
+    <label for="lastName">Last name:</label>
+    <input id="lastName" type="text" formControlName="lastName" required />
+    <div *ngIf="signUpForm.get('lastName')?.invalid && signUpForm.get('lastName')?.touched" style="line-height: 0.1;">
+        <small style="color: red;" *ngIf="signUpForm.get('lastName')?.errors?.['invalidName']">Enter a valid
+            name.</small>
     </div>
 
     <label for="email">Email address:</label>
     <input id="email" type="text" formControlName="email" required />
-    <div *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched" style="line-height: 0;">
+    <div *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched" style="line-height: 0.1;">
         <small style="color: red;" *ngIf="signUpForm.get('email')?.errors?.['invalidEmail']">Enter a valid email
             address.</small>
+    </div>
+    <div *ngIf="signUpForm.get('email')?.errors?.['emailExists']" style="line-height: 0.1;">
+        <small style="color: red;">This email address is already in use.</small>
     </div>
 
     <label for="password">Password:</label>
@@ -27,21 +59,92 @@
     <label for="confirmPassword">Confirm password:</label>
     <input id="confirmPassword" type="password" formControlName="confirmPassword" required />
     <div *ngIf="signUpForm.get('confirmPassword')?.invalid && signUpForm.get('confirmPassword')?.touched"
-        style="line-height: 0;">
+        style="line-height: 0.1;">
         <small style="color: red;" *ngIf="signUpForm.get('confirmPassword')?.errors?.['passwordMismatch']">Passwords do
             not match.</small>
     </div>
 
     <label for="phone">Phone number:</label>
     <input id="phone" type="text" formControlName="phone" required />
-    <div *ngIf="signUpForm.get('phone')?.invalid && signUpForm.get('phone')?.touched" style="line-height: 0;">
-        <small style="color: red;" *ngIf="signUpForm.get('phone')?.errors?.['invalidPhone']">Enter a valid
-            phone number.</small>
+    <div *ngIf="signUpForm.get('phone')?.invalid && signUpForm.get('phone')?.touched" style="line-height: 0.1;">
+        <small style="color: red;" *ngIf="signUpForm.get('phone')?.errors?.['invalidPhone']">Enter a valid phone
+            number.</small>
+    </div>
+    <div *ngIf="signUpForm.get('phone')?.errors?.['phoneExists']" style="line-height: 0.1;">
+        <small style="color: red;">This phone number is already in use.</small>
     </div>
 
+    <div class="agreement-container">
+        <div class="agreement-item">
+            <input type="checkbox" id="terms" formControlName="terms" />
+            <label for="terms"
+                [style.color]="signUpForm.get('terms')?.invalid && signUpForm.get('terms')?.touched ? 'red' : 'inherit'">
+                I agree to the <span class="link-text" (click)="policyNavigateTo('terms-and-conditions', $event)">Terms
+                    and Conditions</span>.
+            </label>
+        </div>
+        <div class="agreement-item">
+            <input type="checkbox" id="privacy" formControlName="privacy" />
+            <label for="privacy"
+                [style.color]="signUpForm.get('privacy')?.invalid && signUpForm.get('privacy')?.touched ? 'red' : 'inherit'">
+                I agree to the <span class="link-text" (click)="policyNavigateTo('privacy-policy', $event)">Privacy
+                    Policy</span>.
+            </label>
+        </div>
+        <div class="agreement-item">
+            <input type="checkbox" id="cookies" formControlName="cookies" />
+            <label for="cookies"
+                [style.color]="signUpForm.get('cookies')?.invalid && signUpForm.get('cookies')?.touched ? 'red' : 'inherit'">
+                I agree to the <span class="link-text" (click)="policyNavigateTo('cookies-policy', $event)">Cookies
+                    Policy</span>.
+            </label>
+        </div>
+    </div>
+
+    <div class="recaptcha-container">
+        <re-captcha [siteKey]="'6LcgwX4qAAAAAAFB67tmqM4M2g1LWLGT-E1LWjK-'" (resolved)="captchaResolved($event)"
+            [ngClass]="{'error': signUpForm.get('captcha')?.invalid && signUpForm.get('captcha')?.touched}">
+        </re-captcha>
+    </div>
+    <div *ngIf="signUpForm.get('captcha')?.invalid && signUpForm.get('captcha')?.touched && captchaResponse === ''">
+        <small style="color: red;">Complete the captcha.</small>
+    </div>
     <button (click)="onSignUp()">Sign up</button>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <p>Already have an account?
         <a routerLink="/login" id="backToLoginLink">Back to login</a>
     </p>
 </div>
+
+<footer>
+    <div class="footer-container">
+        <div class="footer-contact">
+            <h3>Contact Us</h3>
+            <p>Phone number:</p>
+            <p>+1 631 337 8380</p>
+            <p>Email address:</p>
+            <p>parking.info&#64;yahoo.com</p>
+        </div>
+        <div class="footer-links">
+            <h3>Useful Links</h3>
+            <ul>
+                <li><a href="javascript:void(0)" (click)="footerNavigateTo('terms')">Terms and Conditions</a></li>
+                <li><a href="javascript:void(0)" (click)="footerNavigateTo('privacy')">Privacy Policy</a></li>
+                <li><a href="javascript:void(0)" (click)="footerNavigateTo('cookies')">Cookies Policy</a></li>
+                <li><a href="/unsubscribe">Unsubscribe</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-newsletter">
+            <h3>Subscribe to our Newsletter</h3>
+            <form class="footer-form" (ngSubmit)="subscribeNewsletter(emailInput.value)" #newsletterForm="ngForm">
+                <input type="email" name="email" ngModel #emailInput="ngModel" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <p>&copy; 2024 ParkPass. All rights reserved.</p>
+    </div>
+</footer>

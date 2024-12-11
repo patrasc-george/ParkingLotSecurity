@@ -12,12 +12,14 @@ export class SubscriptionsComponent implements OnInit {
   selectedRows: Set<string> = new Set();
   tableErrorMessage: string = '';
   dropdownVisible: boolean = false;
+  name: string = '';
 
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 
   constructor(private http: HttpClient, private router: Router, private renderer: Renderer2) { }
 
   ngOnInit(): void {
+    this.name = localStorage.getItem('name') || 'Guest';
     this.loadSubscriptions();
   }
 
@@ -38,7 +40,8 @@ export class SubscriptionsComponent implements OnInit {
     const routes: { [key: string]: string } = {
       account: '/account',
       subscriptions: '/subscriptions',
-      login: '/login'
+      login: '/login',
+      contact: '/contact'
     };
 
     const route = routes[destination];
@@ -50,6 +53,36 @@ export class SubscriptionsComponent implements OnInit {
     } else {
       this.router.navigate([route]);
     }
+  }
+
+  footerNavigateTo(destination: string): void {
+    localStorage.setItem('policy', destination);
+    this.router.navigateByUrl('/').then(() => {
+      this.router.navigate(['/terms-and-conditions']);
+    });
+  }
+
+  subscribeNewsletter(email: string): void {
+    (document.querySelector('form input') as HTMLInputElement).value = '';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email))
+      return;
+
+    const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('email', email);
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+
+    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+      .subscribe();
+  }
+
+  redirectToSubscriptions(event: Event) {
+    event.preventDefault();
+    this.router.navigate(['/subscriptions']);
   }
 
   logout() {
@@ -102,6 +135,8 @@ export class SubscriptionsComponent implements OnInit {
   }
 
   addSubscription() {
+    this.uncheckAll();
+
     this.tableErrorMessage = '';
     const newRow = this.renderer.createElement('tr');
     const newSubscriptionCell = this.renderer.createElement('td');

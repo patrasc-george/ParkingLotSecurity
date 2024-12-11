@@ -1,17 +1,29 @@
 <header class="site-header">
+  <div class="logo-container">
+    <a href="/subscriptions">
+      <img src="assets/logo.png" alt="Logo" class="logo">
+    </a>
+  </div>
   <nav>
-    <div class="accountIconContainer">
-      <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()" />
+    <div class="account-info">
+      <span class="welcome-text">Hello, {{ name }}</span>
+      <div class="accountIconContainer">
+        <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()" />
+      </div>
     </div>
     <div *ngIf="dropdownVisible" class="dropdown">
       <ul>
         <li (click)="navigateTo('account')">Settings</li>
         <li (click)="navigateTo('subscriptions')">Subscriptions</li>
         <li (click)="logout()">Log out</li>
+        <li (click)="navigateTo('contact')">Contact</li>
       </ul>
     </div>
   </nav>
 </header>
+<div class="site-header-invisible">
+  <h1 class="page-title">SUBSCRIPTIONS</h1>
+</div>
 
 <div class="container" style="width: 450px;">
   <p *ngIf="tableErrorMessage" style="color: red;">{{ tableErrorMessage }}</p>
@@ -32,7 +44,11 @@
   </div>
 
   <table id="subscriptionsTable">
-    <th>Subscriptions</th>
+    <thead>
+      <tr>
+        <th>Subscriptions</th>
+      </tr>
+    </thead>
     <tbody #tableBody>
       <tr *ngFor="let subscription of subscriptionsTable" [attr.data-subscription]="subscription">
         <td>
@@ -49,3 +65,4 @@
       </tr>
     </tbody>
   </table>
+</div>

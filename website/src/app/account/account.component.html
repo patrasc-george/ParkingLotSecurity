@@ -1,45 +1,136 @@
-<div class="container">
-    <p *ngIf="errorMessage" style="color:red;">{{ errorMessage }}</p>
-    <p *ngIf="successMessage" style="color:green;">{{ successMessage }}</p>
-    <br>
+<header class="site-header">
+    <div class="logo-container">
+        <a href="#" (click)="redirectToSubscriptions($event)">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+        </a>
+    </div>
+    <nav>
+        <div class="account-info">
+            <span class="welcome-text">Hello, {{ name }}</span>
+        </div>
+        <div class="accountIconContainer">
+            <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
+        </div>
+        <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
+            <ul>
+                <li (click)="navigateTo('account')">Settings</li>
+                <li (click)="navigateTo('subscriptions')">Subscriptions</li>
+                <li (click)="navigateTo('login')">Log out</li>
+                <li (click)="navigateTo('contact')">Contact</li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<div class="site-header-invisible">
+    <h1 class="page-title">SETTINGS</h1>
+</div>
 
-    <div class="dropdown-text">
-        <span>Email Address</span>
-        <div class="buttons">
-            <button type="button" (click)="updateEmail()">
-                <img src="data/edit.png" alt="Edit" class="icon">
-            </button>
+<div class="container" style="width: 450px;">
+    <div class="security-container">
+        <h2 class="section-title" (click)="toggleForm('account')">Account information</h2>
+        <div class="form-container" [style.display]="formVisibleAccount ? 'block' : 'none'">
+            <form [formGroup]="signUpForm">
+                <div class="form-group">
+                    <label for="formName">First name:</label>
+                    <div class="input-wrapper">
+                        <input type="text" formControlName="formName" required #formNameInput>
+                        <button (click)="activateField('formName')" class="edit-button"
+                            [disabled]="!signUpForm.get('formName')?.disabled" *ngIf="editVisibility['formName']">
+                            <img src="assets/edit.png" alt="Edit">
+                        </button>
+                    </div>
+                    <div *ngIf="signUpForm.get('formName')?.invalid && signUpForm.get('formName')?.touched"
+                        style="line-height: 0;">
+                        <small style="color: red;" *ngIf="signUpForm.get('formName')?.errors?.['invalidName']">Enter a
+                            valid name.</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="formLastName">Last name:</label>
+                    <div class="input-wrapper">
+                        <input type="text" formControlName="formLastName" required #formLastNameInput>
+                        <button (click)="activateField('formLastName')" class="edit-button"
+                            [disabled]="!signUpForm.get('formLastName')?.disabled"
+                            *ngIf="editVisibility['formLastName']">
+                            <img src="assets/edit.png" alt="Edit">
+                        </button>
+                    </div>
+                    <div *ngIf="signUpForm.get('formLastName')?.invalid && signUpForm.get('formLastName')?.touched"
+                        style="line-height: 0;">
+                        <small style="color: red;" *ngIf="signUpForm.get('formLastName')?.errors?.['invalidName']">Enter
+                            a valid name.</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone number:</label>
+                    <div class="input-wrapper">
+                        <input type="text" formControlName="phone" required #phoneInput>
+                        <button (click)="activateField('phone')" class="edit-button"
+                            [disabled]="!signUpForm.get('phone')?.disabled" *ngIf="editVisibility['phone']">
+                            <img src="assets/edit.png" alt="Edit">
+                        </button>
+                    </div>
+                    <div *ngIf="signUpForm.get('phone')?.invalid && signUpForm.get('phone')?.touched"
+                        style="line-height: 0;">
+                        <small style="color: red;" *ngIf="signUpForm.get('phone')?.errors?.['invalidPhone']">Enter a
+                            valid phone number.</small>
+                    </div>
+                    <div *ngIf="signUpForm.get('phone')?.errors?.['phoneExists']" style="line-height: 0.1;">
+                        <small style="color: red;">This phone number is already in use.</small>
+                    </div>
+                </div>
+                <button type="submit" class="save-button" (click)="saveAccoountInformations()">Save</button>
+            </form>
         </div>
     </div>
-    <div>
-        <form (ngSubmit)="updateEmail()">
-            <label for="currentPasswordName">Current password:</label>
-            <input type="password" [(ngModel)]="currentPasswordName" name="currentPasswordName">
 
-            <label for="newName">New email address:</label>
-            <input type="email" [(ngModel)]="newName" name="newName">
+    <div class="security-container">
+        <h2 class="section-title" (click)="toggleForm('security')">Security</h2>
+        <div class="form-container" [style.display]="formVisibleSecurity ? 'block' : 'none'">
+            <form [formGroup]="signUpForm">
 
-            <button type="submit">Save</button>
-        </form>
-    </div>
+                <div class="form-group">
+                    <label for="email">Email address:</label>
+                    <div class="input-wrapper">
+                        <input type="email" formControlName="email" required #emailInput>
+                        <button (click)="activateField('email')" class="edit-button"
+                            [disabled]="!signUpForm.get('email')?.disabled" *ngIf="editVisibility['email']">
+                            <img src="assets/edit.png" alt="Edit">
+                        </button>
+                    </div>
+                    <div *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched"
+                        style="line-height: 0;">
+                        <small style="color: red;" *ngIf="signUpForm.get('email')?.errors?.['invalidEmail']">Enter a
+                            valid email address.</small>
+                    </div>
+                    <div *ngIf="signUpForm.get('email')?.errors?.['emailExists']" style="line-height: 0.1;">
+                        <small style="color: red;">This email address is already in use.</small>
+                    </div>
+                </div>
 
-    <div class="dropdown-text">
-        <span>Password</span>
-        <div class="buttons">
-            <button type="button" (click)="updatePassword()">
-                <img src="data/edit.png" alt="Edit" class="icon">
-            </button>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <div class="input-wrapper">
+                        <input type="password" formControlName="password" required #passwordInput>
+                        <button (click)="activateField('password')" class="edit-button"
+                            [disabled]="!signUpForm.get('password')?.disabled" *ngIf="editVisibility['password']">
+                            <img src="assets/edit.png" alt="Edit">
+                        </button>
+                    </div>
+                    <div *ngIf="signUpForm.get('password')?.invalid && signUpForm.get('password')?.touched">
+                        <ul class="error-list">
+                            <li *ngIf="signUpForm.get('password')?.errors?.['uppercaseRequired']">1 uppercase letter
+                                minimum
+                            </li>
+                            <li *ngIf="signUpForm.get('password')?.errors?.['numberRequired']">1 number minimum</li>
+                            <li *ngIf="signUpForm.get('password')?.errors?.['minLength']">8 characters minimum</li>
+                        </ul>
+                    </div>
+                </div>
+                <button type="submit" class="save-button" (click)="saveSecurity()">Save</button>
+            </form>
         </div>
-    </div>
-    <div>
-        <form (ngSubmit)="updatePassword()">
-            <label for="currentPassword">Current password:</label>
-            <input type="password" [(ngModel)]="currentPassword" name="currentPassword">
-
-            <label for="newPassword">New password:</label>
-            <input type="password" [(ngModel)]="newPassword" name="newPassword">
-
-            <button type="submit">Save</button>
-        </form>
     </div>
 </div>

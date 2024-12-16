@@ -259,7 +259,16 @@ void VehicleManager::search(std::string text, std::unordered_map<int, std::strin
 		}
 }
 
-void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::string, std::string>>& occupancyDateTimes)
+std::chrono::system_clock::time_point parseDateTime(const std::string& dateTime) {
+	std::tm timeStruct = {};
+	std::istringstream ss(dateTime);
+	ss >> std::get_time(&timeStruct, "%d-%m-%Y %H:%M:%S");
+
+	time_t timeT = std::mktime(&timeStruct);
+	return std::chrono::system_clock::from_time_t(timeT);
+}
+
+void VehicleManager::calculateOccupancyStatistics()
 {
 	occupancyStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
 
@@ -268,8 +277,10 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 		{
 			Vehicle* auxVehicle = findVehicle(vehicles[i].getLicensePlate(), vehicles[i].getTicket(), false, false, i);
 
+			std::string firstDateTime = vehicles[i].getDateTime();
+			std::string secondDateTime;
 			if (auxVehicle != nullptr)
-				occupancyDateTimes.push_back(std::make_pair(vehicles[i].getDateTime(), auxVehicle->getDateTime()));
+				secondDateTime = auxVehicle->getDateTime();
 			else
 			{
 				auto now = std::chrono::system_clock::now();
@@ -286,7 +297,34 @@ void VehicleManager::calculateOccupancyStatistics(std::vector<std::pair<std::str
 				std::stringstream ss;
 				ss << std::put_time(timeStruct, "%d-%m-%Y %X");
 
-				occupancyDateTimes.push_back(std::make_pair(vehicles[i].getDateTime(), ss.str()));
+				secondDateTime = ss.str();
+			}
+
+			std::tm startTime = {};
+			std::tm endTime = {};
+
+			std::istringstream startStream(firstDateTime);
+			std::istringstream endStream(secondDateTime);
+
+			startStream >> std::get_time(&startTime, "%d-%m-%Y %H:%M:%S");
+			endStream >> std::get_time(&endTime, "%d-%m-%Y %H:%M:%S");
+
+			auto start = std::chrono::system_clock::from_time_t(std::mktime(&startTime));
+			auto end = std::chrono::system_clock::from_time_t(std::mktime(&endTime));
+
+			while (start <= end)
+			{
+				std::time_t currentTimeT = std::chrono::system_clock::to_time_t(start);
+				std::tm* currentTime = std::localtime(&currentTimeT);
+
+				int day = currentTime->tm_wday;
+				int hour = currentTime->tm_hour;
+
+				day = (day == 0) ? 7 : day;
+
+				increaseOccupancyStatistics(day, hour);
+
+				start += std::chrono::hours(1);
 			}
 		}
 }

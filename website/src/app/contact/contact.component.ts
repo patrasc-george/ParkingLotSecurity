@@ -12,7 +12,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class ContactComponent implements OnInit {
   successMessage: string = '';
   dropdownVisible: boolean = false;
+  name: string = "";
   isAuthenticated: boolean = false;
+  isAdmin: boolean = false;
 
   contactForm!: FormGroup;
 
@@ -20,6 +22,8 @@ export class ContactComponent implements OnInit {
 
   ngOnInit(): void {
     this.isAuthenticated = this.authService.isAuthenticated();
+    this.name = localStorage.getItem('name') || '';
+    this.isAdmin = localStorage.getItem('admin') === 'true';
 
     this.contactForm = this.fb.group({
       email: [localStorage.getItem('email') || '', [Validators.required, this.emailValidator]],
@@ -44,6 +48,7 @@ export class ContactComponent implements OnInit {
 
   navigateTo(destination: string): void {
     const routes: { [key: string]: string } = {
+      dashboard: '/dashboard',
       account: '/account',
       subscriptions: '/subscriptions',
       login: '/login',

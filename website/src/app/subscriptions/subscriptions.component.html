@@ -7,15 +7,16 @@
   <nav>
     <div class="account-info">
       <span class="welcome-text">Hello, {{ name }}</span>
-      <div class="accountIconContainer">
-        <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()" />
-      </div>
     </div>
-    <div *ngIf="dropdownVisible" class="dropdown">
+    <div class="accountIconContainer">
+      <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
+    </div>
+    <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
       <ul>
+        <li *ngIf="isAdmin" (click)="navigateTo('dashboard')">Dashboard</li>
         <li (click)="navigateTo('account')">Settings</li>
         <li (click)="navigateTo('subscriptions')">Subscriptions</li>
-        <li (click)="logout()">Log out</li>
+        <li (click)="navigateTo('login')">Log out</li>
         <li (click)="navigateTo('contact')">Contact</li>
       </ul>
     </div>

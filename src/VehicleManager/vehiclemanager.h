@@ -40,7 +40,7 @@ public:
 
 	void search(std::string text, std::unordered_map<int, std::string>& historyLogList);
 
-	void calculateOccupancyStatistics(std::vector<std::pair<std::string, std::string>>& occupancyDateTimes);
+	void calculateOccupancyStatistics();
 
 	bool pay(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket = false);
 

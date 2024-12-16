@@ -221,6 +221,14 @@ Server::Server() : vehicleManager(VehicleManager::getInstance())
 		this->handleUnsubscribeNewsletter(request, response);
 		});
 
+	server.Post("/api/getAdmin", [this](const httplib::Request& request, httplib::Response& response) {
+		response.set_header("Access-Control-Allow-Origin", "*");
+		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		this->handleGetAdmin(request, response);
+		});
+
 	thread = std::thread([this]() { server.listen("localhost", 8080); });
 }
 
@@ -479,8 +487,20 @@ void Server::handleLogin(const httplib::Request& request, httplib::Response& res
 		if (request.get_param_value("fromRedirect") == "true")
 			fromRedirect = true;
 
+	if (input == "admin")
+	{
+		if (subscriptionManager->verifyAdminCredentials(password))
+			response.set_content(R"({"success": true})", "application/json");
+		else
+			response.set_content(R"({"success": false})", "application/json");
+
+		return;
+	}
+
 	Account* account;
-	if (!fromRedirect)
+	if (fromRedirect)
+		account = subscriptionManager->getAccountByEmail(input);
+	else
 	{
 		account = subscriptionManager->verifyCredentials(input, password);
 		if (account == nullptr)
@@ -489,8 +509,6 @@ void Server::handleLogin(const httplib::Request& request, httplib::Response& res
 			return;
 		}
 	}
-	else
-		account = subscriptionManager->getAccountByEmail(input);
 
 	std::string name = account->getName();
 	std::string lastName = account->getLastName();
@@ -831,6 +849,7 @@ void Server::handleUpdateAccount(const httplib::Request& request, httplib::Respo
 	std::string newEmail;
 	std::string newPassword;
 	std::string email;
+	std::string admin;
 
 	if (request.has_param("newEmail"))
 		newEmail = request.get_param_value("newEmail");
@@ -840,6 +859,9 @@ void Server::handleUpdateAccount(const httplib::Request& request, httplib::Respo
 
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
+
+	if (request.has_param("admin"))
+		admin = request.get_param_value("admin");
 
 	Account* account = subscriptionManager->getAccountByEmail(email);
 
@@ -853,6 +875,14 @@ void Server::handleUpdateAccount(const httplib::Request& request, httplib::Respo
 	{
 		response.set_content(R"({"success": false})", "application/json");
 		return;
+	}
+
+	if (admin == "true")
+	{
+		std::string token = generateToken();
+		subscriptionManager->setUpdateToken(email, token);
+
+		std::string accountEmail = subscriptionManager->updateAccount(token);
 	}
 
 	response.set_content(R"({"success": true})", "application/json");
@@ -932,9 +962,7 @@ void Server::handleValidateUpdate(const httplib::Request& request, httplib::Resp
 
 	std::string email = subscriptionManager->updateAccount(token);
 	if (!email.empty())
-	{
 		response.set_content("{\"success\": true, \"email\": \"" + email + "\"}", "application/json");
-	}
 	else
 		response.set_content(R"({"success": false})", "application/json");
 }
@@ -1030,6 +1058,56 @@ void Server::handleUnsubscribeNewsletter(const httplib::Request& request, httpli
 	sendEmail(email, subject, content);
 
 	response.set_content(R"({"success": true})", "application/json");
+}
+
+void Server::handleGetAdmin(const httplib::Request& request, httplib::Response& response)
+{
+	std::unordered_set<std::string> emails = subscriptionManager->getEmails();
+
+	int index = 0;
+	std::string emailsJson = "[";
+	for (const auto& email : emails)
+	{
+		emailsJson += "[\"" + email + "\"]";
+
+		if (index < emails.size() - 1)
+			emailsJson += ",";
+
+		index++;
+	}
+	emailsJson += "]";
+
+	vehicleManager.calculateOccupancyStatistics();
+	std::vector<std::vector<int>> occupancyStatistics = vehicleManager.getOccupancyStatistics();
+	std::vector<std::vector<int>> entranceStatistics = vehicleManager.getEntranceStatistics();
+	std::vector<std::vector<int>> exitStatistics = vehicleManager.getExitStatistics();
+
+	auto matrixToJson = [](const std::vector<std::vector<int>>& matrix)
+		{
+			std::string json = "[";
+			for (size_t i = 0; i < matrix.size(); ++i) {
+				json += "[";
+				for (size_t j = 0; j < matrix[i].size(); ++j)
+				{
+					json += std::to_string(matrix[i][j]);
+					if (j < matrix[i].size() - 1)
+						json += ",";
+				}
+				json += "]";
+				if (i < matrix.size() - 1)
+					json += ",";
+			}
+			json += "]";
+			return json;
+		};
+
+	std::string occupancyJson = matrixToJson(occupancyStatistics);
+	std::string entranceJson = matrixToJson(entranceStatistics);
+	std::string exitJson = matrixToJson(exitStatistics);
+
+	response.set_content("{\"success\": true, \"emailsTable\": " + emailsJson + ", \"occupancyTable\": " + occupancyJson + ", \"entranceTable\": " + entranceJson + ", \"exitTable\": " + exitJson + "}", "application/json");
+
+	return;
 }
 
 Server::~Server()

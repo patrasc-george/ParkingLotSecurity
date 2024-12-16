@@ -14,7 +14,6 @@
 #include <thread>
 #include <map>
 #include <unordered_set>
-#include <unordered_set>
 
 class SUBSCRIPTIONMANAGER_API SubscriptionManager
 {
@@ -28,8 +27,12 @@ public:
 
 	Account* verifyCredentials(const std::string& input, const std::string& password);
 
+	bool verifyAdminCredentials(const std::string& password) const;
+
 public:
 	std::map<Account, std::vector<Subscription>> getAccounts() const;
+
+	std::unordered_set<std::string> getEmails() const;
 
 	std::vector<std::string> getTempAccount(const std::string& token) const;
 

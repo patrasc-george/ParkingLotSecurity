@@ -132,14 +132,18 @@ export class LoginComponent implements OnInit {
     this.errorMessage = '';
 
     if (data.success === false) {
-      this.errorMessage = data.message || 'Login failed. Please check your credentials.';
+      this.errorMessage = 'Login failed. Please check your credentials.';
     } else if (data.success === true) {
-      localStorage.setItem('subscriptionsTable', JSON.stringify(data.subscriptionsTable));
-      localStorage.setItem('name', data.name);
-      localStorage.setItem('lastName', data.lastName);
-      localStorage.setItem('email', data.email);
-      localStorage.setItem('phone', data.phone);
-      this.router.navigate(['/subscriptions']);
+      if (this.input === "admin") {
+        this.router.navigate(['/dashboard']);
+      } else {
+        localStorage.setItem('subscriptionsTable', JSON.stringify(data.subscriptionsTable));
+        localStorage.setItem('name', data.name);
+        localStorage.setItem('lastName', data.lastName);
+        localStorage.setItem('email', data.email);
+        localStorage.setItem('phone', data.phone);
+        this.router.navigate(['/subscriptions']);
+      }
     } else {
       this.errorMessage = 'An unexpected response was received. Please try again.';
     }

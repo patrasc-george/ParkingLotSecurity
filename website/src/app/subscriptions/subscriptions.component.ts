@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Renderer2, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -13,12 +13,14 @@ export class SubscriptionsComponent implements OnInit {
   tableErrorMessage: string = '';
   dropdownVisible: boolean = false;
   name: string = '';
+  isAdmin: boolean = false;
 
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 
   constructor(private http: HttpClient, private router: Router, private renderer: Renderer2) { }
 
   ngOnInit(): void {
+    this.isAdmin = localStorage.getItem('admin') === 'true';
     this.name = localStorage.getItem('name') || 'Guest';
     this.loadSubscriptions();
   }
@@ -32,12 +34,23 @@ export class SubscriptionsComponent implements OnInit {
     }
   }
 
-  toggleDropdown() {
+  toggleDropdown(): void {
     this.dropdownVisible = !this.dropdownVisible;
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeDropdown(event: MouseEvent): void {
+    const dropdown = document.getElementById('accountDropdown');
+    const accountIcon = document.querySelector('.accountIconContainer');
+
+    if (this.dropdownVisible && dropdown && !dropdown.contains(event.target as Node) && !accountIcon?.contains(event.target as Node)) {
+      this.dropdownVisible = false;
+    }
   }
 
   navigateTo(destination: string) {
     const routes: { [key: string]: string } = {
+      dashboard: '/dashboard',
       account: '/account',
       subscriptions: '/subscriptions',
       login: '/login',

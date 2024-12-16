@@ -23,6 +23,7 @@ import { ContactComponent } from './contact/contact.component';
 import { RecaptchaService } from './recaptcha.service';
 import { TermsAndConditionsComponent } from './terms-and-conditions/terms-and-conditions.component';
 import { UnsubscribeComponent } from './unsubscribe/unsubscribe.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import { UnsubscribeComponent } from './unsubscribe/unsubscribe.component';
     RedirectComponent,
     ContactComponent,
     TermsAndConditionsComponent,
-    UnsubscribeComponent
+    UnsubscribeComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule,

@@ -51,6 +51,8 @@ private:
 
 	void handleLogin(const httplib::Request& request, httplib::Response& response);
 
+	void handleGetAdmin(const httplib::Request& request, httplib::Response& response);
+
 	void handleRecoverPasswordViaEmail(const httplib::Request& request, httplib::Response& response);
 
 	void handleRecoverPasswordViaSMS(const httplib::Request& request, httplib::Response& response);

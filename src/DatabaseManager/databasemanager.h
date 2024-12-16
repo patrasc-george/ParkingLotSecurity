@@ -27,6 +27,8 @@ public:
 
 	std::string getPath() const;
 
+	std::string getPassword() const;
+
 	std::vector<std::string> getVehicles() const;
 
 	std::vector<std::string> getAccounts() const;
@@ -66,4 +68,5 @@ public:
 private:
 	sqlite3* db;
 	std::string path;
+	std::string password;
 };

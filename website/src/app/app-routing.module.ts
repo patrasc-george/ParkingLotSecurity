@@ -17,6 +17,7 @@ import { RedirectComponent } from './redirect/redirect.component';
 import { ContactComponent } from './contact/contact.component';
 import { TermsAndConditionsComponent } from './terms-and-conditions/terms-and-conditions.component';
 import { UnsubscribeComponent } from './unsubscribe/unsubscribe.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 const routes: Routes = [
   { path: '', component: MainpageComponent },
@@ -35,7 +36,8 @@ const routes: Routes = [
   { path: 'redirect', component: RedirectComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'terms-and-conditions', component: TermsAndConditionsComponent },
-  { path: 'unsubscribe', component: UnsubscribeComponent }
+  { path: 'unsubscribe', component: UnsubscribeComponent },
+  { path: 'dashboard', component: DashboardComponent }
 ];
 
 @NgModule({

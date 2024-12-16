@@ -73,6 +73,8 @@ bool DatabaseManager::initializeDatabase(const std::string& password)
 	if (sqlite3_exec(db, sqlCreateTables, nullptr, nullptr, nullptr) == SQLITE_NOTADB)
 		return false;
 
+	this->password = password;
+
 	return true;
 }
 
@@ -85,6 +87,11 @@ DatabaseManager& DatabaseManager::getInstance(const std::string& path)
 std::string DatabaseManager::getPath() const
 {
 	return path;
+}
+
+std::string DatabaseManager::getPassword() const
+{
+	return password;
 }
 
 std::vector<std::string> DatabaseManager::getVehicles() const

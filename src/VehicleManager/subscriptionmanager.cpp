@@ -26,11 +26,11 @@ inline std::vector<std::string> split(const std::string& string, const std::stri
 
 std::string getCurrentTime()
 {
-	auto now = std::chrono::system_clock::now();
-	auto nowTime = std::chrono::system_clock::to_time_t(now);
-
+	std::time_t now = std::time(nullptr);
+	std::tm* localTime = std::localtime(&now);
 	std::ostringstream oss;
-	oss << std::put_time(std::localtime(&nowTime), "%Y-%m-%d %H:%M:%S");
+	oss << std::put_time(localTime, "%d-%m-%Y %H:%M:%S");
+
 	return oss.str();
 }
 
@@ -47,16 +47,15 @@ int timeDifference(const std::string& time)
 	auto inTime = std::mktime(&tmIn);
 	auto outTime = std::mktime(&tmOut);
 
-	if (inTime != -1 && outTime != -1)
-	{
-		auto duration = std::difftime(outTime, inTime);
+	if (inTime == -1 || outTime == -1)
+		return 0;
 
-		int minutes = static_cast<int>(duration) / 600;
-		return minutes;
-	}
+	auto duration = std::difftime(outTime, inTime);
+	int minutes = static_cast<int>(duration) / 60;
 
-	return 0;
+	return minutes;
 }
+
 
 void removeExpiredToken(std::unordered_map<std::string, std::string>& container, const int& timeIndex, const int& limit)
 {
@@ -81,9 +80,9 @@ SubscriptionManager::SubscriptionManager() : databaseManager(DatabaseManager::ge
 		{
 			while (true)
 			{
-				removeExpiredToken(tempAccounts, 5, 10);
-				removeExpiredToken(tempRecoveredPasswords, 1, 10);
-				removeExpiredToken(tempUpdatedAccounts, 3, 10);
+				removeExpiredToken(tempAccounts, 5, 60);
+				removeExpiredToken(tempRecoveredPasswords, 1, 60);
+				removeExpiredToken(tempUpdatedAccounts, 3, 60);
 				std::this_thread::sleep_for(std::chrono::minutes(5));
 			}
 		});
@@ -150,9 +149,27 @@ Account* SubscriptionManager::verifyCredentials(const std::string& input, const 
 	return nullptr;
 }
 
+bool SubscriptionManager::verifyAdminCredentials(const std::string& password) const
+{
+	if (password == databaseManager.getPassword())
+		return true;
+
+	return false;
+}
+
 std::map<Account, std::vector<Subscription>> SubscriptionManager::getAccounts() const
 {
 	return accounts;
+}
+
+std::unordered_set<std::string> SubscriptionManager::getEmails() const
+{
+	std::unordered_set<std::string> emails;
+
+	for (const auto& account : accounts)
+		emails.insert(account.first.getEmail());
+
+	return emails;
 }
 
 std::vector<std::string> SubscriptionManager::getTempAccount(const std::string& token) const

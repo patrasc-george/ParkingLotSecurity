@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-validation-selector',
@@ -16,14 +17,17 @@ export class ValidationSelectorComponent implements OnInit {
   email: string = '';
   password: string = '';
   phone: string = '';
+  isAuthenticated: boolean = false;
 
-  constructor(private router: Router, private http: HttpClient, private fb: FormBuilder) {
+  constructor(private router: Router, private authService: AuthService, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({
       validationMethod: [null, Validators.required],
     });
   }
 
   ngOnInit(): void {
+    this.isAuthenticated = this.authService.isAuthenticated();
+
     this.name = localStorage.getItem('name') || '';
     this.email = localStorage.getItem('email') || '';
     this.phone = localStorage.getItem('phone') || '';
@@ -45,8 +49,11 @@ export class ValidationSelectorComponent implements OnInit {
 
   navigateTo(destination: string): void {
     const routes: { [key: string]: string } = {
-      mainpage: '/',
+      dashboard: '/dashboard',
+      account: '/account',
+      subscriptions: '/subscriptions',
       login: '/login',
+      mainpage: '/',
       createAccount: '/create-subscription',
       contact: '/contact'
     };
@@ -78,6 +85,15 @@ export class ValidationSelectorComponent implements OnInit {
     this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
       .subscribe();
   }
+
+  // redirectToSubscriptions(event: Event) {
+  //   event.preventDefault();
+  //   if (this.isAuthenticated) {
+  //     this.router.navigate(['/subscriptions']);
+  //   } else {
+  //     this.router.navigate(['/']);
+  //   }
+  // }
 
   onValidate(method: 'email' | 'sms'): void {
     if (method === 'email') {

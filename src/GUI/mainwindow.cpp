@@ -467,9 +467,7 @@ void MainWindow::showSubscriptions()
 
 void MainWindow::showStatistics()
 {
-	std::vector<std::pair<std::string, std::string>> occupancyDateTimes;
-	vehicleManager->calculateOccupancyStatistics(occupancyDateTimes);
-	updateOccupancyStatistics(occupancyDateTimes);
+	vehicleManager->calculateOccupancyStatistics();
 
 	StatisticsWindow* statisticsWindow = new StatisticsWindow(vehicleManager->getOccupancyStatistics(), vehicleManager->getEntranceStatistics(), vehicleManager->getExitStatistics(), enterButton->size());
 

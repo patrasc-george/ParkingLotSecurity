@@ -16,12 +16,14 @@ export class SubscriptionComponent implements OnInit {
   allHistoryExpanded = false;
   pageTitle: string = '';
   name: string = '';
+  isAdmin: boolean = false;
 
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 
   constructor(private router: Router, private http: HttpClient, private renderer: Renderer2) { }
 
   ngOnInit(): void {
+    this.isAdmin = localStorage.getItem('admin') === 'true';
     this.name = localStorage.getItem('name') || 'Guest';
     const subscriptionName = localStorage.getItem('subscriptionName');
     if (subscriptionName) {
@@ -43,6 +45,18 @@ export class SubscriptionComponent implements OnInit {
     this.dropdownVisible = !this.dropdownVisible;
   }
 
+  navigateTo(destination: string): void {
+    const routes: { [key: string]: string } = {
+      dashboard: '/dashboard',
+      account: '/account',
+      subscriptions: '/subscriptions',
+      login: '/login',
+      contact: '/contact'
+    };
+
+    this.router.navigate([routes[destination]]);
+  }
+
   @HostListener('document:click', ['$event'])
   closeDropdown(event: MouseEvent): void {
     const dropdown = document.getElementById('accountDropdown');
@@ -51,17 +65,6 @@ export class SubscriptionComponent implements OnInit {
     if (this.dropdownVisible && dropdown && !dropdown.contains(event.target as Node) && !accountIcon?.contains(event.target as Node)) {
       this.dropdownVisible = false;
     }
-  }
-
-  navigateTo(destination: string): void {
-    const routes: { [key: string]: string } = {
-      account: '/account',
-      subscriptions: '/subscriptions',
-      login: '/login',
-      contact: '/contact'
-    };
-
-    this.router.navigate([routes[destination]]);
   }
 
   footerNavigateTo(destination: string): void {

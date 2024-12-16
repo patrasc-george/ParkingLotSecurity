@@ -16,6 +16,7 @@ export class AccountComponent implements OnInit {
   email: string = '';
   password: string = '';
   isReadOnly: boolean = true;
+  isAdmin: boolean = false;
 
   dropdownVisible = false;
 
@@ -40,6 +41,8 @@ export class AccountComponent implements OnInit {
   constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) { }
 
   ngOnInit(): void {
+    this.isAdmin = localStorage.getItem('admin') === 'true';
+
     this.signUpForm = this.fb.group({
       formName: [{ value: '', disabled: true }, [Validators.required, this.nameValidator]],
       formLastName: [{ value: '', disabled: true }, [Validators.required, this.nameValidator]],
@@ -80,6 +83,7 @@ export class AccountComponent implements OnInit {
 
   navigateTo(destination: string): void {
     const routes: { [key: string]: string } = {
+      dashboard: '/dashboard',
       account: '/account',
       subscriptions: '/subscriptions',
       login: '/login',
@@ -232,6 +236,7 @@ export class AccountComponent implements OnInit {
 
     const urlEncodedData = new URLSearchParams();
     urlEncodedData.append('email', this.email);
+    urlEncodedData.append('admin', this.isAdmin.toString());
     if (email) urlEncodedData.append('newEmail', email);
     if (password) urlEncodedData.append('newPassword', password);
 
@@ -247,8 +252,14 @@ export class AccountComponent implements OnInit {
             const emailField = document.querySelector(`[formControlName="email"]`);
             (emailField as HTMLElement)?.focus();
           } else if (data.success === true) {
-            localStorage.setItem('fromAccount', 'true');
-            this.router.navigate(['/validation-selector']);
+            if (this.isAdmin) {
+              if (email) localStorage.setItem('email', email);
+              if (password) localStorage.setItem('password', password);
+              window.location.reload();
+            } else {
+              localStorage.setItem('fromAccount', 'true');
+              this.router.navigate(['/validation-selector']);
+            }
           }
         },
         error => {

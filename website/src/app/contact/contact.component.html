@@ -5,11 +5,15 @@
         </a>
     </div>
     <nav>
+        <div class="account-info" *ngIf="isAuthenticated">
+            <span class="welcome-text">Hello, {{ name }}</span>
+        </div>
         <div class="accountIconContainer">
             <img src="assets/account.png" alt="Account" class="accountIcon" (click)="toggleDropdown()">
         </div>
         <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
             <ul>
+                <li *ngIf="isAdmin" (click)="navigateTo('dashboard')">Dashboard</li>
                 <li *ngIf="isAuthenticated" (click)="navigateTo('account')">Settings</li>
                 <li *ngIf="isAuthenticated" (click)="navigateTo('subscriptions')">Subscriptions</li>
                 <li *ngIf="isAuthenticated" (click)="navigateTo('login')">Log out</li>
@@ -61,7 +65,7 @@
     </form>
 </div>
 
-<footer>
+<footer *ngIf="!isAuthenticated">
     <div class="footer-container">
         <div class="footer-contact">
             <h3>Contact Us</h3>

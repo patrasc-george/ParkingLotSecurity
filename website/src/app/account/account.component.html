@@ -13,6 +13,7 @@
         </div>
         <div id="accountDropdown" class="dropdown" [style.display]="dropdownVisible ? 'block' : 'none'">
             <ul>
+                <li *ngIf="isAdmin" (click)="navigateTo('dashboard')">Dashboard</li>
                 <li (click)="navigateTo('account')">Settings</li>
                 <li (click)="navigateTo('subscriptions')">Subscriptions</li>
                 <li (click)="navigateTo('login')">Log out</li>

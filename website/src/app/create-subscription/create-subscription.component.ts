@@ -174,7 +174,7 @@ export class CreateAccountComponent {
     if (data.success === false) {
       this.captchaResponse = '';
       this.signUpForm.get('captcha')?.setErrors({ captchaInvalid: true });
-      window.grecaptcha.reset();
+      // window.grecaptcha.reset();
 
       if (data.message === 'An account with this email address already exists.') {
         this.signUpForm.get('email')?.setErrors({ emailExists: true });

@@ -9,22 +9,22 @@ import { Router } from '@angular/router';
 })
 export class DashboardComponent implements OnInit {
   emailsTable: any[] = [];
-  occupancyTable: any[][] = [];
-  entranceTable: any[][] = [];
-  exitTable: any[][] = [];
+  // occupancyTable: any[][] = [];
+  // entranceTable: any[][] = [];
+  // exitTable: any[][] = [];
 
-  hours: number[] = Array.from({ length: 24 }, (_, i) => i);
-  daysOfWeek: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  // hours: number[] = Array.from({ length: 24 }, (_, i) => i);
+  // daysOfWeek: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  occupancyStatistics: number[][] = [];
-  entranceStatistics: number[][] = [];
-  exitStatistics: number[][] = [];
+  // occupancyStatistics: number[][] = [];
+  // entranceStatistics: number[][] = [];
+  // exitStatistics: number[][] = [];
 
-  normalizedOccupancyStatistics: number[][] = [];
-  normalizedEntranceStatistics: number[][] = [];
-  normalizedExitStatistics: number[][] = [];
+  // normalizedOccupancyStatistics: number[][] = [];
+  // normalizedEntranceStatistics: number[][] = [];
+  // normalizedExitStatistics: number[][] = [];
 
-  selectedStatistics: number[][] = [];
+  // selectedStatistics: number[][] = [];
 
   dropdownVisible = false;
 
@@ -43,22 +43,23 @@ export class DashboardComponent implements OnInit {
     this.http.post('http://localhost:8080/api/getAdmin', urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
-          if (data && data.emailsTable && data.occupancyTable && data.entranceTable && data.exitTable) {
+          if (data && data.emailsTable) {
+            // if (data && data.emailsTable && data.occupancyTable && data.entranceTable && data.exitTable) {
             this.emailsTable = data.emailsTable;
-            this.occupancyTable = data.occupancyTable;
-            this.entranceTable = data.entranceTable;
-            this.exitTable = data.exitTable;
+            // this.occupancyTable = data.occupancyTable;
+            // this.entranceTable = data.entranceTable;
+            // this.exitTable = data.exitTable;
 
             localStorage.setItem('emailsTable', JSON.stringify(data.emailsTable));
-            localStorage.setItem('occupancyTable', JSON.stringify(data.occupancyTable));
-            localStorage.setItem('entranceTable', JSON.stringify(data.entranceTable));
-            localStorage.setItem('exitTable', JSON.stringify(data.exitTable));
+            // localStorage.setItem('occupancyTable', JSON.stringify(data.occupancyTable));
+            // localStorage.setItem('entranceTable', JSON.stringify(data.entranceTable));
+            // localStorage.setItem('exitTable', JSON.stringify(data.exitTable));
 
-            this.normalizedOccupancyStatistics = this.normalize(this.occupancyTable);
-            this.normalizedEntranceStatistics = this.normalize(this.entranceTable);
-            this.normalizedExitStatistics = this.normalize(this.exitTable);
+            // this.normalizedOccupancyStatistics = this.normalize(this.occupancyTable);
+            // this.normalizedEntranceStatistics = this.normalize(this.entranceTable);
+            // this.normalizedExitStatistics = this.normalize(this.exitTable);
 
-            this.selectedStatistics = this.normalizedOccupancyStatistics;
+            // this.selectedStatistics = this.normalizedOccupancyStatistics;
           } else {
             console.error('Unexpected response format:', data);
           }
@@ -69,26 +70,26 @@ export class DashboardComponent implements OnInit {
       );
   }
 
-  normalize(data: number[][]): number[][] {
-    let maxValue = 0;
+  // normalize(data: number[][]): number[][] {
+  //   let maxValue = 0;
 
-    for (const row of data) {
-      for (const value of row) {
-        if (value > maxValue) {
-          maxValue = value;
-        }
-      }
-    }
+  //   for (const row of data) {
+  //     for (const value of row) {
+  //       if (value > maxValue) {
+  //         maxValue = value;
+  //       }
+  //     }
+  //   }
 
-    if (maxValue === 0) return data.map(row => row.map(() => 0));
+  //   if (maxValue === 0) return data.map(row => row.map(() => 0));
 
-    return data.map(row => row.map(value => value / maxValue));
-  }
+  //   return data.map(row => row.map(value => value / maxValue));
+  // }
 
-  getColor(value: number): string {
-    const blueValue = Math.round(255 * value);
-    return `rgb(${255 - blueValue}, ${255 - blueValue}, 255)`;
-  }
+  // getColor(value: number): string {
+  //   const blueValue = Math.round(255 * value);
+  //   return `rgb(${255 - blueValue}, ${255 - blueValue}, 255)`;
+  // }
 
   toggleDropdown() {
     this.dropdownVisible = !this.dropdownVisible;
@@ -118,24 +119,24 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  onTableChange(event: Event): void {
-    const selectedTable = (event.target as HTMLSelectElement).value;
+  // onTableChange(event: Event): void {
+  //   const selectedTable = (event.target as HTMLSelectElement).value;
 
-    switch (selectedTable) {
-      case 'occupancy':
-        this.selectedStatistics = this.normalizedOccupancyStatistics;
-        break;
-      case 'entrance':
-        this.selectedStatistics = this.normalizedEntranceStatistics;
-        break;
-      case 'exit':
-        this.selectedStatistics = this.normalizedExitStatistics;
-        break;
-      default:
-        this.selectedStatistics = [];
-        break;
-    }
-  }
+  //   switch (selectedTable) {
+  //     case 'occupancy':
+  //       this.selectedStatistics = this.normalizedOccupancyStatistics;
+  //       break;
+  //     case 'entrance':
+  //       this.selectedStatistics = this.normalizedEntranceStatistics;
+  //       break;
+  //     case 'exit':
+  //       this.selectedStatistics = this.normalizedExitStatistics;
+  //       break;
+  //     default:
+  //       this.selectedStatistics = [];
+  //       break;
+  //   }
+  // }
 
   viewAccount(email: string) {
     const urlEncodedData = new URLSearchParams();

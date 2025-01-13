@@ -23,8 +23,8 @@
     <h1 class="page-title">ADMIN DASHBOARD</h1>
 </div>
 
-<div class="container full-width">
-    <div class="container full-width" style="margin: 50px auto 50px auto;">
+<div class="container" style="width: 450px;">
+    <!-- <div class="container full-width" style="margin: 50px auto 50px auto;">
         <div class="statistics-dropdown">
             <select id="tableSelector" (change)="onTableChange($event)">
                 <option value="occupancy">Occupancy Statistics</option>
@@ -51,29 +51,29 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </div> -->
 
-    <div class="container full-width" style="margin: 50px auto 50px auto;">
-        <table id="emailsTable">
-            <thead>
-                <tr>
-                    <th>Accounts</th>
-                </tr>
-            </thead>
-            <tbody #tableBody>
-                <tr *ngFor="let email of emailsTable" [attr.data-email]="email">
-                    <td>
-                        <div class="cell-wrapper">
-                            <div class="checkbox-text-wrapper">
-                                <span>{{ email }}</span>
-                            </div>
-                            <button title="View" class="view-button" (click)="viewAccount(email)">
-                                <img src="assets/select.png" alt="View" class="icon" />
-                            </button>
+    <!-- <div class="container full-width" style="margin: 50px auto 50px auto;"> -->
+    <table id="emailsTable">
+        <thead>
+            <tr>
+                <th>Accounts</th>
+            </tr>
+        </thead>
+        <tbody #tableBody>
+            <tr *ngFor="let email of emailsTable" [attr.data-email]="email">
+                <td>
+                    <div class="cell-wrapper">
+                        <div class="checkbox-text-wrapper">
+                            <span>{{ email }}</span>
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                        <button title="View" class="view-button" (click)="viewAccount(email)">
+                            <img src="assets/select.png" alt="View" class="icon" />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- </div> -->
 </div>

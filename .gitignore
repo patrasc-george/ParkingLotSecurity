@@ -1,12 +1,1 @@
-/build/
-/.vs/
 /DeliveryPack/
-/database/
-*.aux
-*.log
-*.out
-*.rar
-*.synctex(busy)
-*.synctex.gz
-*.toc
-*.qm

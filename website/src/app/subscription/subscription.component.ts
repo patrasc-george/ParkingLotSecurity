@@ -16,6 +16,7 @@ export class SubscriptionComponent implements OnInit {
   allHistoryExpanded = false;
   pageTitle: string = '';
   name: string = '';
+  subscriptionName: string = '';
   isAdmin: boolean = false;
 
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
@@ -25,12 +26,36 @@ export class SubscriptionComponent implements OnInit {
   ngOnInit(): void {
     this.isAdmin = localStorage.getItem('admin') === 'true';
     this.name = localStorage.getItem('name') || 'Guest';
-    const subscriptionName = localStorage.getItem('subscriptionName');
-    if (subscriptionName) {
-      this.pageTitle = subscriptionName;
-    }
+    this.subscriptionName = localStorage.getItem('subscriptionName') || '';
+    this.pageTitle = this.subscriptionName || '';
 
     this.loadVehiclesFromLocalStorage();
+  }
+
+  viewSubscription() {
+    this.tableErrorMessage = '';
+
+    const email = localStorage.getItem('email');
+    const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('email', email || '');
+    urlEncodedData.append('subscriptionName', this.subscriptionName);
+
+    this.http.post('http://localhost:8080/api/getSubscriptionVehicles', urlEncodedData.toString(), {
+      headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
+    })
+      .subscribe(
+        (data: any) => {
+          if (data.success && Array.isArray(data.vehiclesTable)) {
+            localStorage.setItem('vehiclesTable', JSON.stringify(data.vehiclesTable));
+          } else {
+            this.tableErrorMessage = 'Error fetching vehicles for subscription.';
+          }
+        },
+        error => {
+          console.error('Error:', error);
+          this.tableErrorMessage = 'Error communicating with the server.';
+        }
+      );
   }
 
   loadVehiclesFromLocalStorage(): void {
@@ -149,63 +174,118 @@ export class SubscriptionComponent implements OnInit {
     });
   }
 
-  viewAllHistory(): void {
-    if (this.vehiclesTable.length === 0) {
+  async viewAllHistory(): Promise<void> {
+    if (this.selectedRows.size === 0) {
       return;
     }
 
     this.tableErrorMessage = '';
 
-    this.vehiclesTable.forEach(vehicle => {
-      const licensePlate = vehicle[0];
-
+    for (const licensePlate of this.selectedRows) {
       const row = Array.from(this.tableBody.nativeElement.children)
         .find((tr: unknown) => (tr as Element).textContent?.includes(licensePlate)) as HTMLTableRowElement;
 
-      if (row && row.classList.contains('expanded') === this.allHistoryExpanded) {
-        this.viewHistory(licensePlate);
-      }
-    });
+      if (row) {
+        const isExpanded = row.classList.contains('expanded');
 
-    this.allHistoryExpanded = !this.allHistoryExpanded;
+        if (!isExpanded) {
+          await this.viewHistory(licensePlate);
+        }
+      }
+    }
+
     this.uncheckAll();
   }
 
-  viewHistory(licensePlate: string): void {
+  async viewHistory(licensePlate: string): Promise<void> {
     const urlEncodedData = new URLSearchParams();
     urlEncodedData.append('licensePlate', licensePlate);
 
-    this.http.post<{ success: boolean; history: any[] }>(
-      'http://localhost:8080/api/getVehicleHistory',
-      urlEncodedData.toString(),
-      { headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' }) }
-    ).subscribe(
-      data => {
-        if (data.success && Array.isArray(data.history)) {
-          const row = Array.from(this.tableBody.nativeElement.children)
-            .filter((node): node is HTMLTableRowElement => node instanceof HTMLTableRowElement)
-            .find((tr) => tr.textContent?.includes(licensePlate));
+    try {
+      const row = Array.from(this.tableBody.nativeElement.children)
+        .filter((node): node is HTMLTableRowElement => node instanceof HTMLTableRowElement)
+        .find((tr) => tr.textContent?.includes(licensePlate));
 
-          if (row) {
-            this.toggleHistoryRows(row, data.history);
+      if (row) {
+        const isExpanded = row.classList.contains('expanded');
+
+        if (!isExpanded) {
+          const response = await this.http.post<{ success: boolean; history: any[]; totalTimeParked?: string; payment?: string }>(
+            'http://localhost:8080/api/getVehicleHistory',
+            urlEncodedData.toString(),
+            { headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' }) }
+          ).toPromise();
+
+          if (response && response.success && Array.isArray(response.history)) {
+            const firstHistoryEntry = response.history[0];
+            const totalTimeParked = response.totalTimeParked || '';
+            const payment = response.payment ? response.payment + ' RON' : '0' + ' RON';
+
+            const cells = Array.from(row.children) as HTMLTableCellElement[];
+            if (cells.length >= 6) {
+              // Actualizează celulele 1-6 cu noile date
+              cells[1].textContent = firstHistoryEntry[0] || '';
+              cells[2].textContent = firstHistoryEntry[1] || '';
+              cells[3].textContent = firstHistoryEntry[2] || '';
+              cells[4].textContent = firstHistoryEntry[3] || '';
+              cells[5].textContent = totalTimeParked || '';
+              cells[6].textContent = payment || '';
+
+              // Actualizează statutul vehiculului în celula 7
+              const statusCell = cells[7];
+              if (firstHistoryEntry[1]) {
+                statusCell.textContent = 'Inactive';
+                statusCell.style.color = 'red';
+              } else {
+                statusCell.textContent = 'Active';
+                statusCell.style.color = 'green';
+              }
+
+              // Creează o copie a vehiclesTable
+              const vehiclesTableCopy = [...this.vehiclesTable];
+
+              // Căutăm indexul vehiculului în copie
+              const vehicleIndex = vehiclesTableCopy.findIndex(vehicle => vehicle[0] === licensePlate);
+              if (vehicleIndex !== -1) {
+                // Modificăm vehiculul în copie
+                vehiclesTableCopy[vehicleIndex] = [
+                  licensePlate,
+                  firstHistoryEntry[0] || '',
+                  firstHistoryEntry[1] || '',
+                  firstHistoryEntry[2] || '',
+                  firstHistoryEntry[3] || '',
+                  totalTimeParked,
+                  payment,
+                  statusCell.textContent
+                ];
+
+                // Salvează copia modificată în localStorage
+                localStorage.setItem('vehiclesTable', JSON.stringify(vehiclesTableCopy));
+              }
+            }
+
+            this.toggleHistoryRows(row, response.history);
           }
+        } else {
+          this.toggleHistoryRows(row, []);
         }
-      },
-      error => {
-        console.error('Eroare:', error);
       }
-    );
+    } catch (error) {
+      console.error('Eroare:', error);
+    }
   }
 
-  private toggleHistoryRows(row: HTMLTableRowElement, historyData: any[]): void {
+  private toggleHistoryRows(row: HTMLTableRowElement | undefined, historyData: any[]): void {
+    if (!row) {
+      console.warn('Row not found for the vehicle');
+      return;
+    }
+
     const isExpanded = row.classList.toggle('expanded');
 
     if (isExpanded) {
       const reversedHistoryData = [...historyData].reverse();
-
-      const statusCell = row.querySelector('td:last-child');
-      const vehicleStatus = statusCell ? statusCell.textContent?.trim() : '';
-      if (vehicleStatus === 'Inactive') reversedHistoryData.pop();
+      reversedHistoryData.pop();
 
       reversedHistoryData.forEach(historyEntry => {
         const newRow = this.renderer.createElement('tr');
@@ -231,6 +311,10 @@ export class SubscriptionComponent implements OnInit {
         nextSibling.remove();
         nextSibling = row.nextSibling as HTMLElement;
       }
+    }
+
+    if (historyData.length === 1) {
+      row.classList.remove('expanded');
     }
   }
 
@@ -336,12 +420,21 @@ export class SubscriptionComponent implements OnInit {
     });
   }
 
-  deleteSelected(): void {
-    if (this.allHistoryExpanded) {
-      const copySelectedRows = this.selectedRows;
-      this.viewAllHistory();
-      this.selectedRows = copySelectedRows;
-    }
+  async deleteSelected(): Promise<void> {
+    this.selectedRows.forEach(vehicle => {
+      const row = Array.from(this.tableBody.nativeElement.children)
+        .find((tr: unknown) => (tr as Element).textContent?.includes(vehicle)) as HTMLTableRowElement;
+
+      if (row) {
+        let nextSibling = row.nextSibling as HTMLElement;
+
+        while (nextSibling && nextSibling.classList && nextSibling.classList.contains('history-row')) {
+          nextSibling.remove();
+          nextSibling = row.nextSibling as HTMLElement;
+        }
+      }
+    });
+
     const email = localStorage.getItem('email');
     const subscriptionName = localStorage.getItem('subscriptionName');
 
@@ -349,33 +442,33 @@ export class SubscriptionComponent implements OnInit {
       return;
     }
 
-    this.selectedRows.forEach(vehicle => {
+    for (const vehicle of this.selectedRows) {
       const licensePlate = vehicle;
       const urlEncodedData = new URLSearchParams();
       urlEncodedData.append('email', email);
       urlEncodedData.append('subscriptionName', subscriptionName);
       urlEncodedData.append('licensePlate', licensePlate);
 
-      fetch('http://localhost:8080/api/deleteVehicle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: urlEncodedData.toString()
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            this.vehiclesTable = this.vehiclesTable.filter(v => v[0] !== licensePlate);
-            localStorage.setItem('vehiclesTable', JSON.stringify(this.vehiclesTable));
-          } else {
-            this.tableErrorMessage = 'Failed to delete vehicle.';
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          this.tableErrorMessage = 'An error occurred while deleting the vehicle.';
+      try {
+        const response = await fetch('http://localhost:8080/api/deleteVehicle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: urlEncodedData.toString()
         });
-    });
 
+        const data = await response.json();
+
+        if (data.success) {
+          this.vehiclesTable = this.vehiclesTable.filter(v => v[0] !== licensePlate);
+          localStorage.setItem('vehiclesTable', JSON.stringify(this.vehiclesTable));
+        } else {
+          this.tableErrorMessage = 'Failed to delete vehicle.';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        this.tableErrorMessage = 'An error occurred while deleting the vehicle.';
+      }
+    }
     this.selectedRows.clear();
   }
 }

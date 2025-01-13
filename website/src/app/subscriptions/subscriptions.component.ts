@@ -208,35 +208,37 @@ export class SubscriptionsComponent implements OnInit {
     newSubscriptionCell.focus();
   }
 
-  deleteSelected() {
+  async deleteSelected() {
     this.tableErrorMessage = '';
 
-    this.selectedRows.forEach(subscription => {
+    for (const subscription of this.selectedRows) {
       const email = localStorage.getItem('email');
       const urlEncodedData = new URLSearchParams();
       urlEncodedData.append('email', email || '');
       urlEncodedData.append('subscriptionName', subscription);
 
-      this.http.post('http://localhost:8080/api/deleteSubscription', urlEncodedData.toString(), {
-        headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
-      })
-        .subscribe(
-          (data: any) => {
-            if (data.success) {
-              this.subscriptionsTable = this.subscriptionsTable.filter(sub => sub !== subscription);
-              localStorage.setItem('subscriptionsTable', JSON.stringify(this.subscriptionsTable));
-            } else {
-              this.tableErrorMessage = 'Failed to delete subscription.';
-            }
-          },
-          error => {
-            console.error('Error:', error);
-            this.tableErrorMessage = 'An error occurred. Please try again later.';
-          }
-        );
-    });
+      try {
+        const data: any = await this.http.post('http://localhost:8080/api/deleteSubscription', urlEncodedData.toString(), {
+          headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
+        }).toPromise();
+
+        if (data.success) {
+          this.subscriptionsTable = this.subscriptionsTable.filter(sub => sub !== subscription);
+          localStorage.setItem('subscriptionsTable', JSON.stringify(this.subscriptionsTable));
+        } else {
+          this.tableErrorMessage = `Failed to delete subscription: ${subscription}.`;
+          break;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        this.tableErrorMessage = `An error occurred while deleting subscription: ${subscription}. Please try again later.`;
+        break;
+      }
+    }
+
     this.selectedRows.clear();
   }
+
 
   viewSubscription(subscription: string) {
     this.tableErrorMessage = '';

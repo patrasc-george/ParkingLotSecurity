@@ -34,4 +34,4 @@ The application, written in C++, aims to obtain information related to the entry
 
 ## Poster
 
-![alt text](./Documentation/poster_afco_2024.jpg)
+![alt text](./documentation/poster_afco_2024.jpg)

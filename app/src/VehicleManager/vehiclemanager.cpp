@@ -4,7 +4,7 @@
 
 VehicleManager::VehicleManager()
 {
-	client = std::make_shared<WebSocketClient>(ioContext, "ws://localhost:9002");
+	client = std::make_shared<WebSocketClient>(ioContext, std::getenv("WEBSOCKET_URL"));
 
 #ifdef _DEBUG
 	dataBasePath = "../../../database/";

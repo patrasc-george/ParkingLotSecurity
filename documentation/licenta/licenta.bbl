@@ -1,0 +1,79 @@
+\begin{thebibliography}{10}
+
+\bibitem{2}
+Rafael~C. Gonzalez.
+\newblock Digital image processing.
+\newblock 2002.
+
+\bibitem{3}
+Adrian Kaehler and Gary Bradsk.
+\newblock Learning opencv 3.
+\newblock 2016.
+
+\bibitem{1}
+Richard Szeliski.
+\newblock Computer vision: Algorithms and applications.
+\newblock 2001.
+
+\bibitem{4}
+Wikipedia Contributors.
+\newblock C++, 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/C%2B%2B}.
+
+\bibitem{10}
+Wikipedia Contributors.
+\newblock Cmake, 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/CMake}.
+
+\bibitem{14}
+Wikipedia Contributors.
+\newblock Doxygen, 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/Doxygen}.
+
+\bibitem{6}
+Wikipedia Contributors.
+\newblock Dynamic-link library, 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/Dynamic-link_library}.
+
+\bibitem{11}
+Wikipedia Contributors.
+\newblock Git, 2024.
+\newblock URL: \url{https://ro.wikipedia.org/wiki/Git}.
+
+\bibitem{12}
+Wikipedia Contributors.
+\newblock Integrated development environment, 2024.
+\newblock URL:
+  \url{https://en.wikipedia.org/wiki/Integrated_development_environment}.
+
+\bibitem{13}
+Wikipedia Contributors.
+\newblock Microsoft visual studio, 2024.
+\newblock URL: \url{https://ro.wikipedia.org/wiki/Microsoft_Visual_Studio}.
+
+\bibitem{5}
+Wikipedia Contributors.
+\newblock Object-oriented programming, 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/Object-oriented_programming}.
+
+\bibitem{7}
+Wikipedia Contributors.
+\newblock Opencv, 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/OpenCV}.
+
+\bibitem{9}
+Wikipedia Contributors.
+\newblock Qt (software), 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/Qt_(software)}.
+
+\bibitem{8}
+Wikipedia Contributors.
+\newblock Tesseract (software), 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/Tesseract_(software)}.
+
+\bibitem{15}
+Wikipedia Contributors.
+\newblock Unit testing, 2024.
+\newblock URL: \url{https://en.wikipedia.org/wiki/Unit_testing}.
+
+\end{thebibliography}

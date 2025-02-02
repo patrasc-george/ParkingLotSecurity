@@ -1,5 +1,6 @@
 ﻿#define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "httpServer.h"
+
+#include "httpserver.h"
 #include "qrcodedetection.h"
 
 HttpServer::HttpServer()
@@ -244,7 +245,7 @@ HttpServer::HttpServer()
 		this->handleGetAdmin(request, response);
 		});
 
-	server.listen("localhost", 8080);
+	server.listen("0.0.0.0", 8080);
 }
 
 std::string HttpServer::generateToken()
@@ -259,8 +260,8 @@ std::string HttpServer::generateToken()
 
 void HttpServer::sendEmail(const std::string& email, const std::string& subject, const std::string& content)
 {
-	std::string pocoEmail(std::getenv("pocoEmail"));
-	std::string pocoPassword(std::getenv("pocoPassword"));
+	std::string pocoEmail(std::getenv("POCO_EMAIL"));
+	std::string pocoPassword(std::getenv("POCO_PASSWORD"));
 
 	Poco::Net::MailMessage message;
 	message.setSender(pocoEmail);
@@ -285,9 +286,9 @@ void HttpServer::sendEmail(const std::string& email, const std::string& subject,
 
 void HttpServer::sendSMS(const std::string& phone, const std::string& content)
 {
-	std::string twiloSid(std::getenv("twiloSid"));
-	std::string twiloToken(std::getenv("twiloToken"));
-	std::string twiloPhone(std::getenv("twiloPhone"));
+	std::string twiloSid(std::getenv("TWILO_SID"));
+	std::string twiloToken(std::getenv("TWILO_TOKEN"));
+	std::string twiloPhone(std::getenv("TWILO_PHONE"));
 
 	httplib::SSLClient client("api.twilio.com");
 	client.set_basic_auth(twiloSid.c_str(), twiloToken.c_str());
@@ -367,7 +368,7 @@ void HttpServer::handleCreateAccount(const httplib::Request& request, httplib::R
 		captchaToken = request.get_param_value("captchaToken");
 
 	httplib::SSLClient recaptchaClient("www.google.com");
-	std::string secretKey(std::getenv("reCaptchaKey"));
+	std::string secretKey(std::getenv("RECAPTCHA_KEY"));
 	std::string payload = "secret=" + secretKey + "&response=" + captchaToken;
 
 	auto recaptchaResponse = recaptchaClient.Post("/recaptcha/api/siteverify", payload, "application/x-www-form-urlencoded");

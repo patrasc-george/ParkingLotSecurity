@@ -12,7 +12,7 @@
 class WebSocketSession : public std::enable_shared_from_this<WebSocketSession>
 {
 public:
-	explicit WebSocketSession::WebSocketSession(boost::asio::ip::tcp::socket webSocket)
+	explicit WebSocketSession(boost::asio::ip::tcp::socket webSocket)
 		: webSocket(std::move(webSocket)),
 		dataBaseManager(DatabaseManager::getInstance())
 	{}

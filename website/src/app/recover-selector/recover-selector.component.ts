@@ -65,7 +65,8 @@ export class RecoverSelectorComponent {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 

@@ -89,7 +89,8 @@ export class SubscriptionsComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -166,7 +167,8 @@ export class SubscriptionsComponent implements OnInit {
         urlEncodedData.append('email', email || '');
         urlEncodedData.append('subscriptionName', subscriptionName);
 
-        this.http.post('http://localhost:8080/api/addSubscription', urlEncodedData.toString(), {
+        const apiUrl = window['env'].API_URL + '/api/addSubscription';
+        this.http.post(apiUrl, urlEncodedData.toString(), {
           headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
         })
           .subscribe(
@@ -217,8 +219,9 @@ export class SubscriptionsComponent implements OnInit {
       urlEncodedData.append('email', email || '');
       urlEncodedData.append('subscriptionName', subscription);
 
+      const apiUrl = window['env'].API_URL + '/api/deleteSubscription';
       try {
-        const data: any = await this.http.post('http://localhost:8080/api/deleteSubscription', urlEncodedData.toString(), {
+        const data: any = await this.http.post(apiUrl, urlEncodedData.toString(), {
           headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
         }).toPromise();
 
@@ -248,7 +251,8 @@ export class SubscriptionsComponent implements OnInit {
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', subscription);
 
-    this.http.post('http://localhost:8080/api/getSubscriptionVehicles', urlEncodedData.toString(), {
+    const apiUrl = window['env'].API_URL + '/api/getSubscriptionVehicles';
+    this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     })
       .subscribe(

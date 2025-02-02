@@ -82,7 +82,8 @@ export class ValidationSelectorComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -114,7 +115,8 @@ export class ValidationSelectorComponent implements OnInit {
 
     if (localStorage.getItem('fromCreateSubscription') === 'true') {
       localStorage.setItem('fromCreateSubscription', 'false');
-      this.http.post('http://localhost:8080/api/validateViaEmail', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/validateViaEmail';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
             localStorage.setItem('fromValidationSelector', 'true');
@@ -126,7 +128,8 @@ export class ValidationSelectorComponent implements OnInit {
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
       localStorage.setItem('fromAccount', 'false');
-      this.http.post('http://localhost:8080/api/validateUpdateViaEmail', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/validateUpdateViaEmail';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
             localStorage.setItem('fromValidationSelector', 'true');
@@ -150,7 +153,8 @@ export class ValidationSelectorComponent implements OnInit {
 
     if (localStorage.getItem('fromCreateSubscription') === 'true') {
       localStorage.setItem('fromCreateSubscription', 'false');
-      this.http.post('http://localhost:8080/api/validateViaSMS', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/validateViaSMS';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
             localStorage.setItem('fromValidationSelector', 'true');
@@ -161,7 +165,8 @@ export class ValidationSelectorComponent implements OnInit {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      this.http.post('http://localhost:8080/api/validateUpdateViaSMS', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/validateUpdateViaSMS';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
             this.router.navigate(['/validate-phone']);

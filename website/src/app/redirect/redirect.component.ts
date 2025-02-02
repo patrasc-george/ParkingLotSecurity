@@ -58,7 +58,8 @@ export class RedirectComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/login', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/login';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         data => {
           console.log('Login response:', data);

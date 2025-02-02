@@ -1,9 +1,15 @@
 #pragma once
 
+#ifdef _WIN32
 #ifdef ACCOUNT_EXPORTS
 #define ACCOUNT_API __declspec(dllexport)
 #else
 #define ACCOUNT_API __declspec(dllimport)
+#endif
+#elif __linux__
+#define ACCOUNT_API __attribute__((visibility("default")))
+#else
+#define ACCOUNT_API
 #endif
 
 #include <string>

@@ -11,11 +11,16 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 
 add_dependencies(${PROJECT_NAME} DatabaseManager)
 
+find_package(PostgreSQL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/src/DatabaseManager")
+target_include_directories(${PROJECT_NAME} PUBLIC
+	${PostgreSQL_INCLUDE_DIRS}
+	"${CMAKE_SOURCE_DIR}/src/DatabaseManager"
+)
 
 target_link_libraries(${PROJECT_NAME} 
-	DatabaseManager
-	nlohmann_json::nlohmann_json
+    DatabaseManager
+    PostgreSQL::PostgreSQL
+    nlohmann_json::nlohmann_json
 )

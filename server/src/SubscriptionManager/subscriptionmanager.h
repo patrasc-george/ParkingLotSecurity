@@ -1,9 +1,15 @@
 #pragma once
 
+#ifdef _WIN32
 #ifdef SUBSCRIPTIONMANAGER_EXPORTS
 #define SUBSCRIPTIONMANAGER_API __declspec(dllexport)
 #else
 #define SUBSCRIPTIONMANAGER_API __declspec(dllimport)
+#endif
+#elif __linux__
+#define SUBSCRIPTIONMANAGER_API __attribute__((visibility("default")))
+#else
+#define SUBSCRIPTIONMANAGER_API
 #endif
 
 #include "account.h"

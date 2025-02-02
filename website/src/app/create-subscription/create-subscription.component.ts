@@ -94,7 +94,8 @@ export class CreateAccountComponent {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -155,7 +156,8 @@ export class CreateAccountComponent {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/createAccount', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/createAccount';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         data => {
           localStorage.setItem('name', name);

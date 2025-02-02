@@ -73,7 +73,8 @@ export class ValidatePhoneComponent {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -116,7 +117,8 @@ export class ValidatePhoneComponent {
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     if (localStorage.getItem('fromValidationSelector') === 'true') {
-      this.http.post('http://localhost:8080/api/validate', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/validate';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
             this.handleServerResponse(data);
@@ -127,7 +129,8 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromRecoverPassword') === 'true') {
-      this.http.post('http://localhost:8080/api/verifyResetPasswordToken', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/verifyResetPasswordToken';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
             this.handleServerResponse(data);
@@ -138,7 +141,8 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      this.http.post('http://localhost:8080/api/validateUpdate', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/validateUpdate';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
             this.handleServerResponse(data);
@@ -195,21 +199,24 @@ export class ValidatePhoneComponent {
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     if (localStorage.getItem('fromValidationSelector') === 'true') {
-      this.http.post('http://localhost:8080/api/resendValidateSMS', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/resendValidateSMS';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {
             console.error('Error:', error);
           }
         );
     } else if (localStorage.getItem('fromRecoverPassword') === 'true') {
-      this.http.post('http://localhost:8080/api/resendRecoverPassword', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/resendRecoverPassword';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {
             console.error('Error:', error);
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      this.http.post('http://localhost:8080/api/resendValidateUpdateSMS', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/resendValidateUpdateSMS';
+      this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {
             console.error('Error:', error);

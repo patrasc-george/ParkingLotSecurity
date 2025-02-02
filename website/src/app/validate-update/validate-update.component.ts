@@ -25,13 +25,13 @@ export class ValidateUpdateComponent implements OnInit {
   }
 
   validateUpdate(token: string): void {
-    const url = 'http://localhost:8080/api/validateUpdate';
     const urlEncodedData = new URLSearchParams();
     urlEncodedData.append('token', token);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    this.http.post('http://localhost:8080/api/validateUpdate', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/validateUpdate';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
           if (data.success) {

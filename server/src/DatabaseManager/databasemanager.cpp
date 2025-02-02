@@ -10,10 +10,7 @@
 
 bool DatabaseManager::initializeDatabase()
 {
-	std::string password = "password";
-
-	std::string connInfo = "host=localhost port=5432 dbname=parkpass_database user=parkpass password=" + password;
-	conn = PQconnectdb(connInfo.c_str());
+	conn = PQconnectdb(std::getenv("DATABASE_URL"));
 
 	if (PQstatus(conn) != CONNECTION_OK)
 	{
@@ -32,7 +29,6 @@ bool DatabaseManager::initializeDatabase()
 			total_amount REAL,
 			is_paid TEXT NOT NULL
 		);
-
 		CREATE TABLE IF NOT EXISTS accounts (
 			email TEXT PRIMARY KEY,
 			name TEXT NOT NULL,
@@ -40,17 +36,14 @@ bool DatabaseManager::initializeDatabase()
 			password TEXT NOT NULL,
 			phone TEXT NOT NULL
 		);
-
 		CREATE TABLE IF NOT EXISTS payments (
 			id SERIAL PRIMARY KEY,
 			date DATE NOT NULL
 		);
-
 		CREATE TABLE IF NOT EXISTS license_plates (
 			id SERIAL PRIMARY KEY,
 			number TEXT NOT NULL
 		);
-
 		CREATE TABLE IF NOT EXISTS subscription_payments (
 			email TEXT,
 			subscription_name TEXT,
@@ -58,7 +51,6 @@ bool DatabaseManager::initializeDatabase()
 			PRIMARY KEY (subscription_name, email, payment_id),
 			FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
 		);
-
 		CREATE TABLE IF NOT EXISTS subscription_license_plates (
 			email TEXT,
 			subscription_name TEXT,
@@ -66,21 +58,18 @@ bool DatabaseManager::initializeDatabase()
 			PRIMARY KEY (subscription_name, email, license_plate_id),
 			FOREIGN KEY (license_plate_id) REFERENCES license_plates(id) ON DELETE CASCADE
 		);
-
 		CREATE TABLE IF NOT EXISTS newsletter (
 			email TEXT
 		);
 	)";
 
 	PGresult* result = PQexec(conn, sqlCreateTables);
-
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
 		PQclear(result);
 		PQfinish(conn);
 		return false;
 	}
-
 	PQclear(result);
 
 	return true;

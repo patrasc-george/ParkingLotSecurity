@@ -84,7 +84,8 @@ export class ResetPasswordComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -99,7 +100,8 @@ export class ResetPasswordComponent implements OnInit {
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    this.http.post<any>('http://localhost:8080/api/verifyResetPasswordToken', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/verifyResetPasswordToken';
+    this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data) => {
           if (data.success) {
@@ -131,7 +133,8 @@ export class ResetPasswordComponent implements OnInit {
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    this.http.post<any>('http://localhost:8080/api/resetPassword', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/resetPassword';
+    this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data) => {
           localStorage.setItem('fromResetPassword', 'true');

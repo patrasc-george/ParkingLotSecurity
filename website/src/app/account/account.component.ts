@@ -121,7 +121,8 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -207,7 +208,8 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/updateAccountInformation', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/updateAccountInformation';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
           if (data.success === false) {
@@ -244,7 +246,8 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/updateAccount', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/updateAccount';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
           if (data.success === false) {

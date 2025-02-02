@@ -1,9 +1,15 @@
 #pragma once
 
+#ifdef _WIN32
 #ifdef DATABASEMANAGER_EXPORTS
 #define DATABASEMANAGER_API __declspec(dllexport)
 #else
 #define DATABASEMANAGER_API __declspec(dllimport)
+#endif
+#elif __linux__
+#define DATABASEMANAGER_API __attribute__((visibility("default")))
+#else
+#define DATABASEMANAGER_API
 #endif
 
 #include <libpq-fe.h>

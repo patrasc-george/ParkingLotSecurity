@@ -40,7 +40,8 @@ export class SubscriptionComponent implements OnInit {
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', this.subscriptionName);
 
-    this.http.post('http://localhost:8080/api/getSubscriptionVehicles', urlEncodedData.toString(), {
+    const apiUrl = window['env'].API_URL + '/api/getSubscriptionVehicles';
+    this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     })
       .subscribe(
@@ -113,7 +114,8 @@ export class SubscriptionComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -210,8 +212,9 @@ export class SubscriptionComponent implements OnInit {
         const isExpanded = row.classList.contains('expanded');
 
         if (!isExpanded) {
+          const apiUrl = window['env'].API_URL + '/api/getVehicleHistory';
           const response = await this.http.post<{ success: boolean; history: any[]; totalTimeParked?: string; payment?: string }>(
-            'http://localhost:8080/api/getVehicleHistory',
+            apiUrl,
             urlEncodedData.toString(),
             { headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' }) }
           ).toPromise();
@@ -380,7 +383,8 @@ export class SubscriptionComponent implements OnInit {
     urlEncodedData.append('subscriptionName', subscriptionName);
     urlEncodedData.append('activityData', JSON.stringify(activityData));
 
-    return this.http.post('http://localhost:8080/api/addVehicle', urlEncodedData.toString(), {
+    const apiUrl = window['env'].API_URL + '/api/addVehicle';
+    return this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     });
   }
@@ -449,8 +453,9 @@ export class SubscriptionComponent implements OnInit {
       urlEncodedData.append('subscriptionName', subscriptionName);
       urlEncodedData.append('licensePlate', licensePlate);
 
+      const apiUrl = window['env'].API_URL + '/api/deleteVehicle';
       try {
-        const response = await fetch('http://localhost:8080/api/deleteVehicle', {
+        const response = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: urlEncodedData.toString()

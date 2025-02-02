@@ -1,13 +1,20 @@
 #pragma once
 
+#ifdef _WIN32
 #ifdef SUBSCRIPTION_EXPORTS
 #define SUBSCRIPTION_API __declspec(dllexport)
 #else
 #define SUBSCRIPTION_API __declspec(dllimport)
 #endif
+#elif __linux__
+#define SUBSCRIPTION_API __attribute__((visibility("default")))
+#else
+#define SUBSCRIPTION_API
+#endif
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 class SUBSCRIPTION_API Subscription
 {

@@ -81,7 +81,8 @@ export class RecoverPasswordComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    this.http.post('http://localhost:8080/api/subscribeNewsletter', urlEncodedData.toString(), { headers })
+    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
 
@@ -117,7 +118,8 @@ export class RecoverPasswordComponent implements OnInit {
         'Content-Type': 'application/x-www-form-urlencoded'
       });
 
-      this.http.post<any>('http://localhost:8080/api/recoverPasswordViaEmail', urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/recoverPasswordViaEmail';
+      this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
             if (data.success) {
@@ -134,7 +136,6 @@ export class RecoverPasswordComponent implements OnInit {
         );
     }
     else if (fromRecoverViaSMS === 'true') {
-      const url = 'http://localhost:8080/api/recoverPasswordViaSMS';
       const urlEncodedData = new URLSearchParams();
 
       urlEncodedData.append('phone', this.recoverForm.get('input')?.value);
@@ -143,7 +144,8 @@ export class RecoverPasswordComponent implements OnInit {
         'Content-Type': 'application/x-www-form-urlencoded'
       });
 
-      this.http.post<{ success: boolean, message?: string }>(url, urlEncodedData.toString(), { headers })
+      const apiUrl = window['env'].API_URL + '/api/recoverPasswordViaSMS';
+      this.http.post<{ success: boolean, message?: string }>(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           data => {
             if (data.success) {

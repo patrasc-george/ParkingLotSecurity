@@ -4,7 +4,11 @@
 
 VehicleManager::VehicleManager()
 {
+#ifdef _DEBUG
+	client = std::make_shared<WebSocketClient>(ioContext, std::getenv("WEBSOCKET_URL_DEBUG"));
+#else
 	client = std::make_shared<WebSocketClient>(ioContext, std::getenv("WEBSOCKET_URL"));
+#endif
 
 #ifdef _DEBUG
 	dataBasePath = "../../../database/";

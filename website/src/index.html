@@ -16,8 +16,12 @@
     window.env = {
       API_URL: "{{API_URL}}"
     };
+
+    if (window.env.API_URL.includes("{{API_URL}}")) {
+      window.env.API_URL = "http://localhost:8080";
+    }
   </script>
-  
+    
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
 

@@ -444,6 +444,6 @@ void MainWindow::setLanguage(const int& choise)
 	}
 
 	this->close();
-	MainWindow* refresh = new MainWindow();
-	refresh->show();
+	setupUI();
+	this->show();
 }

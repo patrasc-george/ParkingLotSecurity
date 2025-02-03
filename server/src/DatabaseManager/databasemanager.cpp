@@ -10,7 +10,11 @@
 
 bool DatabaseManager::initializeDatabase()
 {
+#ifdef _DEBUG
+	conn = PQconnectdb(std::getenv("DATABASE_URL_DEBUG"));
+#else
 	conn = PQconnectdb(std::getenv("DATABASE_URL"));
+#endif
 
 	if (PQstatus(conn) != CONNECTION_OK)
 	{

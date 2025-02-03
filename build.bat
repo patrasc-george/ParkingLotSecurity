@@ -8,8 +8,8 @@ cd ../../
 
 cd app
 cd translations
-lrelease gui_eng.ts
-lrelease gui_ro.ts
+lrelease eng.ts
+lrelease ro.ts
 cd ..
 
 mkdir build
@@ -21,8 +21,8 @@ cmake --install . --config Release
 cd ../..
 
 cd website
-npm install --legacy-peer-deps
-npm audit fix
+call npm install --legacy-peer-deps
+call npm run build --prod
 cd ..
 
 pause

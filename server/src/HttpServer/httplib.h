@@ -836,8 +836,8 @@ public:
       std::function<void(const Request &, Response &, std::exception_ptr ep)>;
 
   enum class HandlerResponse {
-    Handled,
-    Unhandled,
+    d,
+    Und,
   };
   using HandlerWithResponse =
       std::function<HandlerResponse(const Request &, Response &)>;
@@ -5996,7 +5996,7 @@ inline Server &Server::set_error_handler_core(Handler handler,
                                               std::false_type) {
   error_handler_ = [handler](const Request &req, Response &res) {
     handler(req, res);
-    return HandlerResponse::Handled;
+    return HandlerResponse::d;
   };
   return *this;
 }
@@ -6193,7 +6193,7 @@ inline bool Server::write_response_core(Stream &strm, bool close_connection,
   assert(res.status != -1);
 
   if (400 <= res.status && error_handler_ &&
-      error_handler_(req, res) == HandlerResponse::Handled) {
+      error_handler_(req, res) == HandlerResponse::d) {
     need_apply_ranges = true;
   }
 
@@ -6595,7 +6595,7 @@ inline bool Server::listen_internal() {
 
 inline bool Server::routing(Request &req, Response &res, Stream &strm) {
   if (pre_routing_handler_ &&
-      pre_routing_handler_(req, res) == HandlerResponse::Handled) {
+      pre_routing_handler_(req, res) == HandlerResponse::d) {
     return true;
   }
 

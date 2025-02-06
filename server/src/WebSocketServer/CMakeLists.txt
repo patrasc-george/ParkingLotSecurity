@@ -11,8 +11,8 @@ find_package(PostgreSQL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS beast asio)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
-	${PostgreSQL_INCLUDE_DIRS}
 	"${CMAKE_SOURCE_DIR}/src/DatabaseManager"
+	${PostgreSQL_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} 

@@ -98,7 +98,7 @@ export class MainpageComponent {
   onPay() {
     this.errorMessage = '';
     this.successMessage = '';
-  
+
     const apiUrl = window['env'].API_URL + '/api/endpoint';
 
     if (!this.licensePlate && !this.selectedFile) {
@@ -153,7 +153,7 @@ export class MainpageComponent {
           }
         );
     }
-}
+  }
 
   handleServerResponse(data: any) {
     this.errorMessage = '';

@@ -3,7 +3,7 @@ project(Application)
 file(GLOB HEADER_FILES "*.h")
 file(GLOB SOURCE_FILES "*.cpp")
 
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} WIN32 ${HEADER_FILES} ${SOURCE_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "ParkingLotsSecurityCamera")
 
@@ -38,11 +38,9 @@ install(FILES ${ASSETS} DESTINATION "${DELIVERY_DIR}/assets")
 
 file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/qr")
-file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/uploadedqr")
 
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/qr")
-file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/uploadedqr")
 
 file(GLOB TRANSLATIONS "${CMAKE_SOURCE_DIR}/translations/*.qm")
 install(FILES ${TRANSLATIONS} DESTINATION "${DELIVERY_DIR}/translations")

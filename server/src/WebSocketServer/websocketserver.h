@@ -40,6 +40,7 @@ public:
 		acceptor(ioContext, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 	{}
 
+public:
 	void start();
 
 private:

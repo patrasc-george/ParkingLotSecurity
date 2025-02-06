@@ -8,7 +8,6 @@ import { Router } from '@angular/router';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  emailsTable: any[] = [];
   // occupancyTable: any[][] = [];
   // entranceTable: any[][] = [];
   // exitTable: any[][] = [];
@@ -25,6 +24,8 @@ export class DashboardComponent implements OnInit {
   // normalizedExitStatistics: number[][] = [];
 
   // selectedStatistics: number[][] = [];
+
+  emailsTable: any[] = [];
 
   dropdownVisible = false;
 
@@ -45,23 +46,26 @@ export class DashboardComponent implements OnInit {
       .subscribe(
         (data: any) => {
           if (data && data.emailsTable) {
-            // if (data && data.emailsTable && data.occupancyTable && data.entranceTable && data.exitTable) {
             this.emailsTable = data.emailsTable;
-            // this.occupancyTable = data.occupancyTable;
-            // this.entranceTable = data.entranceTable;
-            // this.exitTable = data.exitTable;
 
             localStorage.setItem('emailsTable', JSON.stringify(data.emailsTable));
-            // localStorage.setItem('occupancyTable', JSON.stringify(data.occupancyTable));
-            // localStorage.setItem('entranceTable', JSON.stringify(data.entranceTable));
-            // localStorage.setItem('exitTable', JSON.stringify(data.exitTable));
+          }
+          // if (data && data.occupancyTable && data.entranceTable && data.exitTable) {
+          //   this.occupancyTable = data.occupancyTable;
+          //   this.entranceTable = data.entranceTable;
+          //   this.exitTable = data.exitTable;
 
-            // this.normalizedOccupancyStatistics = this.normalize(this.occupancyTable);
-            // this.normalizedEntranceStatistics = this.normalize(this.entranceTable);
-            // this.normalizedExitStatistics = this.normalize(this.exitTable);
+          //   localStorage.setItem('occupancyTable', JSON.stringify(data.occupancyTable));
+          //   localStorage.setItem('entranceTable', JSON.stringify(data.entranceTable));
+          //   localStorage.setItem('exitTable', JSON.stringify(data.exitTable));
 
-            // this.selectedStatistics = this.normalizedOccupancyStatistics;
-          } else {
+          //   this.normalizedOccupancyStatistics = this.normalize(this.occupancyTable);
+          //   this.normalizedEntranceStatistics = this.normalize(this.entranceTable);
+          //   this.normalizedExitStatistics = this.normalize(this.exitTable);
+
+          //   this.selectedStatistics = this.normalizedOccupancyStatistics;
+          // } 
+          else {
             console.error('Unexpected response format:', data);
           }
         },

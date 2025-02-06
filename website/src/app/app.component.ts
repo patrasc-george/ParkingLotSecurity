@@ -13,7 +13,7 @@ export class AppComponent {
   ngOnInit(): void {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        window.scrollTo(0, 0); // Scroll la partea de sus a paginii
+        window.scrollTo(0, 0);
       }
     });
   }

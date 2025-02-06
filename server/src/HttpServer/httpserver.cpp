@@ -26,7 +26,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handlePost(request, response);
+		this->post(request, response);
 		});
 
 	server.Post("/api/createAccount", [this](const httplib::Request& request, httplib::Response& response) {
@@ -34,7 +34,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleCreateAccount(request, response);
+		this->createAccount(request, response);
 		});
 
 	server.Post("/api/validateViaEmail", [this](const httplib::Request& request, httplib::Response& response) {
@@ -42,7 +42,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleValidateViaEmail(request, response);
+		this->validateViaEmail(request, response);
 		});
 
 	server.Post("/api/validateViaSMS", [this](const httplib::Request& request, httplib::Response& response) {
@@ -50,7 +50,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleValidateViaSMS(request, response);
+		this->validateViaSMS(request, response);
 		});
 
 	server.Post("/api/resendValidateSMS", [this](const httplib::Request& request, httplib::Response& response) {
@@ -58,7 +58,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleResendValidateSMS(request, response);
+		this->resendValidateSMS(request, response);
 		});
 
 	server.Post("/api/validate", [this](const httplib::Request& request, httplib::Response& response) {
@@ -66,7 +66,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleValidate(request, response);
+		this->validate(request, response);
 		});
 
 	server.Post("/api/login", [this](const httplib::Request& request, httplib::Response& response) {
@@ -74,7 +74,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleLogin(request, response);
+		this->login(request, response);
 		});
 
 	server.Post("/api/recoverPasswordViaEmail", [this](const httplib::Request& request, httplib::Response& response) {
@@ -82,7 +82,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleRecoverPasswordViaEmail(request, response);
+		this->recoverPasswordViaEmail(request, response);
 		});
 
 	server.Post("/api/recoverPasswordViaSMS", [this](const httplib::Request& request, httplib::Response& response) {
@@ -90,7 +90,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleRecoverPasswordViaSMS(request, response);
+		this->recoverPasswordViaSMS(request, response);
 		});
 
 	server.Post("/api/resendRecoverPassword", [this](const httplib::Request& request, httplib::Response& response) {
@@ -98,7 +98,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleResendRecoverPassword(request, response);
+		this->resendRecoverPassword(request, response);
 		});
 
 	server.Post("/api/verifyResetPasswordToken", [this](const httplib::Request& request, httplib::Response& response) {
@@ -106,7 +106,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleVerifyResetPasswordToken(request, response);
+		this->verifyResetPasswordToken(request, response);
 		});
 
 	server.Post("/api/resetPassword", [this](const httplib::Request& request, httplib::Response& response) {
@@ -114,7 +114,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleResetPassword(request, response);
+		this->resetPassword(request, response);
 		});
 
 	server.Post("/api/getSubscriptionVehicles", [this](const httplib::Request& request, httplib::Response& response) {
@@ -122,7 +122,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleGetSubscriptionVehicles(request, response);
+		this->getSubscriptionVehicles(request, response);
 		});
 
 	server.Post("/api/addSubscription", [this](const httplib::Request& request, httplib::Response& response) {
@@ -130,7 +130,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleAddSubscription(request, response);
+		this->addSubscription(request, response);
 		});
 
 	server.Post("/api/deleteSubscription", [this](const httplib::Request& request, httplib::Response& response) {
@@ -138,7 +138,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleDeleteSubscription(request, response);
+		this->deleteSubscription(request, response);
 		});
 
 	server.Post("/api/getVehicleHistory", [this](const httplib::Request& request, httplib::Response& response) {
@@ -146,7 +146,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleGetVehicleHistory(request, response);
+		this->getVehicleHistory(request, response);
 		});
 
 	server.Post("/api/addVehicle", [this](const httplib::Request& request, httplib::Response& response) {
@@ -154,7 +154,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleAddVehicle(request, response);
+		this->addVehicle(request, response);
 		});
 
 	server.Post("/api/deleteVehicle", [this](const httplib::Request& request, httplib::Response& response) {
@@ -162,7 +162,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleDeleteVehicle(request, response);
+		this->deleteVehicle(request, response);
 		});
 
 	server.Post("/api/updateAccountInformation", [this](const httplib::Request& request, httplib::Response& response) {
@@ -170,7 +170,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleUpdateAccountInformation(request, response);
+		this->updateAccountInformation(request, response);
 		});
 
 	server.Post("/api/updateAccount", [this](const httplib::Request& request, httplib::Response& response) {
@@ -178,7 +178,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleUpdateAccount(request, response);
+		this->updateAccount(request, response);
 		});
 
 	server.Post("/api/validateUpdateViaEmail", [this](const httplib::Request& request, httplib::Response& response) {
@@ -186,7 +186,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleValidateUpdateViaEmail(request, response);
+		this->validateUpdateViaEmail(request, response);
 		});
 
 	server.Post("/api/validateUpdateViaSMS", [this](const httplib::Request& request, httplib::Response& response) {
@@ -194,7 +194,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleValidateUpdateViaSMS(request, response);
+		this->validateUpdateViaSMS(request, response);
 		});
 
 	server.Post("/api/resendValidateUpdateSMS", [this](const httplib::Request& request, httplib::Response& response) {
@@ -202,7 +202,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleResendValidateUpdateSMS(request, response);
+		this->resendValidateUpdateSMS(request, response);
 		});
 
 	server.Post("/api/validateUpdate", [this](const httplib::Request& request, httplib::Response& response) {
@@ -210,7 +210,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleValidateUpdate(request, response);
+		this->validateUpdate(request, response);
 		});
 
 	server.Post("/api/contact", [this](const httplib::Request& request, httplib::Response& response) {
@@ -218,7 +218,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleContact(request, response);
+		this->contact(request, response);
 		});
 
 	server.Post("/api/subscribeNewsletter", [this](const httplib::Request& request, httplib::Response& response) {
@@ -226,7 +226,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleSubscribeNewsletter(request, response);
+		this->subscribeNewsletter(request, response);
 		});
 
 	server.Post("/api/unsubscribeNewsletter", [this](const httplib::Request& request, httplib::Response& response) {
@@ -234,7 +234,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleUnsubscribeNewsletter(request, response);
+		this->unsubscribeNewsletter(request, response);
 		});
 
 	server.Post("/api/getAdmin", [this](const httplib::Request& request, httplib::Response& response) {
@@ -242,7 +242,7 @@ HttpServer::HttpServer()
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		this->handleGetAdmin(request, response);
+		this->getAdmin(request, response);
 		});
 
 	server.listen("0.0.0.0", 8080);
@@ -306,7 +306,7 @@ void HttpServer::sendSMS(const std::string& phone, const std::string& content)
 	std::cout << " ";
 }
 
-void HttpServer::handlePost(const httplib::Request& request, httplib::Response& response)
+void HttpServer::post(const httplib::Request& request, httplib::Response& response)
 {
 	std::string licensePlate;
 	std::string dateTime;
@@ -345,7 +345,7 @@ void HttpServer::handlePost(const httplib::Request& request, httplib::Response& 
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleCreateAccount(const httplib::Request& request, httplib::Response& response)
+void HttpServer::createAccount(const httplib::Request& request, httplib::Response& response)
 {
 	std::string name;
 	std::string lastName;
@@ -405,7 +405,7 @@ void HttpServer::handleCreateAccount(const httplib::Request& request, httplib::R
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleValidateViaEmail(const httplib::Request& request, httplib::Response& response)
+void HttpServer::validateViaEmail(const httplib::Request& request, httplib::Response& response)
 {
 	std::string name;
 	std::string	email;
@@ -434,7 +434,7 @@ void HttpServer::handleValidateViaEmail(const httplib::Request& request, httplib
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleValidateViaSMS(const httplib::Request& request, httplib::Response& response)
+void HttpServer::validateViaSMS(const httplib::Request& request, httplib::Response& response)
 {
 	std::string	email;
 	std::string phone;
@@ -453,7 +453,7 @@ void HttpServer::handleValidateViaSMS(const httplib::Request& request, httplib::
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleResendValidateSMS(const httplib::Request& request, httplib::Response& response)
+void HttpServer::resendValidateSMS(const httplib::Request& request, httplib::Response& response)
 {
 	std::string	email;
 	std::string phone;
@@ -470,7 +470,7 @@ void HttpServer::handleResendValidateSMS(const httplib::Request& request, httpli
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleValidate(const httplib::Request& request, httplib::Response& response)
+void HttpServer::validate(const httplib::Request& request, httplib::Response& response)
 {
 	std::string token;
 
@@ -484,7 +484,7 @@ void HttpServer::handleValidate(const httplib::Request& request, httplib::Respon
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleLogin(const httplib::Request& request, httplib::Response& response)
+void HttpServer::login(const httplib::Request& request, httplib::Response& response)
 {
 	std::string input;
 	std::string password;
@@ -542,7 +542,7 @@ void HttpServer::handleLogin(const httplib::Request& request, httplib::Response&
 	response.set_content("{\"success\": true, \"name\": \"" + name + "\", \"lastName\": \"" + lastName + "\", \"email\": \"" + email + "\", \"phone\": \"" + phone + "\", \"subscriptionsTable\": " + subscriptionsJson + "}", "application/json");
 }
 
-void HttpServer::handleRecoverPasswordViaEmail(const httplib::Request& request, httplib::Response& response)
+void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 
@@ -575,7 +575,7 @@ void HttpServer::handleRecoverPasswordViaEmail(const httplib::Request& request, 
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleRecoverPasswordViaSMS(const httplib::Request& request, httplib::Response& response)
+void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib::Response& response)
 {
 	std::string phone;
 
@@ -600,7 +600,7 @@ void HttpServer::handleRecoverPasswordViaSMS(const httplib::Request& request, ht
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleResendRecoverPassword(const httplib::Request& request, httplib::Response& response)
+void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib::Response& response)
 {
 	std::string phone;
 
@@ -623,7 +623,7 @@ void HttpServer::handleResendRecoverPassword(const httplib::Request& request, ht
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleVerifyResetPasswordToken(const httplib::Request& request, httplib::Response& response)
+void HttpServer::verifyResetPasswordToken(const httplib::Request& request, httplib::Response& response)
 {
 	std::string token;
 
@@ -639,7 +639,7 @@ void HttpServer::handleVerifyResetPasswordToken(const httplib::Request& request,
 
 }
 
-void HttpServer::handleResetPassword(const httplib::Request& request, httplib::Response& response)
+void HttpServer::resetPassword(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 	std::string newPassword;
@@ -656,7 +656,7 @@ void HttpServer::handleResetPassword(const httplib::Request& request, httplib::R
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleGetSubscriptionVehicles(const httplib::Request& request, httplib::Response& response)
+void HttpServer::getSubscriptionVehicles(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 	std::string subscriptionName;
@@ -690,7 +690,7 @@ void HttpServer::handleGetSubscriptionVehicles(const httplib::Request& request, 
 	response.set_content("{\"success\": true, \"vehiclesTable\": " + vehiclesJson + "}", "application/json");
 }
 
-void HttpServer::handleAddSubscription(const httplib::Request& request, httplib::Response& response)
+void HttpServer::addSubscription(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 	std::string subscriptionName;
@@ -709,7 +709,7 @@ void HttpServer::handleAddSubscription(const httplib::Request& request, httplib:
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleDeleteSubscription(const httplib::Request& request, httplib::Response& response)
+void HttpServer::deleteSubscription(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 	std::string subscriptionName;
@@ -728,7 +728,7 @@ void HttpServer::handleDeleteSubscription(const httplib::Request& request, httpl
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleGetVehicleHistory(const httplib::Request& request, httplib::Response& response)
+void HttpServer::getVehicleHistory(const httplib::Request& request, httplib::Response& response)
 {
 	std::string licensePlate;
 
@@ -760,7 +760,7 @@ void HttpServer::handleGetVehicleHistory(const httplib::Request& request, httpli
 	response.set_content("{\"success\": true, \"history\": " + historyJson + ", \"totalTimeParked\": \"" + totalTimeParked + "\", \"payment\": " + std::to_string(payment) + "}", "application/json");
 }
 
-void HttpServer::handleAddVehicle(const httplib::Request& request, httplib::Response& response)
+void HttpServer::addVehicle(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 	std::string subscriptionName;
@@ -797,7 +797,7 @@ void HttpServer::handleAddVehicle(const httplib::Request& request, httplib::Resp
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleDeleteVehicle(const httplib::Request& request, httplib::Response& response)
+void HttpServer::deleteVehicle(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 	std::string subscriptionName;
@@ -822,7 +822,7 @@ void HttpServer::handleDeleteVehicle(const httplib::Request& request, httplib::R
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleUpdateAccountInformation(const httplib::Request& request, httplib::Response& response)
+void HttpServer::updateAccountInformation(const httplib::Request& request, httplib::Response& response)
 {
 	std::string newName;
 	std::string newLastName;
@@ -854,7 +854,7 @@ void HttpServer::handleUpdateAccountInformation(const httplib::Request& request,
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleUpdateAccount(const httplib::Request& request, httplib::Response& response)
+void HttpServer::updateAccount(const httplib::Request& request, httplib::Response& response)
 {
 	std::string newEmail;
 	std::string newPassword;
@@ -898,7 +898,7 @@ void HttpServer::handleUpdateAccount(const httplib::Request& request, httplib::R
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleValidateUpdateViaEmail(const httplib::Request& request, httplib::Response& response)
+void HttpServer::validateUpdateViaEmail(const httplib::Request& request, httplib::Response& response)
 {
 	std::string name;
 	std::string	email;
@@ -927,7 +927,7 @@ void HttpServer::handleValidateUpdateViaEmail(const httplib::Request& request, h
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleValidateUpdateViaSMS(const httplib::Request& request, httplib::Response& response)
+void HttpServer::validateUpdateViaSMS(const httplib::Request& request, httplib::Response& response)
 {
 	std::string	email;
 	std::string phone;
@@ -946,7 +946,7 @@ void HttpServer::handleValidateUpdateViaSMS(const httplib::Request& request, htt
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleResendValidateUpdateSMS(const httplib::Request& request, httplib::Response& response)
+void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httplib::Response& response)
 {
 	std::string	email;
 	std::string phone;
@@ -963,7 +963,7 @@ void HttpServer::handleResendValidateUpdateSMS(const httplib::Request& request, 
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleValidateUpdate(const httplib::Request& request, httplib::Response& response)
+void HttpServer::validateUpdate(const httplib::Request& request, httplib::Response& response)
 {
 	std::string token;
 
@@ -977,7 +977,7 @@ void HttpServer::handleValidateUpdate(const httplib::Request& request, httplib::
 		response.set_content(R"({"success": false})", "application/json");
 }
 
-void HttpServer::handleContact(const httplib::Request& request, httplib::Response& response)
+void HttpServer::contact(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 	std::string subject;
@@ -996,25 +996,25 @@ void HttpServer::handleContact(const httplib::Request& request, httplib::Respons
 
 	std::string content;
 	if (account != nullptr)
-		content = "Dear " + account->getName() + ",\n\n";
+		content = "Stimata/Stimate, " + account->getName() + ",\n\n";
 	else
-		content = "Dear customer,\n\n";
+		content = "Stimata/Stimate client,\n\n";
 
 	content +=
-		"Thank you for reaching out to us. This is an automated response to confirm that we have received your message.\n\n"
-		"We will get back to you as soon as possible with a reply.\n\n"
-		"Below is the message you submitted:\n\n"
-		"Subject: " + subject + "\n\n"
-		"Message:\n" + contactMessage + "\n\n"
-		"If you have any further questions, feel free to contact us again.\n\n"
-		"Best regards,\n"
-		"The ParkPass Team";
+		"Va multumim ca ne-ati contactat. Acesta este un raspuns automat pentru a confirma ca am primit mesajul dumneavoastra.\n\n"
+		"Va vom raspunde cat mai curand posibil.\n\n"
+		"Mai jos este mesajul pe care l-ati trimis:\n\n"
+		"Subiect: " + subject + "\n\n"
+		"Mesaj:\n" + contactMessage + "\n\n"
+		"Daca aveti intrebari suplimentare, nu ezitati sa ne contactati din nou.\n\n"
+		"Cu respect,\n"
+		"Echipa ParkPass";
 
 	sendEmail(email, subject, content);
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleSubscribeNewsletter(const httplib::Request& request, httplib::Response& response)
+void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 
@@ -1034,7 +1034,7 @@ void HttpServer::handleSubscribeNewsletter(const httplib::Request& request, http
 		"Vei primi periodic informatii utile despre serviciile noastre, dar si oferte speciale, pentru a-ti face parcarea cat mai simpla si rapida.\n\n"
 		"Daca ai intrebari sau sugestii, nu ezita sa ne contactezi. Suntem aici pentru tine!\n\n"
 		"Iti multumim inca o data pentru incredere si te asteptam sa descoperi mai multe la ParkPass.\n\n"
-		"Cu drag,\n"
+		"Cu respect,\n"
 		"Echipa ParkPass";
 
 	sendEmail(email, subject, content);
@@ -1042,7 +1042,7 @@ void HttpServer::handleSubscribeNewsletter(const httplib::Request& request, http
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleUnsubscribeNewsletter(const httplib::Request& request, httplib::Response& response)
+void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib::Response& response)
 {
 	std::string email;
 
@@ -1070,7 +1070,7 @@ void HttpServer::handleUnsubscribeNewsletter(const httplib::Request& request, ht
 	response.set_content(R"({"success": true})", "application/json");
 }
 
-void HttpServer::handleGetAdmin(const httplib::Request& request, httplib::Response& response)
+void HttpServer::getAdmin(const httplib::Request& request, httplib::Response& response)
 {
 	std::unordered_set<std::string> emails = subscriptionManager.getEmails();
 	int index = 0;

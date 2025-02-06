@@ -226,7 +226,6 @@ export class SubscriptionComponent implements OnInit {
 
             const cells = Array.from(row.children) as HTMLTableCellElement[];
             if (cells.length >= 6) {
-              // Actualizează celulele 1-6 cu noile date
               cells[1].textContent = firstHistoryEntry[0] || '';
               cells[2].textContent = firstHistoryEntry[1] || '';
               cells[3].textContent = firstHistoryEntry[2] || '';
@@ -234,7 +233,6 @@ export class SubscriptionComponent implements OnInit {
               cells[5].textContent = totalTimeParked || '';
               cells[6].textContent = payment || '';
 
-              // Actualizează statutul vehiculului în celula 7
               const statusCell = cells[7];
               if (firstHistoryEntry[1]) {
                 statusCell.textContent = 'Inactive';
@@ -244,13 +242,10 @@ export class SubscriptionComponent implements OnInit {
                 statusCell.style.color = 'green';
               }
 
-              // Creează o copie a vehiclesTable
               const vehiclesTableCopy = [...this.vehiclesTable];
 
-              // Căutăm indexul vehiculului în copie
               const vehicleIndex = vehiclesTableCopy.findIndex(vehicle => vehicle[0] === licensePlate);
               if (vehicleIndex !== -1) {
-                // Modificăm vehiculul în copie
                 vehiclesTableCopy[vehicleIndex] = [
                   licensePlate,
                   firstHistoryEntry[0] || '',
@@ -262,7 +257,6 @@ export class SubscriptionComponent implements OnInit {
                   statusCell.textContent
                 ];
 
-                // Salvează copia modificată în localStorage
                 localStorage.setItem('vehiclesTable', JSON.stringify(vehiclesTableCopy));
               }
             }

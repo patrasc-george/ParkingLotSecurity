@@ -39,61 +39,61 @@ private:
 
 	void sendSMS(const std::string& phone, const std::string& content);
 
-	void handlePost(const httplib::Request& request, httplib::Response& response);
+	void post(const httplib::Request& request, httplib::Response& response);
 
-	void handleCreateAccount(const httplib::Request& request, httplib::Response& response);
+	void createAccount(const httplib::Request& request, httplib::Response& response);
 
-	void handleValidateViaEmail(const httplib::Request& request, httplib::Response& response);
+	void validateViaEmail(const httplib::Request& request, httplib::Response& response);
 
-	void handleValidateViaSMS(const httplib::Request& request, httplib::Response& response);
+	void validateViaSMS(const httplib::Request& request, httplib::Response& response);
 
-	void handleResendValidateSMS(const httplib::Request& request, httplib::Response& response);
+	void resendValidateSMS(const httplib::Request& request, httplib::Response& response);
 
-	void handleValidate(const httplib::Request& request, httplib::Response& response);
+	void validate(const httplib::Request& request, httplib::Response& response);
 
-	void handleLogin(const httplib::Request& request, httplib::Response& response);
+	void login(const httplib::Request& request, httplib::Response& response);
 
-	void handleGetAdmin(const httplib::Request& request, httplib::Response& response);
+	void getAdmin(const httplib::Request& request, httplib::Response& response);
 
-	void handleRecoverPasswordViaEmail(const httplib::Request& request, httplib::Response& response);
+	void recoverPasswordViaEmail(const httplib::Request& request, httplib::Response& response);
 
-	void handleRecoverPasswordViaSMS(const httplib::Request& request, httplib::Response& response);
+	void recoverPasswordViaSMS(const httplib::Request& request, httplib::Response& response);
 
-	void handleVerifyResetPasswordToken(const httplib::Request& request, httplib::Response& response);
+	void verifyResetPasswordToken(const httplib::Request& request, httplib::Response& response);
 
-	void handleResetPassword(const httplib::Request& request, httplib::Response& response);
+	void resetPassword(const httplib::Request& request, httplib::Response& response);
 
-	void handleResendRecoverPassword(const httplib::Request& request, httplib::Response& response);
+	void resendRecoverPassword(const httplib::Request& request, httplib::Response& response);
 
-	void handleGetSubscriptionVehicles(const httplib::Request& request, httplib::Response& response);
+	void getSubscriptionVehicles(const httplib::Request& request, httplib::Response& response);
 
-	void handleAddSubscription(const httplib::Request& request, httplib::Response& response);
+	void addSubscription(const httplib::Request& request, httplib::Response& response);
 
-	void handleDeleteSubscription(const httplib::Request& request, httplib::Response& response);
+	void deleteSubscription(const httplib::Request& request, httplib::Response& response);
 
-	void handleGetVehicleHistory(const httplib::Request& request, httplib::Response& response);
+	void getVehicleHistory(const httplib::Request& request, httplib::Response& response);
 
-	void handleAddVehicle(const httplib::Request& request, httplib::Response& response);
+	void addVehicle(const httplib::Request& request, httplib::Response& response);
 
-	void handleDeleteVehicle(const httplib::Request& request, httplib::Response& response);
+	void deleteVehicle(const httplib::Request& request, httplib::Response& response);
 
-	void handleUpdateAccountInformation(const httplib::Request& request, httplib::Response& response);
+	void updateAccountInformation(const httplib::Request& request, httplib::Response& response);
 
-	void handleUpdateAccount(const httplib::Request& request, httplib::Response& response);
+	void updateAccount(const httplib::Request& request, httplib::Response& response);
 
-	void handleValidateUpdateViaEmail(const httplib::Request& request, httplib::Response& response);
+	void validateUpdateViaEmail(const httplib::Request& request, httplib::Response& response);
 
-	void handleValidateUpdateViaSMS(const httplib::Request& request, httplib::Response& response);
+	void validateUpdateViaSMS(const httplib::Request& request, httplib::Response& response);
 
-	void handleResendValidateUpdateSMS(const httplib::Request& request, httplib::Response& response);
+	void resendValidateUpdateSMS(const httplib::Request& request, httplib::Response& response);
 
-	void handleValidateUpdate(const httplib::Request& request, httplib::Response& response);
+	void validateUpdate(const httplib::Request& request, httplib::Response& response);
 
-	void handleContact(const httplib::Request& request, httplib::Response& response);
+	void contact(const httplib::Request& request, httplib::Response& response);
 
-	void handleSubscribeNewsletter(const httplib::Request& request, httplib::Response& response);
+	void subscribeNewsletter(const httplib::Request& request, httplib::Response& response);
 
-	void handleUnsubscribeNewsletter(const httplib::Request& request, httplib::Response& response);
+	void unsubscribeNewsletter(const httplib::Request& request, httplib::Response& response);
 
 private:
 	std::thread thread;

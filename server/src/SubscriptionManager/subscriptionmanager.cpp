@@ -279,7 +279,6 @@ Subscription* SubscriptionManager::getSubscription(const Account& account, const
 	return nullptr;
 }
 
-
 std::vector<std::vector<std::string>> SubscriptionManager::getSubscriptionVehicles(const Subscription& subscription)
 {
 	std::vector<std::vector<std::string>> subscribedVehicles(subscription.getVehicles().size());

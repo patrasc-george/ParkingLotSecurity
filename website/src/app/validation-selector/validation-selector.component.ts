@@ -87,14 +87,16 @@ export class ValidationSelectorComponent implements OnInit {
       .subscribe();
   }
 
-  // redirectToSubscriptions(event: Event) {
-  //   event.preventDefault();
-  //   if (this.isAuthenticated) {
-  //     this.router.navigate(['/subscriptions']);
-  //   } else {
-  //     this.router.navigate(['/']);
-  //   }
-  // }
+  redirectToSubscriptions(event: Event): void {
+    event.preventDefault();
+    if (localStorage.getItem('fromAccount') == 'true') {
+      localStorage.setItem('fromAccount', 'false');
+      this.router.navigate(['/subscriptions']);
+    } else if (localStorage.getItem('fromCreateSubscription') == 'true') {
+      localStorage.setItem('fromCreateSubscription', 'false');
+      this.router.navigate(['/']);
+    }
+  }
 
   onValidate(method: 'email' | 'sms'): void {
     if (method === 'email') {

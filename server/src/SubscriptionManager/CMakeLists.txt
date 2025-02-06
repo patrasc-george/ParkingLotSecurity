@@ -9,10 +9,10 @@ file(GLOB SOURCE_FILES "*.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 
-add_dependencies(${PROJECT_NAME} DatabaseManager)
-
 find_package(PostgreSQL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+
+add_dependencies(${PROJECT_NAME} DatabaseManager)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 	${PostgreSQL_INCLUDE_DIRS}

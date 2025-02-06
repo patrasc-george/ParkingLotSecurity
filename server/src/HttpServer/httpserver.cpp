@@ -3,6 +3,8 @@
 #include "httpserver.h"
 #include "qrcodedetection.h"
 
+#include <nlohmann/json.hpp>
+
 HttpServer::HttpServer()
 {
 	thread = std::thread([this]()
@@ -308,6 +310,7 @@ void HttpServer::sendSMS(const std::string& phone, const std::string& content)
 
 void HttpServer::post(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string licensePlate;
 	std::string dateTime;
 
@@ -320,7 +323,12 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 
 		if (!subscriptionManager.pay(data, licensePlate, dateTime))
 		{
-			response.set_content(R"({"success": false, "message": "The vehicle was not found. Please upload the QR code."})", "application/json");
+			responseJson = {
+				{"success", false},
+				{"message", "The vehicle was not found. Please upload the QR code."}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
 			return;
 		}
 	}
@@ -334,19 +342,40 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 		std::string ticket = qr.decodeQR(imageData);
 		if (!subscriptionManager.pay(ticket, licensePlate, dateTime, true))
 		{
-			response.set_content(R"({"success": false, "message": "The vehicle was not found. Please upload the QR code again."})", "application/json");
+			responseJson = {
+				{"success", false},
+				{"message", "The vehicle was not found. Please upload the QR code again."}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
 			return;
 		}
 	}
 
 	if (!licensePlate.empty() && !dateTime.empty())
-		response.set_content("{ \"success\": true, \"message\": \"The vehicle with license plate number " + licensePlate + " was found. The parking fee has been paid. The vehicle entered the parking lot on " + dateTime + ".\", \"licensePlate\": \"" + licensePlate + "\", \"dateTime\": \"" + dateTime + "\" }", "application/json");
+	{
+		responseJson = {
+			{"success", true},
+			{"message", "The vehicle with license plate number " + licensePlate + " was found. The parking fee has been paid. The vehicle entered the parking lot on " + dateTime + "."},
+			{"licensePlate", licensePlate},
+			{"dateTime", dateTime}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::createAccount(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string name;
 	std::string lastName;
 	std::string	email;
@@ -374,7 +403,11 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 	auto recaptchaResponse = recaptchaClient.Post("/recaptcha/api/siteverify", payload, "application/x-www-form-urlencoded");
 	if (!recaptchaResponse || recaptchaResponse->status != 200)
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
@@ -385,28 +418,48 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 
 	if (!captchaSuccess)
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
 	if (subscriptionManager.getAccountByEmail(email) != nullptr)
 	{
-		response.set_content(R"({"success": false, "message": "An account with this email address already exists."})", "application/json");
+		responseJson = {
+			{"success", false},
+			{"message", "An account with this email address already exists."}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
 	if (subscriptionManager.getAccountByPhone(phone) != nullptr)
 	{
-		response.set_content(R"({"success": false, "message": "An account with this phone number already exists."})", "application/json");
+		responseJson = {
+			{"success", false},
+			{"message", "An account with this phone number already exists."}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
 	subscriptionManager.addTempAccount(name, lastName, email, password, phone);
-	response.set_content(R"({"success": true})", "application/json");
+
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::validateViaEmail(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string name;
 	std::string	email;
 
@@ -431,11 +484,16 @@ void HttpServer::validateViaEmail(const httplib::Request& request, httplib::Resp
 		"Echipa ParkPass";
 	sendEmail(email, subject, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::validateViaSMS(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string	email;
 	std::string phone;
 
@@ -450,11 +508,16 @@ void HttpServer::validateViaSMS(const httplib::Request& request, httplib::Respon
 	std::string content = "Codul de validare pentru contul tau ParkPass este: " + token;
 	sendSMS(phone, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::resendValidateSMS(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string	email;
 	std::string phone;
 
@@ -467,11 +530,16 @@ void HttpServer::resendValidateSMS(const httplib::Request& request, httplib::Res
 	std::string content = "Codul de validare pentru contul tau ParkPass este: " + token;
 	sendSMS(phone, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::validate(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string token;
 
 	if (request.has_param("token"))
@@ -479,13 +547,27 @@ void HttpServer::validate(const httplib::Request& request, httplib::Response& re
 
 	std::string email = subscriptionManager.addAccount(token);
 	if (!email.empty())
-		response.set_content("{\"success\": true, \"email\": \"" + email + "\"}", "application/json");
+	{
+		responseJson = {
+			{"success", true},
+			{"email", email}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::login(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string input;
 	std::string password;
 	bool fromRedirect = false;
@@ -503,9 +585,21 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 	if (input == "admin")
 	{
 		if (subscriptionManager.verifyAdminCredentials(password))
-			response.set_content(R"({"success": true})", "application/json");
+		{
+			responseJson = {
+				{"success", true}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
+		}
 		else
-			response.set_content(R"({"success": false})", "application/json");
+		{
+			responseJson = {
+				{"success", false}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
+		}
 
 		return;
 	}
@@ -518,7 +612,11 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 		account = subscriptionManager.verifyCredentials(input, password);
 		if (account == nullptr)
 		{
-			response.set_content(R"({"success": false})", "application/json");
+			responseJson = {
+				{"success", false}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
 			return;
 		}
 	}
@@ -530,20 +628,26 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 
 	std::vector<Subscription>* subscriptions = subscriptionManager.getSubscriptions(*account);
 
-	std::string subscriptionsJson = "[";
-	for (int i = 0; i < subscriptions->size(); i++)
-	{
-		subscriptionsJson += "[\"" + subscriptions->at(i).getName() + "\"]";
-		if (i < subscriptions->size() - 1)
-			subscriptionsJson += ",";
-	}
-	subscriptionsJson += "]";
+	nlohmann::json subscriptionsJson = nlohmann::json::array();
 
-	response.set_content("{\"success\": true, \"name\": \"" + name + "\", \"lastName\": \"" + lastName + "\", \"email\": \"" + email + "\", \"phone\": \"" + phone + "\", \"subscriptionsTable\": " + subscriptionsJson + "}", "application/json");
+	for (const auto& subscription : *subscriptions)
+		subscriptionsJson.push_back(nlohmann::json::array({ subscription.getName() }));
+
+	responseJson = {
+		{"success", true},
+		{"name", name},
+		{"lastName", lastName},
+		{"email", email},
+		{"phone", phone},
+		{"subscriptionsTable", subscriptionsJson}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 
 	if (request.has_param("email"))
@@ -553,7 +657,11 @@ void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httpli
 
 	if (account == nullptr)
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
@@ -572,11 +680,16 @@ void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httpli
 		"Echipa ParkPass";
 	sendEmail(email, subject, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string phone;
 
 	if (request.has_param("phone"))
@@ -586,7 +699,11 @@ void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib:
 
 	if (account == nullptr)
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
@@ -597,11 +714,16 @@ void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib:
 	std::string content = "Codul de resetare a parolei pentru contul tau ParkPass este: " + token;
 	sendSMS(phone, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string phone;
 
 	if (request.has_param("phone"))
@@ -611,7 +733,11 @@ void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib:
 
 	if (account == nullptr)
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
@@ -620,11 +746,16 @@ void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib:
 	std::string content = "Codul de resetare a parolei pentru contul tau ParkPass este: " + token;
 	sendSMS(phone, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::verifyResetPasswordToken(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string token;
 
 	if (request.has_param("token"))
@@ -633,14 +764,27 @@ void HttpServer::verifyResetPasswordToken(const httplib::Request& request, httpl
 	std::string email = subscriptionManager.verifyTempRecoveredPasswordsToken(token);
 
 	if (!email.empty())
-		response.set_content("{\"success\": true, \"email\": \"" + email + "\"}", "application/json");
-	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", true},
+			{"email", email}
+		};
 
+		response.set_content(responseJson.dump(), "application/json");
+	}
+	else
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::resetPassword(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 	std::string newPassword;
 
@@ -651,13 +795,26 @@ void HttpServer::resetPassword(const httplib::Request& request, httplib::Respons
 		newPassword = request.get_param_value("newPassword");
 
 	if (subscriptionManager.updateAccountPassword(email, newPassword))
-		response.set_content(R"({"success": true})", "application/json");
+	{
+		responseJson = {
+			{"success", true}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::getSubscriptionVehicles(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 	std::string subscriptionName;
 
@@ -671,27 +828,28 @@ void HttpServer::getSubscriptionVehicles(const httplib::Request& request, httpli
 	Subscription* subscription = subscriptionManager.getSubscription(*account, subscriptionName);
 	std::vector<std::vector<std::string>> vehiclesTable = subscriptionManager.getSubscriptionVehicles(*subscription);
 
-	std::string vehiclesJson = "[";
-	for (int i = 0; i < vehiclesTable.size(); i++)
+	nlohmann::json vehiclesJson = nlohmann::json::array();
+	for (const auto& vehicle : vehiclesTable)
 	{
-		vehiclesJson += "[";
-		for (int j = 0; j < vehiclesTable[i].size(); j++)
-		{
-			vehiclesJson += "\"" + vehiclesTable[i][j] + "\"";
-			if (j < vehiclesTable[i].size() - 1)
-				vehiclesJson += ",";
-		}
-		vehiclesJson += "]";
-		if (i < vehiclesTable.size() - 1)
-			vehiclesJson += ",";
-	}
-	vehiclesJson += "]";
+		nlohmann::json vehicleArray = nlohmann::json::array();
 
-	response.set_content("{\"success\": true, \"vehiclesTable\": " + vehiclesJson + "}", "application/json");
+		for (const auto& data : vehicle)
+			vehicleArray.push_back(data);
+
+		vehiclesJson.push_back(vehicleArray);
+	}
+
+	responseJson = {
+		{"success", true},
+		{"vehiclesTable", vehiclesJson}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::addSubscription(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 	std::string subscriptionName;
 
@@ -704,13 +862,26 @@ void HttpServer::addSubscription(const httplib::Request& request, httplib::Respo
 	Account* account = subscriptionManager.getAccountByEmail(email);
 
 	if (subscriptionManager.addSubscription(*account, subscriptionName))
-		response.set_content(R"({"success": true})", "application/json");
+	{
+		responseJson = {
+			{"success", true}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::deleteSubscription(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 	std::string subscriptionName;
 
@@ -723,13 +894,26 @@ void HttpServer::deleteSubscription(const httplib::Request& request, httplib::Re
 	Account* account = subscriptionManager.getAccountByEmail(email);
 
 	if (subscriptionManager.deleteSubscription(*account, subscriptionName))
-		response.set_content(R"({"success": true})", "application/json");
+	{
+		responseJson = {
+			{"success", true}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::getVehicleHistory(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string licensePlate;
 
 	if (request.has_param("licensePlate"))
@@ -739,29 +923,31 @@ void HttpServer::getVehicleHistory(const httplib::Request& request, httplib::Res
 	int payment;
 	std::vector<std::vector<std::string>> history = subscriptionManager.getVehicleHistory(licensePlate, totalTimeParked, payment);
 
-	std::string historyJson = "[";
-	for (int i = 0; i < history.size(); ++i)
+	nlohmann::json historyJson = nlohmann::json::array();
+
+	for (const auto& data : history)
 	{
-		historyJson += "[";
+		nlohmann::json historyArray = nlohmann::json::array();
 
-		for (int j = 0; j < history[i].size(); ++j)
-		{
-			historyJson += "\"" + history[i][j] + "\"";
-			if (j < history[i].size() - 1)
-				historyJson += ",";
-		}
+		for (const auto& value : data)
+			historyArray.push_back(value);
 
-		historyJson += "]";
-		if (i < history.size() - 1)
-			historyJson += ",";
+		historyJson.push_back(historyArray);
 	}
-	historyJson += "]";
 
-	response.set_content("{\"success\": true, \"history\": " + historyJson + ", \"totalTimeParked\": \"" + totalTimeParked + "\", \"payment\": " + std::to_string(payment) + "}", "application/json");
+	responseJson = {
+		{"success", true},
+		{"history", historyJson},
+		{"totalTimeParked", totalTimeParked},
+		{"payment", std::to_string(payment)}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::addVehicle(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 	std::string subscriptionName;
 	std::string licensePlate;
@@ -782,23 +968,39 @@ void HttpServer::addVehicle(const httplib::Request& request, httplib::Response& 
 	if (subscriptionManager.addVehicle(*account, *subscription, licensePlate))
 	{
 		std::vector<std::vector<std::string>> vehiclesTable = subscriptionManager.getSubscriptionVehicles(*subscription);
-		std::string vehiclesJson = "[[";
-		for (int i = 0; i < vehiclesTable[vehiclesTable.size() - 1].size(); i++)
-		{
-			vehiclesJson += "\"" + vehiclesTable[vehiclesTable.size() - 1][i] + "\"";
-			if (i < vehiclesTable[vehiclesTable.size() - 1].size() - 1)
-				vehiclesJson += ",";
-		}
-		vehiclesJson += "]]";
+		nlohmann::json vehiclesJson = nlohmann::json::array();
 
-		response.set_content("{\"success\": true, \"vehiclesTable\": " + vehiclesJson + "}", "application/json");
+		if (!vehiclesTable.empty())
+		{
+			nlohmann::json lastVehicle = nlohmann::json::array();
+
+			for (const auto& item : vehiclesTable.back())
+				lastVehicle.push_back(item);
+
+			vehiclesJson.push_back(lastVehicle);
+		}
+
+		responseJson = {
+			{"success", true},
+			{"vehiclesTable", vehiclesJson}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+
 	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::deleteVehicle(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 	std::string subscriptionName;
 	std::string licensePlate;
@@ -817,13 +1019,26 @@ void HttpServer::deleteVehicle(const httplib::Request& request, httplib::Respons
 	std::transform(licensePlate.begin(), licensePlate.end(), licensePlate.begin(), ::toupper);
 
 	if (subscription && subscriptionManager.deleteVehicle(*account, *subscription, licensePlate))
-		response.set_content(R"({"success": true})", "application/json");
+	{
+		responseJson = {
+			{"success", true}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::updateAccountInformation(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string newName;
 	std::string newLastName;
 	std::string newPhone;
@@ -844,18 +1059,35 @@ void HttpServer::updateAccountInformation(const httplib::Request& request, httpl
 	if (!newPhone.empty())
 		if (subscriptionManager.getAccountByPhone(newPhone) != nullptr)
 		{
-			response.set_content(R"({"success": false})", "application/json");
+			responseJson = {
+				{"success", false}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
 			return;
 		}
 
 	if (subscriptionManager.updateAccountInformation(email, newName, newLastName, newPhone))
-		response.set_content(R"({"success": true})", "application/json");
+	{
+		responseJson = {
+			{"success", true}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::updateAccount(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string newEmail;
 	std::string newPassword;
 	std::string email;
@@ -877,13 +1109,21 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 
 	if (account == nullptr)
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
 	if (!subscriptionManager.addTempUpdatedAccount(email, newEmail, newPassword))
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
@@ -895,11 +1135,17 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 		std::string accountEmail = subscriptionManager.updateAccount(token);
 	}
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
+
 
 void HttpServer::validateUpdateViaEmail(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string name;
 	std::string	email;
 
@@ -924,11 +1170,16 @@ void HttpServer::validateUpdateViaEmail(const httplib::Request& request, httplib
 		"Echipa ParkPass";
 
 	sendEmail(email, subject, content);
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::validateUpdateViaSMS(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string	email;
 	std::string phone;
 
@@ -943,11 +1194,16 @@ void HttpServer::validateUpdateViaSMS(const httplib::Request& request, httplib::
 	std::string content = "Codul de validare pentru actualizarea datelor contului tau ParkPass este: " + token;
 	sendSMS(phone, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string	email;
 	std::string phone;
 
@@ -960,11 +1216,16 @@ void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httpli
 	std::string content = "Codul de validare pentru actualizarea datelor contului tau ParkPass este: " + token;
 	sendSMS(phone, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::validateUpdate(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string token;
 
 	if (request.has_param("token"))
@@ -972,13 +1233,27 @@ void HttpServer::validateUpdate(const httplib::Request& request, httplib::Respon
 
 	std::string email = subscriptionManager.updateAccount(token);
 	if (!email.empty())
-		response.set_content("{\"success\": true, \"email\": \"" + email + "\"}", "application/json");
+	{
+		responseJson = {
+			{"success", true},
+			{"email", email}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 	else
-		response.set_content(R"({"success": false})", "application/json");
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+	}
 }
 
 void HttpServer::contact(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 	std::string subject;
 	std::string contactMessage;
@@ -1011,11 +1286,16 @@ void HttpServer::contact(const httplib::Request& request, httplib::Response& res
 		"Echipa ParkPass";
 
 	sendEmail(email, subject, content);
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 
 	if (request.has_param("email"))
@@ -1023,7 +1303,11 @@ void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::R
 
 	if (!subscriptionManager.subscribeNewsletter(email))
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
@@ -1039,11 +1323,16 @@ void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::R
 
 	sendEmail(email, subject, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::string email;
 
 	if (request.has_param("email"))
@@ -1051,7 +1340,11 @@ void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib:
 
 	if (!subscriptionManager.unsubscribeNewsletter(email))
 	{
-		response.set_content(R"({"success": false})", "application/json");
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
 
@@ -1067,27 +1360,30 @@ void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib:
 
 	sendEmail(email, subject, content);
 
-	response.set_content(R"({"success": true})", "application/json");
+	responseJson = {
+		{"success", true}
+	};
+
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 void HttpServer::getAdmin(const httplib::Request& request, httplib::Response& response)
 {
+	nlohmann::json responseJson;
 	std::unordered_set<std::string> emails = subscriptionManager.getEmails();
 	int index = 0;
 
-	std::string emailsJson = "[";
+	nlohmann::json emailsJson = nlohmann::json::array();
+
 	for (const auto& email : emails)
-	{
-		emailsJson += "\"" + email + "\"";
+		emailsJson.push_back(email);
 
-		if (index < emails.size() - 1)
-			emailsJson += ",";
+	responseJson = {
+		{"success", true},
+		{"emailsTable", emailsJson}
+	};
 
-		index++;
-	}
-	emailsJson += "]";
-
-	response.set_content("{\"success\": true, \"emailsTable\": " + emailsJson + "}", "application/json");
+	response.set_content(responseJson.dump(), "application/json");
 }
 
 HttpServer::~HttpServer()

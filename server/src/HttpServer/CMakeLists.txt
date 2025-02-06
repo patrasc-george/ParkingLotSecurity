@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
 add_dependencies(${PROJECT_NAME} SubscriptionManager)
 
 find_package(Poco REQUIRED COMPONENTS Foundation Net NetSSL Crypto)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
 	"${CMAKE_SOURCE_DIR}/src/SubscriptionManager"
@@ -22,4 +23,5 @@ target_link_libraries(${PROJECT_NAME}
 	Poco::Net 
 	Poco::NetSSL 
 	Poco::Crypto
+	nlohmann_json::nlohmann_json
 )

@@ -9,6 +9,7 @@ add_dependencies(${PROJECT_NAME} DatabaseManager)
 
 find_package(PostgreSQL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS beast asio)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
 	"${CMAKE_SOURCE_DIR}/src/DatabaseManager"
@@ -21,4 +22,5 @@ target_link_libraries(${PROJECT_NAME}
 	Boost::boost 
 	Boost::beast 
 	Boost::asio
+	nlohmann_json::nlohmann_json
 )

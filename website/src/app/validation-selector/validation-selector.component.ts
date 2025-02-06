@@ -17,7 +17,7 @@ export class ValidationSelectorComponent implements OnInit {
   email: string = '';
   password: string = '';
   phone: string = '';
-  isAuthenticated: boolean = false;
+  isAuthenticated: boolean = true;
 
   constructor(private router: Router, private authService: AuthService, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({
@@ -26,8 +26,11 @@ export class ValidationSelectorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isAuthenticated = this.authService.isAuthenticated();
-
+    if (localStorage.getItem('fromAccount') == 'true') {
+      this.isAuthenticated = true;
+    } else if (localStorage.getItem('fromCreateSubscription') == 'true') {
+      this.isAuthenticated = false;
+    }
     this.name = localStorage.getItem('name') || '';
     this.email = localStorage.getItem('email') || '';
     this.phone = localStorage.getItem('phone') || '';

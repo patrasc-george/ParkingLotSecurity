@@ -229,7 +229,7 @@ export class TermsAndConditionsComponent implements OnInit {
   navigateTo(destination: string): void {
     const routes: { [key: string]: string } = {
       mainpage: '/',
-      login: '/validate-phone',
+      login: '/login',
       createAccount: '/create-subscription',
       contact: '/contact'
     };

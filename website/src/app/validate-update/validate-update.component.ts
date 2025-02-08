@@ -26,6 +26,7 @@ export class ValidateUpdateComponent implements OnInit {
 
   validateUpdate(token: string): void {
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('token', token);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });

@@ -17,6 +17,7 @@ COPY ./replace-env-vars.sh /usr/share/nginx/html/
 RUN chmod +x /usr/share/nginx/html/replace-env-vars.sh
 
 ENV API_URL=${API_URL}
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
 EXPOSE 80
 

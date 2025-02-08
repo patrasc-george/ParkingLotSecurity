@@ -7,6 +7,12 @@
 
 HttpServer::HttpServer()
 {
+#ifdef _DEBUG
+	key = "";
+#else
+	key = std::getenv("POSTGRES_PASSWORD");
+#endif
+
 	thread = std::thread([this]()
 		{
 			try
@@ -314,6 +320,16 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	std::string licensePlate;
 	std::string dateTime;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("licensePlate"))
 	{
 		auto data = request.get_param_value("licensePlate");
@@ -382,6 +398,16 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 	std::string password;
 	std::string phone;
 	std::string captchaToken;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("name"))
 		name = request.get_param_value("name");
@@ -463,6 +489,16 @@ void HttpServer::validateViaEmail(const httplib::Request& request, httplib::Resp
 	std::string name;
 	std::string	email;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("name"))
 		name = request.get_param_value("name");
 	if (request.has_param("email"))
@@ -497,6 +533,16 @@ void HttpServer::validateViaSMS(const httplib::Request& request, httplib::Respon
 	std::string	email;
 	std::string phone;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 	if (request.has_param("phone"))
@@ -521,6 +567,16 @@ void HttpServer::resendValidateSMS(const httplib::Request& request, httplib::Res
 	std::string	email;
 	std::string phone;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 	if (request.has_param("phone"))
@@ -541,6 +597,16 @@ void HttpServer::validate(const httplib::Request& request, httplib::Response& re
 {
 	nlohmann::json responseJson;
 	std::string token;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("token"))
 		token = request.get_param_value("token");
@@ -571,6 +637,16 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 	std::string input;
 	std::string password;
 	bool fromRedirect = false;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("input"))
 		input = request.get_param_value("input");
@@ -650,6 +726,16 @@ void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httpli
 	nlohmann::json responseJson;
 	std::string email;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
@@ -692,6 +778,16 @@ void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib:
 	nlohmann::json responseJson;
 	std::string phone;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("phone"))
 		phone = request.get_param_value("phone");
 
@@ -726,6 +822,16 @@ void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib:
 	nlohmann::json responseJson;
 	std::string phone;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("phone"))
 		phone = request.get_param_value("phone");
 
@@ -758,6 +864,16 @@ void HttpServer::verifyResetPasswordToken(const httplib::Request& request, httpl
 	nlohmann::json responseJson;
 	std::string token;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("token"))
 		token = request.get_param_value("token");
 
@@ -788,6 +904,16 @@ void HttpServer::resetPassword(const httplib::Request& request, httplib::Respons
 	std::string email;
 	std::string newPassword;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
@@ -817,6 +943,16 @@ void HttpServer::getSubscriptionVehicles(const httplib::Request& request, httpli
 	nlohmann::json responseJson;
 	std::string email;
 	std::string subscriptionName;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
@@ -853,6 +989,16 @@ void HttpServer::addSubscription(const httplib::Request& request, httplib::Respo
 	std::string email;
 	std::string subscriptionName;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
@@ -885,6 +1031,16 @@ void HttpServer::deleteSubscription(const httplib::Request& request, httplib::Re
 	std::string email;
 	std::string subscriptionName;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
@@ -915,6 +1071,16 @@ void HttpServer::getVehicleHistory(const httplib::Request& request, httplib::Res
 {
 	nlohmann::json responseJson;
 	std::string licensePlate;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("licensePlate"))
 		licensePlate = request.get_param_value("licensePlate");
@@ -951,6 +1117,16 @@ void HttpServer::addVehicle(const httplib::Request& request, httplib::Response& 
 	std::string email;
 	std::string subscriptionName;
 	std::string licensePlate;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
@@ -1005,6 +1181,16 @@ void HttpServer::deleteVehicle(const httplib::Request& request, httplib::Respons
 	std::string subscriptionName;
 	std::string licensePlate;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
@@ -1043,6 +1229,16 @@ void HttpServer::updateAccountInformation(const httplib::Request& request, httpl
 	std::string newLastName;
 	std::string newPhone;
 	std::string email;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("newName"))
 		newName = request.get_param_value("newName");
@@ -1092,6 +1288,16 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 	std::string newPassword;
 	std::string email;
 	std::string admin;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("newEmail"))
 		newEmail = request.get_param_value("newEmail");
@@ -1149,6 +1355,16 @@ void HttpServer::validateUpdateViaEmail(const httplib::Request& request, httplib
 	std::string name;
 	std::string	email;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("name"))
 		name = request.get_param_value("name");
 	if (request.has_param("email"))
@@ -1183,6 +1399,16 @@ void HttpServer::validateUpdateViaSMS(const httplib::Request& request, httplib::
 	std::string	email;
 	std::string phone;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 	if (request.has_param("phone"))
@@ -1207,6 +1433,16 @@ void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httpli
 	std::string	email;
 	std::string phone;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 	if (request.has_param("phone"))
@@ -1227,6 +1463,16 @@ void HttpServer::validateUpdate(const httplib::Request& request, httplib::Respon
 {
 	nlohmann::json responseJson;
 	std::string token;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("token"))
 		token = request.get_param_value("token");
@@ -1257,6 +1503,16 @@ void HttpServer::contact(const httplib::Request& request, httplib::Response& res
 	std::string email;
 	std::string subject;
 	std::string contactMessage;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
@@ -1298,6 +1554,16 @@ void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::R
 	nlohmann::json responseJson;
 	std::string email;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
@@ -1335,6 +1601,16 @@ void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib:
 	nlohmann::json responseJson;
 	std::string email;
 
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	if (request.has_param("email"))
 		email = request.get_param_value("email");
 
@@ -1370,11 +1646,19 @@ void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib:
 void HttpServer::getAdmin(const httplib::Request& request, httplib::Response& response)
 {
 	nlohmann::json responseJson;
+
+	if (!request.has_param("key") || request.get_param_value("key") != key)
+	{
+		responseJson = {
+			{"success", false}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
+
 	std::unordered_set<std::string> emails = subscriptionManager.getEmails();
-	int index = 0;
-
 	nlohmann::json emailsJson = nlohmann::json::array();
-
 	for (const auto& email : emails)
 		emailsJson.push_back(email);
 

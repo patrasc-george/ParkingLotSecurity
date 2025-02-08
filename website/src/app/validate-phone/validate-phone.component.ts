@@ -67,6 +67,7 @@ export class ValidatePhoneComponent {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -112,6 +113,7 @@ export class ValidatePhoneComponent {
   validateToken(): void {
     const token = this.code.join('');
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('token', token);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
@@ -193,6 +195,7 @@ export class ValidatePhoneComponent {
     this.startTimer();
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', this.email);
     urlEncodedData.append('phone', this.phone);
 

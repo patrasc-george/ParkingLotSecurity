@@ -100,4 +100,5 @@ private:
 	httplib::Server server;
 	std::unique_ptr<WebSocketServer> webSocketServer;
 	SubscriptionManager subscriptionManager;
+	std::string key;
 };

@@ -83,6 +83,7 @@ export class SubscriptionsComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -164,6 +165,7 @@ export class SubscriptionsComponent implements OnInit {
       if (subscriptionName) {
         const email = localStorage.getItem('email');
         const urlEncodedData = new URLSearchParams();
+        urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
         urlEncodedData.append('email', email || '');
         urlEncodedData.append('subscriptionName', subscriptionName);
 
@@ -216,6 +218,7 @@ export class SubscriptionsComponent implements OnInit {
     for (const subscription of this.selectedRows) {
       const email = localStorage.getItem('email');
       const urlEncodedData = new URLSearchParams();
+      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
       urlEncodedData.append('email', email || '');
       urlEncodedData.append('subscriptionName', subscription);
 
@@ -248,6 +251,7 @@ export class SubscriptionsComponent implements OnInit {
 
     const email = localStorage.getItem('email');
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', subscription);
 

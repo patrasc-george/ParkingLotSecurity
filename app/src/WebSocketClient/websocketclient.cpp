@@ -100,7 +100,7 @@ bool WebSocketClient::connect()
 
 	std::string fullUri;
 #ifdef _DEBUG
-	fullUri = uri + "?token=" + "";
+	fullUri = uri + "?token=" + std::getenv("POSTGRES_PASSWORD_DEBUG");
 #else
 	fullUri = uri + "?token=" + std::getenv("POSTGRES_PASSWORD");
 #endif

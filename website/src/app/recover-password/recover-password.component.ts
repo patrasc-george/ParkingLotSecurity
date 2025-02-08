@@ -75,6 +75,7 @@ export class RecoverPasswordComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -111,7 +112,7 @@ export class RecoverPasswordComponent implements OnInit {
 
     if (fromRecoverViaEmail === 'true') {
       const urlEncodedData = new URLSearchParams();
-
+      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
       urlEncodedData.append('email', this.recoverForm.get('input')?.value);
 
       const headers = new HttpHeaders({
@@ -137,7 +138,7 @@ export class RecoverPasswordComponent implements OnInit {
     }
     else if (fromRecoverViaSMS === 'true') {
       const urlEncodedData = new URLSearchParams();
-
+      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
       urlEncodedData.append('phone', this.recoverForm.get('input')?.value);
 
       const headers = new HttpHeaders({

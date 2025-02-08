@@ -47,6 +47,7 @@ export class RedirectComponent implements OnInit {
     this.isRedirecting = true;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
 
     const email = localStorage.getItem('email');
     if (email) {

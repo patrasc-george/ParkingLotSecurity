@@ -78,6 +78,7 @@ export class ResetPasswordComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -96,6 +97,7 @@ export class ResetPasswordComponent implements OnInit {
     const token = this.resetPasswordForm.get('token')?.value;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('token', token);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
@@ -128,6 +130,7 @@ export class ResetPasswordComponent implements OnInit {
     const newPassword = this.resetPasswordForm.get('password')?.value;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', localStorage.getItem('email') || '');
     urlEncodedData.append('newPassword', newPassword);
 

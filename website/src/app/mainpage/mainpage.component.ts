@@ -67,6 +67,7 @@ export class MainpageComponent {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -112,6 +113,7 @@ export class MainpageComponent {
       this.fileName = '';
 
       const urlEncodedData = new URLSearchParams();
+      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
       urlEncodedData.append('licensePlate', this.licensePlate);
 
       const headers = new HttpHeaders({

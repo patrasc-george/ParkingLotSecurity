@@ -115,6 +115,7 @@ export class AccountComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -199,6 +200,7 @@ export class AccountComponent implements OnInit {
     const { formName, formLastName, email, password, phone } = this.signUpForm.value;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', this.email);
     if (formName) urlEncodedData.append('newName', formName);
     if (formLastName) urlEncodedData.append('newLastName', formLastName);
@@ -237,6 +239,7 @@ export class AccountComponent implements OnInit {
     const { formName, formLastName, email, password, phone } = this.signUpForm.value;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', this.email);
     urlEncodedData.append('admin', this.isAdmin.toString());
     if (email) urlEncodedData.append('newEmail', email);

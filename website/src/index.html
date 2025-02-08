@@ -14,12 +14,18 @@
 
   <script>
     window.env = {
-      API_URL: "{{API_URL}}"
+      API_URL: "{{API_URL}}",
+      POSTGRES_PASSWORD: "{{POSTGRES_PASSWORD}}"
     };
 
     if (window.env.API_URL.includes("API_URL")) {
       window.env.API_URL = "http://localhost:8080";
     }
+
+    if (window.env.POSTGRES_PASSWORD.includes("POSTGRES_PASSWORD")) {
+      window.env.POSTGRES_PASSWORD = "";
+    }
+    
   </script>
 
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>

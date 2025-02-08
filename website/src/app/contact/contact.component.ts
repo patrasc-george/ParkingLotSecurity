@@ -83,6 +83,7 @@ export class ContactComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -109,6 +110,7 @@ export class ContactComponent implements OnInit {
     const { email, subject, message } = this.contactForm.value;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
     urlEncodedData.append('subject', subject);
     urlEncodedData.append('message', message);

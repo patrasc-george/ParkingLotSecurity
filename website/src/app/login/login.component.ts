@@ -89,6 +89,7 @@ export class LoginComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -110,6 +111,7 @@ export class LoginComponent implements OnInit {
     }
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('input', this.input);
     urlEncodedData.append('password', this.password);
 

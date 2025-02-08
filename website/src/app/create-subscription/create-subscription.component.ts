@@ -88,6 +88,7 @@ export class CreateAccountComponent {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -145,6 +146,7 @@ export class CreateAccountComponent {
     const { name, lastName, email, password, confirmPassword, phone } = this.signUpForm.value;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('name', name);
     urlEncodedData.append('lastName', lastName);
     urlEncodedData.append('email', email);

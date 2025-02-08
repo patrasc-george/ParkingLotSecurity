@@ -37,6 +37,7 @@ export class DashboardComponent implements OnInit {
 
   getTables(): void {
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
@@ -145,7 +146,7 @@ export class DashboardComponent implements OnInit {
 
   viewAccount(email: string) {
     const urlEncodedData = new URLSearchParams();
-
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('input', email);
     urlEncodedData.append('fromRedirect', 'true');
 

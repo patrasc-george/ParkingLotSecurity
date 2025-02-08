@@ -79,6 +79,7 @@ export class ValidationSelectorComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -111,6 +112,7 @@ export class ValidationSelectorComponent implements OnInit {
 
   validateByEmail() {
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('name', this.name);
     urlEncodedData.append('email', this.email);
 
@@ -149,6 +151,7 @@ export class ValidationSelectorComponent implements OnInit {
 
   validateBySMS() {
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', this.email);
     urlEncodedData.append('phone', this.phone);
 

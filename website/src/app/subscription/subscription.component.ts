@@ -37,6 +37,7 @@ export class SubscriptionComponent implements OnInit {
 
     const email = localStorage.getItem('email');
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', this.subscriptionName);
 
@@ -108,6 +109,7 @@ export class SubscriptionComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
@@ -201,6 +203,7 @@ export class SubscriptionComponent implements OnInit {
 
   async viewHistory(licensePlate: string): Promise<void> {
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('licensePlate', licensePlate);
 
     try {
@@ -372,6 +375,7 @@ export class SubscriptionComponent implements OnInit {
     const subscriptionName = localStorage.getItem('subscriptionName') || '';
 
     const urlEncodedData = new URLSearchParams();
+    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
     urlEncodedData.append('email', email);
     urlEncodedData.append('licensePlate', licensePlate);
     urlEncodedData.append('subscriptionName', subscriptionName);
@@ -443,6 +447,7 @@ export class SubscriptionComponent implements OnInit {
     for (const vehicle of this.selectedRows) {
       const licensePlate = vehicle;
       const urlEncodedData = new URLSearchParams();
+      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
       urlEncodedData.append('email', email);
       urlEncodedData.append('subscriptionName', subscriptionName);
       urlEncodedData.append('licensePlate', licensePlate);

@@ -1,5 +1,79 @@
 ﻿#include "websocketclient.h"
 
+#include <openssl/aes.h>
+#include <openssl/rand.h>
+#include <bitset>
+
+std::string encrypt(const std::string& text)
+{
+	std::string password(std::getenv("POSTGRES_PASSWORD"));
+	if (password.empty() || password.size() != 32)
+		return text;
+
+	const unsigned char* key = reinterpret_cast<const unsigned char*>(password.c_str());
+
+	AES_KEY enc_key;
+	if (AES_set_encrypt_key(key, 256, &enc_key) < 0)
+		return "";
+
+	int padding = 16 - (text.size() % 16);
+	std::string paddedText = text + std::string(padding, '\0');
+
+	std::string cipherText;
+	for (int i = 0; i < paddedText.size(); i += 16)
+	{
+		unsigned char block[16];
+		AES_encrypt(reinterpret_cast<const unsigned char*>(&paddedText[i]), block, &enc_key);
+
+		for (int j = 0; j < 16; j++)
+		{
+			std::bitset<8> bits(block[j]);
+			cipherText += bits.to_string();
+		}
+	}
+
+	return cipherText;
+}
+
+nlohmann::json decrypt(const std::string& text)
+{
+	std::string password(std::getenv("POSTGRES_PASSWORD"));
+	if (password.empty() || password.size() != 32)
+		return nlohmann::json();
+
+	const unsigned char* key = reinterpret_cast<const unsigned char*>(password.c_str());
+
+	AES_KEY dec_key;
+	if (AES_set_decrypt_key(key, 256, &dec_key) < 0)
+		return nlohmann::json();
+
+	std::vector<unsigned char> cipherText;
+	for (int i = 0; i < text.size(); i += 8)
+	{
+		std::bitset<8> bits(text.substr(i, 8));
+		cipherText.push_back(static_cast<unsigned char>(bits.to_ulong()));
+	}
+
+	std::string decryptedText;
+	decryptedText.resize(cipherText.size());
+
+	for (size_t i = 0; i < cipherText.size(); i += 16)
+		AES_decrypt(&cipherText[i], reinterpret_cast<unsigned char*>(&decryptedText[i]), &dec_key);
+
+	size_t padding = decryptedText[decryptedText.size() - 1];
+	decryptedText.resize(decryptedText.size() - padding);
+
+	nlohmann::json jsonText;
+	try {
+		jsonText = nlohmann::json::parse(decryptedText);
+	}
+	catch (const std::exception& error) {
+		std::cerr << "Error parsing JSON: " << error.what() << std::endl;
+	}
+
+	return jsonText;
+}
+
 WebSocketClient::WebSocketClient(boost::asio::io_context& ioContext, const std::string& uri)
 	: ioContext(&ioContext),
 	webSocket(std::make_unique<boost::beast::websocket::stream<boost::asio::ip::tcp::socket>>(boost::asio::make_strand(ioContext))),
@@ -16,7 +90,6 @@ WebSocketClient::WebSocketClient(boost::asio::io_context& ioContext, const std::
 	ioThread = std::thread([this, &ioContext]() { ioContext.run(); });
 }
 
-
 bool WebSocketClient::connect()
 {
 	if (!ioContext || !webSocket || !resolver)
@@ -25,6 +98,13 @@ bool WebSocketClient::connect()
 		return false;
 	}
 
+	std::string fullUri;
+#ifdef _DEBUG
+	fullUri = uri + "?token=" + "";
+#else
+	fullUri = uri + "?token=" + std::getenv("POSTGRES_PASSWORD");
+#endif
+
 	try
 	{
 		auto results = resolver->resolve(host, port);
@@ -32,13 +112,23 @@ bool WebSocketClient::connect()
 
 		try
 		{
-			webSocket->handshake(host, "/");
+			boost::beast::error_code errorCode;
+			webSocket->handshake(host, fullUri, errorCode);
+
+			if (errorCode)
+			{
+				std::cerr << "[ERROR] WebSocket handshake failed: " << errorCode.message() << std::endl;
+				return false;
+			}
+
 			webSocket->text(true);
 		}
 		catch (const boost::system::system_error& e)
 		{
 			std::cerr << "Handshake failed: " << e.what() << " [code: " << e.code() << "]" << std::endl;
+			return false;
 		}
+
 		return true;
 	}
 	catch (const std::exception& e)
@@ -77,6 +167,7 @@ std::string WebSocketClient::receiveSync()
 std::vector<std::string> WebSocketClient::getVehicles()
 {
 	nlohmann::json request = { {"command", "getVehicles"} };
+	std::string encryptRequest = encrypt(request.dump());
 
 	std::vector<std::string> vehicles;
 
@@ -86,27 +177,19 @@ std::vector<std::string> WebSocketClient::getVehicles()
 		return vehicles;
 	}
 
-	send(request.dump());
+	send(encryptRequest);
 
 	std::string response = receiveSync();
-
 	if (response.empty())
 	{
 		std::cerr << "Received empty response!" << std::endl;
 		return vehicles;
 	}
 
-	try
-	{
-		auto jsonResponse = nlohmann::json::parse(response);
-		if (jsonResponse.contains("vehicles"))
-			for (const auto& vehicle : jsonResponse["vehicles"])
-				vehicles.push_back(vehicle.get<std::string>());
-	}
-	catch (const std::exception& error)
-	{
-		std::cerr << "Error parsing JSON: " << error.what() << std::endl;
-	}
+	nlohmann::json decryptResponse = decrypt(response);
+	if (decryptResponse.contains("vehicles"))
+		for (const auto& vehicle : decryptResponse["vehicles"])
+			vehicles.push_back(vehicle.get<std::string>());
 
 	return vehicles;
 }
@@ -124,8 +207,9 @@ void WebSocketClient::addVehicle(const int& id, const std::string& imagePath, co
 		{"totalAmount", totalAmount},
 		{"isPaid", isPaid}
 	};
+	std::string encryptRequest = encrypt(request.dump());
 
-	send(request.dump());
+	send(encryptRequest);
 
 	receiveSync();
 }
@@ -136,33 +220,26 @@ bool WebSocketClient::getIsPaid(const std::string& licensePlate)
 		{"command", "getIsPaid"},
 		{"licensePlate", licensePlate},
 	};
+	std::string encryptRequest = encrypt(request.dump());
 
-	send(request.dump());
+	send(encryptRequest);
 	std::string response = receiveSync();
 	if (response.empty())
 	{
 		std::cerr << "Received empty response!" << std::endl;
-		send(request.dump());
+		send(encryptRequest);
 		return false;
 	}
 
 	bool isPaid = false;
-	try
+	nlohmann::json decryptResponse = decrypt(response);
+	if (decryptResponse.contains("isPaid"))
 	{
-		auto jsonResponse = nlohmann::json::parse(response);
-		if (jsonResponse.contains("isPaid"))
-		{
-			std::cout << "Received response: " << response << std::endl;
-			isPaid = jsonResponse["isPaid"];
-		}
-		else
-			send(request.dump());
+		std::cout << "Received response: " << decryptResponse << std::endl;
+		isPaid = decryptResponse["isPaid"];
 	}
-	catch (const std::exception& error)
-	{
-		std::cerr << "Error parsing JSON: " << error.what() << std::endl;
-		send(request.dump());
-	}
+	else
+		send(encryptRequest);
 
 	return isPaid;
 }

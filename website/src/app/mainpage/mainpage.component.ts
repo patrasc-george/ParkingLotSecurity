@@ -120,12 +120,9 @@ export class MainpageComponent {
         'Content-Type': 'application/x-www-form-urlencoded'
       });
 
-      console.log('Sending license plate:', this.licensePlate);
-
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           data => {
-            console.log('Response from server (license plate):', data);
             this.handleServerResponse(data);
           },
           error => {

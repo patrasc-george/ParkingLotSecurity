@@ -1,6 +1,7 @@
 #pragma once
 
 #include "databasemanager.h"
+#include "logger.h"
 
 #include <boost/asio.hpp>
 #include <boost/beast/websocket.hpp>
@@ -28,6 +29,7 @@ private:
 	boost::beast::flat_buffer buffer;
 	boost::beast::websocket::stream<boost::asio::ip::tcp::socket> webSocket;
 	DatabaseManager& dataBaseManager;
+	Logger logger;
 };
 
 class WebSocketServer
@@ -49,4 +51,5 @@ private:
 private:
 	boost::asio::io_context& ioContext;
 	boost::asio::ip::tcp::acceptor acceptor;
+	Logger logger;
 };

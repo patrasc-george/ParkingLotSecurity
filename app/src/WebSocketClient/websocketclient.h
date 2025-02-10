@@ -6,6 +6,8 @@
 #define WEBSOCKETCLIENT_API __declspec(dllimport)
 #endif
 
+#include "logger.h"
+
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
@@ -54,4 +56,5 @@ private:
 	std::string uri;
 	std::string host;
 	std::string port;
+	Logger logger;
 };

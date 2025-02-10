@@ -36,9 +36,9 @@ public:
 private:
 	std::string generateToken();
 
-	void sendEmail(const std::string& email, const std::string& subject, const std::string& content);
+	bool sendEmail(const std::string& email, const std::string& subject, const std::string& content);
 
-	void sendSMS(const std::string& phone, const std::string& content);
+	bool sendSMS(const std::string& phone, const std::string& content);
 
 	void post(const httplib::Request& request, httplib::Response& response);
 

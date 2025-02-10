@@ -7,7 +7,7 @@ Logger::Logger()
 #ifdef _DEBUG
 	path = "../../../logs.txt";
 #else
-	path = "logs.txt"
+	path = "logs.txt";
 #endif
 }
 

@@ -12,6 +12,8 @@
 #define DATABASEMANAGER_API
 #endif
 
+#include "logger.h"
+
 #include <libpq-fe.h>
 #include <iostream>
 #include <string>
@@ -31,23 +33,23 @@ public:
 
 	bool initializeDatabase();
 
-	std::vector<std::string> getVehicles() const;
+	std::vector<std::string> getVehicles();
 
-	std::string getLastVehicleActivity(const std::string& vehicleLicensePlate) const;
+	std::string getLastVehicleActivity(const std::string& vehicleLicensePlate);
 
-	std::string getTotalTimeParked(const std::string& vehicleLicensePlate) const;
+	std::string getTotalTimeParked(const std::string& vehicleLicensePlate);
 
-	int getPayment(const std::string& vehicleLicensePlate) const;
+	int getPayment(const std::string& vehicleLicensePlate);
 
-	std::vector<std::string> getAccounts() const;
+	std::vector<std::string> getAccounts();
 
-	std::unordered_set<std::string> getNewsletter() const;
+	std::unordered_set<std::string> getNewsletter();
 
-	std::unordered_map<std::string, std::pair<std::string, std::string>> getSubscriptions(const std::string& email) const;
+	std::unordered_map<std::string, std::pair<std::string, std::string>> getSubscriptions(const std::string& email);
 
-	std::vector<std::string> getVehicleHistory(const std::string& vehicleLicensePlate) const;
+	std::vector<std::string> getVehicleHistory(const std::string& vehicleLicensePlate);
 
-	bool getIsPaid(const std::string& vehicleLicensePlate) const;
+	bool getIsPaid(const std::string& vehicleLicensePlate);
 
 	bool setIsPaid(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket);
 
@@ -79,4 +81,5 @@ public:
 
 private:
 	PGconn* conn;
+	Logger logger;
 };

@@ -14,12 +14,14 @@ add_dependencies(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
+	"${CMAKE_SOURCE_DIR}/src/Logger"
     "${CMAKE_SOURCE_DIR}/src/QRCodeDetection"
     "${CMAKE_SOURCE_DIR}/src/LicensePlateDetection"
     "${CMAKE_SOURCE_DIR}/src/WebSocketClient"
 )
 
 target_link_libraries(${PROJECT_NAME} 
+	Logger
     QRCodeDetection
     LicensePlateDetection
     WebSocketClient

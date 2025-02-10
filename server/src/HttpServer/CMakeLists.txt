@@ -14,14 +14,16 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	"${CMAKE_SOURCE_DIR}/src/SubscriptionManager"
 	"${CMAKE_SOURCE_DIR}/src/WebSocketServer"
 	"${CMAKE_SOURCE_DIR}/src/QRCodeDetection"
+	"${CMAKE_SOURCE_DIR}/src/Logger"
 )
 
 target_link_libraries(${PROJECT_NAME} 
-	SubscriptionManager 
+	SubscriptionManager
 	WebSocketServer
 	QRCodeDetection
-	Poco::Net 
-	Poco::NetSSL 
+	Logger
+	Poco::Net
+	Poco::NetSSL
 	Poco::Crypto
 	nlohmann_json::nlohmann_json
 )

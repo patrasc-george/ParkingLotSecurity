@@ -13,11 +13,13 @@ find_package(nlohmann_json CONFIG REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
 	"${CMAKE_SOURCE_DIR}/src/DatabaseManager"
+	"${CMAKE_SOURCE_DIR}/src/Logger"
 	${PostgreSQL_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} 
 	DatabaseManager
+	Logger
     PostgreSQL::PostgreSQL
 	Boost::boost 
 	Boost::beast 

@@ -9,6 +9,12 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 
 find_package(PostgreSQL REQUIRED)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${PostgreSQL_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE 
+	"${CMAKE_SOURCE_DIR}/src/Logger"
+	${PostgreSQL_INCLUDE_DIRS}
+)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE PostgreSQL::PostgreSQL)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+	Logger
+	PostgreSQL::PostgreSQL
+)

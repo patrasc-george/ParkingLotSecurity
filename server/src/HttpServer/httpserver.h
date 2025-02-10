@@ -3,6 +3,7 @@
 #include "httplib.h"
 #include "subscriptionmanager.h"
 #include "websocketserver.h"
+#include "logger.h"
 
 #include <thread>
 #include <iostream>
@@ -100,5 +101,6 @@ private:
 	httplib::Server server;
 	std::unique_ptr<WebSocketServer> webSocketServer;
 	SubscriptionManager subscriptionManager;
+	Logger logger;
 	std::string key;
 };

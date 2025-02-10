@@ -19,11 +19,13 @@ add_dependencies(${PROJECT_NAME} VehicleManager)
 find_package(Qt6 REQUIRED COMPONENTS Gui Core Widgets)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
+	"${CMAKE_SOURCE_DIR}/src/Logger"
     "${CMAKE_SOURCE_DIR}/src/VehicleManager"
     "${CMAKE_SOURCE_DIR}/src/Interface"
 )
 
 target_link_libraries(${PROJECT_NAME}
+	Logger
     VehicleManager
     Qt6::Widgets 
     Qt6::Core

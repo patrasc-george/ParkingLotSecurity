@@ -9,6 +9,7 @@ set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Application)
 
 add_subdirectory(tests)
+add_subdirectory(src/Logger)
 add_subdirectory(src/QRCodeDetection)
 add_subdirectory(src/LicensePlateDetection)
 add_subdirectory(src/WebSocketClient)

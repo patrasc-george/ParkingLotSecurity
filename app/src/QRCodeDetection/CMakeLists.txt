@@ -12,12 +12,14 @@ find_path(QRENCODE_INCLUDE_DIR NAMES qrencode.h)
 find_library(QRENCODE_LIBRARY_RELEASE qrencode)
 find_library(QRENCODE_LIBRARY_DEBUG qrencoded)
 
-target_include_directories(${PROJECT_NAME} PUBLIC 
+target_include_directories(${PROJECT_NAME} PUBLIC
+	"${CMAKE_SOURCE_DIR}/src/Logger"
     ${OpenCV_INCLUDE_DIRS}
 	${QRENCODE_INCLUDE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC 
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	Logger
     ${OpenCV_LIBS}
 	${QRENCODE_LIBRARIES}
 )

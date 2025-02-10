@@ -15,12 +15,14 @@ find_package(nlohmann_json CONFIG REQUIRED)
 add_dependencies(${PROJECT_NAME} DatabaseManager)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-	${PostgreSQL_INCLUDE_DIRS}
+	"${CMAKE_SOURCE_DIR}/src/Logger"
 	"${CMAKE_SOURCE_DIR}/src/DatabaseManager"
+	${PostgreSQL_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} 
     DatabaseManager
+	Logger
     PostgreSQL::PostgreSQL
     nlohmann_json::nlohmann_json
 )

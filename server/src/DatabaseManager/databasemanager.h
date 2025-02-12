@@ -24,7 +24,7 @@
 class DATABASEMANAGER_API DatabaseManager
 {
 private:
-	DatabaseManager() {};
+	DatabaseManager() : logger(Logger::getInstance()) {};
 
 	~DatabaseManager();
 
@@ -81,5 +81,5 @@ public:
 
 private:
 	PGconn* conn;
-	Logger logger;
+	Logger& logger;
 };

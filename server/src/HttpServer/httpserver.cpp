@@ -5,7 +5,7 @@
 
 #include <nlohmann/json.hpp>
 
-HttpServer::HttpServer()
+HttpServer::HttpServer() : logger(Logger::getInstance())
 {
 #ifdef _DEBUG
 	key = "";
@@ -20,7 +20,7 @@ HttpServer::HttpServer()
 				boost::asio::io_context ioContext;
 				unsigned short port = 9002;
 
-				LOG_MESSAGE(LogLevel::INFO, LogOutput::CONSOLE) << "WebSocket server started on port " + std::to_string(port) + "." << std::endl;
+				LOG_MESSAGE(INFO) << "WebSocket server started on port " + std::to_string(port) + "." << std::endl;
 
 				webSocketServer = std::make_unique<WebSocketServer>(ioContext, port);
 				webSocketServer->start();
@@ -453,7 +453,7 @@ HttpServer::HttpServer()
 		this->getAdmin(request, response);
 		});
 
-	LOG_MESSAGE(LogLevel::INFO, LogOutput::CONSOLE) << "HTTP server started on port 8080." << std::endl;
+	LOG_MESSAGE(INFO) << "HTTP server started on port 8080." << std::endl;
 	server.listen("0.0.0.0", 8080);
 }
 
@@ -463,10 +463,6 @@ std::string HttpServer::generateToken()
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> dis(100000, 999999);
 	std::string token = std::to_string(dis(gen));
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Generated token: " << token << std::endl;
-#endif
 
 	return token;
 }
@@ -478,7 +474,7 @@ bool HttpServer::sendEmail(const std::string& email, const std::string& subject,
 
 	if (pocoEmail.empty() || pocoPassword.empty())
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Missing POCO email credentials." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Missing POCO email credentials." << std::endl;
 		return false;
 	}
 
@@ -504,13 +500,9 @@ bool HttpServer::sendEmail(const std::string& email, const std::string& subject,
 	}
 	catch (const Poco::Exception& ex)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to send email to: " << email << ". Exception: " << ex.displayText() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to send email to: " << email << ". Exception: " << ex.displayText() << std::endl;
 		return false;
 	}
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Email sent successfully to: " << email << std::endl;
-#endif
 
 	return true;
 }
@@ -523,7 +515,7 @@ bool HttpServer::sendSMS(const std::string& phone, const std::string& content)
 
 	if (twiloSid.empty() || twiloToken.empty() || twiloPhone.empty())
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Missing Twilio credentials (SID, Token, or Phone)." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Missing Twilio credentials (SID, Token, or Phone)." << std::endl;
 		return false;
 	}
 
@@ -541,13 +533,9 @@ bool HttpServer::sendSMS(const std::string& phone, const std::string& content)
 
 	if (!res || res->status != 200)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to send SMS to: " << phone << ". Response status: " << (res ? std::to_string(res->status) : "-1") << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to send SMS to: " << phone << ". Response status: " << (res ? std::to_string(res->status) : "-1") << std::endl;
 		return false;
 	}
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "SMS sent successfully to: " << phone << std::endl;
-#endif
 
 	return true;
 }
@@ -560,7 +548,7 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -597,9 +585,6 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 		QRCode qr;
 		std::string ticket = qr.decodeQR(imageData);
 
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "QR code decoded: " << ticket << std::endl;
-#endif
 		if (!subscriptionManager.pay(ticket, licensePlate, dateTime, true))
 		{
 			responseJson = {
@@ -625,7 +610,7 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	}
 	else
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Missing required data." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Missing required data." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -646,7 +631,7 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -671,15 +656,11 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 	std::string secretKey(std::getenv("RECAPTCHA_KEY"));
 	std::string payload = "secret=" + secretKey + "&response=" + captchaToken;
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Sending captcha verification request for token: " << captchaToken << std::endl;
-#endif
-
 	auto recaptchaResponse = recaptchaClient.Post("/recaptcha/api/siteverify", payload, "application/x-www-form-urlencoded");
 	if (!recaptchaResponse || recaptchaResponse->status != 200)
 	{
 		std::string statusMessage = (recaptchaResponse != nullptr) ? std::to_string(recaptchaResponse->status) : "null response";
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to verify captcha with status: " << statusMessage << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to verify captcha with status: " << statusMessage << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -695,7 +676,7 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 
 	if (!captchaSuccess)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Captcha verification failed." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Captcha verification failed." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -726,10 +707,6 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 
 	subscriptionManager.addTempAccount(name, lastName, email, password, phone);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Created temporary account for: " << email << std::endl;
-#endif
-
 	responseJson = {
 		{"success", true}
 	};
@@ -744,7 +721,7 @@ void HttpServer::validateViaEmail(const httplib::Request& request, httplib::Resp
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -760,10 +737,6 @@ void HttpServer::validateViaEmail(const httplib::Request& request, httplib::Resp
 	std::string token = generateToken();
 	subscriptionManager.setToken(email, token);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Generated validation token for email: " << email << std::endl;
-#endif
-
 	std::string subject = "Validare cont";
 	std::string content =
 		"Stimata/Stimate, " + name + ",\n\n"
@@ -778,7 +751,7 @@ void HttpServer::validateViaEmail(const httplib::Request& request, httplib::Resp
 
 	if (!sendEmail(email, subject, content))
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to send validation email to: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to send validation email to: " << email << std::endl;
 		responseJson = {
 			{"success", false},
 			{"message", "Failed to send validation email. Please try again later."}
@@ -801,7 +774,7 @@ void HttpServer::validateViaSMS(const httplib::Request& request, httplib::Respon
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -817,14 +790,10 @@ void HttpServer::validateViaSMS(const httplib::Request& request, httplib::Respon
 	std::string token = generateToken();
 	subscriptionManager.setToken(email, token);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Generated validation token for phone: " << phone << std::endl;
-#endif
-
 	std::string content = "Codul de validare pentru contul tau ParkPass este: " + token;
 	if (!sendSMS(phone, content))
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to send validation SMS to: " << phone << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to send validation SMS to: " << phone << std::endl;
 		responseJson = {
 			{"success", false},
 			{"message", "Failed to send validation SMS. Please try again later."}
@@ -847,7 +816,7 @@ void HttpServer::resendValidateSMS(const httplib::Request& request, httplib::Res
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -862,14 +831,10 @@ void HttpServer::resendValidateSMS(const httplib::Request& request, httplib::Res
 
 	std::string token = subscriptionManager.getTempAccountToken(email);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Resending validation token for phone: " << phone << std::endl;
-#endif
-
 	std::string content = "Codul de validare pentru contul tau ParkPass este: " + token;
 	if (!sendSMS(phone, content))
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to resend validation SMS to: " << phone << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to resend validation SMS to: " << phone << std::endl;
 		responseJson = {
 			{"success", false},
 			{"message", "Failed to resend validation SMS. Please try again later."}
@@ -891,7 +856,7 @@ void HttpServer::validate(const httplib::Request& request, httplib::Response& re
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -905,9 +870,6 @@ void HttpServer::validate(const httplib::Request& request, httplib::Response& re
 	std::string email = subscriptionManager.addAccount(token);
 	if (!email.empty())
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account validated for email: " << email << std::endl;
-#endif
 		responseJson = {
 			{"success", true},
 			{"email", email}
@@ -916,7 +878,7 @@ void HttpServer::validate(const httplib::Request& request, httplib::Response& re
 	}
 	else
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Account validation failed for token: " << token << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Account validation failed for token: " << token << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -933,7 +895,7 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received in login." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received in login." << std::endl;
 		responseJson = {
 			{"success", false}
 		};
@@ -962,9 +924,6 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 		}
 		else
 		{
-#ifdef _DEBUG
-			LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Admin login failed." << std::endl;
-#endif
 			responseJson = {
 				{"success", false}
 			};
@@ -981,9 +940,6 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 		account = subscriptionManager.verifyCredentials(input, password);
 		if (account == nullptr)
 		{
-#ifdef _DEBUG
-			LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Login failed for input: " << input << std::endl;
-#endif
 			responseJson = {
 				{"success", false}
 			};
@@ -1002,10 +958,6 @@ void HttpServer::login(const httplib::Request& request, httplib::Response& respo
 
 	for (const auto& subscription : *subscriptions)
 		subscriptionsJson.push_back(nlohmann::json::array({ subscription.getName() }));
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "User logged in: " << email << std::endl;
-#endif
 
 	responseJson = {
 		{"success", true},
@@ -1026,7 +978,7 @@ void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httpli
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1042,20 +994,12 @@ void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httpli
 
 	if (account == nullptr)
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "No account found for email: " << email << std::endl;
-#endif
-
 		responseJson = {
 			{"success", false}
 		};
 		response.set_content(responseJson.dump(), "application/json");
 		return;
 	}
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account found for email: " << email << ". Generating recovery token." << std::endl;
-#endif
 
 	std::string token = generateToken();
 	subscriptionManager.addTempRecoveredPasswords(email, token);
@@ -1073,10 +1017,6 @@ void HttpServer::recoverPasswordViaEmail(const httplib::Request& request, httpli
 
 	sendEmail(email, subject, content);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Recovery email sent successfully to: " << email << std::endl;
-#endif
-
 	responseJson = {
 		{"success", true}
 	};
@@ -1090,7 +1030,7 @@ void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib:
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1106,10 +1046,6 @@ void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib:
 
 	if (account == nullptr)
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "No account found for phone: " << phone << std::endl;
-#endif
-
 		responseJson = {
 			{"success", false}
 		};
@@ -1117,19 +1053,11 @@ void HttpServer::recoverPasswordViaSMS(const httplib::Request& request, httplib:
 		return;
 	}
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account found for phone: " << phone << ". Generating recovery token." << std::endl;
-#endif
-
 	std::string token = generateToken();
 	subscriptionManager.addTempRecoveredPasswords(account->getEmail(), token);
 
 	std::string content = "Codul de resetare a parolei pentru contul tau ParkPass este: " + token;
 	sendSMS(phone, content);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Recovery SMS sent successfully to: " << phone << std::endl;
-#endif
 
 	responseJson = {
 		{"success", true}
@@ -1144,7 +1072,7 @@ void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib:
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1160,9 +1088,6 @@ void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib:
 
 	if (account == nullptr)
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "No account found for phone: " << phone << std::endl;
-#endif
 
 		responseJson = {
 			{"success", false}
@@ -1171,18 +1096,10 @@ void HttpServer::resendRecoverPassword(const httplib::Request& request, httplib:
 		return;
 	}
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching existing recovery token for phone: " << phone << std::endl;
-#endif
-
 	std::string token = subscriptionManager.getTempRecoveredPasswordToken(account->getEmail());
 
 	std::string content = "Codul de resetare a parolei pentru contul tau ParkPass este: " + token;
 	sendSMS(phone, content);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Resent recovery SMS successfully to: " << phone << std::endl;
-#endif
 
 	responseJson = { {"success", true} };
 	response.set_content(responseJson.dump(), "application/json");
@@ -1195,7 +1112,7 @@ void HttpServer::verifyResetPasswordToken(const httplib::Request& request, httpl
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1217,15 +1134,11 @@ void HttpServer::verifyResetPasswordToken(const httplib::Request& request, httpl
 			{"email", email}
 		};
 
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Token verified successfully. Email: " << email << std::endl;
-#endif
-
 		response.set_content(responseJson.dump(), "application/json");
 	}
 	else
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid token received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid token received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1243,7 +1156,7 @@ void HttpServer::resetPassword(const httplib::Request& request, httplib::Respons
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1265,18 +1178,10 @@ void HttpServer::resetPassword(const httplib::Request& request, httplib::Respons
 			{"success", true}
 		};
 
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Password reset successfully for email: " << email << std::endl;
-#endif
-
 		response.set_content(responseJson.dump(), "application/json");
 	}
 	else
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to reset password for email: " << email << std::endl;
-#endif
-
 		responseJson = {
 			{"success", false}
 		};
@@ -1293,7 +1198,7 @@ void HttpServer::getSubscriptionVehicles(const httplib::Request& request, httpli
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1329,10 +1234,6 @@ void HttpServer::getSubscriptionVehicles(const httplib::Request& request, httpli
 		{"vehiclesTable", vehiclesJson}
 	};
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetched subscription vehicles successfully for email: " << email << std::endl;
-#endif
-
 	response.set_content(responseJson.dump(), "application/json");
 }
 
@@ -1344,7 +1245,7 @@ void HttpServer::addSubscription(const httplib::Request& request, httplib::Respo
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1368,10 +1269,6 @@ void HttpServer::addSubscription(const httplib::Request& request, httplib::Respo
 			{"success", true}
 		};
 
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Subscription added successfully for email: " << email << ", subscription: " << subscriptionName << std::endl;
-#endif
-
 		response.set_content(responseJson.dump(), "application/json");
 	}
 	else
@@ -1379,10 +1276,6 @@ void HttpServer::addSubscription(const httplib::Request& request, httplib::Respo
 		responseJson = {
 			{"success", false}
 		};
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to add subscription for email: " << email << ", subscription: " << subscriptionName << std::endl;
-#endif
 
 		response.set_content(responseJson.dump(), "application/json");
 	}
@@ -1396,7 +1289,7 @@ void HttpServer::deleteSubscription(const httplib::Request& request, httplib::Re
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1420,10 +1313,6 @@ void HttpServer::deleteSubscription(const httplib::Request& request, httplib::Re
 			{"success", true}
 		};
 
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Subscription deleted successfully for email: " << email << ", subscription: " << subscriptionName << std::endl;
-#endif
-
 		response.set_content(responseJson.dump(), "application/json");
 	}
 	else
@@ -1431,10 +1320,6 @@ void HttpServer::deleteSubscription(const httplib::Request& request, httplib::Re
 		responseJson = {
 			{"success", false}
 		};
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to delete subscription for email: " << email << ", subscription: " << subscriptionName << std::endl;
-#endif
 
 		response.set_content(responseJson.dump(), "application/json");
 	}
@@ -1447,7 +1332,7 @@ void HttpServer::getVehicleHistory(const httplib::Request& request, httplib::Res
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1483,10 +1368,6 @@ void HttpServer::getVehicleHistory(const httplib::Request& request, httplib::Res
 		{"payment", std::to_string(payment)}
 	};
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Vehicle history fetched for license plate: " << licensePlate << std::endl;
-#endif
-
 	response.set_content(responseJson.dump(), "application/json");
 }
 
@@ -1499,7 +1380,7 @@ void HttpServer::addVehicle(const httplib::Request& request, httplib::Response& 
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1543,10 +1424,6 @@ void HttpServer::addVehicle(const httplib::Request& request, httplib::Response& 
 		};
 
 		response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Vehicle added successfully for subscription: " << subscriptionName << ", license plate: " << licensePlate << std::endl;
-#endif
 	}
 	else
 	{
@@ -1555,9 +1432,6 @@ void HttpServer::addVehicle(const httplib::Request& request, httplib::Response& 
 		};
 
 		response.set_content(responseJson.dump(), "application/json");
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to add vehicle for subscription: " << subscriptionName << ", license plate: " << licensePlate << std::endl;
-#endif
 	}
 }
 
@@ -1570,7 +1444,7 @@ void HttpServer::deleteVehicle(const httplib::Request& request, httplib::Respons
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1600,10 +1474,6 @@ void HttpServer::deleteVehicle(const httplib::Request& request, httplib::Respons
 		};
 
 		response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Vehicle with license plate " << licensePlate << " deleted successfully for subscription: " << subscriptionName << std::endl;
-#endif
 	}
 	else
 	{
@@ -1613,9 +1483,7 @@ void HttpServer::deleteVehicle(const httplib::Request& request, httplib::Respons
 
 		response.set_content(responseJson.dump(), "application/json");
 
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to delete vehicle with license plate " << licensePlate << " for subscription: " << subscriptionName << std::endl;
-#endif
+		LOG_MESSAGE(CRITICAL) << "Failed to delete vehicle with license plate " << licensePlate << " for subscription: " << subscriptionName << std::endl;
 	}
 }
 
@@ -1629,7 +1497,7 @@ void HttpServer::updateAccountInformation(const httplib::Request& request, httpl
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1659,9 +1527,6 @@ void HttpServer::updateAccountInformation(const httplib::Request& request, httpl
 			};
 
 			response.set_content(responseJson.dump(), "application/json");
-#ifdef _DEBUG
-			LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Phone number " << newPhone << " is already in use." << std::endl;
-#endif
 
 			return;
 		}
@@ -1673,10 +1538,6 @@ void HttpServer::updateAccountInformation(const httplib::Request& request, httpl
 		};
 
 		response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account information updated for email: " << email << std::endl;
-#endif
 	}
 	else
 	{
@@ -1686,7 +1547,7 @@ void HttpServer::updateAccountInformation(const httplib::Request& request, httpl
 
 		response.set_content(responseJson.dump(), "application/json");
 
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update account information for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update account information for email: " << email << std::endl;
 	}
 }
 
@@ -1700,7 +1561,7 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1726,9 +1587,6 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 
 	if (account == nullptr)
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account not found for email: " << email << std::endl;
-#endif
 
 		responseJson = {
 			{"success", false}
@@ -1740,10 +1598,6 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 
 	if (!subscriptionManager.addTempUpdatedAccount(email, newEmail, newPassword))
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to temporarily update account for email: " << email << std::endl;
-#endif
-
 		responseJson = {
 			{"success", false}
 		};
@@ -1758,10 +1612,6 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 		subscriptionManager.setUpdateToken(email, token);
 
 		std::string accountEmail = subscriptionManager.updateAccount(token);
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Admin update requested for email: " << email << ", token generated: " << token << std::endl;
-#endif
 	}
 
 	responseJson = {
@@ -1769,10 +1619,6 @@ void HttpServer::updateAccount(const httplib::Request& request, httplib::Respons
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account update process completed for email: " << email << std::endl;
-#endif
 }
 
 void HttpServer::validateUpdateViaEmail(const httplib::Request& request, httplib::Response& response)
@@ -1783,7 +1629,7 @@ void HttpServer::validateUpdateViaEmail(const httplib::Request& request, httplib
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1820,10 +1666,6 @@ void HttpServer::validateUpdateViaEmail(const httplib::Request& request, httplib
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Email sent for account update verification to email: " << email << std::endl;
-#endif
 }
 
 void HttpServer::validateUpdateViaSMS(const httplib::Request& request, httplib::Response& response)
@@ -1834,7 +1676,7 @@ void HttpServer::validateUpdateViaSMS(const httplib::Request& request, httplib::
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1860,10 +1702,6 @@ void HttpServer::validateUpdateViaSMS(const httplib::Request& request, httplib::
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "SMS sent for account update verification to phone: " << phone << std::endl;
-#endif
 }
 
 void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httplib::Response& response)
@@ -1874,7 +1712,7 @@ void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httpli
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1892,9 +1730,7 @@ void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httpli
 	std::string token = subscriptionManager.getTempUpdatedAccountToken(email);
 	if (token.empty())
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "No update token found for email: " << email << std::endl;
-#endif
+		LOG_MESSAGE(CRITICAL) << "No update token found for email: " << email << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1912,10 +1748,6 @@ void HttpServer::resendValidateUpdateSMS(const httplib::Request& request, httpli
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Resend validation SMS for email: " << email << " to phone: " << phone << std::endl;
-#endif
 }
 void HttpServer::validateUpdate(const httplib::Request& request, httplib::Response& response)
 {
@@ -1924,7 +1756,7 @@ void HttpServer::validateUpdate(const httplib::Request& request, httplib::Respon
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -1946,22 +1778,16 @@ void HttpServer::validateUpdate(const httplib::Request& request, httplib::Respon
 		};
 
 		response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account update validated for email: " << email << " with token: " << token << std::endl;
-#endif
 	}
 	else
 	{
+		LOG_MESSAGE(CRITICAL) << "No update token found for email: " << email << std::endl;
+
 		responseJson = {
 			{"success", false}
 		};
 
 		response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to validate account update with token: " << token << std::endl;
-#endif
 	}
 }
 
@@ -1974,7 +1800,7 @@ void HttpServer::contact(const httplib::Request& request, httplib::Response& res
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid key in contact request." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -2017,10 +1843,6 @@ void HttpServer::contact(const httplib::Request& request, httplib::Response& res
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Contact email sent to: " << email << " with subject: " << subject << std::endl;
-#endif
 }
 
 void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::Response& response)
@@ -2030,7 +1852,7 @@ void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::R
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -2045,10 +1867,6 @@ void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::R
 
 	if (!subscriptionManager.subscribeNewsletter(email))
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to subscribe email: " << email << std::endl;
-#endif
-
 		responseJson = {
 			{"success", false}
 		};
@@ -2074,10 +1892,6 @@ void HttpServer::subscribeNewsletter(const httplib::Request& request, httplib::R
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Successfully subscribed email: " << email << " to the newsletter." << std::endl;
-#endif
 }
 
 void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib::Response& response)
@@ -2087,7 +1901,7 @@ void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib:
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -2102,10 +1916,6 @@ void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib:
 
 	if (!subscriptionManager.unsubscribeNewsletter(email))
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Failed to unsubscribe email: " << email << std::endl;
-#endif
-
 		responseJson = {
 			{"success", false}
 		};
@@ -2131,10 +1941,6 @@ void HttpServer::unsubscribeNewsletter(const httplib::Request& request, httplib:
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Successfully unsubscribed email: " << email << " from the newsletter." << std::endl;
-#endif
 }
 
 void HttpServer::getAdmin(const httplib::Request& request, httplib::Response& response)
@@ -2143,7 +1949,7 @@ void HttpServer::getAdmin(const httplib::Request& request, httplib::Response& re
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid API key received." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 
 		responseJson = {
 			{"success", false}
@@ -2164,10 +1970,6 @@ void HttpServer::getAdmin(const httplib::Request& request, httplib::Response& re
 	};
 
 	response.set_content(responseJson.dump(), "application/json");
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetched emails for admin view, total: " << std::to_string(emails.size()) << " emails." << std::endl;
-#endif
 }
 
 HttpServer::~HttpServer()

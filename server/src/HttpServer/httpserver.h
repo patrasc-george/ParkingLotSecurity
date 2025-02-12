@@ -101,6 +101,6 @@ private:
 	httplib::Server server;
 	std::unique_ptr<WebSocketServer> webSocketServer;
 	SubscriptionManager subscriptionManager;
-	Logger logger;
+	Logger& logger;
 	std::string key;
 };

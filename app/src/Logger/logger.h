@@ -12,8 +12,8 @@
 #define LOGGER_API
 #endif
 
-#define LOG_MESSAGE(logLevel, logOutput) \
-    logger.log(logLevel, logOutput, __FILE__, __LINE__)
+#define LOG_MESSAGE(logLevel) \
+    logger.log(logLevel, __FILE__, __LINE__)
 
 #include <iostream>
 #include <fstream>
@@ -36,11 +36,15 @@ enum LogOutput
 
 class LOGGER_API Logger
 {
-public:
+private:
 	Logger();
 
 public:
-	Logger& log(const LogLevel& logLevel, const LogOutput& logOutput, const std::string& file, const int& line);
+	static Logger& getInstance();
+
+	void setLogOutput(const LogOutput& logOutput);
+
+	Logger& log(const LogLevel& logLevel, const std::string& file, const int& line);
 
 	Logger& operator<<(const std::string& message);
 

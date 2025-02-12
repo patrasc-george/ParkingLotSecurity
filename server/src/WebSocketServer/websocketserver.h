@@ -15,7 +15,8 @@ class WebSocketSession : public std::enable_shared_from_this<WebSocketSession>
 public:
 	explicit WebSocketSession(boost::beast::websocket::stream<boost::asio::ip::tcp::socket> webSocket)
 		: webSocket(std::move(webSocket)),
-		dataBaseManager(DatabaseManager::getInstance())
+		dataBaseManager(DatabaseManager::getInstance()),
+		logger(Logger::getInstance())
 	{}
 
 	void start();
@@ -29,7 +30,7 @@ private:
 	boost::beast::flat_buffer buffer;
 	boost::beast::websocket::stream<boost::asio::ip::tcp::socket> webSocket;
 	DatabaseManager& dataBaseManager;
-	Logger logger;
+	Logger& logger;
 };
 
 class WebSocketServer
@@ -39,7 +40,8 @@ public:
 
 	WebSocketServer(boost::asio::io_context& ioContext, unsigned short port)
 		: ioContext(ioContext),
-		acceptor(ioContext, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
+		acceptor(ioContext, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
+		logger(Logger::getInstance())
 	{}
 
 public:
@@ -51,5 +53,5 @@ private:
 private:
 	boost::asio::io_context& ioContext;
 	boost::asio::ip::tcp::acceptor acceptor;
-	Logger logger;
+	Logger& logger;
 };

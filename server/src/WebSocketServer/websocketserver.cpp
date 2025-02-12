@@ -2,26 +2,65 @@
 
 #include <openssl/aes.h>
 #include <openssl/rand.h>
+#include <openssl/buffer.h>
 #include <bitset>
 
+std::string base64Encode(const std::string& text)
+{
+	Logger& logger = Logger::getInstance();
+
+	BIO* bio = BIO_new(BIO_f_base64());
+	if (!bio)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to create BIO for base64 encoding." << std::endl;
+		return "";
+	}
+
+	BIO* mem = BIO_new(BIO_s_mem());
+	if (!mem)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to create memory BIO." << std::endl;
+		BIO_free_all(bio);
+		return "";
+	}
+
+	bio = BIO_push(bio, mem);
+	BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
+
+	BIO_write(bio, text.data(), text.size());
+	BIO_flush(bio);
+
+	BUF_MEM* buffer;
+	BIO_get_mem_ptr(bio, &buffer);
+	if (!buffer)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to get memory pointer from BIO." << std::endl;
+		BIO_free_all(bio);
+		return "";
+	}
+
+	std::string encoded(buffer->data, buffer->length);
+	BIO_free_all(bio);
+	return encoded;
+}
 
 std::string encrypt(const std::string& text)
 {
-	Logger logger;
+	Logger& logger = Logger::getInstance();
 
 	std::string password(std::getenv("POSTGRES_PASSWORD"));
 	if (password.empty() || password.size() != 32)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid or missing password for encryption." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid or missing password for encryption." << std::endl;
 		return text;
 	}
 
 	const unsigned char* key = reinterpret_cast<const unsigned char*>(password.c_str());
 
-	AES_KEY enc_key;
-	if (AES_set_encrypt_key(key, 256, &enc_key) < 0)
+	AES_KEY encKey;
+	if (AES_set_encrypt_key(key, 256, &encKey) < 0)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to set encryption key." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to set encryption key." << std::endl;
 		return "";
 	}
 
@@ -34,32 +73,65 @@ std::string encrypt(const std::string& text)
 		for (int i = 0; i < paddedText.size(); i += 16)
 		{
 			unsigned char block[16];
-			AES_encrypt(reinterpret_cast<const unsigned char*>(&paddedText[i]), block, &enc_key);
-
-			for (int j = 0; j < 16; j++)
-			{
-				std::bitset<8> bits(block[j]);
-				cipherText += bits.to_string();
-			}
+			AES_encrypt(reinterpret_cast<const unsigned char*>(&paddedText[i]), block, &encKey);
+			cipherText.append(reinterpret_cast<const char*>(block), 16);
 		}
 	}
 	catch (const std::exception& e)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error during encryption process: " << e.what() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error during encryption process: " << e.what() << std::endl;
 		return "";
 	}
 
-	return cipherText;
+	return base64Encode(cipherText);
+}
+
+std::string base64Decode(const std::string& text)
+{
+	Logger& logger = Logger::getInstance();
+
+	BIO* bio = BIO_new_mem_buf(text.data(), text.size());
+	if (!bio)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to create memory BIO for base64 decoding." << std::endl;
+		return "";
+	}
+
+	BIO* b64 = BIO_new(BIO_f_base64());
+	if (!b64)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to create BIO filter for base64 decoding." << std::endl;
+		BIO_free_all(bio);
+		return "";
+	}
+
+	bio = BIO_push(b64, bio);
+	BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
+
+	std::string decoded(text.size(), '\0');
+	int size = BIO_read(bio, &decoded[0], text.size());
+
+	if (size <= 0)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to read decoded data from BIO." << std::endl;
+		BIO_free_all(bio);
+		return "";
+	}
+
+	decoded.resize(size);
+
+	BIO_free_all(bio);
+	return decoded;
 }
 
 nlohmann::json decrypt(const std::string& text)
 {
-	Logger logger;
+	Logger& logger = Logger::getInstance();
 
 	std::string password(std::getenv("POSTGRES_PASSWORD"));
 	if (password.empty() || password.size() != 32)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid or missing password for decryption." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid or missing password for decryption." << std::endl;
 		return nlohmann::json();
 	}
 
@@ -68,54 +140,31 @@ nlohmann::json decrypt(const std::string& text)
 	AES_KEY dec_key;
 	if (AES_set_decrypt_key(key, 256, &dec_key) < 0)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to set decryption key." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to set decryption key." << std::endl;
 		return nlohmann::json();
 	}
 
-	std::vector<unsigned char> cipherText;
-	try
-	{
-		for (int i = 0; i < text.size(); i += 8)
-		{
-			std::bitset<8> bits(text.substr(i, 8));
-			cipherText.push_back(static_cast<unsigned char>(bits.to_ulong()));
-		}
-	}
-	catch (const std::exception& e)
-	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error during text conversion to cipher text: " << e.what() << std::endl;
-		return nlohmann::json();
-	}
+	std::string decodedCipherText = base64Decode(text);
+	std::vector<unsigned char> cipherText(decodedCipherText.begin(), decodedCipherText.end());
 
 	std::string decryptedText;
 	decryptedText.resize(cipherText.size());
 
-	try
-	{
-		for (size_t i = 0; i < cipherText.size(); i += 16)
-			AES_decrypt(&cipherText[i], reinterpret_cast<unsigned char*>(&decryptedText[i]), &dec_key);
-	}
-	catch (const std::exception& e)
-	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error during AES decryption: " << e.what() << std::endl;
-		return nlohmann::json();
-	}
+	for (int i = 0; i < cipherText.size(); i += 16)
+		AES_decrypt(&cipherText[i], reinterpret_cast<unsigned char*>(&decryptedText[i]), &dec_key);
 
-	size_t padding = decryptedText[decryptedText.size() - 1];
+	int padding = decryptedText[decryptedText.size() - 1];
 	decryptedText.resize(decryptedText.size() - padding);
 
-	nlohmann::json jsonText;
 	try
 	{
-		jsonText = nlohmann::json::parse(decryptedText);
+		return nlohmann::json::parse(decryptedText);
 	}
-	catch (const std::exception& e)
+	catch (const nlohmann::json::parse_error& e)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to parse decrypted text into JSON. Error: " << e.what() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to parse decrypted text into JSON: " << e.what() << std::endl;
 		return nlohmann::json();
 	}
-
-	return jsonText;
 }
 
 void WebSocketSession::start()
@@ -130,20 +179,11 @@ void WebSocketSession::doRead()
 	webSocket.read(buffer, errorCode);
 
 	if (errorCode)
-	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Error reading message from WebSocket: " << errorCode.message() << std::endl;
-#endif
 		return;
-	}
 
 	std::string message = boost::beast::buffers_to_string(buffer.data());
 	nlohmann::json decryptMessage = decrypt(message);
 	buffer.consume(buffer.size());
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Received message: " << decryptMessage.dump() << std::endl;
-#endif
 
 	std::string command = decryptMessage["command"];
 	nlohmann::json response;
@@ -187,19 +227,15 @@ void WebSocketSession::doWrite(const std::string& message)
 {
 	if (!webSocket.is_open())
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "WebSocket is not open. Cannot send message." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "WebSocket is not open. Cannot send message." << std::endl;
 		return;
 	}
 
 	if (message.empty())
 	{
-		LOG_MESSAGE(LogLevel::WARNING, LogOutput::CONSOLE) << "Attempted to send an empty message." << std::endl;
+		LOG_MESSAGE(WARNING) << "Attempted to send an empty message." << std::endl;
 		return;
 	}
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Sending message: " << message << std::endl;
-#endif
 
 	std::string encryptMessage = encrypt(message);
 	boost::beast::error_code errorCode;
@@ -207,7 +243,7 @@ void WebSocketSession::doWrite(const std::string& message)
 
 	if (errorCode)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to send message: " << errorCode.message() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to send message: " << errorCode.message() << std::endl;
 		return;
 	}
 }
@@ -219,10 +255,7 @@ void WebSocketServer::start()
 
 bool isValidToken(const std::string& token)
 {
-	Logger logger;
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Validating token: " << token << std::endl;
-#endif
+	Logger& logger = Logger::getInstance();
 
 	std::string expectedToken;
 #ifdef _DEBUG
@@ -233,7 +266,7 @@ bool isValidToken(const std::string& token)
 
 	if (token != expectedToken)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid token: " << token << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid token: " << token << std::endl;
 		return false;
 	}
 
@@ -249,7 +282,7 @@ void WebSocketServer::doAccept()
 
 	if (errorCode)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to accept connection: " << errorCode.message() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to accept connection: " << errorCode.message() << std::endl;
 		return;
 	}
 
@@ -259,7 +292,7 @@ void WebSocketServer::doAccept()
 
 	if (errorCode)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to read HTTP request: " << errorCode.message() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to read HTTP request: " << errorCode.message() << std::endl;
 		return;
 	}
 
@@ -269,7 +302,7 @@ void WebSocketServer::doAccept()
 
 	if (errorCode)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to accept WebSocket connection: " << errorCode.message() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to accept WebSocket connection: " << errorCode.message() << std::endl;
 		return;
 	}
 
@@ -287,11 +320,11 @@ void WebSocketServer::doAccept()
 	{
 		wsStream.close(boost::beast::websocket::close_code::policy_error, errorCode);
 
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Invalid token. Closing connection." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Invalid token. Closing connection." << std::endl;
 		return;
 	}
 	else
-		LOG_MESSAGE(LogLevel::INFO, LogOutput::CONSOLE) << "Accepted a new WebSocket connection." << std::endl;
+		LOG_MESSAGE(INFO) << "Accepted a new WebSocket connection." << std::endl;
 
 	auto session = std::make_shared<WebSocketSession>(std::move(wsStream));
 	session->start();

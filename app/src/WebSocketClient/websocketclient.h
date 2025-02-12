@@ -26,7 +26,8 @@ public:
 		resolver(nullptr),
 		uri(""),
 		host(""),
-		port("")
+		port(""),
+		logger(Logger::getInstance())
 	{};
 
 	WebSocketClient(boost::asio::io_context& ioContext, const std::string& uri);
@@ -56,5 +57,5 @@ private:
 	std::string uri;
 	std::string host;
 	std::string port;
-	Logger logger;
+	Logger& logger;
 };

@@ -10,9 +10,9 @@
 
 bool DatabaseManager::initializeDatabase()
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "The program has been launched." << std::endl;
-#endif
+	logger.setLogOutput(CONSOLE);
+
+	LOG_MESSAGE(INFO) << "The program has been launched." << std::endl;
 
 #ifdef _DEBUG
 	conn = PQconnectdb(std::getenv("DATABASE_URL_DEBUG"));
@@ -22,7 +22,7 @@ bool DatabaseManager::initializeDatabase()
 
 	if (PQstatus(conn) != CONNECTION_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to connect to the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to connect to the database." << std::endl;
 		PQfinish(conn);
 		return false;
 	}
@@ -72,24 +72,18 @@ bool DatabaseManager::initializeDatabase()
 		);
 	)";
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Executing SQL to create tables." << std::endl;
-#endif
-
 	PGresult* result = PQexec(conn, sqlCreateTables);
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to create tables in the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to create tables in the database." << std::endl;
 		PQclear(result);
 		PQfinish(conn);
 		return false;
 	}
 	PQclear(result);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Database initialized successfully." << std::endl;
-#endif
+	LOG_MESSAGE(INFO) << "Database initialized successfully." << std::endl;
 
 	return true;
 }
@@ -102,10 +96,6 @@ DatabaseManager& DatabaseManager::getInstance()
 
 std::vector<std::string> DatabaseManager::getVehicles()
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching vehicles from the database." << std::endl;
-#endif
-
 	std::vector<std::string> vehicles;
 	const char* sql = "SELECT id, image_path, license_plate, date_time, ticket, time_parked, total_amount, is_paid FROM vehicles;";
 
@@ -113,16 +103,12 @@ std::vector<std::string> DatabaseManager::getVehicles()
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch vehicles from the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch vehicles from the database." << std::endl;
 		PQclear(result);
 		return vehicles;
 	}
 
 	int numRows = PQntuples(result);
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetched " << std::to_string(numRows) << " vehicles from the database." << std::endl;
-#endif
-
 	for (int i = 0; i < numRows; i++)
 	{
 		int id = std::stoi(PQgetvalue(result, i, 0)) - 1;
@@ -145,10 +131,6 @@ std::vector<std::string> DatabaseManager::getVehicles()
 
 std::unordered_set<std::string> DatabaseManager::getNewsletter()
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching newsletter emails from the database." << std::endl;
-#endif
-
 	std::unordered_set<std::string> newsletter;
 	const char* sql = "SELECT email FROM newsletter;";
 
@@ -156,7 +138,7 @@ std::unordered_set<std::string> DatabaseManager::getNewsletter()
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch newsletter emails from the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch newsletter emails from the database." << std::endl;
 		PQclear(result);
 		return newsletter;
 	}
@@ -169,19 +151,12 @@ std::unordered_set<std::string> DatabaseManager::getNewsletter()
 	}
 
 	PQclear(result);
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetched " << std::to_string(numRows) << " emails for the newsletter." << std::endl;
-#endif
 
 	return newsletter;
 }
 
 std::string DatabaseManager::getLastVehicleActivity(const std::string& vehicleLicensePlate)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching last activity for vehicle: " << vehicleLicensePlate << std::endl;
-#endif
-
 	std::string activity = ", , , ";
 	const char* sql = "SELECT license_plate, date_time, ticket, time_parked, total_amount FROM vehicles;";
 
@@ -189,7 +164,7 @@ std::string DatabaseManager::getLastVehicleActivity(const std::string& vehicleLi
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch vehicle activity from the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch vehicle activity from the database." << std::endl;
 		PQclear(result);
 		return activity;
 	}
@@ -214,19 +189,11 @@ std::string DatabaseManager::getLastVehicleActivity(const std::string& vehicleLi
 
 	PQclear(result);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Last activity for vehicle " << vehicleLicensePlate << ": " << activity << std::endl;
-#endif
-
 	return activity;
 }
 
 std::string DatabaseManager::getTotalTimeParked(const std::string& vehicleLicensePlate)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching total time parked for vehicle: " << vehicleLicensePlate << std::endl;
-#endif
-
 	int totalSeconds = 0;
 	const char* sql = "SELECT license_plate, time_parked FROM vehicles;";
 
@@ -234,7 +201,7 @@ std::string DatabaseManager::getTotalTimeParked(const std::string& vehicleLicens
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch parking time from the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch parking time from the database." << std::endl;
 		PQclear(result);
 		return "00:00:00";
 	}
@@ -273,19 +240,11 @@ std::string DatabaseManager::getTotalTimeParked(const std::string& vehicleLicens
 
 	PQclear(result);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Total time parked for vehicle " << vehicleLicensePlate << ": " << ss.str() << std::endl;
-#endif
-
 	return ss.str();
 }
 
 int DatabaseManager::getPayment(const std::string& vehicleLicensePlate)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching total payment for vehicle: " << vehicleLicensePlate << std::endl;
-#endif
-
 	int payment = 0;
 	const char* sql = "SELECT license_plate, time_parked, total_amount FROM vehicles;";
 
@@ -293,7 +252,7 @@ int DatabaseManager::getPayment(const std::string& vehicleLicensePlate)
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch payment data from the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch payment data from the database." << std::endl;
 		PQclear(result);
 		return payment;
 	}
@@ -311,19 +270,11 @@ int DatabaseManager::getPayment(const std::string& vehicleLicensePlate)
 
 	PQclear(result);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Total payment for vehicle " << vehicleLicensePlate << ": " << std::to_string(payment) << " RON" << std::endl;
-#endif
-
 	return payment;
 }
 
 std::vector<std::string> DatabaseManager::getAccounts()
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching accounts from the database." << std::endl;
-#endif
-
 	std::vector<std::string> accounts;
 	const char* sql = "SELECT name, last_name, email, password, phone FROM accounts;";
 
@@ -331,7 +282,7 @@ std::vector<std::string> DatabaseManager::getAccounts()
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch account data from the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch account data from the database." << std::endl;
 		PQclear(result);
 		return accounts;
 	}
@@ -351,19 +302,11 @@ std::vector<std::string> DatabaseManager::getAccounts()
 
 	PQclear(result);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetched " << std::to_string(numRows) << " accounts from the database." << std::endl;
-#endif
-
 	return accounts;
 }
 
 std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseManager::getSubscriptions(const std::string& email)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching subscriptions for email: " << email << std::endl;
-#endif
-
 	std::unordered_map<std::string, std::pair<std::string, std::string>> subscriptions;
 
 	const char* sqlGetSubscriptions = R"(
@@ -378,7 +321,7 @@ std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseMan
 
 	if (PQresultStatus(resultGetSubscriptions) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch subscriptions for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch subscriptions for email: " << email << std::endl;
 		PQclear(resultGetSubscriptions);
 		return subscriptions;
 	}
@@ -404,10 +347,6 @@ std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseMan
 
 	for (auto& pair : subscriptions)
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching details for subscription: " << pair.first << std::endl;
-#endif
-
 		std::string payments;
 		std::string licensePlates;
 
@@ -417,7 +356,7 @@ std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseMan
 
 		if (PQresultStatus(resultGetDetails) != PGRES_TUPLES_OK)
 		{
-			LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch details for subscription: " << pair.first << " and email: " << email << std::endl;
+			LOG_MESSAGE(CRITICAL) << "Failed to fetch details for subscription: " << pair.first << " and email: " << email << std::endl;
 			PQclear(resultGetDetails);
 			continue;
 		}
@@ -456,10 +395,6 @@ std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseMan
 
 std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& vehicleLicensePlate)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetching vehicle history for license plate: " << vehicleLicensePlate << std::endl;
-#endif
-
 	std::vector<std::string> history;
 	const char* sql = "SELECT license_plate, date_time, ticket, time_parked, total_amount FROM vehicles;";
 
@@ -467,7 +402,7 @@ std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& v
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch vehicle history from the database." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch vehicle history from the database." << std::endl;
 		PQclear(result);
 		return history;
 	}
@@ -494,19 +429,11 @@ std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& v
 
 	PQclear(result);
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Fetched " << std::to_string(history.size()) << " history entries for vehicle " << vehicleLicensePlate << std::endl;
-#endif
-
 	return history;
 }
 
 bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Checking payment status for vehicle with license plate: " << vehicleLicensePlate << std::endl;
-#endif
-
 	const char* sqlCheckLicensePlate = "SELECT 1 FROM license_plates WHERE number = $1;";
 
 	const char* paramsCheckLicensePlate[] = { vehicleLicensePlate.c_str() };
@@ -516,9 +443,6 @@ bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 	if (PQresultStatus(checkLicensePlateResult) == PGRES_TUPLES_OK && PQntuples(checkLicensePlateResult))
 	{
 		PQclear(checkLicensePlateResult);
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Vehicle license plate exists: " << vehicleLicensePlate << std::endl;
-#endif
 		return true;
 	}
 
@@ -538,7 +462,7 @@ bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 
 	if (PQresultStatus(checkResult) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to check payment status for vehicle: " << vehicleLicensePlate << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to check payment status for vehicle: " << vehicleLicensePlate << std::endl;
 		PQclear(checkResult);
 		return false;
 	}
@@ -546,7 +470,7 @@ bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 	int numRows = PQntuples(checkResult);
 	if (numRows == 0)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "No payment records found for vehicle: " << vehicleLicensePlate << std::endl;
+		LOG_MESSAGE(CRITICAL) << "No payment records found for vehicle: " << vehicleLicensePlate << std::endl;
 		PQclear(checkResult);
 		return false;
 	}
@@ -554,10 +478,6 @@ bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 	std::string isPaid = PQgetvalue(checkResult, 0, 0);
 
 	PQclear(checkResult);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Payment status for vehicle " << vehicleLicensePlate << ": " << (isPaid == "true" ? "Paid" : "Not Paid") << std::endl;
-#endif
 
 	if (isPaid == "true")
 		return true;
@@ -567,10 +487,6 @@ bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 
 bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Setting payment status for vehicle: " << vehicle << ", ticket: " << std::to_string(isTicket) << std::endl;
-#endif
-
 	const char* sqlCheck;
 	if (isTicket)
 		sqlCheck = R"(
@@ -595,7 +511,7 @@ bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& license
 
 	if (PQresultStatus(checkResult) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch vehicle information for: " << vehicle << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch vehicle information for: " << vehicle << std::endl;
 		PQclear(checkResult);
 		return false;
 	}
@@ -603,7 +519,7 @@ bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& license
 	int numRows = PQntuples(checkResult);
 	if (numRows == 0)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "No information found for vehicle: " << vehicle << std::endl;
+		LOG_MESSAGE(CRITICAL) << "No information found for vehicle: " << vehicle << std::endl;
 		PQclear(checkResult);
 		return false;
 	}
@@ -623,12 +539,10 @@ bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& license
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update payment status for vehicle: " << vehicle << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update payment status for vehicle: " << vehicle << std::endl;
 		PQclear(result);
 		return false;
 	}
-
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Payment status successfully set for vehicle: " << vehicle << std::endl;
 
 	PQclear(result);
 	return true;
@@ -639,10 +553,6 @@ void DatabaseManager::setName(const std::string& email, const std::string& newNa
 	if (newName.empty())
 		return;
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Updating name for email: " << email << " to " << newName << std::endl;
-#endif
-
 	const char* sql = "UPDATE accounts SET name = $1 WHERE email = $2";
 
 	const char* params[] = { newName.c_str(), email.c_str() };
@@ -651,12 +561,10 @@ void DatabaseManager::setName(const std::string& email, const std::string& newNa
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update name for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update name for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
-
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Name successfully updated for email: " << email << std::endl;
 
 	PQclear(result);
 }
@@ -666,10 +574,6 @@ void DatabaseManager::setLastName(const std::string& email, const std::string& n
 	if (newLastName.empty())
 		return;
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Updating last name for email: " << email << " to " << newLastName << std::endl;
-#endif
-
 	const char* sql = "UPDATE accounts SET last_name = $1 WHERE email = $2";
 
 	const char* params[] = { newLastName.c_str(), email.c_str() };
@@ -678,12 +582,10 @@ void DatabaseManager::setLastName(const std::string& email, const std::string& n
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update last name for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update last name for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
-
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Last name successfully updated for email: " << email << std::endl;
 
 	PQclear(result);
 }
@@ -693,10 +595,6 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 	if (newEmail.empty())
 		return;
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Updating email from: " << email << " to: " << newEmail << std::endl;
-#endif
-
 	const char* selectAccount = "SELECT name, last_name, password, phone FROM accounts WHERE email = $1";
 	const char* paramsSelect[] = { email.c_str() };
 
@@ -704,7 +602,7 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK || PQntuples(result) != 1)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to fetch account information for: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch account information for: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -723,7 +621,7 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to insert new account with email: " << newEmail << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to insert new account with email: " << newEmail << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -737,7 +635,7 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update subscription payments for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update subscription payments for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -750,7 +648,7 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update subscription license plates for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update subscription license plates for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -763,26 +661,18 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to delete old account with email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to delete old account with email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Email successfully updated from: " << email << " to: " << newEmail << std::endl;
-#endif
 }
 
 void DatabaseManager::setPassword(const std::string& email, const std::string& newPassword)
 {
 	if (newPassword.empty())
 		return;
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Updating password for email: " << email << std::endl;
-#endif
 
 	const char* sql = "UPDATE accounts SET password = $1 WHERE email = $2";
 
@@ -792,26 +682,18 @@ void DatabaseManager::setPassword(const std::string& email, const std::string& n
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update password for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update password for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Password successfully updated for email: " << email << std::endl;
-#endif
 }
 
 void DatabaseManager::setPhone(const std::string& email, const std::string& newPhone)
 {
 	if (newPhone.empty())
 		return;
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Updating phone number for email: " << email << " to: " << newPhone << std::endl;
-#endif
 
 	const char* sql = "UPDATE accounts SET phone = $1 WHERE email = $2";
 
@@ -821,24 +703,16 @@ void DatabaseManager::setPhone(const std::string& email, const std::string& newP
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Failed to update phone number for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update phone number for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Phone number successfully updated for email: " << email << std::endl;
-#endif
 }
 
 void DatabaseManager::addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Adding new vehicle: " << licensePlate << ", Ticket: " << ticket << std::endl;
-#endif
-
 	const char* sqlInsert = R"(
         INSERT INTO vehicles (image_path, license_plate, date_time, ticket, time_parked, total_amount, is_paid)
         VALUES ($1, $2, $3, $4, $5, $6, $7);
@@ -858,24 +732,16 @@ void DatabaseManager::addVehicle(const int& id, const std::string& imagePath, co
 
 	if (PQresultStatus(insertResult) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error inserting vehicle with license plate: " << licensePlate << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error inserting vehicle with license plate: " << licensePlate << std::endl;
 		PQclear(insertResult);
 		throw std::runtime_error("Error inserting vehicle into database");
 	}
 
 	PQclear(insertResult);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Vehicle successfully added with license plate: " << licensePlate << std::endl;
-#endif
 }
 
 void DatabaseManager::addAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Adding new account for email: " << email << std::endl;
-#endif
-
 	const char* sql = R"(
         INSERT INTO accounts (name, last_name, email, password, phone)
         VALUES ($1, $2, $3, $4, $5);
@@ -887,24 +753,16 @@ void DatabaseManager::addAccount(const std::string& name, const std::string& las
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error adding account for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error adding account for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Account successfully added for email: " << email << std::endl;
-#endif
 }
 
 void DatabaseManager::addSubscription(const std::string& email, const std::string& name)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Adding subscription for email: " << email << " with subscription name: " << name << std::endl;
-#endif
-
 	const char* sqlInsertPayment = R"(
     INSERT INTO payments (date)
     VALUES ($1)
@@ -922,7 +780,7 @@ void DatabaseManager::addSubscription(const std::string& email, const std::strin
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error inserting payment for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error inserting payment for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -946,24 +804,16 @@ void DatabaseManager::addSubscription(const std::string& email, const std::strin
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error linking subscription for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error linking subscription for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Subscription successfully added for email: " << email << " with subscription name: " << name << std::endl;
-#endif
 }
 
 void DatabaseManager::addLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Adding license plate: " << licensePlate << " for email: " << email << std::endl;
-#endif
-
 	const char* insertLicensePlateSQL = R"(
         INSERT INTO license_plates (number) 
         VALUES ($1);
@@ -974,7 +824,7 @@ void DatabaseManager::addLicensePlate(const std::string& email, const std::strin
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error inserting license plate: " << licensePlate << " for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error inserting license plate: " << licensePlate << " for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -988,7 +838,7 @@ void DatabaseManager::addLicensePlate(const std::string& email, const std::strin
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error getting last inserted license plate ID for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error getting last inserted license plate ID for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -1007,24 +857,16 @@ void DatabaseManager::addLicensePlate(const std::string& email, const std::strin
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error linking license plate to subscription for email: " << email << " with license plate: " << licensePlate << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error linking license plate to subscription for email: " << email << " with license plate: " << licensePlate << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "License plate successfully added for email: " << email << " with license plate: " << licensePlate << std::endl;
-#endif
 }
 
 void DatabaseManager::subscribeNewsletter(const std::string& email)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Subscribing email to newsletter: " << email << std::endl;
-#endif
-
 	const char* subscribeSQL = R"(
         INSERT INTO newsletter (email) 
         VALUES ($1);
@@ -1035,24 +877,16 @@ void DatabaseManager::subscribeNewsletter(const std::string& email)
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error subscribing email to newsletter: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error subscribing email to newsletter: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Successfully subscribed email to newsletter: " << email << std::endl;
-#endif
 }
 
 void DatabaseManager::unsubscribeNewsletter(const std::string& email)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Unsubscribing email from newsletter: " << email << std::endl;
-#endif
-
 	const char* unsubscribeSQL = R"(
         DELETE FROM newsletter 
         WHERE email = $1;
@@ -1063,24 +897,16 @@ void DatabaseManager::unsubscribeNewsletter(const std::string& email)
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error unsubscribing email from newsletter: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error unsubscribing email from newsletter: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	PQclear(result);
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Successfully unsubscribed email from newsletter: " << email << std::endl;
-#endif
 }
 
 void DatabaseManager::deleteSubscription(const std::string& email, const std::string& name)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Deleting subscription for email: " << email << " and subscription name: " << name << std::endl;
-#endif
-
 	std::vector<int> paymentIds;
 	std::vector<int> licensePlateIds;
 
@@ -1094,7 +920,7 @@ void DatabaseManager::deleteSubscription(const std::string& email, const std::st
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error retrieving payment IDs for subscription: " << name << " and email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error retrieving payment IDs for subscription: " << name << " and email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -1114,7 +940,7 @@ void DatabaseManager::deleteSubscription(const std::string& email, const std::st
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error retrieving license plate IDs for subscription: " << name << " and email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error retrieving license plate IDs for subscription: " << name << " and email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -1133,7 +959,7 @@ void DatabaseManager::deleteSubscription(const std::string& email, const std::st
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error deleting payments for subscription: " << name << " and email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error deleting payments for subscription: " << name << " and email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -1148,7 +974,7 @@ void DatabaseManager::deleteSubscription(const std::string& email, const std::st
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error deleting license plates for subscription: " << name << " and email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error deleting license plates for subscription: " << name << " and email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -1167,7 +993,7 @@ void DatabaseManager::deleteSubscription(const std::string& email, const std::st
 
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
-			LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error deleting payment ID: " << std::to_string(id) << " for email: " << email << std::endl;
+			LOG_MESSAGE(CRITICAL) << "Error deleting payment ID: " << std::to_string(id) << " for email: " << email << std::endl;
 			PQclear(result);
 			return;
 		}
@@ -1187,24 +1013,16 @@ void DatabaseManager::deleteSubscription(const std::string& email, const std::st
 
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
-			LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error deleting license plate ID: " << std::to_string(id) << " for email: " << email << std::endl;
+			LOG_MESSAGE(CRITICAL) << "Error deleting license plate ID: " << std::to_string(id) << " for email: " << email << std::endl;
 			PQclear(result);
 			return;
 		}
 		PQclear(result);
 	}
-
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Successfully deleted subscription for email: " << email << " and subscription name: " << name << std::endl;
-#endif
 }
 
 void DatabaseManager::deleteLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate)
 {
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Attempting to delete license plate: " << licensePlate << " for email: " << email << " and subscription: " << name << std::endl;
-#endif
-
 	const char* selectIdSQL = R"(
         SELECT id FROM license_plates 
         WHERE number = $1;
@@ -1214,13 +1032,10 @@ void DatabaseManager::deleteLicensePlate(const std::string& email, const std::st
 
 	int licensePlateId = -1;
 	if (PQresultStatus(result) == PGRES_TUPLES_OK && PQntuples(result) > 0)
-	{
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "License plate ID found: " << std::to_string(licensePlateId) << std::endl;
 		licensePlateId = std::stoi(PQgetvalue(result, 0, 0));
-	}
 	else
 	{
-		LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "License plate not found: " << licensePlate << std::endl;
+		LOG_MESSAGE(CRITICAL) << "License plate not found: " << licensePlate << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -1240,7 +1055,7 @@ void DatabaseManager::deleteLicensePlate(const std::string& email, const std::st
 
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
-			LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error deleting license plate link for plate: " << licensePlate << " and subscription: " << name << std::endl;
+			LOG_MESSAGE(CRITICAL) << "Error deleting license plate link for plate: " << licensePlate << " and subscription: " << name << std::endl;
 			PQclear(result);
 			return;
 		}
@@ -1256,16 +1071,12 @@ void DatabaseManager::deleteLicensePlate(const std::string& email, const std::st
 
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
-			LOG_MESSAGE(LogLevel::CRITICAL, LogOutput::CONSOLE) << "Error deleting license plate record for plate: " << licensePlate << std::endl;
+			LOG_MESSAGE(CRITICAL) << "Error deleting license plate record for plate: " << licensePlate << std::endl;
 			PQclear(result);
 			return;
 		}
 
 		PQclear(result);
-
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Successfully deleted license plate: " << licensePlate << std::endl;
-#endif
 	}
 }
 
@@ -1273,13 +1084,9 @@ DatabaseManager::~DatabaseManager()
 {
 	if (conn)
 	{
-#ifdef _DEBUG
-		LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "Closing database connection." << std::endl;
-#endif
+		LOG_MESSAGE(INFO) << "Closing database connection." << std::endl;
 		PQfinish(conn);
 	}
 
-#ifdef _DEBUG
-	LOG_MESSAGE(LogLevel::DEBUG, LogOutput::TEXT_FILE) << "The program has been closed." << std::endl << std::endl << std::endl << std::endl;
-#endif
+	LOG_MESSAGE(INFO) << "The program has been closed." << std::endl << std::endl << std::endl << std::endl;
 }

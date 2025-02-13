@@ -140,7 +140,7 @@ public:
 	 * @return An unordered map where each key is a subscription name and each value is a pair of strings:
 	 *         the first string is the list of payment dates, and the second string is the list of associated license plates.
 	 */
-	std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseManager::getSubscriptions(const std::string& email);
+	std::unordered_map<std::string, std::pair<std::string, std::string>> getSubscriptions(const std::string& email);
 
 	/**
 	 * @brief Retrieves the parking history of a specific vehicle based on its license plate.
@@ -150,7 +150,7 @@ public:
 	 * @param[in] vehicleLicensePlate The license plate number of the vehicle whose history is to be retrieved.
 	 * @return A vector of strings, each representing a parking session, including the ticket, date/time, time parked, and total amount.
 	 */
-	std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& vehicleLicensePlate);
+	std::vector<std::string> getVehicleHistory(const std::string& vehicleLicensePlate);
 
 	/**
 	 * @brief Checks if a specific vehicle's parking fee has been paid based on its license plate.
@@ -159,7 +159,7 @@ public:
 	 * @param[in] vehicleLicensePlate The license plate number of the vehicle whose payment status is to be checked.
 	 * @return A boolean value: true if the parking fee has been paid, false otherwise.
 	 */
-	bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate);
+	bool getIsPaid(const std::string& vehicleLicensePlate);
 
 	/**
 	 * @brief Sets the payment status for a vehicle based on its license plate or ticket.
@@ -174,7 +174,7 @@ public:
 	 * @param[in] isTicket Boolean indicating whether the query should search by ticket (true) or by license plate (false).
 	 * @return A boolean indicating whether the payment status was successfully updated.
 	 */
-	bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket);
+	bool setIsPaid(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket);
 
 	/**
 	 * @brief Updates the name of an account based on the user's email.
@@ -183,7 +183,7 @@ public:
 	 * @param[in] email The email address of the account to update.
 	 * @param[in] newName The new name to set for the account.
 	 */
-	void DatabaseManager::setName(const std::string& email, const std::string& newName);
+	void setName(const std::string& email, const std::string& newName);
 
 	/**
 	 * @brief Updates the last name of an account based on the user's email.
@@ -192,7 +192,7 @@ public:
 	 * @param[in] email The email address of the account to update.
 	 * @param[in] newLastName The new last name to set for the account.
 	 */
-	void DatabaseManager::setLastName(const std::string& email, const std::string& newLastName);
+	void setLastName(const std::string& email, const std::string& newLastName);
 
 	/**
 	 * @brief Updates the email address of an account and associated records in related tables.
@@ -204,7 +204,7 @@ public:
 	 * @param[in] email The old email address of the account to be updated.
 	 * @param[in] newEmail The new email address to assign to the account.
 	 */
-	void DatabaseManager::setEmail(const std::string& email, const std::string& newEmail);
+	void setEmail(const std::string& email, const std::string& newEmail);
 
 	/**
 	 * @brief Updates the password of an account based on the user's email.
@@ -213,7 +213,7 @@ public:
 	 * @param[in] email The email address of the account whose password needs to be updated.
 	 * @param[in] newPassword The new password to set for the account.
 	 */
-	void DatabaseManager::setPassword(const std::string& email, const std::string& newPassword);
+	void setPassword(const std::string& email, const std::string& newPassword);
 
 	/**
 	 * @brief Updates the phone number of an account based on the user's email.
@@ -222,7 +222,7 @@ public:
 	 * @param[in] email The email address of the account whose phone number needs to be updated.
 	 * @param[in] newPhone The new phone number to set for the account.
 	 */
-	void DatabaseManager::setPhone(const std::string& email, const std::string& newPhone);
+	void setPhone(const std::string& email, const std::string& newPhone);
 
 	/**
 	 * @brief Adds a new vehicle to the "vehicles" table.
@@ -239,7 +239,7 @@ public:
 	 * @param[in] isPaid A flag indicating whether the vehicle's parking fee has been paid.
 	 * @throws std::runtime_error If an error occurs while inserting the vehicle into the database.
 	 */
-	void DatabaseManager::addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid);
+	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid);
 
 	/**
 	 * @brief Adds a new account to the "accounts" table.
@@ -251,7 +251,7 @@ public:
 	 * @param[in] password The password for the account.
 	 * @param[in] phone The phone number of the account holder.
 	 */
-	void DatabaseManager::addAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone);
+	void addAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone);
 
 	/**
 	 * @brief Adds a new subscription and links it to a payment record.
@@ -261,7 +261,7 @@ public:
 	 * @param[in] email The email address of the account to link to the subscription.
 	 * @param[in] name The name of the subscription to link to the payment.
 	 */
-	void DatabaseManager::addSubscription(const std::string& email, const std::string& name);
+	void addSubscription(const std::string& email, const std::string& name);
 
 	/**
 	 * @brief Adds a license plate to the database and links it to the given subscription.
@@ -272,7 +272,7 @@ public:
 	 * @param[in] name The name of the subscription that the license plate will be associated with.
 	 * @param[in] licensePlate The license plate number to insert and link to the subscription.
 	 */
-	void DatabaseManager::addLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate);
+	void addLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate);
 
 	/**
 	 * @brief Subscribes the given email address to the newsletter.
@@ -280,7 +280,7 @@ public:
 	 *          If an error occurs during the insertion, the function logs the error.
 	 * @param[in] email The email address to be subscribed to the newsletter.
 	 */
-	void DatabaseManager::subscribeNewsletter(const std::string& email);
+	void subscribeNewsletter(const std::string& email);
 
 	/**
 	 * @brief Unsubscribes the given email address from the newsletter.
@@ -288,7 +288,7 @@ public:
 	 *          If an error occurs during the deletion, the function logs the error.
 	 * @param[in] email The email address to be unsubscribed from the newsletter.
 	 */
-	void DatabaseManager::unsubscribeNewsletter(const std::string& email);
+	void unsubscribeNewsletter(const std::string& email);
 
 	/**
 	 * @brief Deletes a subscription and related records for the specified email and subscription name.
@@ -300,7 +300,7 @@ public:
 	 * @param[in] email The email address of the user whose subscription and related records are to be deleted.
 	 * @param[in] name The name of the subscription to delete.
 	 */
-	void DatabaseManager::deleteSubscription(const std::string& email, const std::string& name);
+	void deleteSubscription(const std::string& email, const std::string& name);
 
 	/**
 	 * @brief Deletes a license plate from the database and removes the link between the license plate and its subscription.

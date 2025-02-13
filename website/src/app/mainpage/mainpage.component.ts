@@ -14,7 +14,9 @@ export class MainpageComponent {
   successMessage: string = '';
   selectedFile: File | null = null;
   dropdownVisible = false;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(private http: HttpClient, private router: Router) { }
 
   onLogin() {
@@ -67,14 +69,14 @@ export class MainpageComponent {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -100,11 +102,10 @@ export class MainpageComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const apiUrl = window['env'].API_URL + '/api/endpoint';
+    const apiUrl = this.apiURL  + '/api/endpoint';
 
     if (!this.licensePlate && !this.selectedFile) {
       this.errorMessage = 'Please enter a license plate number or upload a QR code.';
-      console.error('Error: No license plate or QR code uploaded.');
       return;
     }
 
@@ -113,7 +114,7 @@ export class MainpageComponent {
       this.fileName = '';
 
       const urlEncodedData = new URLSearchParams();
-      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+      urlEncodedData.append('key', this.key);
       urlEncodedData.append('licensePlate', this.licensePlate);
 
       const headers = new HttpHeaders({
@@ -126,7 +127,6 @@ export class MainpageComponent {
             this.handleServerResponse(data);
           },
           error => {
-            console.error('Error during POST request for license plate:', error);
             this.errorMessage = error.message || 'An error occurred while processing the license plate.';
             const errorData = error.error ? error.error : { success: false };
             this.handleServerResponse(errorData);
@@ -135,17 +135,12 @@ export class MainpageComponent {
     } else if (this.selectedFile) {
       const formData = new FormData();
       formData.append('qrCodeImage', this.selectedFile, this.selectedFile.name);
-
-      console.log('Sending QR code image:', this.selectedFile.name);
-
       this.http.post(apiUrl, formData)
         .subscribe(
           data => {
-            console.log('Response from server (QR code):', data);
             this.handleServerResponse(data);
           },
           error => {
-            console.error('Error during POST request for QR code:', error);
             this.errorMessage = error.message || 'An error occurred while processing the QR code.';
             const errorData = error.error ? error.error : { success: false };
             this.handleServerResponse(errorData);

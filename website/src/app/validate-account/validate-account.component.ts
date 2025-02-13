@@ -8,6 +8,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   styleUrls: ['./validate-account.component.css']
 })
 export class ValidateAccountComponent implements OnInit {
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
@@ -25,12 +28,12 @@ export class ValidateAccountComponent implements OnInit {
 
   validateAccount(token: string): void {
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('token', token);
+    
+    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded' });
 
-    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-
-    const apiUrl = window['env'].API_URL + '/api/validate';
+    const apiUrl = this.apiURL + '/api/validate';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {

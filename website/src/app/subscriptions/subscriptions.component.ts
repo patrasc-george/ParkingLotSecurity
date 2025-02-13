@@ -14,7 +14,9 @@ export class SubscriptionsComponent implements OnInit {
   dropdownVisible: boolean = false;
   name: string = '';
   isAdmin: boolean = false;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 
   constructor(private http: HttpClient, private router: Router, private renderer: Renderer2) { }
@@ -29,7 +31,6 @@ export class SubscriptionsComponent implements OnInit {
     try {
       this.subscriptionsTable = JSON.parse(localStorage.getItem('subscriptionsTable') || '[]');
     } catch (error) {
-      console.error('Error parsing subscriptionsTable from localStorage:', error);
       this.subscriptionsTable = [];
     }
   }
@@ -83,14 +84,14 @@ export class SubscriptionsComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -165,11 +166,11 @@ export class SubscriptionsComponent implements OnInit {
       if (subscriptionName) {
         const email = localStorage.getItem('email');
         const urlEncodedData = new URLSearchParams();
-        urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+        urlEncodedData.append('key', this.key);
         urlEncodedData.append('email', email || '');
         urlEncodedData.append('subscriptionName', subscriptionName);
 
-        const apiUrl = window['env'].API_URL + '/api/addSubscription';
+        const apiUrl = this.apiURL  + '/api/addSubscription';
         this.http.post(apiUrl, urlEncodedData.toString(), {
           headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
         })
@@ -218,11 +219,11 @@ export class SubscriptionsComponent implements OnInit {
     for (const subscription of this.selectedRows) {
       const email = localStorage.getItem('email');
       const urlEncodedData = new URLSearchParams();
-      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+      urlEncodedData.append('key', this.key);
       urlEncodedData.append('email', email || '');
       urlEncodedData.append('subscriptionName', subscription);
 
-      const apiUrl = window['env'].API_URL + '/api/deleteSubscription';
+      const apiUrl = this.apiURL  + '/api/deleteSubscription';
       try {
         const data: any = await this.http.post(apiUrl, urlEncodedData.toString(), {
           headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
@@ -251,11 +252,11 @@ export class SubscriptionsComponent implements OnInit {
 
     const email = localStorage.getItem('email');
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', subscription);
 
-    const apiUrl = window['env'].API_URL + '/api/getSubscriptionVehicles';
+    const apiUrl = this.apiURL  + '/api/getSubscriptionVehicles';
     this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     })

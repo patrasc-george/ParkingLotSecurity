@@ -12,7 +12,9 @@ export class RedirectComponent implements OnInit {
   strokeOffset: number = 283;
   message: string = '';
   isRedirecting: boolean = false;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
@@ -47,7 +49,7 @@ export class RedirectComponent implements OnInit {
     this.isRedirecting = true;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
 
     const email = localStorage.getItem('email');
     if (email) {
@@ -59,11 +61,10 @@ export class RedirectComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/login';
+    const apiUrl = this.apiURL  + '/api/login';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         data => {
-          console.log('Login response:', data);
           this.handleServerResponse(data);
         },
         error => {

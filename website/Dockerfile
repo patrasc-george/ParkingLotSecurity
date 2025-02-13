@@ -21,4 +21,4 @@ ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
 EXPOSE 80
 
-CMD ["/bin/sh", "-c", "/usr/share/nginx/html/replace-env-vars.sh"]
+CMD ["/bin/sh", "-c", "/usr/share/nginx/html/replace-env-vars.sh && nginx -g 'daemon off;'"]

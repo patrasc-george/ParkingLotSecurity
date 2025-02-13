@@ -18,7 +18,9 @@ export class ValidationSelectorComponent implements OnInit {
   password: string = '';
   phone: string = '';
   isAuthenticated: boolean = true;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(private router: Router, private authService: AuthService, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({
       validationMethod: [null, Validators.required],
@@ -79,14 +81,14 @@ export class ValidationSelectorComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -112,7 +114,7 @@ export class ValidationSelectorComponent implements OnInit {
 
   validateByEmail() {
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('name', this.name);
     urlEncodedData.append('email', this.email);
 
@@ -122,7 +124,7 @@ export class ValidationSelectorComponent implements OnInit {
 
     if (localStorage.getItem('fromCreateSubscription') === 'true') {
       localStorage.setItem('fromCreateSubscription', 'false');
-      const apiUrl = window['env'].API_URL + '/api/validateViaEmail';
+      const apiUrl = this.apiURL  + '/api/validateViaEmail';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
@@ -135,7 +137,7 @@ export class ValidationSelectorComponent implements OnInit {
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
       localStorage.setItem('fromAccount', 'false');
-      const apiUrl = window['env'].API_URL + '/api/validateUpdateViaEmail';
+      const apiUrl = this.apiURL  + '/api/validateUpdateViaEmail';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
@@ -151,7 +153,7 @@ export class ValidationSelectorComponent implements OnInit {
 
   validateBySMS() {
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', this.email);
     urlEncodedData.append('phone', this.phone);
 
@@ -161,7 +163,7 @@ export class ValidationSelectorComponent implements OnInit {
 
     if (localStorage.getItem('fromCreateSubscription') === 'true') {
       localStorage.setItem('fromCreateSubscription', 'false');
-      const apiUrl = window['env'].API_URL + '/api/validateViaSMS';
+      const apiUrl = this.apiURL  + '/api/validateViaSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
@@ -173,7 +175,7 @@ export class ValidationSelectorComponent implements OnInit {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      const apiUrl = window['env'].API_URL + '/api/validateUpdateViaSMS';
+      const apiUrl = this.apiURL  + '/api/validateUpdateViaSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {

@@ -17,7 +17,9 @@ export class AccountComponent implements OnInit {
   password: string = '';
   isReadOnly: boolean = true;
   isAdmin: boolean = false;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   dropdownVisible = false;
 
   formVisibleAccount: boolean = false;
@@ -115,14 +117,14 @@ export class AccountComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -200,7 +202,7 @@ export class AccountComponent implements OnInit {
     const { formName, formLastName, email, password, phone } = this.signUpForm.value;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', this.email);
     if (formName) urlEncodedData.append('newName', formName);
     if (formLastName) urlEncodedData.append('newLastName', formLastName);
@@ -210,7 +212,7 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/updateAccountInformation';
+    const apiUrl = this.apiURL  + '/api/updateAccountInformation';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
@@ -239,7 +241,7 @@ export class AccountComponent implements OnInit {
     const { formName, formLastName, email, password, phone } = this.signUpForm.value;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', this.email);
     urlEncodedData.append('admin', this.isAdmin.toString());
     if (email) urlEncodedData.append('newEmail', email);
@@ -249,7 +251,7 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/updateAccount';
+    const apiUrl = this.apiURL  + '/api/updateAccount';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {

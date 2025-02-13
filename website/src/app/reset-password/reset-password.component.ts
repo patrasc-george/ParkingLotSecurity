@@ -13,7 +13,9 @@ export class ResetPasswordComponent implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
   dropdownVisible = false;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -78,14 +80,14 @@ export class ResetPasswordComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -97,12 +99,12 @@ export class ResetPasswordComponent implements OnInit {
     const token = this.resetPasswordForm.get('token')?.value;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('token', token);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    const apiUrl = window['env'].API_URL + '/api/verifyResetPasswordToken';
+    const apiUrl = this.apiURL  + '/api/verifyResetPasswordToken';
     this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data) => {
@@ -130,13 +132,13 @@ export class ResetPasswordComponent implements OnInit {
     const newPassword = this.resetPasswordForm.get('password')?.value;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', localStorage.getItem('email') || '');
     urlEncodedData.append('newPassword', newPassword);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    const apiUrl = window['env'].API_URL + '/api/resetPassword';
+    const apiUrl = this.apiURL  + '/api/resetPassword';
     this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data) => {

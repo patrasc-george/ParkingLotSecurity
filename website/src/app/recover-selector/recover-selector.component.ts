@@ -12,7 +12,9 @@ export class RecoverSelectorComponent {
   dropdownVisible = false;
   validationForm: FormGroup;
   validationMethod: 'email' | 'sms' | null = null;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(private router: Router, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({
       validationMethod: [null, Validators.required],
@@ -59,14 +61,14 @@ export class RecoverSelectorComponent {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }

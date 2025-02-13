@@ -15,7 +15,9 @@ export class ContactComponent implements OnInit {
   name: string = "";
   isAuthenticated: boolean = false;
   isAdmin: boolean = false;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   contactForm!: FormGroup;
 
   constructor(private router: Router, private authService: AuthService, private fb: FormBuilder, private http: HttpClient) { }
@@ -83,14 +85,14 @@ export class ContactComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -110,7 +112,7 @@ export class ContactComponent implements OnInit {
     const { email, subject, message } = this.contactForm.value;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
     urlEncodedData.append('subject', subject);
     urlEncodedData.append('message', message);
@@ -119,7 +121,7 @@ export class ContactComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/contact';
+    const apiUrl = this.apiURL  + '/api/contact';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => this.handleServerResponse(data),

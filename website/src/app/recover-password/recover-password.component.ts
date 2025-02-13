@@ -14,7 +14,8 @@ export class RecoverPasswordComponent implements OnInit {
   dropdownVisible = false;
   fieldLabel: string = '';
   fieldType: string = '';
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
 
   constructor(private http: HttpClient, private router: Router, private fb: FormBuilder) {
     this.recoverForm = this.fb.group({
@@ -75,14 +76,14 @@ export class RecoverPasswordComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -112,14 +113,14 @@ export class RecoverPasswordComponent implements OnInit {
 
     if (fromRecoverViaEmail === 'true') {
       const urlEncodedData = new URLSearchParams();
-      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+      urlEncodedData.append('key', this.key);
       urlEncodedData.append('email', this.recoverForm.get('input')?.value);
 
       const headers = new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
       });
 
-      const apiUrl = window['env'].API_URL + '/api/recoverPasswordViaEmail';
+      const apiUrl = this.apiURL  + '/api/recoverPasswordViaEmail';
       this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -138,14 +139,14 @@ export class RecoverPasswordComponent implements OnInit {
     }
     else if (fromRecoverViaSMS === 'true') {
       const urlEncodedData = new URLSearchParams();
-      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+      urlEncodedData.append('key', this.key);
       urlEncodedData.append('phone', this.recoverForm.get('input')?.value);
 
       const headers = new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded'
       });
 
-      const apiUrl = window['env'].API_URL + '/api/recoverPasswordViaSMS';
+      const apiUrl = this.apiURL  + '/api/recoverPasswordViaSMS';
       this.http.post<{ success: boolean, message?: string }>(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           data => {

@@ -16,7 +16,9 @@ export class ValidatePhoneComponent {
   timerInterval: any;
   email: string = '';
   phone: string = '';
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -67,14 +69,14 @@ export class ValidatePhoneComponent {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -113,13 +115,13 @@ export class ValidatePhoneComponent {
   validateToken(): void {
     const token = this.code.join('');
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('token', token);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     if (localStorage.getItem('fromValidationSelector') === 'true') {
-      const apiUrl = window['env'].API_URL + '/api/validate';
+      const apiUrl = this.apiURL  + '/api/validate';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -131,7 +133,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromRecoverPassword') === 'true') {
-      const apiUrl = window['env'].API_URL + '/api/verifyResetPasswordToken';
+      const apiUrl = this.apiURL  + '/api/verifyResetPasswordToken';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -143,7 +145,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      const apiUrl = window['env'].API_URL + '/api/validateUpdate';
+      const apiUrl = this.apiURL  + '/api/validateUpdate';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -160,7 +162,6 @@ export class ValidatePhoneComponent {
   handleServerResponse(data: any) {
     if (data.success === false) {
       this.errorMessage = 'The code entered is not correct.';
-      console.error(this.errorMessage);
       return;
     } else if (data.success === true) {
       if (data.email != '') {
@@ -195,14 +196,14 @@ export class ValidatePhoneComponent {
     this.startTimer();
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', this.email);
     urlEncodedData.append('phone', this.phone);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     if (localStorage.getItem('fromValidationSelector') === 'true') {
-      const apiUrl = window['env'].API_URL + '/api/resendValidateSMS';
+      const apiUrl = this.apiURL  + '/api/resendValidateSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {
@@ -210,7 +211,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromRecoverPassword') === 'true') {
-      const apiUrl = window['env'].API_URL + '/api/resendRecoverPassword';
+      const apiUrl = this.apiURL  + '/api/resendRecoverPassword';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {
@@ -218,7 +219,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      const apiUrl = window['env'].API_URL + '/api/resendValidateUpdateSMS';
+      const apiUrl = this.apiURL  + '/api/resendValidateUpdateSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {

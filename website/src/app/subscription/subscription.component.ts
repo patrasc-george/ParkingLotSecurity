@@ -18,7 +18,9 @@ export class SubscriptionComponent implements OnInit {
   name: string = '';
   subscriptionName: string = '';
   isAdmin: boolean = false;
-
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 
   constructor(private router: Router, private http: HttpClient, private renderer: Renderer2) { }
@@ -37,11 +39,11 @@ export class SubscriptionComponent implements OnInit {
 
     const email = localStorage.getItem('email');
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', this.subscriptionName);
 
-    const apiUrl = window['env'].API_URL + '/api/getSubscriptionVehicles';
+    const apiUrl = this.apiURL  + '/api/getSubscriptionVehicles';
     this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     })
@@ -109,14 +111,14 @@ export class SubscriptionComponent implements OnInit {
       return;
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -203,7 +205,7 @@ export class SubscriptionComponent implements OnInit {
 
   async viewHistory(licensePlate: string): Promise<void> {
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('licensePlate', licensePlate);
 
     try {
@@ -215,7 +217,7 @@ export class SubscriptionComponent implements OnInit {
         const isExpanded = row.classList.contains('expanded');
 
         if (!isExpanded) {
-          const apiUrl = window['env'].API_URL + '/api/getVehicleHistory';
+          const apiUrl = this.apiURL  + '/api/getVehicleHistory';
           const response = await this.http.post<{ success: boolean; history: any[]; totalTimeParked?: string; payment?: string }>(
             apiUrl,
             urlEncodedData.toString(),
@@ -271,13 +273,12 @@ export class SubscriptionComponent implements OnInit {
         }
       }
     } catch (error) {
-      console.error('Eroare:', error);
+      console.error('Error:', error);
     }
   }
 
   private toggleHistoryRows(row: HTMLTableRowElement | undefined, historyData: any[]): void {
     if (!row) {
-      console.warn('Row not found for the vehicle');
       return;
     }
 
@@ -375,13 +376,13 @@ export class SubscriptionComponent implements OnInit {
     const subscriptionName = localStorage.getItem('subscriptionName') || '';
 
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('email', email);
     urlEncodedData.append('licensePlate', licensePlate);
     urlEncodedData.append('subscriptionName', subscriptionName);
     urlEncodedData.append('activityData', JSON.stringify(activityData));
 
-    const apiUrl = window['env'].API_URL + '/api/addVehicle';
+    const apiUrl = this.apiURL  + '/api/addVehicle';
     return this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     });
@@ -447,12 +448,12 @@ export class SubscriptionComponent implements OnInit {
     for (const vehicle of this.selectedRows) {
       const licensePlate = vehicle;
       const urlEncodedData = new URLSearchParams();
-      urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+      urlEncodedData.append('key', this.key);
       urlEncodedData.append('email', email);
       urlEncodedData.append('subscriptionName', subscriptionName);
       urlEncodedData.append('licensePlate', licensePlate);
 
-      const apiUrl = window['env'].API_URL + '/api/deleteVehicle';
+      const apiUrl = this.apiURL  + '/api/deleteVehicle';
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',

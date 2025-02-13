@@ -28,7 +28,10 @@ export class DashboardComponent implements OnInit {
   emailsTable: any[] = [];
 
   dropdownVisible = false;
-
+  
+  apiURL: string = "{{API_URL}}";
+  key: string = "{{POSTGRES_PASSWORD}}";
+  
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
@@ -37,12 +40,12 @@ export class DashboardComponent implements OnInit {
 
   getTables(): void {
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/getAdmin';
+    const apiUrl = this.apiURL  + '/api/getAdmin';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
@@ -146,7 +149,7 @@ export class DashboardComponent implements OnInit {
 
   viewAccount(email: string) {
     const urlEncodedData = new URLSearchParams();
-    urlEncodedData.append('key', window['env'].POSTGRES_PASSWORD);
+    urlEncodedData.append('key', this.key);
     urlEncodedData.append('input', email);
     urlEncodedData.append('fromRedirect', 'true');
 
@@ -154,7 +157,7 @@ export class DashboardComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = window['env'].API_URL + '/api/login';
+    const apiUrl = this.apiURL  + '/api/login';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {

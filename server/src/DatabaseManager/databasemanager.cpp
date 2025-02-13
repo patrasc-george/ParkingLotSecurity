@@ -129,32 +129,6 @@ std::vector<std::string> DatabaseManager::getVehicles()
 	return vehicles;
 }
 
-std::unordered_set<std::string> DatabaseManager::getNewsletter()
-{
-	std::unordered_set<std::string> newsletter;
-	const char* sql = "SELECT email FROM newsletter;";
-
-	PGresult* result = PQexec(conn, sql);
-
-	if (PQresultStatus(result) != PGRES_TUPLES_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to fetch newsletter emails from the database." << std::endl;
-		PQclear(result);
-		return newsletter;
-	}
-
-	int numRows = PQntuples(result);
-
-	for (int i = 0; i < numRows; ++i)
-	{
-		newsletter.insert(PQgetvalue(result, i, 0));
-	}
-
-	PQclear(result);
-
-	return newsletter;
-}
-
 std::string DatabaseManager::getLastVehicleActivity(const std::string& vehicleLicensePlate)
 {
 	std::string activity = ", , , ";
@@ -303,6 +277,32 @@ std::vector<std::string> DatabaseManager::getAccounts()
 	PQclear(result);
 
 	return accounts;
+}
+
+std::unordered_set<std::string> DatabaseManager::getNewsletter()
+{
+	std::unordered_set<std::string> newsletter;
+	const char* sql = "SELECT email FROM newsletter;";
+
+	PGresult* result = PQexec(conn, sql);
+
+	if (PQresultStatus(result) != PGRES_TUPLES_OK)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch newsletter emails from the database." << std::endl;
+		PQclear(result);
+		return newsletter;
+	}
+
+	int numRows = PQntuples(result);
+
+	for (int i = 0; i < numRows; ++i)
+	{
+		newsletter.insert(PQgetvalue(result, i, 0));
+	}
+
+	PQclear(result);
+
+	return newsletter;
 }
 
 std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseManager::getSubscriptions(const std::string& email)

@@ -296,9 +296,9 @@ void WebSocketServer::doAccept()
 		return;
 	}
 
-	boost::beast::websocket::stream<boost::asio::ip::tcp::socket> wsStream(std::move(socket));
+	boost::beast::websocket::stream<boost::asio::ip::tcp::socket> stream(std::move(socket));
 
-	wsStream.accept(req, errorCode);
+	stream.accept(req, errorCode);
 
 	if (errorCode)
 	{
@@ -318,7 +318,7 @@ void WebSocketServer::doAccept()
 
 	if (!isValidToken(token))
 	{
-		wsStream.close(boost::beast::websocket::close_code::policy_error, errorCode);
+		stream.close(boost::beast::websocket::close_code::policy_error, errorCode);
 
 		LOG_MESSAGE(CRITICAL) << "Invalid token. Closing connection." << std::endl;
 		return;
@@ -326,7 +326,7 @@ void WebSocketServer::doAccept()
 	else
 		LOG_MESSAGE(INFO) << "Accepted a new WebSocket connection." << std::endl;
 
-	auto session = std::make_shared<WebSocketSession>(std::move(wsStream));
+	auto session = std::make_shared<WebSocketSession>(std::move(stream));
 	session->start();
 
 	doAccept();

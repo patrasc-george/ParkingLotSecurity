@@ -1,10 +1,12 @@
 #pragma once
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 
 #include "httplib.h"
 #include "subscriptionmanager.h"
 #include "websocketserver.h"
 #include "logger.h"
 
+#include <memory>
 #include <thread>
 #include <iostream>
 #include <Poco/Net/SMTPClientSession.h>
@@ -105,6 +107,7 @@ private:
 	 *          If any error occurs during the validation or payment process, an error message is returned.
 	 * @param[in] request The HTTP request object containing the incoming parameters and files.
 	 * @param[out] response The HTTP response object to be populated with the response data.
+	 * @return void
 	 */
 	void post(const httplib::Request& request, httplib::Response& response);
 
@@ -118,6 +121,7 @@ private:
 	 *          is returned if the account is created successfully, otherwise an error message is returned.
 	 * @param[in] request The HTTP request object containing the account creation parameters.
 	 * @param[out] response The HTTP response object to be populated with the response data.
+	 * @return void
 	 */
 	void createAccount(const httplib::Request& request, httplib::Response& response);
 
@@ -129,6 +133,7 @@ private:
 	 *          is returned with a reason for the failure.
 	 * @param[in] request The HTTP request object containing the user's name and email address for validation.
 	 * @param[out] response The HTTP response object to be populated with the response data.
+	 * @return void
 	 */
 	void validateViaEmail(const httplib::Request& request, httplib::Response& response);
 
@@ -139,6 +144,7 @@ private:
 	 *          If the validation SMS is sent successfully, a success message is returned. If sending the SMS fails, an error message is returned.
 	 * @param[in] request The HTTP request object containing the user's email and phone number for SMS validation.
 	 * @param[out] response The HTTP response object to be populated with the response data.
+	 * @return void
 	 */
 	void validateViaSMS(const httplib::Request& request, httplib::Response& response);
 
@@ -149,6 +155,7 @@ private:
 	 *          If the SMS is resent successfully, a success message is returned. If sending the SMS fails, an error message is returned.
 	 * @param[in] request The HTTP request object containing the user's email and phone number for resending the SMS validation code.
 	 * @param[out] response The HTTP response object to be populated with the response data.
+	 * @return void
 	 */
 	void resendValidateSMS(const httplib::Request& request, httplib::Response& response);
 
@@ -159,6 +166,7 @@ private:
 	 *          If the token is invalid, an error message is returned.
 	 * @param[in] request The HTTP request object containing the token for account validation.
 	 * @param[out] response The HTTP response object to be populated with the response data.
+	 * @return void
 	 */
 	void validate(const httplib::Request& request, httplib::Response& response);
 
@@ -170,6 +178,7 @@ private:
 	 *          If login is successful, user details and subscriptions are returned. If login fails, an error message is returned.
 	 * @param[in] request The HTTP request object containing the user's input credentials (email, password, etc.).
 	 * @param[out] response The HTTP response object to be populated with the response data.
+	 * @return void
 	 */
 	void login(const httplib::Request& request, httplib::Response& response);
 
@@ -179,6 +188,7 @@ private:
 	 *          and returns them in the response. If the API key is invalid, an error message is returned.
 	 * @param[in] request The HTTP request object.
 	 * @param[out] response The HTTP response object to be populated with the emails list.
+	 * @return void
 	 */
 	void getAdmin(const httplib::Request& request, httplib::Response& response);
 
@@ -189,6 +199,7 @@ private:
 	 *          to the user with a link to reset the password. If any issue arises (e.g., invalid email or missing API key), an error response is sent.
 	 * @param[in] request The HTTP request object containing the user's email for password recovery.
 	 * @param[out] response The HTTP response object to be populated with the result of the password recovery request.
+	 * @return void
 	 */
 	void recoverPasswordViaEmail(const httplib::Request& request, httplib::Response& response);
 
@@ -199,6 +210,7 @@ private:
 	 *          via SMS to the user. If any issue arises (e.g., invalid phone number or missing API key), an error response is sent.
 	 * @param[in] request The HTTP request object containing the user's phone number for password recovery.
 	 * @param[out] response The HTTP response object to be populated with the result of the password recovery request.
+	 * @return void
 	 */
 	void recoverPasswordViaSMS(const httplib::Request& request, httplib::Response& response);
 
@@ -209,6 +221,7 @@ private:
 	 *          If any issue arises (e.g., invalid phone number or missing API key), an error response is sent.
 	 * @param[in] request The HTTP request object containing the user's phone number for resending the password recovery code.
 	 * @param[out] response The HTTP response object to be populated with the result of the resend request.
+	 * @return void
 	 */
 	void resendRecoverPassword(const httplib::Request& request, httplib::Response& response);
 
@@ -218,6 +231,7 @@ private:
 	 *          The request must contain the API key and the token to be verified.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key and token).
 	 * @param[out] response The HTTP response object to be populated with the result of the token verification.
+	 * @return void
 	 */
 	void verifyResetPasswordToken(const httplib::Request& request, httplib::Response& response);
 
@@ -227,6 +241,7 @@ private:
 	 *          If the password is successfully updated, a success message is returned.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and new password).
 	 * @param[out] response The HTTP response object to be populated with the result of the password reset operation.
+	 * @return void
 	 */
 	void resetPassword(const httplib::Request& request, httplib::Response& response);
 
@@ -238,6 +253,7 @@ private:
 	 *          an error response is returned.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and subscription name).
 	 * @param[out] response The HTTP response object to be populated with the vehicles list for the given subscription.
+	 * @return void
 	 */
 	void getSubscriptionVehicles(const httplib::Request& request, httplib::Response& response);
 
@@ -247,6 +263,7 @@ private:
 	 *          If the API key is valid and the subscription is successfully added, a success response is returned. Otherwise, an error response is sent.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and subscription name).
 	 * @param[out] response The HTTP response object to be populated with the result of the add subscription operation.
+	 * @return void
 	 */
 	void addSubscription(const httplib::Request& request, httplib::Response& response);
 
@@ -256,6 +273,7 @@ private:
 	 *          If the API key is valid and the subscription is successfully deleted, a success response is returned. Otherwise, an error response is sent.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and subscription name).
 	 * @param[out] response The HTTP response object to be populated with the result of the delete subscription operation.
+	 * @return void
 	 */
 	void deleteSubscription(const httplib::Request& request, httplib::Response& response);
 
@@ -266,6 +284,7 @@ private:
 	 *          along with total time parked and payment details. If any parameter is missing or invalid, an error response is returned.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key and license plate).
 	 * @param[out] response The HTTP response object to be populated with the vehicle's parking history, total time parked, and payment details.
+	 * @return void
 	 */
 	void getVehicleHistory(const httplib::Request& request, httplib::Response& response);
 
@@ -277,6 +296,7 @@ private:
 	 *          an error response is sent.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, subscription name, and license plate).
 	 * @param[out] response The HTTP response object to be populated with the result of the add vehicle operation.
+	 * @return void
 	 */
 	void addVehicle(const httplib::Request& request, httplib::Response& response);
 
@@ -287,6 +307,7 @@ private:
 	 *          a success response is returned. If any parameter is missing or invalid, an error response is sent.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, subscription name, and license plate).
 	 * @param[out] response The HTTP response object to be populated with the result of the delete vehicle operation.
+	 * @return void
 	 */
 	void deleteVehicle(const httplib::Request& request, httplib::Response& response);
 
@@ -296,6 +317,7 @@ private:
 	 *          new name, new last name, and new phone. If the phone is already associated with another account, the update fails.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and new account information).
 	 * @param[out] response The HTTP response object to be populated with the result of the update operation.
+	 * @return void
 	 */
 	void updateAccountInformation(const httplib::Request& request, httplib::Response& response);
 
@@ -305,6 +327,7 @@ private:
 	 *          If the user has admin privileges, the update can be confirmed with a token.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, new credentials, and admin flag).
 	 * @param[out] response The HTTP response object to be populated with the result of the update account operation.
+	 * @return void
 	 */
 	void updateAccount(const httplib::Request& request, httplib::Response& response);
 
@@ -314,6 +337,7 @@ private:
 	 *          The request must contain the API key, email, and name. If the token is successfully generated and set, the email is sent.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and name).
 	 * @param[out] response The HTTP response object to be populated with the result of the validation request.
+	 * @return void
 	 */
 	void validateUpdateViaEmail(const httplib::Request& request, httplib::Response& response);
 
@@ -323,6 +347,7 @@ private:
 	 *          The request must contain the API key, email, and phone number. If the token is successfully generated and set, the SMS is sent.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and phone).
 	 * @param[out] response The HTTP response object to be populated with the result of the validation request.
+	 * @return void
 	 */
 	void validateUpdateViaSMS(const httplib::Request& request, httplib::Response& response);
 
@@ -332,6 +357,7 @@ private:
 	 *          The request must contain the API key, email, and phone. If a valid token exists for the given email, the SMS is sent.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, and phone).
 	 * @param[out] response The HTTP response object to be populated with the result of the resend SMS operation.
+	 * @return void
 	 */
 	void resendValidateUpdateSMS(const httplib::Request& request, httplib::Response& response);
 
@@ -341,6 +367,7 @@ private:
 	 *          If the token is valid, the account update is applied, and the email is returned in the response.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key and token).
 	 * @param[out] response The HTTP response object to be populated with the result of the validation.
+	 * @return void
 	 */
 	void validateUpdate(const httplib::Request& request, httplib::Response& response);
 
@@ -350,6 +377,7 @@ private:
 	 *          An automated confirmation email is sent to the user, acknowledging receipt of their message.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key, email, subject, and message).
 	 * @param[out] response The HTTP response object to be populated with the result of the contact message handling.
+	 * @return void
 	 */
 	void contact(const httplib::Request& request, httplib::Response& response);
 
@@ -359,6 +387,7 @@ private:
 	 *          A confirmation email is sent to the user, thanking them for subscribing to the newsletter.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key and email).
 	 * @param[out] response The HTTP response object to be populated with the result of the subscription operation.
+	 * @return void
 	 */
 	void subscribeNewsletter(const httplib::Request& request, httplib::Response& response);
 
@@ -368,6 +397,7 @@ private:
 	 *          A confirmation email is sent to the user, confirming the unsubscription.
 	 * @param[in] request The HTTP request object containing the necessary parameters (API key and email).
 	 * @param[out] response The HTTP response object to be populated with the result of the unsubscription.
+	 * @return void
 	 */
 	void unsubscribeNewsletter(const httplib::Request& request, httplib::Response& response);
 

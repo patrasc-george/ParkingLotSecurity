@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     tar \
     libssl-dev \
+	libssl3 \
+    ca-certificates \
     libstdc++6 \
     libgcc-s1 \
     libpq5 \
@@ -92,9 +94,13 @@ RUN apt-get update && apt-get install -y \
     libqrencode4 \
     wget \
     curl \
+    ca-certificates \
+	libssl3 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-	
+
 COPY --from=build-server /app/server /app/server
+
+RUN ldd /app/server/bin/Server | grep ssl || echo "OpenSSL missing!"
 
 RUN chmod +x /app/server/bin/Server
 

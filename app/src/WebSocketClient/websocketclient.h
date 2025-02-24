@@ -91,6 +91,7 @@ public:
 	 * @param[in] timeParked The time the vehicle has been parked.
 	 * @param[in] totalAmount The total amount for parking.
 	 * @param[in] isPaid The payment status of the vehicle.
+	 * @return void
 	 */
 	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid);
 
@@ -107,6 +108,7 @@ private:
 	 * @brief Sends a message through the WebSocket connection.
 	 * @details This function encrypts the message and sends it through the WebSocket.
 	 * @param[in] message The message to be sent to the server.
+	 * @return void
 	 */
 	void send(const std::string& message);
 

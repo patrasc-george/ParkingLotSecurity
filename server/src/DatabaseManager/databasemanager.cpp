@@ -10,9 +10,9 @@
 
 bool DatabaseManager::initializeDatabase()
 {
-	logger.setLogOutput(CONSOLE);
-
 	LOG_MESSAGE(INFO) << "The program has been launched." << std::endl;
+
+	logger.setLogOutput(CONSOLE);
 
 #ifdef _DEBUG
 	conn = PQconnectdb(std::getenv("DATABASE_URL_DEBUG"));

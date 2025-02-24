@@ -29,6 +29,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          taking into account the maximum and minimum values of the BGR components to calculate the HSV values.
 	 * @param[in] src The source image in BGR color space.
 	 * @param[out] dst The destination image in HSV color space.
+	 * @return void
 	 */
 	static void BGR2HSV(const cv::Mat& src, cv::Mat& dst);
 
@@ -40,6 +41,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[in] src The source image in HSV color space.
 	 * @param[out] dst The destination binary image.
 	 * @param[in] threshold The threshold value used for binarization.
+	 * @return void
 	 */
 	static void HSV2Binary(const cv::Mat& src, cv::Mat& dst, const uchar& threshold = 125);
 
@@ -51,6 +53,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[out] stats Statistics of the identified components, including the area.
 	 * @param[out] areas A vector of pairs, each containing the label and area of a connected component.
 	 * @param[in] newSize The maximum number of components to keep after sorting.
+	 * @return void
 	 */
 	static void getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize = 0);
 
@@ -61,6 +64,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[in] stats The statistics of connected components obtained from connected components analysis.
 	 * @param[in] label The label of the connected component whose bounding box is to be retrieved.
 	 * @param[out] roi The bounding box of the specified connected component.
+	 * @return void
 	 */
 	static void getRoi(const cv::Mat& stats, cv::Rect& roi, const int& label);
 
@@ -97,6 +101,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param percent The percentage of the rectangle's dimensions to calculate the padding thickness. Default is 0.
 	 * @param square A boolean flag indicating whether to enforce a square shape for the destination rectangle. Default is false.
 	 * @param size An optional cv::Size representing boundary dimensions within which the destination rectangle must fit. Default is cv::Size(), implying no bounds.
+	 * @return void
 	 */
 	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent = 0, const bool& square = 0, const cv::Size& size = cv::Size());
 
@@ -106,6 +111,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          turning those within a specified blue color range to black. This can be used to highlight certain features in the image.
 	 * @param[in] src The source image to be processed.
 	 * @param[out] dst The destination image with specific blue pixels turned to black.
+	 * @return void
 	 */
 	static void blueToBlack(const cv::Mat& src, cv::Mat& dst);
 
@@ -116,6 +122,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          and stores the result in the destination image.
 	 * @param[in] src The source image in HSV color space.
 	 * @param[out] dst The destination image in BGR color space.
+	 * @return void
 	 */
 	static void HSV2BGR(const cv::Mat& src, cv::Mat& dst);
 
@@ -125,6 +132,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          It identifies the range of pixel values and the total number of pixel intensity levels.
 	 * @param[in] src The source image for which the histogram is to be calculated.
 	 * @param[out] hist The output histogram, represented as a cv::Mat.
+	 * @return void
 	 */
 	static void histogram(const cv::Mat& src, cv::Mat& hist);
 
@@ -134,6 +142,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          The cumulative value at each bin represents the total count of pixels with intensity values up to that bin.
 	 * @param[in] hist The input histogram.
 	 * @param[out] cumulvativeHist The cumulative histogram, stored as a cv::Mat.
+	 * @return void
 	 */
 	static void cumulativeHistogram(const cv::Mat& hist, cv::Mat& cumulvativeHist);
 
@@ -142,6 +151,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @details This function identifies the minimum and maximum values in the cumulative histogram and constructs a line connecting these two points.
 	 * @param[in] cumulvativeHist The cumulative histogram.
 	 * @param[out] line The calculated line, represented as a cv::Vec4f.
+	 * @return void
 	 */
 	static void histogramLine(const cv::Mat& cumulvativeHist, cv::Vec4f& line);
 
@@ -161,6 +171,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @details This function calculates an optimal threshold based on the shape of the image histogram and uses it to convert the image to binary form.
 	 * @param[in] src The source image to threshold.
 	 * @param[out] dst The destination binary image.
+	 * @return void
 	 */
 	static void triangleThresholding(const cv::Mat& src, cv::Mat& dst);
 
@@ -171,6 +182,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[in] src The source image.
 	 * @param[out] dst The binary image after applying Sobel edge detection and thresholding.
 	 * @param[out] direction The gradient direction of each pixel.
+	 * @return void
 	 */
 	static void binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction);
 
@@ -181,6 +193,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[in] src The source edge image.
 	 * @param[out] dst The image after applying non-maximum suppression.
 	 * @param[in] direction The gradient direction of each pixel.
+	 * @return void
 	 */
 	static void nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& direction);
 
@@ -190,6 +203,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          It combines the results with Sobel edges and applies non-maximum suppression to refine the edge map.
 	 * @param[in] src The source image.
 	 * @param[out] dst The image after applying the morphological gradient and refining the edges.
+	 * @return void
 	 */
 	static void edgeDetection(const cv::Mat& src, cv::Mat& dst);
 
@@ -199,6 +213,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          between the source image and an edges mask, setting pixels to zero where both input images have white pixels.
 	 * @param[in,out] src The source image to be modified.
 	 * @param[in] edges The edges image used for the NAND operation.
+	 * @return void
 	 */
 	static void bitwiseNand(cv::Mat& src, const cv::Mat& edges);
 
@@ -207,6 +222,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @details This function iterates over a given set of contours, calculates the area for each, and identifies the largest contour.
 	 * @param[in] contours A vector containing multiple contours.
 	 * @param[out] largestContour The contour with the largest area.
+	 * @return void
 	 */
 	static void getLargestContour(const std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point>& largestContour);
 
@@ -232,6 +248,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[in] slope The slope of the line.
 	 * @param[in] point A point through which the line passes.
 	 * @param[in] direction The direction of the line: true for horizontal, false for vertical.
+	 * @return void
 	 */
 	static void lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction);
 
@@ -245,6 +262,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[out] firstLines Lines that are on one side of the reference line.
 	 * @param[out] secondLines Lines that are on the opposite side of the reference line.
 	 * @param[in] referenceLine The reference line used for comparison, represented as a 4-element vector (x1, y1, x2, y2).
+	 * @return void
 	 */
 	static void compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec4f& referenceLine);
 
@@ -335,6 +353,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          and applies Otsu's thresholding to distinguish the inner contours. Finally, the result is inverted to highlight these contours against a dark background.
 	 * @param src The source image to process.
 	 * @param dst The destination image where the result is stored. This will contain the highlighted inner contours.
+	 * @return void
 	 */
 	static void insideContour(const cv::Mat& src, cv::Mat& dst);
 
@@ -387,6 +406,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          It stores the bounding boxes of these characters in the provided vector.
 	 * @param src The source binary image from which characters are to be extracted.
 	 * @param chars Output vector storing the bounding boxes of detected characters.
+	 * @return void
 	 */
 	static void charsBBoxes(const cv::Mat& src, std::vector<cv::Rect>& chars);
 
@@ -405,6 +425,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param src Vector of original character bounding boxes.
 	 * @param dst Vector of padded and adjusted character bounding boxes.
 	 * @param percent Percentage of the original size to calculate padding.
+	 * @return void
 	 */
 	static void paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent = 0);
 
@@ -416,6 +437,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param dst Output image with characters arranged and spaced according to `paddedChars`.
 	 * @param chars Vector of character bounding boxes.
 	 * @param paddedChars Vector of padded character bounding boxes used for spacing.
+	 * @return void
 	 */
 	static void charsSpacing(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars);
 
@@ -425,6 +447,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param chars Vector of all character bounding boxes.
 	 * @param words Output array of vectors, each storing character bounding boxes for a separate word.
 	 * @param indexes Array of indexes used to determine word boundaries.
+	 * @return void
 	 */
 #ifdef _DEBUG
 	static void wordsSeparation(const std::vector<cv::Rect>& chars, std::array<std::vector<cv::Rect>, 3>& words, const std::array<int, 3>& indexes, const cv::Mat src);
@@ -473,6 +496,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[out] firstPadding The padding to be added on one side of the dimension.
 	 * @param[out] secondPadding The padding to be added on the opposite side of the dimension.
 	 *          If the total required padding is odd, secondPadding will be one unit larger than firstPadding.
+	 * @return void
 	 */
 	static void padding(const int& firstSize, const int& secondSize, int& firstPadding, int& secondPadding);
 
@@ -530,6 +554,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[out] time The current time, formatted as a string.
 	 * @param[in] text The text to be displayed along with the time and confidence score.
 	 * @param[in] confidence The confidence score associated with the text, formatted as part of the display text.
+	 * @return void
 	 */
 	static void drawBBoxes(cv::Mat& dst, cv::Rect& roi, std::string& dateTime, const std::string& text, const float& confidence);
 

@@ -56,6 +56,7 @@ public:
 	 * @brief Sets the license plate of the vehicle.
 	 * @details This function allows you to update the license plate of the vehicle.
 	 * @param[in] licensePlate The new license plate number.
+	 * @return void
 	 */
 	void setLicensePlate(const std::string& licensePlate);
 
@@ -77,6 +78,7 @@ public:
 	 * @brief Sets the ticket number for the vehicle.
 	 * @details This function allows you to assign a new ticket number to the vehicle.
 	 * @param[in] ticket The new ticket number.
+	 * @return void
 	 */
 	void setTicket(const std::string& ticket);
 
@@ -91,6 +93,7 @@ public:
 	 * @brief Sets the time the vehicle has been parked.
 	 * @details This function allows you to record how long the vehicle has been parked.
 	 * @param[in] timeParked The time the vehicle has been parked.
+	 * @return void
 	 */
 	void setTimeParked(const std::string& timeParked);
 
@@ -105,6 +108,7 @@ public:
 	 * @brief Sets the total amount to be paid for parking.
 	 * @details This function allows you to set the parking fee.
 	 * @param[in] totalAmount The total amount for parking in monetary units (e.g., RON).
+	 * @return void
 	 */
 	void setTotalAmount(const int& totalAmount);
 
@@ -118,6 +122,7 @@ public:
 	/**
 	 * @brief Marks the vehicle as having paid for parking.
 	 * @details This function updates the `isPaid` flag to `true`, indicating that the parking fee has been settled.
+	 * @return void
 	 */
 	void setIsPaid();
 

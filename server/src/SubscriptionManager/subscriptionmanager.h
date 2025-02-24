@@ -61,6 +61,7 @@ public:
 	 * @details This function retrieves all account data and associated subscription data from the database and stores it into the internal `accounts` container.
 	 *          Each account is created using the data retrieved, and corresponding subscription information (including dateTimes and vehicles) is added to each account's subscription list.
 	 *          This process ensures the internal subscription data is always up-to-date with the database.
+	 * @return void
 	 */
 	void uploadSubscriptions();
 
@@ -238,6 +239,7 @@ public:
 	 * @param[in] email The email address of the account holder (used as the key).
 	 * @param[in] password The password of the account holder.
 	 * @param[in] phone The phone number of the account holder.
+	 * @return void
 	 */
 	void addTempAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone);
 

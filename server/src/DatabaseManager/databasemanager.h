@@ -25,7 +25,7 @@
  * @class DatabaseManager
  * @brief Manages database connections and operations related to vehicles, accounts, payments, subscriptions, and newsletters.
  *
- * The `DatabaseManager` class provides a set of methods to interact with a PostgreSQL database, allowing for the management
+ * The `DatabaseManager` class provides a set of methods to interact with PostgreSQL database, allowing for the management
  * of vehicles, accounts, subscriptions, and other related records. It uses the Singleton design pattern to ensure that only
  * one instance of the class exists. The class offers functionality for initializing the database, retrieving and modifying
  * records related to vehicles, accounts, and subscriptions, as well as managing newsletter subscriptions.
@@ -182,6 +182,7 @@ public:
 	 *          If an error occurs during the update, it logs the error message.
 	 * @param[in] email The email address of the account to update.
 	 * @param[in] newName The new name to set for the account.
+	 * @return void
 	 */
 	void setName(const std::string& email, const std::string& newName);
 
@@ -191,6 +192,7 @@ public:
 	 *          If an error occurs during the update, it logs the error message.
 	 * @param[in] email The email address of the account to update.
 	 * @param[in] newLastName The new last name to set for the account.
+	 * @return void
 	 */
 	void setLastName(const std::string& email, const std::string& newLastName);
 
@@ -203,6 +205,7 @@ public:
 	 *          the function logs the errors.
 	 * @param[in] email The old email address of the account to be updated.
 	 * @param[in] newEmail The new email address to assign to the account.
+	 * @return void
 	 */
 	void setEmail(const std::string& email, const std::string& newEmail);
 
@@ -212,6 +215,7 @@ public:
 	 *          for the provided email address. If an error occurs during the update, the function logs the error.
 	 * @param[in] email The email address of the account whose password needs to be updated.
 	 * @param[in] newPassword The new password to set for the account.
+	 * @return void
 	 */
 	void setPassword(const std::string& email, const std::string& newPassword);
 
@@ -221,6 +225,7 @@ public:
 	 *          for the provided email address. If an error occurs during the update, the function logs the error.
 	 * @param[in] email The email address of the account whose phone number needs to be updated.
 	 * @param[in] newPhone The new phone number to set for the account.
+	 * @return void
 	 */
 	void setPhone(const std::string& email, const std::string& newPhone);
 
@@ -238,6 +243,7 @@ public:
 	 * @param[in] totalAmount The total amount due for parking.
 	 * @param[in] isPaid A flag indicating whether the vehicle's parking fee has been paid.
 	 * @throws std::runtime_error If an error occurs while inserting the vehicle into the database.
+	 * @return void
 	 */
 	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid);
 
@@ -250,6 +256,7 @@ public:
 	 * @param[in] email The email address for the account.
 	 * @param[in] password The password for the account.
 	 * @param[in] phone The phone number of the account holder.
+	 * @return void
 	 */
 	void addAccount(const std::string& name, const std::string& lastName, const std::string& email, const std::string& password, const std::string& phone);
 
@@ -260,6 +267,7 @@ public:
 	 *          logs any errors that occur during the process.
 	 * @param[in] email The email address of the account to link to the subscription.
 	 * @param[in] name The name of the subscription to link to the payment.
+	 * @return void
 	 */
 	void addSubscription(const std::string& email, const std::string& name);
 
@@ -271,6 +279,7 @@ public:
 	 * @param[in] email The email address of the user whose subscription the license plate will be linked to.
 	 * @param[in] name The name of the subscription that the license plate will be associated with.
 	 * @param[in] licensePlate The license plate number to insert and link to the subscription.
+	 * @return void
 	 */
 	void addLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate);
 
@@ -279,6 +288,7 @@ public:
 	 * @details This function inserts the provided email address into the "newsletter" table to subscribe the user to the newsletter.
 	 *          If an error occurs during the insertion, the function logs the error.
 	 * @param[in] email The email address to be subscribed to the newsletter.
+	 * @return void
 	 */
 	void subscribeNewsletter(const std::string& email);
 
@@ -287,6 +297,7 @@ public:
 	 * @details This function removes the provided email address from the "newsletter" table, effectively unsubscribing the user from the newsletter.
 	 *          If an error occurs during the deletion, the function logs the error.
 	 * @param[in] email The email address to be unsubscribed from the newsletter.
+	 * @return void
 	 */
 	void unsubscribeNewsletter(const std::string& email);
 
@@ -299,6 +310,7 @@ public:
 	 *          If any error occurs during any of the operations, the function logs the error and halts the process.
 	 * @param[in] email The email address of the user whose subscription and related records are to be deleted.
 	 * @param[in] name The name of the subscription to delete.
+	 * @return void
 	 */
 	void deleteSubscription(const std::string& email, const std::string& name);
 
@@ -312,6 +324,7 @@ public:
 	 * @param[in] email The email address of the user whose subscription the license plate is linked to.
 	 * @param[in] name The name of the subscription the license plate is associated with.
 	 * @param[in] licensePlate The license plate number to be deleted.
+	 * @return void
 	 */
 	void deleteLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate);
 

@@ -40,6 +40,7 @@ private slots:
 	 * @details This function loads the appropriate statistics based on the user's selection from a dropdown (ComboBox).
 	 *          The table is then updated with the new data, and the corresponding color scheme is applied.
 	 * @param[in] choise The index of the selected item in the ComboBox, where 0 represents Occupancy, 1 represents Entries, and 2 represents Exits.
+	 * @return void
 	 */
 	void setTable(const int& choice);
 
@@ -50,6 +51,7 @@ private:
 	 *          The normalized statistics are stored in the reference parameter `normalizedStatistics`.
 	 * @param[in] statistics The input 2D vector containing the statistics to normalize.
 	 * @param[out] normalizedStatistics A reference to the 2D vector where the normalized statistics will be stored.
+	 * @return void
 	 */
 	void normalize(const std::vector<std::vector<int>>& data, std::vector<std::vector<double>>& normalizedData);
 
@@ -58,6 +60,7 @@ private:
 	 * @details This function configures the appearance of the table, including its row and column count, header visibility, column widths, and item alignment.
 	 *          It also fills the first row and first column with days and hours, respectively.
 	 * @param[in] table The QTableWidget that will be configured and populated with day and hour labels.
+	 * @return void
 	 */
 	void setupTable(QTableWidget* table);
 
@@ -67,6 +70,7 @@ private:
 	 *          The values are displayed in the table cells with a color gradient, where higher values are shown in blue and lower values in white.
 	 * @param[in] table The QTableWidget that will have its cells colored.
 	 * @param[in] normalizedStatistics The normalized statistics used to calculate the color for each cell.
+	 * @return void
 	 */
 	void applyColor(QTableWidget* table, const std::vector<std::vector<double>>& normalizedData);
 

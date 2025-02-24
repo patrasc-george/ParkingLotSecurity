@@ -30,6 +30,7 @@ private slots:
 	 * @brief Handles the QR code upload action.
 	 * @details This function opens a file dialog allowing the user to select an image file containing the QR code.
 	 *          Once a file is selected, the dialog is closed, and the file path is emitted through the `getQRPath` signal if the path is valid.
+	 * @return void
 	 */
 	void upload();
 

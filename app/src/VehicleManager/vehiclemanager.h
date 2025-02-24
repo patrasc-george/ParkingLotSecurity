@@ -41,6 +41,7 @@ public:
 	 *          and exit times. It also stores the vehicles' data for further processing.
 	 * @param[out] entranceDateTimes A vector to store entrance date and time strings.
 	 * @param[out] exitDateTimes A vector to store exit date and time strings.
+	 * @return void
 	 */
 	void uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes);
 
@@ -50,6 +51,7 @@ public:
 	 *          the entries list or the exits list based on whether they are currently parked or not.
 	 * @param[out] entriesList A map to store the entry vehicles' information.
 	 * @param[out] exitsList A map to store the exit vehicles' information.
+	 * @return void
 	 */
 	void uploadVehicles(std::map<int, std::string>& entriesList, std::map<int, std::string>& exitsList);
 
@@ -58,6 +60,7 @@ public:
 	 * @details This function counts the number of vehicles that are currently occupying parking spaces
 	 *          and updates the passed reference of the number of occupied parking lots.
 	 * @param[out] numberOccupiedParkingLots The number of occupied parking lots.
+	 * @return void
 	 */
 	void setNumberOccupiedParkingLots(int& numberOccupiedParkingLots);
 
@@ -67,6 +70,7 @@ public:
 	 *          information. The vehicle's image is then saved to a predefined path.
 	 * @param[in] imagePath The path to the image to be processed.
 	 * @param[out] savePath The path where the vehicle's image will be saved.
+	 * @return void
 	 */
 	void getVehicle(const std::string& imagePath, std::string& savePath);
 
@@ -129,6 +133,7 @@ public:
 	 * @param[in] text The text to search for in the vehicle license plates.
 	 * @param[out] historyLogList A map to store the results of the search, with vehicle IDs as keys
 	 *                            and vehicle details (license plate, date, time parked, total amount) as values.
+	 * @return void
 	 */
 	void search(std::string text, std::unordered_map<int, std::string>& historyLogList);
 
@@ -137,6 +142,7 @@ public:
 	 * @details This function iterates over all the vehicles to calculate the occupancy statistics
 	 *          for each hour of the week. The occupancy is tracked by hour and day of the week.
 	 *          It takes into account both the entry and exit time of the vehicles.
+	 * @return void
 	 */
 	void calculateOccupancyStatistics();
 
@@ -154,6 +160,7 @@ public:
 	 * @brief Sets the name for the vehicle manager.
 	 * @details This function sets the name of the vehicle manager to the provided string.
 	 * @param[in] name The name to be set for the vehicle manager.
+	 * @return void
 	 */
 	void setName(const std::string& name);
 
@@ -163,6 +170,7 @@ public:
 	 *          and hour in the occupancy statistics.
 	 * @param[in] day The day of the week (1-7).
 	 * @param[in] hour The hour of the day (0-23).
+	 * @return void
 	 */
 	void increaseOccupancyStatistics(const int& day, const int& hour);
 
@@ -172,6 +180,7 @@ public:
 	 *          for the given day and hour.
 	 * @param[in] day The day of the week (1-7).
 	 * @param[in] hour The hour of the day (0-23).
+	 * @return void
 	 */
 	void increaseEntranceStatistics(const int& day, const int& hour);
 
@@ -181,6 +190,7 @@ public:
 	 *          for the given day and hour.
 	 * @param[in] day The day of the week (1-7).
 	 * @param[in] hour The hour of the day (0-23).
+	 * @return void
 	 */
 	void increaseExitStatistics(const int& day, const int& hour);
 

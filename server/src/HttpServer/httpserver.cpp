@@ -1,6 +1,4 @@
-﻿#define CPPHTTPLIB_OPENSSL_SUPPORT
-
-#include "httpserver.h"
+﻿#include "httpserver.h"
 #include "qrcodedetection.h"
 
 #include <nlohmann/json.hpp>
@@ -58,12 +56,17 @@ HttpServer::HttpServer() : logger(Logger::getInstance())
 		});
 
 	server.Post("/api/validateViaSMS", [this](const httplib::Request& request, httplib::Response& response) {
+		LOG_MESSAGE(INFO) << "Received POST request at /api/validateViaSMS" << std::endl;
+
 		response.set_header("Access-Control-Allow-Origin", "*");
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-		response.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept");
-		response.set_header("Access-Control-Allow-Credentials", "true");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
+
+		LOG_MESSAGE(INFO) << "Headers set, calling validateViaSMS." << std::endl;
 
 		this->validateViaSMS(request, response);
+
+		LOG_MESSAGE(INFO) << "Finished processing /api/validateViaSMS request." << std::endl;
 		});
 
 	server.Post("/api/resendValidateSMS", [this](const httplib::Request& request, httplib::Response& response) {
@@ -457,38 +460,38 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 	if (request.has_param("captchaToken"))
 		captchaToken = request.get_param_value("captchaToken");
 
-	//httplib::SSLClient recaptchaClient("www.google.com");
-	//std::string secretKey(std::getenv("RECAPTCHA_KEY"));
-	//std::string payload = "secret=" + secretKey + "&response=" + captchaToken;
+	httplib::SSLClient recaptchaClient("www.google.com");
+	std::string secretKey(std::getenv("RECAPTCHA_KEY"));
+	std::string payload = "secret=" + secretKey + "&response=" + captchaToken;
 
-	//auto recaptchaResponse = recaptchaClient.Post("/recaptcha/api/siteverify", payload, "application/x-www-form-urlencoded");
-	//if (!recaptchaResponse || recaptchaResponse->status != 200)
-	//{
-	//	std::string statusMessage = (recaptchaResponse != nullptr) ? std::to_string(recaptchaResponse->status) : "null response";
-	//	LOG_MESSAGE(CRITICAL) << "Failed to verify captcha with status: " << statusMessage << std::endl;
-	//	responseJson = {
-	//		{"success", false}
-	//	};
+	auto recaptchaResponse = recaptchaClient.Post("/recaptcha/api/siteverify", payload, "application/x-www-form-urlencoded");
+	if (!recaptchaResponse || recaptchaResponse->status != 200)
+	{
+		std::string statusMessage = (recaptchaResponse != nullptr) ? std::to_string(recaptchaResponse->status) : "null response";
+		LOG_MESSAGE(CRITICAL) << "Failed to verify captcha with status: " << statusMessage << std::endl;
+		responseJson = {
+			{"success", false}
+		};
 
-	//	response.set_content(responseJson.dump(), "application/json");
-	//	return;
-	//}
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
-	//auto recaptchaBody = recaptchaResponse->body;
-	//Poco::JSON::Parser parser;
-	//auto recaptchaJson = parser.parse(recaptchaBody).extract<Poco::JSON::Object::Ptr>();
-	//bool captchaSuccess = recaptchaJson->getValue<bool>("success");
+	auto recaptchaBody = recaptchaResponse->body;
+	Poco::JSON::Parser parser;
+	auto recaptchaJson = parser.parse(recaptchaBody).extract<Poco::JSON::Object::Ptr>();
+	bool captchaSuccess = recaptchaJson->getValue<bool>("success");
 
-	//if (!captchaSuccess)
-	//{
-	//	LOG_MESSAGE(CRITICAL) << "Captcha verification failed." << std::endl;
-	//	responseJson = {
-	//		{"success", false}
-	//	};
+	if (!captchaSuccess)
+	{
+		LOG_MESSAGE(CRITICAL) << "Captcha verification failed." << std::endl;
+		responseJson = {
+			{"success", false}
+		};
 
-	//	response.set_content(responseJson.dump(), "application/json");
-	//	return;
-	//}
+		response.set_content(responseJson.dump(), "application/json");
+		return;
+	}
 
 	if (subscriptionManager.getAccountByEmail(email) != nullptr)
 	{

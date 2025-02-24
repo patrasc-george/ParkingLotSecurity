@@ -37,6 +37,7 @@ public:
 	/**
 	 * @brief Starts the WebSocket session.
 	 * @details Initiates the reading process for the WebSocket session.
+	 * @return void
 	 */
 	void start();
 
@@ -45,6 +46,7 @@ private:
 	 * @brief Reads data from the WebSocket connection.
 	 * @details Reads an incoming message, decrypts it, processes the command, and sends a corresponding response.
 	 *          Supported commands: "getVehicles", "addVehicle", and "getIsPaid". An error response is sent for unknown commands.
+	 * @return void
 	 */
 	void doRead();
 
@@ -52,6 +54,7 @@ private:
 	 * @brief Writes a message to the WebSocket connection.
 	 * @details Encrypts the message and sends it over the WebSocket. Logs errors if the WebSocket is not open or if the message fails to send.
 	 * @param[in] message The message to be sent over the WebSocket.
+	 * @return void
 	 */
 	void doWrite(const std::string& message);
 
@@ -95,6 +98,7 @@ public:
 	/**
 	 * @brief Starts the WebSocket server.
 	 * @details Initiates the process to accept new WebSocket connections.
+	 * @return void
 	 */
 	void start();
 
@@ -103,6 +107,7 @@ private:
 	 * @brief Accepts new WebSocket connections.
 	 * @details Accepts a TCP socket, upgrades it to a WebSocket connection, validates the connection token, and starts a new session.
 	 *          Closes the connection if the token is invalid.
+	 * @return void
 	 */
 	void doAccept();
 

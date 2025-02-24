@@ -58,6 +58,7 @@ public:
 	 * @brief Adds a new date-time to the subscription.
 	 * @details Appends a date-time string to the list of subscription date-times. This could be used for logging events or recording renewals.
 	 * @param[in] dateTime The date-time string to be added to the subscription.
+	 * @return void
 	 */
 	void addDateTime(const std::string& dateTime);
 

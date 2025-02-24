@@ -46,12 +46,13 @@ enum LogOutput
 class LOGGER_API Logger
 {
 private:
-	/**
-	 * @brief Constructor for the Logger class.
-	 * @details Initializes the logger with a default log output type, which is set to CONSOLE.
-	 *          The log file path is set based on the build configuration (debug or release).
-	 */
 	Logger();
+
+	~Logger() {};
+
+	Logger(const Logger&) = delete;
+
+	Logger& operator=(const Logger&) = delete;
 
 public:
 	/**

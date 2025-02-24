@@ -95,6 +95,7 @@ public:
 	 * @brief Sets the name of the account.
 	 * @details If the provided name is empty, the operation is ignored. Otherwise, the internal name is updated.
 	 * @param[in] name The new name to be set. If empty, the operation is ignored.
+	 * @return void
 	 */
 	void setName(const std::string& name);
 
@@ -109,6 +110,7 @@ public:
 	 * @brief Sets the last name of the account.
 	 * @details If the provided last name is empty, the internal value is not changed.
 	 * @param[in] lastName The new last name to be set. If empty, the operation is ignored.
+	 * @return void
 	 */
 	void setLastName(const std::string& lastName);
 
@@ -123,6 +125,7 @@ public:
 	 * @brief Sets the email of the account.
 	 * @details If the provided email is empty, the operation is ignored. The email is essential for account identification.
 	 * @param[in] email The new email to be set. If empty, the operation is ignored.
+	 * @return void
 	 */
 	void setEmail(const std::string& email);
 
@@ -137,6 +140,7 @@ public:
 	 * @brief Sets the password for the account.
 	 * @details If the provided password is empty, the internal value is not updated. Consider encrypting or hashing the password before setting it.
 	 * @param[in] password The new password to be set. If empty, the operation is ignored.
+	 * @return void
 	 */
 	void setPassword(const std::string& password);
 
@@ -151,6 +155,7 @@ public:
 	 * @brief Sets the phone number for the account.
 	 * @details Updates the phone number if the provided value is non-empty. Phone numbers can be used for contact purposes or account recovery.
 	 * @param[in] phone The new phone number to be set. If empty, the operation is ignored.
+	 * @return void
 	 */
 	void setPhone(const std::string& phone);
 

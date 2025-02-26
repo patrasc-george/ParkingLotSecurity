@@ -1,5 +1,7 @@
 project(WebSocketServer)
 
+cmake_policy(SET CMP0167 NEW)
+
 file(GLOB HEADER_FILES "*.h")
 file(GLOB SOURCE_FILES "*.cpp")
 

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(Server)
 
+add_definitions(-D_WIN32_WINNT=0x0A00)
+
 set(CMAKE_CXX_VISIBILITY_PRESET "default")
 set(CMAKE_VISIBILITY_INLINES_HIDDEN "YES")
 

@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-login',
@@ -14,8 +15,8 @@ export class LoginComponent implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
   dropdownVisible = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(
     private http: HttpClient,

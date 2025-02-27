@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,8 +30,8 @@ export class DashboardComponent implements OnInit {
 
   dropdownVisible = false;
   
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(private http: HttpClient, private router: Router) { }
 

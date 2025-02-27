@@ -1,6 +1,7 @@
 import { Component, HostListener } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-mainpage',
@@ -14,8 +15,8 @@ export class MainpageComponent {
   successMessage: string = '';
   selectedFile: File | null = null;
   dropdownVisible = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;
   
   constructor(private http: HttpClient, private router: Router) { }
 

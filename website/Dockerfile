@@ -5,8 +5,13 @@ WORKDIR /app
 COPY package*.json ./
 COPY . .
 
+COPY ./generate-environments.sh ./
+RUN chmod +x ./generate-environments.sh
+
+RUN ./generate-environments.sh
+
 RUN npm install --legacy-peer-deps
-RUN npm run build --prod
+RUN npm run build --configuration=production
 
 FROM nginx:stable-alpine
 

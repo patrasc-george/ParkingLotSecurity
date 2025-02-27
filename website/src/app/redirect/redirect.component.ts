@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-redirect',
@@ -12,8 +13,8 @@ export class RedirectComponent implements OnInit {
   strokeOffset: number = 283;
   message: string = '';
   isRedirecting: boolean = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute) { }
 

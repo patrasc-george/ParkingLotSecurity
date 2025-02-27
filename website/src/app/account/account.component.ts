@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-account',
@@ -17,8 +18,8 @@ export class AccountComponent implements OnInit {
   password: string = '';
   isReadOnly: boolean = true;
   isAdmin: boolean = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   dropdownVisible = false;
 

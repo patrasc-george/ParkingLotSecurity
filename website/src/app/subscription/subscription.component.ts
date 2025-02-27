@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, ElementRef, HostListener, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/internal/Observable';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-subscriptions',
@@ -18,8 +19,8 @@ export class SubscriptionComponent implements OnInit {
   name: string = '';
   subscriptionName: string = '';
   isAdmin: boolean = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 

@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-reset-password',
@@ -13,8 +14,8 @@ export class ResetPasswordComponent implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
   dropdownVisible = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(
     private fb: FormBuilder,

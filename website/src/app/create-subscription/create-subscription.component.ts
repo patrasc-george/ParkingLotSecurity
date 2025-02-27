@@ -2,6 +2,7 @@ import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-create-subscription',
@@ -12,8 +13,8 @@ export class CreateAccountComponent {
   signUpForm: FormGroup;
   dropdownVisible = false;
   captchaResponse: string | null = '';
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(
     private fb: FormBuilder,

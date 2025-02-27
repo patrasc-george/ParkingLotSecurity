@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-terms-and-conditions',
@@ -10,8 +11,8 @@ import { Router } from '@angular/router';
 export class TermsAndConditionsComponent implements OnInit {
   dropdownVisible = false;
   selectedSection: string = 'generalitati';
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   termsSections = [
     {

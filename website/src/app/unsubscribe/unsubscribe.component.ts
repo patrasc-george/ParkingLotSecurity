@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, HostListener } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-unsubscribe',
@@ -12,8 +13,8 @@ export class UnsubscribeComponent {
   unsubscribeForm: FormGroup;
   successMessage: string = '';
   dropdownVisible = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(
     private fb: FormBuilder,

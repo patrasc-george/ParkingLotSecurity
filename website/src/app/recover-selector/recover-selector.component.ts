@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-recover-selector',
@@ -12,8 +13,8 @@ export class RecoverSelectorComponent {
   dropdownVisible = false;
   validationForm: FormGroup;
   validationMethod: 'email' | 'sms' | null = null;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(private router: Router, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({

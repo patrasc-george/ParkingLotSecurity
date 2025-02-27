@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators }
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-contact',
@@ -15,8 +16,8 @@ export class ContactComponent implements OnInit {
   name: string = "";
   isAuthenticated: boolean = false;
   isAdmin: boolean = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   contactForm!: FormGroup;
 

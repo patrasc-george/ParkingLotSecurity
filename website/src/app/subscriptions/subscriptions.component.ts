@@ -1,6 +1,7 @@
 import { Component, OnInit, Renderer2, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-subscriptions',
@@ -14,8 +15,8 @@ export class SubscriptionsComponent implements OnInit {
   dropdownVisible: boolean = false;
   name: string = '';
   isAdmin: boolean = false;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 

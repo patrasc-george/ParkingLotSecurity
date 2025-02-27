@@ -3,6 +3,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-validation-selector',
@@ -18,8 +19,8 @@ export class ValidationSelectorComponent implements OnInit {
   password: string = '';
   phone: string = '';
   isAuthenticated: boolean = true;
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(private router: Router, private authService: AuthService, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({

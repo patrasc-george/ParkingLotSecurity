@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-recover-password',
@@ -14,8 +15,8 @@ export class RecoverPasswordComponent implements OnInit {
   dropdownVisible = false;
   fieldLabel: string = '';
   fieldType: string = '';
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
 
   constructor(private http: HttpClient, private router: Router, private fb: FormBuilder) {
     this.recoverForm = this.fb.group({

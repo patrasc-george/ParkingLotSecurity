@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from './environment';
 
 @Component({
   selector: 'app-validate-update',
@@ -8,8 +9,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   styleUrls: ['./validate-update.component.css']
 })
 export class ValidateUpdateComponent implements OnInit {
-  apiURL: string = "{{API_URL}}";
-  key: string = "{{POSTGRES_PASSWORD}}";
+  apiURL: string = environment.API_URL;
+  key: string = environment.POSTGRES_PASSWORD;;
   
   constructor(
     private route: ActivatedRoute,

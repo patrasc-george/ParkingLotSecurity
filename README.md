@@ -1,3 +1,11 @@
+## Table of Contents
+
+1. [About](#about)  
+2. [Build Requirements](#build-requirements)  
+3. [Installation](#installation)  
+4. [Website](#website)  
+5. [Poster](#poster)  
+
 ## About
 
 The application, written in C++, aims to obtain information related to the entry and exit of vehicles in parking lots. Using various image processing techniques, the license plate number is identified in the image, segmented, rectified, read with the help of an AI model, and stored in database. A website was also implemented using Angular, which is hosted online and communicates in real-time with the desktop application and database, intended for users to pay parking fees and manage subscriptions. 
@@ -34,10 +42,12 @@ The application, written in C++, aims to obtain information related to the entry
 
 ## Website
 
-The page for paying the parking fee. Users can make the payment either by entering the license plate number (if detected) or by uploading an image of the parking ticket to extract and decode the QR code.  
+The page for paying the parking fee. Users can make the payment either by entering the license plate number (if detected) or by uploading an image of the parking ticket to extract and decode the QR code.
+
 ![Parking fee payment page – input fields for license plate and ticket upload](./documentation/website1.png)  
 
-The subscription management page. The displayed subscription includes two vehicles, one of which is currently in the parking lot and has its history expanded for viewing.  
+The subscription management page. The displayed subscription includes two vehicles, one of which is currently in the parking lot and has its history expanded for viewing.
+
 ![Subscription management page – list of vehicles with expanded history for one](./documentation/website2.png)  
 
 ## Poster

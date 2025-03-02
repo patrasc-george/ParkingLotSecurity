@@ -89,14 +89,14 @@ bool DatabaseManager::initializeDatabase()
 			FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
 		);
 
-		CREATE TABLE IF NOT EXISTS subscription_license_vehicles (
+		CREATE TABLE IF NOT EXISTS subscriptions_vehicles (
 			id SERIAL PRIMARY KEY,
 			subscription_id INTEGER NOT NULL,
 			license_plate TEXT NOT NULL,
 			FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
 		);
 
-		CREATE TABLE IF NOT EXISTS subscription_payments (
+		CREATE TABLE IF NOT EXISTS subscriptions_payments (
 			id SERIAL PRIMARY KEY,
 			subscription_id INTEGER NOT NULL,
 			date DATE NOT NULL,
@@ -320,8 +320,8 @@ std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseMan
 	const char* sql = R"(
         SELECT s.subscription_name, sp.date, slv.license_plate
         FROM subscriptions s
-        LEFT JOIN subscription_payments sp ON s.id = sp.subscription_id
-        LEFT JOIN subscription_license_vehicles slv ON s.id = slv.subscription_id
+        LEFT JOIN subscriptions_payments sp ON s.id = sp.subscription_id
+        LEFT JOIN subscriptions_vehicles slv ON s.id = slv.subscription_id
         WHERE s.account_id = (SELECT id FROM accounts WHERE email = $1);
     )";
 
@@ -401,7 +401,7 @@ std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& v
 bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 {
 	const char* sqlCheckSubscription = R"(
-        SELECT 1 FROM subscription_license_vehicles WHERE license_plate = $1;
+        SELECT 1 FROM subscriptions_vehicles WHERE license_plate = $1;
     )";
 
 	const char* paramsSubscription[] = { vehicleLicensePlate.c_str() };
@@ -491,7 +491,7 @@ bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& license
 	PQclear(checkResult);
 
 	const char* sqlCheckSubscription = R"(
-        SELECT 1 FROM subscription_license_vehicles WHERE license_plate = $1;
+        SELECT 1 FROM subscriptions_vehicles WHERE license_plate = $1;
     )";
 
 	const char* paramsSubscription[] = { licensePlate.c_str() };
@@ -709,7 +709,7 @@ void DatabaseManager::addSubscription(const std::string& email, const std::strin
 	PQclear(result);
 
 	const char* sqlInsertPayment = R"(
-    INSERT INTO subscription_payments (subscription_id, date)
+    INSERT INTO subscriptions_payments (subscription_id, date)
     VALUES ($1, $2)
     RETURNING id;
 )";
@@ -779,7 +779,7 @@ void DatabaseManager::addLicensePlate(const std::string& email, const std::strin
 	PQclear(result);
 
 	const char* insertLicensePlateSQL = R"(
-        INSERT INTO subscription_license_vehicles (subscription_id, license_plate) 
+        INSERT INTO subscriptions_vehicles (subscription_id, license_plate) 
         VALUES ($1, $2);
     )";
 
@@ -889,7 +889,7 @@ void DatabaseManager::deleteSubscription(const std::string& email, const std::st
 void DatabaseManager::deleteLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate)
 {
 	const char* selectIdSQL = R"(
-        SELECT subscription_id FROM subscription_license_vehicles 
+        SELECT subscription_id FROM subscriptions_vehicles 
         WHERE license_plate = $1;
     )";
 	const char* paramsSelect[] = { licensePlate.c_str() };
@@ -911,7 +911,7 @@ void DatabaseManager::deleteLicensePlate(const std::string& email, const std::st
 	if (subscriptionId != "-1")
 	{
 		const char* deleteLinkSQL = R"(
-            DELETE FROM subscription_license_vehicles
+            DELETE FROM subscriptions_vehicles
             WHERE subscription_id = $1 AND license_plate = $2;
         )";
 		const char* paramsDeleteLink[] = { subscriptionId.c_str(), licensePlate.c_str() };

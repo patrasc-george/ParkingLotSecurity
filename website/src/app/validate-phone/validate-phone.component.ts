@@ -19,7 +19,7 @@ export class ValidatePhoneComponent {
   phone: string = '';
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -77,7 +77,7 @@ export class ValidatePhoneComponent {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -122,7 +122,7 @@ export class ValidatePhoneComponent {
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     if (localStorage.getItem('fromValidationSelector') === 'true') {
-      const apiUrl = this.apiURL  + '/api/validate';
+      const apiUrl = this.apiURL + '/api/validate';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -134,7 +134,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromRecoverPassword') === 'true') {
-      const apiUrl = this.apiURL  + '/api/verifyResetPasswordToken';
+      const apiUrl = this.apiURL + '/api/verifyResetPasswordToken';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -146,7 +146,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      const apiUrl = this.apiURL  + '/api/validateUpdate';
+      const apiUrl = this.apiURL + '/api/validateUpdate';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -204,7 +204,7 @@ export class ValidatePhoneComponent {
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     if (localStorage.getItem('fromValidationSelector') === 'true') {
-      const apiUrl = this.apiURL  + '/api/resendValidateSMS';
+      const apiUrl = this.apiURL + '/api/resendValidateSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {
@@ -212,7 +212,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromRecoverPassword') === 'true') {
-      const apiUrl = this.apiURL  + '/api/resendRecoverPassword';
+      const apiUrl = this.apiURL + '/api/resendRecoverPassword';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {
@@ -220,7 +220,7 @@ export class ValidatePhoneComponent {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      const apiUrl = this.apiURL  + '/api/resendValidateUpdateSMS';
+      const apiUrl = this.apiURL + '/api/resendValidateUpdateSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (error) => {

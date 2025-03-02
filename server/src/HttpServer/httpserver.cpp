@@ -42,7 +42,7 @@ HttpServer::HttpServer() : logger(Logger::getInstance())
 	server.Post("/api/createAccount", [this](const httplib::Request& request, httplib::Response& response) {
 		response.set_header("Access-Control-Allow-Origin", "*");
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-		response.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
 		this->createAccount(request, response);
 		});
@@ -56,17 +56,11 @@ HttpServer::HttpServer() : logger(Logger::getInstance())
 		});
 
 	server.Post("/api/validateViaSMS", [this](const httplib::Request& request, httplib::Response& response) {
-		LOG_MESSAGE(INFO) << "Received POST request at /api/validateViaSMS" << std::endl;
-
 		response.set_header("Access-Control-Allow-Origin", "*");
 		response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		response.set_header("Access-Control-Allow-Headers", "Content-Type");
 
-		LOG_MESSAGE(INFO) << "Headers set, calling validateViaSMS." << std::endl;
-
 		this->validateViaSMS(request, response);
-
-		LOG_MESSAGE(INFO) << "Finished processing /api/validateViaSMS request." << std::endl;
 		});
 
 	server.Post("/api/resendValidateSMS", [this](const httplib::Request& request, httplib::Response& response) {

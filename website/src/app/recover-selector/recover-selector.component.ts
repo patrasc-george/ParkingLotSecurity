@@ -15,7 +15,7 @@ export class RecoverSelectorComponent {
   validationMethod: 'email' | 'sms' | null = null;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(private router: Router, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({
       validationMethod: [null, Validators.required],
@@ -69,7 +69,7 @@ export class RecoverSelectorComponent {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }

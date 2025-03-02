@@ -11,7 +11,7 @@ import { environment } from './environment';
 export class ValidateUpdateComponent implements OnInit {
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
@@ -32,7 +32,7 @@ export class ValidateUpdateComponent implements OnInit {
     urlEncodedData.append('key', this.key);
     urlEncodedData.append('token', token);
 
-    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded' });
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
     const apiUrl = this.apiURL + '/api/validateUpdate';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })

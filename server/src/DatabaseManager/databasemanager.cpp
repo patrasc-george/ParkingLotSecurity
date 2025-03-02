@@ -8,10 +8,46 @@
 #include <sstream>
 #include <algorithm>
 
+int getSeconds(const std::string& firstDateTime, const std::string& secondFirstTime)
+{
+	int totalSeconds = 0;
+	std::tm firstTm = {};
+	std::tm secondTm = {};
+
+	std::istringstream firstStream(firstDateTime);
+	firstStream >> std::get_time(&firstTm, "%Y-%m-%d %H:%M:%S");
+
+	std::istringstream secondStream(secondFirstTime);
+	secondStream >> std::get_time(&secondTm, "%Y-%m-%d %H:%M:%S");
+
+	std::time_t firstSeconds = std::mktime(&firstTm);
+	std::time_t secondSeconds = std::mktime(&secondTm);
+
+	if (firstSeconds != -1 && secondSeconds != -1)
+		return std::abs(std::difftime(firstSeconds, secondSeconds));
+
+	return 0;
+}
+
+std::string timeParked(const int& seconds)
+{
+	std::tm dateTime = {};
+	dateTime.tm_hour = seconds / 3600;
+	dateTime.tm_min = (seconds % 3600) / 60;
+	dateTime.tm_sec = seconds % 60;
+
+	std::ostringstream ss;
+	ss << std::setw(2) << std::setfill('0') << dateTime.tm_hour << ":"
+		<< std::setw(2) << std::setfill('0') << dateTime.tm_min << ":"
+		<< std::setw(2) << std::setfill('0') << dateTime.tm_sec;
+
+	return ss.str();
+}
+
 bool DatabaseManager::initializeDatabase()
 {
 	logger.setLogOutput(CONSOLE);
-	
+
 	LOG_MESSAGE(INFO) << "The program has been launched." << std::endl;
 
 #ifdef _DEBUG
@@ -30,45 +66,46 @@ bool DatabaseManager::initializeDatabase()
 	const char* sqlCreateTables = R"(
 		CREATE TABLE IF NOT EXISTS vehicles (
 			id SERIAL PRIMARY KEY,
-			image_path TEXT NOT NULL,
 			license_plate TEXT NOT NULL,
-			date_time TEXT NOT NULL,
-			ticket TEXT NOT NULL,
-			time_parked TEXT,
-			total_amount REAL,
-			is_paid TEXT NOT NULL
+			date_time TIMESTAMP NOT NULL,
+			ticket TIMESTAMP NOT NULL,
+			total_amount REAL NOT NULL,
+			is_paid BOOLEAN NOT NULL
 		);
+
 		CREATE TABLE IF NOT EXISTS accounts (
-			email TEXT PRIMARY KEY,
+			id SERIAL PRIMARY KEY,
+			email TEXT UNIQUE NOT NULL,
 			name TEXT NOT NULL,
 			last_name TEXT NOT NULL,
 			password TEXT NOT NULL,
-			phone TEXT NOT NULL
+			phone TEXT UNIQUE NOT NULL
 		);
-		CREATE TABLE IF NOT EXISTS payments (
+
+		CREATE TABLE IF NOT EXISTS subscriptions (
 			id SERIAL PRIMARY KEY,
-			date DATE NOT NULL
+			account_id INTEGER NOT NULL,
+			subscription_name TEXT NOT NULL,
+			FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
 		);
-		CREATE TABLE IF NOT EXISTS license_plates (
+
+		CREATE TABLE IF NOT EXISTS subscription_license_vehicles (
 			id SERIAL PRIMARY KEY,
-			number TEXT NOT NULL
+			subscription_id INTEGER NOT NULL,
+			license_plate TEXT NOT NULL,
+			FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
 		);
+
 		CREATE TABLE IF NOT EXISTS subscription_payments (
-			email TEXT,
-			subscription_name TEXT,
-			payment_id INTEGER,
-			PRIMARY KEY (subscription_name, email, payment_id),
-			FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
+			id SERIAL PRIMARY KEY,
+			subscription_id INTEGER NOT NULL,
+			date DATE NOT NULL,
+			FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
 		);
-		CREATE TABLE IF NOT EXISTS subscription_license_plates (
-			email TEXT,
-			subscription_name TEXT,
-			license_plate_id INTEGER,
-			PRIMARY KEY (subscription_name, email, license_plate_id),
-			FOREIGN KEY (license_plate_id) REFERENCES license_plates(id) ON DELETE CASCADE
-		);
+
 		CREATE TABLE IF NOT EXISTS newsletter (
-			email TEXT
+			id SERIAL PRIMARY KEY,
+			email TEXT UNIQUE NOT NULL
 		);
 	)";
 
@@ -97,7 +134,7 @@ DatabaseManager& DatabaseManager::getInstance()
 std::vector<std::string> DatabaseManager::getVehicles()
 {
 	std::vector<std::string> vehicles;
-	const char* sql = "SELECT id, image_path, license_plate, date_time, ticket, time_parked, total_amount, is_paid FROM vehicles;";
+	const char* sql = "SELECT id, license_plate, TO_CHAR(date_time, 'DD-MM-YYYY HH24:MI:SS'), TO_CHAR(ticket, 'DD-MM-YYYY HH24:MI:SS'), total_amount, is_paid FROM vehicles;";
 
 	PGresult* result = PQexec(conn, sql);
 
@@ -111,16 +148,17 @@ std::vector<std::string> DatabaseManager::getVehicles()
 	int numRows = PQntuples(result);
 	for (int i = 0; i < numRows; i++)
 	{
-		int id = std::stoi(PQgetvalue(result, i, 0)) - 1;
-		std::string imagePath = PQgetvalue(result, i, 1);
-		std::string licensePlate = PQgetvalue(result, i, 2);
-		std::string dateTime = PQgetvalue(result, i, 3);
-		std::string ticket = PQgetvalue(result, i, 4);
-		std::string timeParked = (PQgetlength(result, i, 5) == 0) ? "" : PQgetvalue(result, i, 5);
-		int totalAmount = (PQgetlength(result, i, 6) == 0) ? 0 : std::stoi(PQgetvalue(result, i, 6));
-		std::string isPaid = PQgetvalue(result, i, 7);
+		int id = std::stoi(PQgetvalue(result, i, 0));
+		std::string licensePlate = PQgetvalue(result, i, 1);
+		std::string dateTime = PQgetvalue(result, i, 2);
+		std::string ticket = PQgetvalue(result, i, 3);
+		float totalAmount = std::stof(PQgetvalue(result, i, 4));
+		bool isPaid = (std::string(PQgetvalue(result, i, 5)) == "t");
 
-		std::string vehicleInfo = std::to_string(id) + ", " + imagePath + ", " + licensePlate + ", " + dateTime + ", " + ticket + ", " + timeParked + ", " + std::to_string(totalAmount) + ", " + isPaid;
+		std::ostringstream stream;
+		stream << std::fixed << std::setprecision(2) << totalAmount;
+		std::string totalAmountStr = stream.str();
+		std::string vehicleInfo = std::to_string(id) + ", " + licensePlate + ", " + dateTime + ", " + ticket + ", " + totalAmountStr + ", " + (isPaid ? "1" : "0");
 
 		vehicles.push_back(vehicleInfo);
 	}
@@ -132,9 +170,14 @@ std::vector<std::string> DatabaseManager::getVehicles()
 std::string DatabaseManager::getLastVehicleActivity(const std::string& vehicleLicensePlate)
 {
 	std::string activity = ", , , ";
-	const char* sql = "SELECT license_plate, date_time, ticket, time_parked, total_amount FROM vehicles;";
 
-	PGresult* result = PQexec(conn, sql);
+	const char* sql = "SELECT TO_CHAR(date_time, 'DD-MM-YYYY HH24:MI:SS'), "
+		"TO_CHAR(ticket, 'DD-MM-YYYY HH24:MI:SS'), total_amount "
+		"FROM vehicles WHERE license_plate = $1 "
+		"ORDER BY date_time DESC LIMIT 1;";
+
+	const char* paramValues[1] = { vehicleLicensePlate.c_str() };
+	PGresult* result = PQexecParams(conn, sql, 1, nullptr, paramValues, nullptr, nullptr, 0);
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
@@ -143,33 +186,26 @@ std::string DatabaseManager::getLastVehicleActivity(const std::string& vehicleLi
 		return activity;
 	}
 
-	int numRows = PQntuples(result);
-	for (int i = 0; i < numRows; i++)
+	if (PQntuples(result) > 0)
 	{
-		std::string licensePlate = PQgetvalue(result, i, 0);
-		std::string dateTime = PQgetvalue(result, i, 1);
-		std::string ticket = PQgetvalue(result, i, 2);
-		std::string timeParked = (PQgetlength(result, i, 3) == 0) ? "" : PQgetvalue(result, i, 3);
-		std::string totalAmount = (PQgetlength(result, i, 4) == 0) ? "0" : PQgetvalue(result, i, 4);
+		std::string dateTime = PQgetvalue(result, 0, 0);
+		std::string ticket = PQgetvalue(result, 0, 1);
+		float totalAmount = std::stof(PQgetvalue(result, 0, 2));
 
-		if (licensePlate == vehicleLicensePlate)
-		{
-			if (timeParked.empty())
-				activity = dateTime + ", " + "" + ", " + "" + ", " + "";
-			else
-				activity = ticket + ", " + dateTime + ", " + timeParked + ", " + totalAmount + " RON";
-		}
+		if (dateTime != ticket)
+			activity = ticket + ", " + dateTime + ", " + timeParked(getSeconds(ticket, dateTime)) + ", " + std::to_string(totalAmount) + " RON";
+		else
+			activity = dateTime + ", " + "" + ", " + "" + ", " + "";
 	}
 
 	PQclear(result);
-
 	return activity;
 }
 
 std::string DatabaseManager::getTotalTimeParked(const std::string& vehicleLicensePlate)
 {
 	int totalSeconds = 0;
-	const char* sql = "SELECT license_plate, time_parked FROM vehicles;";
+	const char* sql = "SELECT license_plate, date_time, ticket FROM vehicles;";
 
 	PGresult* result = PQexec(conn, sql);
 
@@ -184,45 +220,26 @@ std::string DatabaseManager::getTotalTimeParked(const std::string& vehicleLicens
 	for (int i = 0; i < numRows; i++)
 	{
 		std::string licensePlate = PQgetvalue(result, i, 0);
-		std::string timeParked = (PQgetlength(result, i, 1) == 0) ? "" : PQgetvalue(result, i, 1);
+		std::string dateTime = PQgetvalue(result, i, 1);
+		std::string ticket = PQgetvalue(result, i, 2);
 
-		if (licensePlate == vehicleLicensePlate)
-		{
-			if (!timeParked.empty())
-			{
-				int hours, minutes, seconds;
-				std::string time = timeParked;
-
-				std::replace(time.begin(), time.end(), ':', ' ');
-				std::istringstream ss(time);
-				ss >> hours >> minutes >> seconds;
-
-				totalSeconds += hours * 3600 + minutes * 60 + seconds;
-			}
-		}
+		if (licensePlate == vehicleLicensePlate && dateTime != ticket)
+			totalSeconds += getSeconds(ticket, dateTime);
 	}
-
-	std::tm timeParked = {};
-	timeParked.tm_hour = totalSeconds / 3600;
-	timeParked.tm_min = (totalSeconds % 3600) / 60;
-	timeParked.tm_sec = totalSeconds % 60;
-
-	std::ostringstream ss;
-	ss << std::setw(2) << std::setfill('0') << timeParked.tm_hour << ":"
-		<< std::setw(2) << std::setfill('0') << timeParked.tm_min << ":"
-		<< std::setw(2) << std::setfill('0') << timeParked.tm_sec;
 
 	PQclear(result);
 
-	return ss.str();
+	return timeParked(totalSeconds);
 }
 
 int DatabaseManager::getPayment(const std::string& vehicleLicensePlate)
 {
 	int payment = 0;
-	const char* sql = "SELECT license_plate, time_parked, total_amount FROM vehicles;";
+	const char* sql = "SELECT SUM(total_amount) FROM vehicles "
+		"WHERE license_plate = $1 AND date_time != ticket;";
 
-	PGresult* result = PQexec(conn, sql);
+	const char* paramValues[1] = { vehicleLicensePlate.c_str() };
+	PGresult* result = PQexecParams(conn, sql, 1, nullptr, paramValues, nullptr, nullptr, 0);
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
@@ -231,19 +248,10 @@ int DatabaseManager::getPayment(const std::string& vehicleLicensePlate)
 		return payment;
 	}
 
-	int numRows = PQntuples(result);
-	for (int i = 0; i < numRows; i++)
-	{
-		std::string licensePlate = PQgetvalue(result, i, 0);
-		std::string timeParked = (PQgetlength(result, i, 1) == 0) ? "" : PQgetvalue(result, i, 1);
-		int totalAmount = (PQgetlength(result, i, 2) == 0) ? 0 : std::stoi(PQgetvalue(result, i, 2));
-
-		if (licensePlate == vehicleLicensePlate && !timeParked.empty())
-			payment += totalAmount;
-	}
+	if (PQntuples(result) > 0 && PQgetlength(result, 0, 0) > 0)
+		payment = std::stoi(PQgetvalue(result, 0, 0));
 
 	PQclear(result);
-
 	return payment;
 }
 
@@ -309,94 +317,51 @@ std::unordered_map<std::string, std::pair<std::string, std::string>> DatabaseMan
 {
 	std::unordered_map<std::string, std::pair<std::string, std::string>> subscriptions;
 
-	const char* sqlGetSubscriptions = R"(
-        SELECT DISTINCT sp.subscription_name
-        FROM subscription_payments sp
-        WHERE sp.email = $1;
+	const char* sql = R"(
+        SELECT s.subscription_name, sp.date, slv.license_plate
+        FROM subscriptions s
+        LEFT JOIN subscription_payments sp ON s.id = sp.subscription_id
+        LEFT JOIN subscription_license_vehicles slv ON s.id = slv.subscription_id
+        WHERE s.account_id = (SELECT id FROM accounts WHERE email = $1);
     )";
 
-	const char* params[] = { email.c_str() };
+	const char* paramValues[] = { email.c_str() };
+	PGresult* result = PQexecParams(conn, sql, 1, nullptr, paramValues, nullptr, nullptr, 0);
 
-	PGresult* resultGetSubscriptions = PQexecParams(conn, sqlGetSubscriptions, 1, nullptr, params, nullptr, nullptr, 0);
-
-	if (PQresultStatus(resultGetSubscriptions) != PGRES_TUPLES_OK)
+	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
 		LOG_MESSAGE(CRITICAL) << "Failed to fetch subscriptions for email: " << email << std::endl;
-		PQclear(resultGetSubscriptions);
+		PQclear(result);
 		return subscriptions;
 	}
 
-	int numRows = PQntuples(resultGetSubscriptions);
+	int numRows = PQntuples(result);
 
-	for (int i = 0; i < numRows; i++)
+	for (int i = 0; i < numRows; ++i)
 	{
-		std::string subscriptionName = PQgetvalue(resultGetSubscriptions, i, 0);
-		subscriptions[subscriptionName] = {};
+		std::string subscriptionName = PQgetvalue(result, i, 0);
+		std::string paymentDate = PQgetvalue(result, i, 1) ? PQgetvalue(result, i, 1) : "";
+		std::string licensePlate = PQgetvalue(result, i, 2) ? PQgetvalue(result, i, 2) : "";
+
+		if (subscriptions.find(subscriptionName) == subscriptions.end())
+			subscriptions[subscriptionName] = { paymentDate, licensePlate };
+		else
+		{
+			if (!paymentDate.empty() && subscriptions[subscriptionName].first.find(paymentDate) == std::string::npos)
+				subscriptions[subscriptionName].first += ", " + paymentDate;
+			if (!licensePlate.empty() && subscriptions[subscriptionName].second.find(licensePlate) == std::string::npos)
+				subscriptions[subscriptionName].second += ", " + licensePlate;
+		}
 	}
 
-	PQclear(resultGetSubscriptions);
-
-	const char* sqlGetDetails = R"(
-		SELECT p.date, l.number
-		FROM subscription_payments sp
-		INNER JOIN payments p ON sp.payment_id = p.id
-		INNER JOIN subscription_license_plates slp ON sp.subscription_name = slp.subscription_name AND sp.email = slp.email
-		INNER JOIN license_plates l ON slp.license_plate_id = l.id
-		WHERE sp.subscription_name = $1 AND sp.email = $2;
-    )";
-
-	for (auto& pair : subscriptions)
-	{
-		std::string payments;
-		std::string licensePlates;
-
-		const char* detailsParams[] = { pair.first.c_str(), email.c_str() };
-
-		PGresult* resultGetDetails = PQexecParams(conn, sqlGetDetails, 2, nullptr, detailsParams, nullptr, nullptr, 0);
-
-		if (PQresultStatus(resultGetDetails) != PGRES_TUPLES_OK)
-		{
-			LOG_MESSAGE(CRITICAL) << "Failed to fetch details for subscription: " << pair.first << " and email: " << email << std::endl;
-			PQclear(resultGetDetails);
-			continue;
-		}
-
-		int numRowsDetails = PQntuples(resultGetDetails);
-
-		for (int i = 0; i < numRowsDetails; ++i)
-		{
-			const char* paymentText = PQgetvalue(resultGetDetails, i, 0);
-			if (paymentText)
-			{
-				std::string payment(paymentText);
-				if (!payments.empty())
-					payments += ", ";
-				payments += payment;
-			}
-
-			const char* licensePlateText = PQgetvalue(resultGetDetails, i, 1);
-			if (licensePlateText)
-			{
-				std::string licensePlate(licensePlateText);
-				if (!licensePlates.empty())
-					licensePlates += ", ";
-				licensePlates += licensePlate;
-			}
-		}
-
-		PQclear(resultGetDetails);
-
-		pair.second.first = payments;
-		pair.second.second = licensePlates;
-	}
-
+	PQclear(result);
 	return subscriptions;
 }
 
 std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& vehicleLicensePlate)
 {
 	std::vector<std::string> history;
-	const char* sql = "SELECT license_plate, date_time, ticket, time_parked, total_amount FROM vehicles;";
+	const char* sql = "SELECT license_plate, date_time, ticket, total_amount FROM vehicles;";
 
 	PGresult* result = PQexec(conn, sql);
 
@@ -413,18 +378,19 @@ std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& v
 		std::string licensePlate = PQgetvalue(result, i, 0);
 		std::string dateTime = PQgetvalue(result, i, 1);
 		std::string ticket = PQgetvalue(result, i, 2);
-		std::string timeParked = (PQgetlength(result, i, 3) == 0) ? "" : PQgetvalue(result, i, 3);
-		int totalAmount = (PQgetlength(result, i, 4) == 0) ? 0 : std::stoi(PQgetvalue(result, i, 4));
+		int totalAmount = (PQgetlength(result, i, 3) == 0) ? 0 : std::stoi(PQgetvalue(result, i, 3));
 
 		if (vehicleLicensePlate == licensePlate)
+		{
 			if (history.empty())
-				if (!timeParked.empty())
-					history.push_back(ticket + ", " + dateTime + ", " + timeParked + ", " + std::to_string(totalAmount) + " RON");
+				if (dateTime != ticket)
+					history.push_back(ticket + ", " + dateTime + ", " + timeParked(getSeconds(ticket, dateTime)) + ", " + std::to_string(totalAmount) + " RON");
 				else
 					history.push_back(ticket + ", " + "" + ", " + "" + ", " + "");
 			else
-				if (!timeParked.empty())
-					history.push_back(ticket + ", " + dateTime + ", " + timeParked + ", " + std::to_string(totalAmount) + " RON");
+				if (dateTime != ticket)
+					history.push_back(ticket + ", " + dateTime + ", " + timeParked(getSeconds(ticket, dateTime)) + ", " + std::to_string(totalAmount) + " RON");
+		}
 	}
 
 	PQclear(result);
@@ -434,55 +400,50 @@ std::vector<std::string> DatabaseManager::getVehicleHistory(const std::string& v
 
 bool DatabaseManager::getIsPaid(const std::string& vehicleLicensePlate)
 {
-	const char* sqlCheckLicensePlate = "SELECT 1 FROM license_plates WHERE number = $1;";
+	const char* sqlCheckSubscription = R"(
+        SELECT 1 FROM subscription_license_vehicles WHERE license_plate = $1;
+    )";
 
-	const char* paramsCheckLicensePlate[] = { vehicleLicensePlate.c_str() };
+	const char* paramsSubscription[] = { vehicleLicensePlate.c_str() };
+	PGresult* checkSubscriptionResult = PQexecParams(conn, sqlCheckSubscription, 1, nullptr, paramsSubscription, nullptr, nullptr, 0);
 
-	PGresult* checkLicensePlateResult = PQexecParams(conn, sqlCheckLicensePlate, 1, nullptr, paramsCheckLicensePlate, nullptr, nullptr, 0);
-
-	if (PQresultStatus(checkLicensePlateResult) == PGRES_TUPLES_OK && PQntuples(checkLicensePlateResult))
+	if (PQresultStatus(checkSubscriptionResult) == PGRES_TUPLES_OK && PQntuples(checkSubscriptionResult) > 0)
 	{
-		PQclear(checkLicensePlateResult);
+		PQclear(checkSubscriptionResult);
 		return true;
 	}
 
-	PQclear(checkLicensePlateResult);
+	PQclear(checkSubscriptionResult);
 
-	const char* sql = R"(
-    SELECT is_paid 
-    FROM vehicles 
-    WHERE license_plate = $1 
-    ORDER BY date_time DESC 
-    LIMIT 1;
-	)";
+	const char* sqlCheckPayment = R"(
+        SELECT is_paid 
+        FROM vehicles 
+        WHERE license_plate = $1 
+        ORDER BY date_time DESC 
+        LIMIT 1;
+    )";
 
 	const char* params[] = { vehicleLicensePlate.c_str() };
+	PGresult* checkPaymentResult = PQexecParams(conn, sqlCheckPayment, 1, nullptr, params, nullptr, nullptr, 0);
 
-	PGresult* checkResult = PQexecParams(conn, sql, 1, nullptr, params, nullptr, nullptr, 0);
-
-	if (PQresultStatus(checkResult) != PGRES_TUPLES_OK)
+	if (PQresultStatus(checkPaymentResult) != PGRES_TUPLES_OK)
 	{
 		LOG_MESSAGE(CRITICAL) << "Failed to check payment status for vehicle: " << vehicleLicensePlate << std::endl;
-		PQclear(checkResult);
+		PQclear(checkPaymentResult);
 		return false;
 	}
 
-	int numRows = PQntuples(checkResult);
+	int numRows = PQntuples(checkPaymentResult);
 	if (numRows == 0)
 	{
-		LOG_MESSAGE(CRITICAL) << "No payment records found for vehicle: " << vehicleLicensePlate << std::endl;
-		PQclear(checkResult);
+		PQclear(checkPaymentResult);
 		return false;
 	}
 
-	std::string isPaid = PQgetvalue(checkResult, 0, 0);
+	std::string isPaid = PQgetvalue(checkPaymentResult, 0, 0);
+	PQclear(checkPaymentResult);
 
-	PQclear(checkResult);
-
-	if (isPaid == "true")
-		return true;
-
-	return false;
+	return isPaid == "t";
 }
 
 bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& licensePlate, std::string& dateTime, const bool& isTicket)
@@ -529,11 +490,26 @@ bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& license
 
 	PQclear(checkResult);
 
+	const char* sqlCheckSubscription = R"(
+        SELECT 1 FROM subscription_license_vehicles WHERE license_plate = $1;
+    )";
+
+	const char* paramsSubscription[] = { licensePlate.c_str() };
+	PGresult* checkSubscriptionResult = PQexecParams(conn, sqlCheckSubscription, 1, nullptr, paramsSubscription, nullptr, nullptr, 0);
+
+	if (PQresultStatus(checkSubscriptionResult) == PGRES_TUPLES_OK && PQntuples(checkSubscriptionResult) > 0)
+	{
+		PQclear(checkSubscriptionResult);
+		return true;
+	}
+
+	PQclear(checkSubscriptionResult);
+
 	const char* sqlUpdate;
 	if (isTicket)
-		sqlUpdate = "UPDATE vehicles SET is_paid = 'true' WHERE ticket = $1;";
+		sqlUpdate = "UPDATE vehicles SET is_paid = 't' WHERE ticket = $1;";
 	else
-		sqlUpdate = "UPDATE vehicles SET is_paid = 'true' WHERE license_plate = $1;";
+		sqlUpdate = "UPDATE vehicles SET is_paid = 't' WHERE license_plate = $1;";
 
 	PGresult* result = PQexecParams(conn, sqlUpdate, 1, nullptr, params, nullptr, nullptr, 0);
 
@@ -595,73 +571,15 @@ void DatabaseManager::setEmail(const std::string& email, const std::string& newE
 	if (newEmail.empty())
 		return;
 
-	const char* selectAccount = "SELECT name, last_name, password, phone FROM accounts WHERE email = $1";
-	const char* paramsSelect[] = { email.c_str() };
+	const char* sql = "UPDATE accounts SET email = $1 WHERE email = $2";
 
-	PGresult* result = PQexecParams(conn, selectAccount, 1, nullptr, paramsSelect, nullptr, nullptr, 0);
+	const char* params[] = { newEmail.c_str(), email.c_str() };
 
-	if (PQresultStatus(result) != PGRES_TUPLES_OK || PQntuples(result) != 1)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to fetch account information for: " << email << std::endl;
-		PQclear(result);
-		return;
-	}
-
-	std::string name = PQgetvalue(result, 0, 0);
-	std::string lastName = PQgetvalue(result, 0, 1);
-	std::string password = PQgetvalue(result, 0, 2);
-	std::string phone = PQgetvalue(result, 0, 3);
-
-	PQclear(result);
-
-	const char* insertAccount = "INSERT INTO accounts (email, name, last_name, password, phone) VALUES ($1, $2, $3, $4, $5)";
-	const char* paramsInsert[] = { newEmail.c_str(), name.c_str(), lastName.c_str(), password.c_str(), phone.c_str() };
-
-	result = PQexecParams(conn, insertAccount, 5, nullptr, paramsInsert, nullptr, nullptr, 0);
+	PGresult* result = PQexecParams(conn, sql, 2, nullptr, params, nullptr, nullptr, 0);
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(CRITICAL) << "Failed to insert new account with email: " << newEmail << std::endl;
-		PQclear(result);
-		return;
-	}
-
-	PQclear(result);
-
-	const char* updatePayments = "UPDATE subscription_payments SET email = $1 WHERE email = $2";
-	const char* paramsPayments[] = { newEmail.c_str(), email.c_str() };
-
-	result = PQexecParams(conn, updatePayments, 2, nullptr, paramsPayments, nullptr, nullptr, 0);
-
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to update subscription payments for email: " << email << std::endl;
-		PQclear(result);
-		return;
-	}
-	PQclear(result);
-
-	const char* updateLicensePlates = "UPDATE subscription_license_plates SET email = $1 WHERE email = $2";
-	const char* paramsLicensePlates[] = { newEmail.c_str(), email.c_str() };
-
-	result = PQexecParams(conn, updateLicensePlates, 2, nullptr, paramsLicensePlates, nullptr, nullptr, 0);
-
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to update subscription license plates for email: " << email << std::endl;
-		PQclear(result);
-		return;
-	}
-	PQclear(result);
-
-	const char* deleteAccount = "DELETE FROM accounts WHERE email = $1";
-	const char* paramsDelete[] = { email.c_str() };
-
-	result = PQexecParams(conn, deleteAccount, 1, nullptr, paramsDelete, nullptr, nullptr, 0);
-
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to delete old account with email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to update email for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
@@ -711,24 +629,32 @@ void DatabaseManager::setPhone(const std::string& email, const std::string& newP
 	PQclear(result);
 }
 
-void DatabaseManager::addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid)
+void DatabaseManager::addVehicle(const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, float totalAmount)
 {
 	const char* sqlInsert = R"(
-        INSERT INTO vehicles (image_path, license_plate, date_time, ticket, time_parked, total_amount, is_paid)
-        VALUES ($1, $2, $3, $4, $5, $6, $7);
+        INSERT INTO vehicles (license_plate, date_time, ticket, total_amount, is_paid)
+        VALUES ($1, $2, $3, $4, $5);
     )";
 
+	std::ostringstream stream;
+	stream << std::fixed << std::setprecision(2) << totalAmount;
+	std::string totalAmountStr = stream.str();
+
+	std::string isPaidStr;
+	if (dateTime == ticket)
+		isPaidStr = "f";
+	else
+		isPaidStr = "t";
+
 	const char* insertParams[] = {
-		imagePath.c_str(),
 		licensePlate.c_str(),
 		dateTime.c_str(),
 		ticket.c_str(),
-		timeParked.c_str(),
-		totalAmount.c_str(),
-		isPaid.c_str()
+		totalAmountStr.c_str(),
+		isPaidStr.c_str()
 	};
 
-	PGresult* insertResult = PQexecParams(conn, sqlInsert, 7, nullptr, insertParams, nullptr, nullptr, 0);
+	PGresult* insertResult = PQexecParams(conn, sqlInsert, 5, nullptr, insertParams, nullptr, nullptr, 0);
 
 	if (PQresultStatus(insertResult) != PGRES_COMMAND_OK)
 	{
@@ -763,11 +689,30 @@ void DatabaseManager::addAccount(const std::string& name, const std::string& las
 
 void DatabaseManager::addSubscription(const std::string& email, const std::string& name)
 {
+	const char* sqlInsertSubscription = R"(
+        INSERT INTO subscriptions (account_id, subscription_name)
+        VALUES ((SELECT id FROM accounts WHERE email = $1), $2)
+        RETURNING id;
+    )";
+
+	const char* paramsSubscription[] = { email.c_str(), name.c_str() };
+	PGresult* result = PQexecParams(conn, sqlInsertSubscription, 2, nullptr, paramsSubscription, nullptr, nullptr, 0);
+
+	if (PQresultStatus(result) != PGRES_TUPLES_OK)
+	{
+		LOG_MESSAGE(CRITICAL) << "Error inserting subscription for email: " << email << " and subscription: " << name << std::endl;
+		PQclear(result);
+		return;
+	}
+
+	std::string subscriptionId = PQgetvalue(result, 0, 0);
+	PQclear(result);
+
 	const char* sqlInsertPayment = R"(
-    INSERT INTO payments (date)
-    VALUES ($1)
+    INSERT INTO subscription_payments (subscription_id, date)
+    VALUES ($1, $2)
     RETURNING id;
-	)";
+)";
 
 	time_t now = time(0);
 	tm* ltm = localtime(&now);
@@ -775,85 +720,71 @@ void DatabaseManager::addSubscription(const std::string& email, const std::strin
 	snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", 1900 + ltm->tm_year, 1 + ltm->tm_mon, ltm->tm_mday);
 	std::string currentDate = std::string(buffer);
 
-	const char* paramsPayment[] = { currentDate.c_str() };
-	PGresult* result = PQexecParams(conn, sqlInsertPayment, 1, nullptr, paramsPayment, nullptr, nullptr, 0);
+	const char* paramsPayment[] = { subscriptionId.c_str(), currentDate.c_str() };
+	result = PQexecParams(conn, sqlInsertPayment, 2, nullptr, paramsPayment, nullptr, nullptr, 0);
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(CRITICAL) << "Error inserting payment for email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error inserting payment for subscription for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
 	int paymentId = std::stoi(PQgetvalue(result, 0, 0));
 	PQclear(result);
-
-	const char* sqlLinkSubscriptionPayment = R"(
-    INSERT INTO subscription_payments (email, subscription_name, payment_id)
-    VALUES ($1, $2, $3);
-	)";
-
-	std::string id = std::to_string(paymentId);
-	const char* paramsLinkSubscriptionPayment[] = {
-		email.c_str(),
-		name.c_str(),
-		id.c_str()
-	};
-
-	result = PQexecParams(conn, sqlLinkSubscriptionPayment, 3, nullptr, paramsLinkSubscriptionPayment, nullptr, nullptr, 0);
-
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Error linking subscription for email: " << email << std::endl;
-		PQclear(result);
-		return;
-	}
-
-	PQclear(result);
 }
 
 void DatabaseManager::addLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate)
 {
+	const char* getAccountIdSQL = R"(
+        SELECT id 
+        FROM accounts 
+        WHERE email = $1
+        LIMIT 1;
+    )";
+
+	const char* params[] = { email.c_str() };
+	PGresult* result = PQexecParams(conn, getAccountIdSQL, 1, nullptr, params, nullptr, nullptr, 0);
+
+	if (PQresultStatus(result) != PGRES_TUPLES_OK || PQntuples(result) == 0)
+	{
+		LOG_MESSAGE(CRITICAL) << "Error fetching account ID for email: " << email << std::endl;
+		PQclear(result);
+		return;
+	}
+
+	std::string accountId = PQgetvalue(result, 0, 0);
+	PQclear(result);
+
+	const char* getSubscriptionIdSQL = R"(
+        SELECT id 
+        FROM subscriptions 
+        WHERE account_id = $1 AND subscription_name = $2
+        LIMIT 1;
+    )";
+
+
+	const char* paramsSubscription[] = { accountId.c_str(), name.c_str() };
+	result = PQexecParams(conn, getSubscriptionIdSQL, 2, nullptr, paramsSubscription, nullptr, nullptr, 0);
+
+	if (PQresultStatus(result) != PGRES_TUPLES_OK || PQntuples(result) == 0)
+	{
+		std::string errorMessage = PQerrorMessage(conn);
+		LOG_MESSAGE(CRITICAL) << "Error fetching subscription ID for email: " << email << " and subscription name: " << name << std::endl;
+		PQclear(result);
+		return;
+	}
+
+	std::string subscriptionId = PQgetvalue(result, 0, 0);
+	PQclear(result);
+
 	const char* insertLicensePlateSQL = R"(
-        INSERT INTO license_plates (number) 
-        VALUES ($1);
+        INSERT INTO subscription_license_vehicles (subscription_id, license_plate) 
+        VALUES ($1, $2);
     )";
 
-	const char* params[] = { licensePlate.c_str() };
-	PGresult* result = PQexecParams(conn, insertLicensePlateSQL, 1, nullptr, params, nullptr, nullptr, 0);
-
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Error inserting license plate: " << licensePlate << " for email: " << email << std::endl;
-		PQclear(result);
-		return;
-	}
-
-	PQclear(result);
-
-	const char* getLastInsertIdSQL = R"(
-        SELECT LASTVAL();
-    )";
-	result = PQexec(conn, getLastInsertIdSQL);
-
-	if (PQresultStatus(result) != PGRES_TUPLES_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Error getting last inserted license plate ID for email: " << email << std::endl;
-		PQclear(result);
-		return;
-	}
-
-	int licensePlateId = std::stoi(PQgetvalue(result, 0, 0));
-	PQclear(result);
-
-	const char* insertSubscriptionLicensePlateSQL = R"(
-    INSERT INTO subscription_license_plates (email, subscription_name, license_plate_id)
-    VALUES ($1, $2, $3);
-	)";
-
-	std::string id = std::to_string(licensePlateId);
-	const char* paramsInsert[] = { email.c_str(), name.c_str(), id.c_str() };
-	result = PQexecParams(conn, insertSubscriptionLicensePlateSQL, 3, nullptr, paramsInsert, nullptr, nullptr, 0);
+	const char* paramsInsert[] = { subscriptionId.c_str(), licensePlate.c_str() };
+	result = PQexecParams(conn, insertLicensePlateSQL, 2, nullptr, paramsInsert, nullptr, nullptr, 0);
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
@@ -907,134 +838,69 @@ void DatabaseManager::unsubscribeNewsletter(const std::string& email)
 
 void DatabaseManager::deleteSubscription(const std::string& email, const std::string& name)
 {
-	std::vector<int> paymentIds;
-	std::vector<int> licensePlateIds;
-
-	const char* sqlGetPaymentIds = R"(
-        SELECT payment_id
-        FROM subscription_payments
-        WHERE email = $1 AND subscription_name = $2;
+	const char* sqlGetAccountId = R"(
+        SELECT id FROM accounts WHERE email = $1;
     )";
-	const char* paramsGetPaymentIds[] = { email.c_str(), name.c_str() };
-	PGresult* result = PQexecParams(conn, sqlGetPaymentIds, 2, nullptr, paramsGetPaymentIds, nullptr, nullptr, 0);
+	const char* paramsGetAccountId[] = { email.c_str() };
+	PGresult* result = PQexecParams(conn, sqlGetAccountId, 1, nullptr, paramsGetAccountId, nullptr, nullptr, 0);
 
-	if (PQresultStatus(result) != PGRES_TUPLES_OK)
+	if (PQresultStatus(result) != PGRES_TUPLES_OK || PQntuples(result) == 0)
 	{
-		LOG_MESSAGE(CRITICAL) << "Error retrieving payment IDs for subscription: " << name << " and email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error retrieving account ID for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
-	for (int i = 0; i < PQntuples(result); ++i)
-		paymentIds.push_back(std::stoi(PQgetvalue(result, i, 0)));
-
+	std::string accountId = PQgetvalue(result, 0, 0);
 	PQclear(result);
 
-	const char* sqlGetLicensePlateIds = R"(
-        SELECT license_plate_id
-        FROM subscription_license_plates
-        WHERE email = $1 AND subscription_name = $2;
+	const char* sqlGetSubscriptionId = R"(
+        SELECT id FROM subscriptions WHERE account_id = $1 AND subscription_name = $2;
     )";
-	const char* paramsGetLicensePlateIds[] = { email.c_str(), name.c_str() };
-	result = PQexecParams(conn, sqlGetLicensePlateIds, 2, nullptr, paramsGetLicensePlateIds, nullptr, nullptr, 0);
+	const char* paramsGetSubscriptionId[] = { accountId.c_str(), name.c_str() };
+	result = PQexecParams(conn, sqlGetSubscriptionId, 2, nullptr, paramsGetSubscriptionId, nullptr, nullptr, 0);
 
-	if (PQresultStatus(result) != PGRES_TUPLES_OK)
+	if (PQresultStatus(result) != PGRES_TUPLES_OK || PQntuples(result) == 0)
 	{
-		LOG_MESSAGE(CRITICAL) << "Error retrieving license plate IDs for subscription: " << name << " and email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error retrieving subscription ID for subscription: " << name << " and email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
 
-	for (int i = 0; i < PQntuples(result); ++i)
-		licensePlateIds.push_back(std::stoi(PQgetvalue(result, i, 0)));
-
+	std::string subscriptionId = PQgetvalue(result, 0, 0);
 	PQclear(result);
 
-	const char* sqlDeletePayments = R"(
-        DELETE FROM subscription_payments
-        WHERE email = $1 AND subscription_name = $2;
+	const char* sqlDeleteSubscription = R"(
+        DELETE FROM subscriptions WHERE id = $1;
     )";
-	const char* paramsDeletePayments[] = { email.c_str(), name.c_str() };
-	result = PQexecParams(conn, sqlDeletePayments, 2, nullptr, paramsDeletePayments, nullptr, nullptr, 0);
+	const char* paramsDeleteSubscription[] = { subscriptionId.c_str() };
+	result = PQexecParams(conn, sqlDeleteSubscription, 1, nullptr, paramsDeleteSubscription, nullptr, nullptr, 0);
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
 	{
-		LOG_MESSAGE(CRITICAL) << "Error deleting payments for subscription: " << name << " and email: " << email << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Error deleting subscription ID: " << subscriptionId << " for email: " << email << std::endl;
 		PQclear(result);
 		return;
 	}
+
 	PQclear(result);
-
-	const char* sqlDeleteLicensePlates = R"(
-        DELETE FROM subscription_license_plates
-        WHERE email = $1 AND subscription_name = $2;
-    )";
-	const char* paramsDeleteLicensePlates[] = { email.c_str(), name.c_str() };
-	result = PQexecParams(conn, sqlDeleteLicensePlates, 2, nullptr, paramsDeleteLicensePlates, nullptr, nullptr, 0);
-
-	if (PQresultStatus(result) != PGRES_COMMAND_OK)
-	{
-		LOG_MESSAGE(CRITICAL) << "Error deleting license plates for subscription: " << name << " and email: " << email << std::endl;
-		PQclear(result);
-		return;
-	}
-	PQclear(result);
-
-	for (int id : paymentIds)
-	{
-		const char* sqlDeletePayment = R"(
-            DELETE FROM payments
-            WHERE id = $1;
-        )";
-
-		std::string strId = std::to_string(id);
-		const char* paramsDeletePayment[] = { strId.c_str() };
-		result = PQexecParams(conn, sqlDeletePayment, 1, nullptr, paramsDeletePayment, nullptr, nullptr, 0);
-
-		if (PQresultStatus(result) != PGRES_COMMAND_OK)
-		{
-			LOG_MESSAGE(CRITICAL) << "Error deleting payment ID: " << std::to_string(id) << " for email: " << email << std::endl;
-			PQclear(result);
-			return;
-		}
-		PQclear(result);
-	}
-
-	for (int id : licensePlateIds)
-	{
-		const char* sqlDeleteLicensePlate = R"(
-            DELETE FROM license_plates
-            WHERE id = $1;
-        )";
-
-		std::string strId = std::to_string(id);
-		const char* paramsDeleteLicensePlate[] = { strId.c_str() };
-		result = PQexecParams(conn, sqlDeleteLicensePlate, 1, nullptr, paramsDeleteLicensePlate, nullptr, nullptr, 0);
-
-		if (PQresultStatus(result) != PGRES_COMMAND_OK)
-		{
-			LOG_MESSAGE(CRITICAL) << "Error deleting license plate ID: " << std::to_string(id) << " for email: " << email << std::endl;
-			PQclear(result);
-			return;
-		}
-		PQclear(result);
-	}
 }
 
 void DatabaseManager::deleteLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate)
 {
 	const char* selectIdSQL = R"(
-        SELECT id FROM license_plates 
-        WHERE number = $1;
+        SELECT subscription_id FROM subscription_license_vehicles 
+        WHERE license_plate = $1;
     )";
 	const char* paramsSelect[] = { licensePlate.c_str() };
 	PGresult* result = PQexecParams(conn, selectIdSQL, 1, nullptr, paramsSelect, nullptr, nullptr, 0);
 
-	int licensePlateId = -1;
+	std::string subscriptionId = "-1";
 	if (PQresultStatus(result) == PGRES_TUPLES_OK && PQntuples(result) > 0)
-		licensePlateId = std::stoi(PQgetvalue(result, 0, 0));
+		subscriptionId = PQgetvalue(result, 0, 0);
 	else
 	{
+		std::string errorMessage = PQerrorMessage(conn);
 		LOG_MESSAGE(CRITICAL) << "License plate not found: " << licensePlate << std::endl;
 		PQclear(result);
 		return;
@@ -1042,36 +908,19 @@ void DatabaseManager::deleteLicensePlate(const std::string& email, const std::st
 
 	PQclear(result);
 
-	if (licensePlateId != -1)
+	if (subscriptionId != "-1")
 	{
 		const char* deleteLinkSQL = R"(
-	        DELETE FROM subscription_license_plates
-	        WHERE license_plate_id = $1;
-	    )";
-
-		std::string id = std::to_string(licensePlateId);
-		const char* paramsDeleteLink[] = { id.c_str() };
-		result = PQexecParams(conn, deleteLinkSQL, 1, nullptr, paramsDeleteLink, nullptr, nullptr, 0);
+            DELETE FROM subscription_license_vehicles
+            WHERE subscription_id = $1 AND license_plate = $2;
+        )";
+		const char* paramsDeleteLink[] = { subscriptionId.c_str(), licensePlate.c_str() };
+		result = PQexecParams(conn, deleteLinkSQL, 2, nullptr, paramsDeleteLink, nullptr, nullptr, 0);
 
 		if (PQresultStatus(result) != PGRES_COMMAND_OK)
 		{
+			std::string errorMessage = PQerrorMessage(conn);
 			LOG_MESSAGE(CRITICAL) << "Error deleting license plate link for plate: " << licensePlate << " and subscription: " << name << std::endl;
-			PQclear(result);
-			return;
-		}
-
-		PQclear(result);
-
-		const char* deleteLicensePlateSQL = R"(
-	        DELETE FROM license_plates
-	        WHERE id = $1;
-	    )";
-		const char* paramsDeleteLicensePlate[] = { id.c_str() };
-		result = PQexecParams(conn, deleteLicensePlateSQL, 1, nullptr, paramsDeleteLicensePlate, nullptr, nullptr, 0);
-
-		if (PQresultStatus(result) != PGRES_COMMAND_OK)
-		{
-			LOG_MESSAGE(CRITICAL) << "Error deleting license plate record for plate: " << licensePlate << std::endl;
 			PQclear(result);
 			return;
 		}

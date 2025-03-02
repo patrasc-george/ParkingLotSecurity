@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
   dropdownVisible = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -99,7 +99,7 @@ export class LoginComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -122,7 +122,7 @@ export class LoginComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/login';
+    const apiUrl = this.apiURL + '/api/login';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         data => {

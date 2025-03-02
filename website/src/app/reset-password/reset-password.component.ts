@@ -16,7 +16,7 @@ export class ResetPasswordComponent implements OnInit {
   dropdownVisible = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -88,7 +88,7 @@ export class ResetPasswordComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -105,7 +105,7 @@ export class ResetPasswordComponent implements OnInit {
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    const apiUrl = this.apiURL  + '/api/verifyResetPasswordToken';
+    const apiUrl = this.apiURL + '/api/verifyResetPasswordToken';
     this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data) => {
@@ -139,7 +139,7 @@ export class ResetPasswordComponent implements OnInit {
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    const apiUrl = this.apiURL  + '/api/resetPassword';
+    const apiUrl = this.apiURL + '/api/resetPassword';
     this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data) => {

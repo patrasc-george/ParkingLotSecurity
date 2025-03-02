@@ -39,6 +39,56 @@ inline std::vector<std::string> split(const std::string& string, const std::stri
 	return substrings;
 }
 
+std::string VehicleManager::timeParked()
+{
+	Vehicle* auxVehicle = findVehicle(curentVehicle.getLicensePlate(), curentVehicle.getTicket(), true);
+
+	if (auxVehicle == nullptr)
+	{
+		if (curentVehicle.getTicket().empty())
+			return "undetected";
+		else
+		{
+			curentVehicle.setTicket("00-00-0000 00:00:00");
+			return "00:00:00";
+		}
+	}
+
+	if (!client->getIsPaid(curentVehicle.getLicensePlate()))
+		return "unpaid";
+
+	if (auxVehicle->getLicensePlate() != "N/A")
+		curentVehicle.setLicensePlate(auxVehicle->getLicensePlate());
+	else
+		auxVehicle->setLicensePlate(curentVehicle.getLicensePlate());
+	curentVehicle.setTicket(auxVehicle->getTicket());
+
+	std::ostringstream timeStream;
+	std::tm tmIn = {}, tmOut = {};
+	std::istringstream inStr(auxVehicle->getDateTime());
+	std::istringstream outStr(curentVehicle.getDateTime());
+	inStr >> std::get_time(&tmIn, "%d-%m-%Y %H:%M:%S");
+	outStr >> std::get_time(&tmOut, "%d-%m-%Y %H:%M:%S");
+	auto inTime = std::mktime(&tmIn);
+	auto outTime = std::mktime(&tmOut);
+
+	if (inTime != -1 && outTime != -1)
+	{
+		auto duration = std::difftime(outTime, inTime);
+
+		int hours = static_cast<int>(duration) / 3600;
+		int minutes = (static_cast<int>(duration) % 3600) / 60;
+		int seconds = static_cast<int>(duration) % 60;
+
+		timeStream << std::setw(2) << std::setfill('0') << hours << ":"
+			<< std::setw(2) << std::setfill('0') << minutes << ":"
+			<< std::setw(2) << std::setfill('0') << seconds;
+	}
+
+	curentVehicle.setTicket(auxVehicle->getTicket());
+	return timeStream.str();
+}
+
 void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes, std::vector<std::string>& exitDateTimes)
 {
 	entranceStatistics = std::vector<std::vector<int>>(7, std::vector<int>(24, 0));
@@ -49,22 +99,24 @@ void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes,
 	{
 		std::vector<std::string> data = split(vehicleData, ", ");
 
-		curentVehicle = Vehicle(std::stoi(data[0]), data[1], data[2], data[3]);
-		curentVehicle.setTicket(data[4]);
+		int id = std::stoi(data[0]) - 1;
+		std::string path = dataBasePath + "vehicles/" + std::to_string(id) + ".jpg";
+		curentVehicle = Vehicle(id, path, data[1], data[2]);
+		curentVehicle.setTicket(data[3]);
 
-		if (data[5].empty())
+		if (data[2] == data[3])
 		{
-			if (data[7] == "true")
+			if (data[5] == "1")
 				curentVehicle.setIsPaid();
 
-			entranceDateTimes.push_back(data[3]);
+			entranceDateTimes.push_back(data[2]);
 		}
 		else
 		{
-			curentVehicle.setTimeParked(data[5]);
-			curentVehicle.setTotalAmount(std::stoi(data[6]));
+			curentVehicle.setTimeParked(timeParked());
+			curentVehicle.setTotalAmount(std::stoi(data[4]));
 
-			exitDateTimes.push_back(data[3]);
+			exitDateTimes.push_back(data[2]);
 		}
 
 		vehicles.push_back(curentVehicle);
@@ -141,56 +193,6 @@ Vehicle* VehicleManager::findVehicle(const std::string& licensePlate, const std:
 	return nullptr;
 }
 
-std::string VehicleManager::timeParked()
-{
-	Vehicle* auxVehicle = findVehicle(curentVehicle.getLicensePlate(), curentVehicle.getTicket(), true);
-
-	if (auxVehicle == nullptr)
-	{
-		if (curentVehicle.getTicket().empty())
-			return "undetected";
-		else
-		{
-			curentVehicle.setTicket("00-00-0000 00:00:00");
-			return "00:00:00";
-		}
-	}
-
-	if (!client->getIsPaid(curentVehicle.getLicensePlate()))
-		return "unpaid";
-
-	if (auxVehicle->getLicensePlate() != "N/A")
-		curentVehicle.setLicensePlate(auxVehicle->getLicensePlate());
-	else
-		auxVehicle->setLicensePlate(curentVehicle.getLicensePlate());
-	curentVehicle.setTicket(auxVehicle->getTicket());
-
-	std::ostringstream timeStream;
-	std::tm tmIn = {}, tmOut = {};
-	std::istringstream inStr(auxVehicle->getDateTime());
-	std::istringstream outStr(curentVehicle.getDateTime());
-	inStr >> std::get_time(&tmIn, "%d-%m-%Y %H:%M:%S");
-	outStr >> std::get_time(&tmOut, "%d-%m-%Y %H:%M:%S");
-	auto inTime = std::mktime(&tmIn);
-	auto outTime = std::mktime(&tmOut);
-
-	if (inTime != -1 && outTime != -1)
-	{
-		auto duration = std::difftime(outTime, inTime);
-
-		int hours = static_cast<int>(duration) / 3600;
-		int minutes = (static_cast<int>(duration) % 3600) / 60;
-		int seconds = static_cast<int>(duration) % 60;
-
-		timeStream << std::setw(2) << std::setfill('0') << hours << ":"
-			<< std::setw(2) << std::setfill('0') << minutes << ":"
-			<< std::setw(2) << std::setfill('0') << seconds;
-	}
-
-	curentVehicle.setTicket(auxVehicle->getTicket());
-	return timeStream.str();
-}
-
 int VehicleManager::calculateTotalAmount(const std::string& time, const int& fee)
 {
 	int index = time.rfind(":");
@@ -244,7 +246,7 @@ int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::stri
 
 		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), dataBasePath);
 	}
-	client->addVehicle(vehicles.size(), curentVehicle.getPath(), curentVehicle.getLicensePlate(), curentVehicle.getDateTime(), curentVehicle.getTicket(), curentVehicle.getTimeParked(), std::to_string(curentVehicle.getTotalAmount()), "false");
+	client->addVehicle(curentVehicle.getLicensePlate(), curentVehicle.getDateTime(), curentVehicle.getTicket(), curentVehicle.getTotalAmount());
 	vehicles.push_back(curentVehicle);
 
 	return 0;

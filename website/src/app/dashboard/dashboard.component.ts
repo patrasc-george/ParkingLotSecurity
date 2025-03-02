@@ -29,10 +29,10 @@ export class DashboardComponent implements OnInit {
   emailsTable: any[] = [];
 
   dropdownVisible = false;
-  
+
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
@@ -46,7 +46,7 @@ export class DashboardComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/getAdmin';
+    const apiUrl = this.apiURL + '/api/getAdmin';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
@@ -158,7 +158,7 @@ export class DashboardComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/login';
+    const apiUrl = this.apiURL + '/api/login';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {

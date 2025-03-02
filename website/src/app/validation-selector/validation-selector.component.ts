@@ -21,7 +21,7 @@ export class ValidationSelectorComponent implements OnInit {
   isAuthenticated: boolean = true;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(private router: Router, private authService: AuthService, private http: HttpClient, private fb: FormBuilder) {
     this.validationForm = this.fb.group({
       validationMethod: [null, Validators.required],
@@ -89,7 +89,7 @@ export class ValidationSelectorComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -125,12 +125,15 @@ export class ValidationSelectorComponent implements OnInit {
 
     if (localStorage.getItem('fromCreateSubscription') === 'true') {
       localStorage.setItem('fromCreateSubscription', 'false');
-      const apiUrl = this.apiURL  + '/api/validateViaEmail';
+      const apiUrl = this.apiURL + '/api/validateViaEmail';
+
+      localStorage.setItem('fromValidationSelector', 'true');
+      this.router.navigate(['/login']);
+
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
-            localStorage.setItem('fromValidationSelector', 'true');
-            this.router.navigate(['/login']);
+
           },
           error => {
             console.error('Error:', error);
@@ -138,12 +141,15 @@ export class ValidationSelectorComponent implements OnInit {
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
       localStorage.setItem('fromAccount', 'false');
-      const apiUrl = this.apiURL  + '/api/validateUpdateViaEmail';
+      const apiUrl = this.apiURL + '/api/validateUpdateViaEmail';
+
+      localStorage.setItem('fromValidationSelector', 'true');
+      this.router.navigate(['/login']);
+
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
-            localStorage.setItem('fromValidationSelector', 'true');
-            this.router.navigate(['/login']);
+
           },
           error => {
             console.error('Error:', error);
@@ -164,7 +170,7 @@ export class ValidationSelectorComponent implements OnInit {
 
     if (localStorage.getItem('fromCreateSubscription') === 'true') {
       localStorage.setItem('fromCreateSubscription', 'false');
-      const apiUrl = this.apiURL  + '/api/validateViaSMS';
+      const apiUrl = this.apiURL + '/api/validateViaSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {
@@ -176,7 +182,7 @@ export class ValidationSelectorComponent implements OnInit {
           }
         );
     } else if (localStorage.getItem('fromAccount') === 'true') {
-      const apiUrl = this.apiURL  + '/api/validateUpdateViaSMS';
+      const apiUrl = this.apiURL + '/api/validateUpdateViaSMS';
       this.http.post(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data: any) => {

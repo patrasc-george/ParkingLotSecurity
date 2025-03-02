@@ -216,7 +216,7 @@ bool WebSocketClient::connect()
 
 			if (errorCode)
 			{
-				LOG_MESSAGE(CRITICAL) << "[ERROR] WebSocket handshake failed: " << errorCode.message() << std::endl;
+				LOG_MESSAGE(CRITICAL) << "WebSocket handshake failed: " << errorCode.message() << std::endl;
 				return false;
 			}
 
@@ -231,7 +231,7 @@ bool WebSocketClient::connect()
 		}
 
 		return true;
-}
+	}
 	catch (const std::exception& e)
 	{
 		LOG_MESSAGE(CRITICAL) << "Connection failed: " << e.what() << std::endl;
@@ -300,18 +300,14 @@ std::vector<std::string> WebSocketClient::getVehicles()
 	return vehicles;
 }
 
-void WebSocketClient::addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid)
+void WebSocketClient::addVehicle(const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const float& totalAmount)
 {
 	nlohmann::json request = {
 		{"command", "addVehicle"},
-		{"id", id},
-		{"imagePath", imagePath},
 		{"licensePlate", licensePlate},
 		{"dateTime", dateTime},
 		{"ticket", ticket},
-		{"timeParked", timeParked},
-		{"totalAmount", totalAmount},
-		{"isPaid", isPaid}
+		{"totalAmount", totalAmount}
 	};
 	LOG_MESSAGE(DEBUG) << "Sending request to add vehicle." << std::endl;
 

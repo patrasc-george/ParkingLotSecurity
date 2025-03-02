@@ -20,7 +20,7 @@ export class AccountComponent implements OnInit {
   isAdmin: boolean = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   dropdownVisible = false;
 
   formVisibleAccount: boolean = false;
@@ -125,7 +125,7 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -213,7 +213,7 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/updateAccountInformation';
+    const apiUrl = this.apiURL + '/api/updateAccountInformation';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {
@@ -252,7 +252,7 @@ export class AccountComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/updateAccount';
+    const apiUrl = this.apiURL + '/api/updateAccount';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => {

@@ -1,3 +1,5 @@
+src/app/**/environment.ts
+
 /tmp
 /out-tsc
 /bazel-out

@@ -18,7 +18,7 @@ export class ContactComponent implements OnInit {
   isAdmin: boolean = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   contactForm!: FormGroup;
 
   constructor(private router: Router, private authService: AuthService, private fb: FormBuilder, private http: HttpClient) { }
@@ -93,7 +93,7 @@ export class ContactComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -122,7 +122,7 @@ export class ContactComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/contact';
+    const apiUrl = this.apiURL + '/api/contact';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data: any) => this.handleServerResponse(data),

@@ -13,7 +13,7 @@ export class TermsAndConditionsComponent implements OnInit {
   selectedSection: string = 'generalitati';
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   termsSections = [
     {
       title: '1. Informații preliminare',
@@ -263,7 +263,7 @@ export class TermsAndConditionsComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }

@@ -47,7 +47,7 @@ class LOGGER_API Logger
 {
 private:
 	Logger();
-	
+
 	~Logger() {};
 
 	Logger(const Logger&) = delete;

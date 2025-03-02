@@ -15,7 +15,7 @@ export class UnsubscribeComponent {
   dropdownVisible = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -76,7 +76,7 @@ export class UnsubscribeComponent {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -92,7 +92,7 @@ export class UnsubscribeComponent {
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    const apiUrl = this.apiURL  + '/api/unsubscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/unsubscribeNewsletter';
     this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         (data) => {

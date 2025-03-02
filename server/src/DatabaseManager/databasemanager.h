@@ -235,17 +235,14 @@ public:
 	 *          date/time of entry, ticket number, parking time, total amount, and payment status. If any error occurs during the
 	 *          insertion, the function logs the error and throws a runtime exception.
 	 * @param[in] id The unique identifier for the vehicle (though not used in the SQL query).
-	 * @param[in] imagePath The path to the image representing the vehicle.
 	 * @param[in] licensePlate The license plate of the vehicle.
 	 * @param[in] dateTime The date and time when the vehicle's entry was recorded.
 	 * @param[in] ticket The ticket number associated with the vehicle.
-	 * @param[in] timeParked The amount of time the vehicle has been parked.
 	 * @param[in] totalAmount The total amount due for parking.
-	 * @param[in] isPaid A flag indicating whether the vehicle's parking fee has been paid.
 	 * @throws std::runtime_error If an error occurs while inserting the vehicle into the database.
 	 * @return void
 	 */
-	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid);
+	void addVehicle(const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, float totalAmount);
 
 	/**
 	 * @brief Adds a new account to the "accounts" table.

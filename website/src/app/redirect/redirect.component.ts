@@ -15,7 +15,7 @@ export class RedirectComponent implements OnInit {
   isRedirecting: boolean = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   constructor(private router: Router, private http: HttpClient, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
@@ -62,7 +62,7 @@ export class RedirectComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/login';
+    const apiUrl = this.apiURL + '/api/login';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe(
         data => {

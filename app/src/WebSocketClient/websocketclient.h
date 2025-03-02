@@ -84,16 +84,13 @@ public:
 	 * @details This function sends a request to the server with the vehicle's details, including the ID, image path,
 	 *          license plate, datetime, ticket, time parked, total amount, and payment status.
 	 * @param[in] id The ID of the vehicle.
-	 * @param[in] imagePath The path to the vehicle's image.
 	 * @param[in] licensePlate The license plate of the vehicle.
 	 * @param[in] dateTime The date and time when the vehicle was detected.
 	 * @param[in] ticket The ticket associated with the vehicle.
-	 * @param[in] timeParked The time the vehicle has been parked.
 	 * @param[in] totalAmount The total amount for parking.
-	 * @param[in] isPaid The payment status of the vehicle.
 	 * @return void
 	 */
-	void addVehicle(const int& id, const std::string& imagePath, const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const std::string& timeParked, const std::string& totalAmount, const std::string& isPaid);
+	void addVehicle(const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const float& totalAmount);
 
 	/**
 	 * @brief Checks whether the specified vehicle has been paid for.

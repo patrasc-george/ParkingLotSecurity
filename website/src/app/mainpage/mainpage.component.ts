@@ -17,7 +17,7 @@ export class MainpageComponent {
   dropdownVisible = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;
-  
+
   constructor(private http: HttpClient, private router: Router) { }
 
   onLogin() {
@@ -103,7 +103,7 @@ export class MainpageComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const apiUrl = this.apiURL  + '/api/endpoint';
+    const apiUrl = this.apiURL + '/api/endpoint';
 
     if (!this.licensePlate && !this.selectedFile) {
       this.errorMessage = 'Please enter a license plate number or upload a QR code.';

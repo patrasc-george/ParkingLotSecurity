@@ -84,7 +84,7 @@ export class RecoverPasswordComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -121,7 +121,7 @@ export class RecoverPasswordComponent implements OnInit {
         'Content-Type': 'application/x-www-form-urlencoded'
       });
 
-      const apiUrl = this.apiURL  + '/api/recoverPasswordViaEmail';
+      const apiUrl = this.apiURL + '/api/recoverPasswordViaEmail';
       this.http.post<any>(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           (data) => {
@@ -147,7 +147,7 @@ export class RecoverPasswordComponent implements OnInit {
         'Content-Type': 'application/x-www-form-urlencoded'
       });
 
-      const apiUrl = this.apiURL  + '/api/recoverPasswordViaSMS';
+      const apiUrl = this.apiURL + '/api/recoverPasswordViaSMS';
       this.http.post<{ success: boolean, message?: string }>(apiUrl, urlEncodedData.toString(), { headers })
         .subscribe(
           data => {

@@ -21,7 +21,7 @@ export class SubscriptionComponent implements OnInit {
   isAdmin: boolean = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 
   constructor(private router: Router, private http: HttpClient, private renderer: Renderer2) { }
@@ -44,7 +44,7 @@ export class SubscriptionComponent implements OnInit {
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', this.subscriptionName);
 
-    const apiUrl = this.apiURL  + '/api/getSubscriptionVehicles';
+    const apiUrl = this.apiURL + '/api/getSubscriptionVehicles';
     this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     })
@@ -119,7 +119,7 @@ export class SubscriptionComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -218,7 +218,7 @@ export class SubscriptionComponent implements OnInit {
         const isExpanded = row.classList.contains('expanded');
 
         if (!isExpanded) {
-          const apiUrl = this.apiURL  + '/api/getVehicleHistory';
+          const apiUrl = this.apiURL + '/api/getVehicleHistory';
           const response = await this.http.post<{ success: boolean; history: any[]; totalTimeParked?: string; payment?: string }>(
             apiUrl,
             urlEncodedData.toString(),
@@ -383,7 +383,7 @@ export class SubscriptionComponent implements OnInit {
     urlEncodedData.append('subscriptionName', subscriptionName);
     urlEncodedData.append('activityData', JSON.stringify(activityData));
 
-    const apiUrl = this.apiURL  + '/api/addVehicle';
+    const apiUrl = this.apiURL + '/api/addVehicle';
     return this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     });
@@ -454,7 +454,7 @@ export class SubscriptionComponent implements OnInit {
       urlEncodedData.append('subscriptionName', subscriptionName);
       urlEncodedData.append('licensePlate', licensePlate);
 
-      const apiUrl = this.apiURL  + '/api/deleteVehicle';
+      const apiUrl = this.apiURL + '/api/deleteVehicle';
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',

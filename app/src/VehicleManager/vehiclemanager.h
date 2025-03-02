@@ -36,6 +36,15 @@ public:
 
 public:
 	/**
+	 * @brief Calculates the time a vehicle has been parked.
+	 * @details This function finds the vehicle based on its license plate and ticket, and calculates the
+	 *          difference between the vehicle's entry time and exit time. It returns the time the vehicle
+	 *          has been parked in the format "HH:MM:SS".
+	 * @return A string representing the parking duration (e.g., "02:30:45" or "undetected").
+	 */
+	std::string timeParked();
+
+	/**
 	 * @brief Uploads the vehicles data and updates entrance and exit times.
 	 * @details This function fetches vehicle data from the WebSocket client and updates the entrance
 	 *          and exit times. It also stores the vehicles' data for further processing.
@@ -86,15 +95,6 @@ public:
 	 * @return A pointer to the found vehicle, or nullptr if not found.
 	 */
 	Vehicle* findVehicle(const std::string& licensePlate, const std::string& ticket, const bool& isEntered, const bool& direction = true, const int& index = -1);
-
-	/**
-	 * @brief Calculates the time a vehicle has been parked.
-	 * @details This function finds the vehicle based on its license plate and ticket, and calculates the
-	 *          difference between the vehicle's entry time and exit time. It returns the time the vehicle
-	 *          has been parked in the format "HH:MM:SS".
-	 * @return A string representing the parking duration (e.g., "02:30:45" or "undetected").
-	 */
-	std::string timeParked();
 
 	/**
 	 * @brief Calculates the total parking fee based on the time and fee rate.

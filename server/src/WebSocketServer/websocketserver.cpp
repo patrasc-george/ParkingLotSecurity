@@ -194,16 +194,12 @@ void WebSocketSession::doRead()
 	}
 	else if (command == "addVehicle")
 	{
-		int id = decryptMessage["id"];
-		std::string imagePath = decryptMessage["imagePath"];
 		std::string licensePlate = decryptMessage["licensePlate"];
 		std::string dateTime = decryptMessage["dateTime"];
 		std::string ticket = decryptMessage["ticket"];
-		std::string timeParked = decryptMessage["timeParked"];
-		std::string totalAmount = decryptMessage["totalAmount"];
-		std::string isPaid = decryptMessage["isPaid"];
+		float totalAmount = decryptMessage["totalAmount"];
 
-		this->dataBaseManager.addVehicle(id, imagePath, licensePlate, dateTime, ticket, timeParked, totalAmount, isPaid);
+		this->dataBaseManager.addVehicle(licensePlate, dateTime, ticket, totalAmount);
 
 		response["status"] = "success";
 		response["message"] = "Vehicle added " + licensePlate;

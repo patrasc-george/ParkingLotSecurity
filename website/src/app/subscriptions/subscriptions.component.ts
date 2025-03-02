@@ -17,7 +17,7 @@ export class SubscriptionsComponent implements OnInit {
   isAdmin: boolean = false;
   apiURL: string = environment.API_URL;
   key: string = environment.POSTGRES_PASSWORD;;
-  
+
   @ViewChild('tableBody', { static: true }) tableBody!: ElementRef;
 
   constructor(private http: HttpClient, private router: Router, private renderer: Renderer2) { }
@@ -92,7 +92,7 @@ export class SubscriptionsComponent implements OnInit {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    const apiUrl = this.apiURL  + '/api/subscribeNewsletter';
+    const apiUrl = this.apiURL + '/api/subscribeNewsletter';
     this.http.post(apiUrl, urlEncodedData.toString(), { headers })
       .subscribe();
   }
@@ -171,7 +171,7 @@ export class SubscriptionsComponent implements OnInit {
         urlEncodedData.append('email', email || '');
         urlEncodedData.append('subscriptionName', subscriptionName);
 
-        const apiUrl = this.apiURL  + '/api/addSubscription';
+        const apiUrl = this.apiURL + '/api/addSubscription';
         this.http.post(apiUrl, urlEncodedData.toString(), {
           headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
         })
@@ -224,7 +224,7 @@ export class SubscriptionsComponent implements OnInit {
       urlEncodedData.append('email', email || '');
       urlEncodedData.append('subscriptionName', subscription);
 
-      const apiUrl = this.apiURL  + '/api/deleteSubscription';
+      const apiUrl = this.apiURL + '/api/deleteSubscription';
       try {
         const data: any = await this.http.post(apiUrl, urlEncodedData.toString(), {
           headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
@@ -257,7 +257,7 @@ export class SubscriptionsComponent implements OnInit {
     urlEncodedData.append('email', email || '');
     urlEncodedData.append('subscriptionName', subscription);
 
-    const apiUrl = this.apiURL  + '/api/getSubscriptionVehicles';
+    const apiUrl = this.apiURL + '/api/getSubscriptionVehicles';
     this.http.post(apiUrl, urlEncodedData.toString(), {
       headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
     })

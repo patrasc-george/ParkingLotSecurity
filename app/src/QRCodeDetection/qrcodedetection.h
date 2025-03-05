@@ -27,7 +27,7 @@ public:
 	 * @param[in] totalAmount The total amount for parking, in RON.
 	 * @return void
 	 */
-	void generateQR(const std::string& id, const std::string& name, const std::string& licensePlate, const std::string& dataBasePath, const std::string& dateTime = "", const std::string& timeParked = "", const int& totalAmount = 0);
+	void generateQR(const std::string& id, const std::string& name, const std::string& licensePlate, const std::string& dataBasePath, const std::string& assetsPath, const std::string& dateTime = "", const std::string& timeParked = "", const int& totalAmount = 0);
 
 	std::string decodeQR(const std::string& path);
 };

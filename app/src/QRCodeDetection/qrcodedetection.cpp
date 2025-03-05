@@ -2,29 +2,75 @@
 
 #include <qrencode.h>
 #include <opencv2/opencv.hpp>
+#include <regex>
 
-void QRCode::generateQR(const std::string& id, const std::string& name, const std::string& licensePlate, const std::string& dataBasePath, const std::string& dateTime, const std::string& timeParked, const int& totalAmount)
+void write(cv::Mat& image, int x, int& y, const int& margin, const std::string& leftText, const std::string& rightText, const float& fontScale, const int& thickness)
 {
-	std::string text = id;
+	cv::Size textSize;
+
+	textSize = cv::getTextSize(leftText, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
+	y = y + textSize.height;
+	cv::putText(image, leftText, cv::Point(margin, y), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+
+	textSize = cv::getTextSize(rightText, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
+	x = x - textSize.width;
+	cv::putText(image, rightText, cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+}
+
+void QRCode::generateQR(const std::string& id, const std::string& name, const std::string& licensePlate, const std::string& dataBasePath, const std::string& assetsPath, const std::string& dateTime, const std::string& timeParked, const int& totalAmount)
+{
+	std::regex pattern(R"((\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2}))");
+	std::smatch match;
+
+	std::string text;
+	if (std::regex_match(id, match, pattern))
+		text = match[1].str() + match[2].str() + match[3].str().substr(2) + match[4].str() + match[5].str() + match[6].str();
+
 	QRcode* qr = QRcode_encodeString(text.c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
 
-	int size = qr->width;
-	int scale = 30;
-	int qrSize = qr->width * scale;
+	int qrScale = 30;
+	int qrSize = qr->width * qrScale;
 	int width = qrSize * 2;
-	int height = qrSize * 3;
+	int height = qrSize * 4;
+	int margin = width * 0.1;
+	int textScale = 20;
+	int lineSpacing = textScale * 3;
+	float fontScale = textScale / 10.0;
+	int thickness = textScale / 3;
 
 	cv::Mat ticket(height, width, CV_8UC1, cv::Scalar(255));
 
-	int qrX = (width - qrSize) / 2;
-	int qrY = qrSize / 2;
+	cv::Mat logo = cv::imread(assetsPath + "park.png", cv::IMREAD_GRAYSCALE);
+	int logoWidth = width / 5;
+	int logoHeight = ((float)logoWidth / logo.cols) * logo.rows;
+	cv::resize(logo, logo, cv::Size(logoWidth, logoHeight));
+	logo.copyTo(ticket(cv::Rect(margin, margin, logoWidth, logoHeight)));
 
-	for (int y = 0; y < size; y++)
+	cv::Size textSize = cv::getTextSize(name, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
+	int x = width - (margin + textSize.width);
+	int y = margin + logoHeight / 2 + textSize.height / 2;
+	cv::putText(ticket, name, cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+
+	y = margin + logoHeight + lineSpacing;
+	cv::line(ticket, cv::Point(margin, y), cv::Point(width - margin, y), cv::Scalar(0), thickness);
+
+	textSize = cv::getTextSize("PARKING RECEIPT", cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
+	y = y + lineSpacing + textSize.height;
+	x = width / 2 - textSize.width / 2;
+	cv::putText(ticket, "PARKING RECEIPT", cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+
+	y = y + lineSpacing;
+	cv::line(ticket, cv::Point(margin, y), cv::Point(width - margin, y), cv::Scalar(0), thickness);
+
+	x = (width - qrSize) / 2;
+	y = y + lineSpacing * 2;
+
+	for (int j = 0; j < qr->width; j++)
 	{
-		for (int x = 0; x < size; x++)
+		for (int i = 0; i < qr->width; i++)
 		{
-			unsigned char bit = qr->data[y * size + x] & 1;
-			cv::Rect roi(qrX + x * scale, qrY + y * scale, scale, scale);
+			unsigned char bit = qr->data[j * qr->width + i] & 1;
+			cv::Rect roi(x + i * qrScale, y + j * qrScale, qrScale, qrScale);
 
 			if (bit)
 				ticket(roi).setTo(0);
@@ -33,49 +79,43 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 		}
 	}
 
-	int textY = 2 * qrSize;
-	int lineSpacing = scale * 4;
-	double fontScale = scale / 10.0;
-	int thickness = scale / 3;
+	y = y + qrSize + lineSpacing * 2;
+	x = width - margin;
+	write(ticket, x, y, margin, "License plate:", licensePlate, fontScale, thickness);
 
-	cv::Size nameSize = cv::getTextSize(name, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
-	int nameX = (width - nameSize.width) / 2;
-	int nameY = (qrY + nameSize.height) / 2;
-	cv::putText(ticket, name, cv::Point(nameX, nameY), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+	y = y + lineSpacing;
+	write(ticket, x, y, margin, "Entered:", id, fontScale, thickness);
 
-	cv::Size licensePlateSize = cv::getTextSize(licensePlate, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
-	int licensePlateX = (width - licensePlateSize.width) / 2;
-	cv::putText(ticket, licensePlate, cv::Point(licensePlateX, textY), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
-
-	if (dateTime.empty() && timeParked.empty() && totalAmount == 0)
+	if (!dateTime.empty() && !timeParked.empty() && totalAmount != 0)
 	{
-		cv::Size idSize = cv::getTextSize(id, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
-		int idX = (width - idSize.width) / 2;
-		cv::putText(ticket, id, cv::Point(idX, textY + lineSpacing), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+		y = y + lineSpacing;
+		write(ticket, x, y, margin, "Exit:", dateTime, fontScale, thickness);
 
-		text += " entered.jpg";
-	}
-	else
-	{
-		cv::Size dateTimeSize = cv::getTextSize(dateTime, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
-		int dateTimeX = (width - dateTimeSize.width) / 2;
-		cv::putText(ticket, dateTime, cv::Point(dateTimeX, textY + lineSpacing), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+		y = y + lineSpacing;
+		write(ticket, x, y, margin, "Time parked:", timeParked, fontScale, thickness);
 
-		cv::Size timeParkedSize = cv::getTextSize(timeParked, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
-		int timeParkedX = (width - timeParkedSize.width) / 2;
-		cv::putText(ticket, timeParked, cv::Point(timeParkedX, textY + lineSpacing * 2), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
-
-		std::string totalAmountString = std::to_string(totalAmount) + " RON";
-		cv::Size totalAmountSize = cv::getTextSize(totalAmountString, cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
-		int totalAmountX = (width - totalAmountSize.width) / 2;
-		cv::putText(ticket, totalAmountString, cv::Point(totalAmountX, textY + lineSpacing * 3), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+		y = y + lineSpacing;
+		write(ticket, x, y, margin, "Paid:", std::to_string(totalAmount) + " RON", fontScale, thickness);
 
 		text += " exit.jpg";
 	}
+	else
+		text += " entered.jpg";
+
+	y = y + lineSpacing;
+	cv::line(ticket, cv::Point(margin, y), cv::Point(width - margin, y), cv::Scalar(0), thickness);
+
+	textSize = cv::getTextSize("THANK YOU!", cv::FONT_HERSHEY_SIMPLEX, fontScale, thickness, nullptr);
+	y = y + lineSpacing + textSize.height;
+	x = width / 2 - textSize.width / 2;
+	cv::putText(ticket, "THANK YOU!", cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
+
+	y = y + margin;
+	ticket = ticket(cv::Rect(0, 0, ticket.cols, y));
 
 	std::replace(text.begin(), text.end(), ':', '-');
 	std::replace(text.begin(), text.end(), ' ', '_');
-	std::string savePath = dataBasePath + "qr/" + text;
+	std::string savePath = dataBasePath + "tickets/" + text;
 	cv::imwrite(savePath, ticket);
 
 	QRcode_free(qr);

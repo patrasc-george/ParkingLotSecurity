@@ -37,10 +37,10 @@ file(GLOB ASSETS
 install(FILES ${ASSETS} DESTINATION "${DELIVERY_DIR}/assets")
 
 file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/vehicles")
-file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/qr")
+file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/tickets")
 
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/vehicles")
-file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/qr")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/tickets")
 
 file(GLOB TRANSLATIONS "${CMAKE_SOURCE_DIR}/translations/*.qm")
 install(FILES ${TRANSLATIONS} DESTINATION "${DELIVERY_DIR}/translations")

@@ -347,8 +347,12 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	nlohmann::json responseJson;
 	std::string licensePlate;
 	std::string dateTime;
+	std::string requestKey;
 
-	if (!request.has_param("key") || request.get_param_value("key") != key)
+	if (request.has_param("key"))
+		requestKey = request.get_param_value("key");
+
+	if (requestKey != key)
 	{
 		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
 		responseJson = {

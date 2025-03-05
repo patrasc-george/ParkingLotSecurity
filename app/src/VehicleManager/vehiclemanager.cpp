@@ -11,8 +11,10 @@ VehicleManager::VehicleManager()
 #endif
 
 #ifdef _DEBUG
+	assetsPath = "../../../assets/";
 	dataBasePath = "../../../database/";
 #else
+	assetsPath = "assets/";
 	dataBasePath = "database/";
 #endif
 
@@ -238,13 +240,13 @@ int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::stri
 		curentVehicle.setTimeParked(time);
 		curentVehicle.setTotalAmount(totalAmount);
 
-		qr.generateQR(curentVehicle.getTicket(), name, curentVehicle.getLicensePlate(), dataBasePath, curentVehicle.getDateTime(), time, totalAmount);
+		qr.generateQR(curentVehicle.getTicket(), name, curentVehicle.getLicensePlate(), dataBasePath, assetsPath, curentVehicle.getDateTime(), time, totalAmount);
 	}
 	else
 	{
 		curentVehicle.setTicket(dateTime);
 
-		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), dataBasePath);
+		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), dataBasePath, assetsPath);
 	}
 	client->addVehicle(curentVehicle.getLicensePlate(), curentVehicle.getDateTime(), curentVehicle.getTicket(), curentVehicle.getTotalAmount());
 	vehicles.push_back(curentVehicle);

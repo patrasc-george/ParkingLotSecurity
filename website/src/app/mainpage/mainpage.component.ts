@@ -136,6 +136,7 @@ export class MainpageComponent {
     } else if (this.selectedFile) {
       const formData = new FormData();
       formData.append('qrCodeImage', this.selectedFile, this.selectedFile.name);
+      formData.append('key', this.key);
       this.http.post(apiUrl, formData)
         .subscribe(
           data => {

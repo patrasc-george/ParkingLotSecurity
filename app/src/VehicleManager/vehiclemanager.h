@@ -225,6 +225,7 @@ private:
 	boost::asio::io_context ioContext;
 	std::shared_ptr<WebSocketClient> client;
 	std::string dataBasePath;
+	std::string assetsPath;
 	std::string name;
 	std::vector<std::vector<int>> occupancyStatistics;
 	std::vector<std::vector<int>> entranceStatistics;

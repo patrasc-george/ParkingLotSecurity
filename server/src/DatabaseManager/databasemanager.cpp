@@ -472,7 +472,6 @@ bool DatabaseManager::setIsPaid(const std::string& vehicle, std::string& license
 
 	if (PQresultStatus(checkResult) != PGRES_TUPLES_OK)
 	{
-		LOG_MESSAGE(CRITICAL) << "Failed to fetch vehicle information for: " << vehicle << std::endl;
 		PQclear(checkResult);
 		return false;
 	}

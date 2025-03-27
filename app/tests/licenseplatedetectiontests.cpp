@@ -266,42 +266,42 @@ public:
 	TEST_METHOD(paddingRect_InvalidInput)
 	{
 		cv::Rect src(0, 0, 10, 10), dst;
-		float percent;
+		float percentage;
 		bool square;
 		cv::Size size;
 
-		percent = 0;
+		percentage = 0;
 		square = false;
-		Algorithm::paddingRect(src, dst, percent, square, size);
+		Algorithm::paddingRect(src, dst, percentage, square, size);
 		Assert::AreEqual(dst.x, src.x - 3);
 		Assert::AreEqual(dst.y, src.y - 3);
 		Assert::AreEqual(dst.width, src.width + 6);
 		Assert::AreEqual(dst.height, src.height + 6);
 
 		square = true;
-		Algorithm::paddingRect(src, dst, percent, square);
+		Algorithm::paddingRect(src, dst, percentage, square);
 		Assert::AreEqual(dst.x, src.x - 3);
 		Assert::AreEqual(dst.y, src.y - 3);
 		Assert::AreEqual(dst.width, src.width + 6);
 		Assert::AreEqual(dst.height, src.height + 6);
 
 		size = cv::Size(100, 100);
-		Algorithm::paddingRect(src, dst, percent, square, size);
+		Algorithm::paddingRect(src, dst, percentage, square, size);
 		Assert::AreEqual(dst.x, src.x);
 		Assert::AreEqual(dst.y, src.y);
 		Assert::AreEqual(dst.width, src.width + 6);
 		Assert::AreEqual(dst.height, src.height + 6);
 
 		dst = cv::Rect(0, 0, 0, 0);
-		percent = -1;
-		Algorithm::paddingRect(src, dst, percent);
+		percentage = -1;
+		Algorithm::paddingRect(src, dst, percentage);
 		Assert::AreEqual(dst.x, 0);
 		Assert::AreEqual(dst.y, 0);
 		Assert::AreEqual(dst.width, 0);
 		Assert::AreEqual(dst.height, 0);
 
 		size = cv::Size(-1, -1);
-		Algorithm::paddingRect(src, dst, percent, square, size);
+		Algorithm::paddingRect(src, dst, percentage, square, size);
 		Assert::AreEqual(dst.x, 0);
 		Assert::AreEqual(dst.y, 0);
 		Assert::AreEqual(dst.width, 0);
@@ -311,26 +311,26 @@ public:
 	TEST_METHOD(paddingRect_ValidInput)
 	{
 		cv::Rect src(0, 0, 200, 100), dst;
-		float percent;
+		float percentage;
 		bool square;
 		cv::Size size;
 
-		percent = 0.1;
-		Algorithm::paddingRect(src, dst, percent);
+		percentage = 0.1;
+		Algorithm::paddingRect(src, dst, percentage);
 		Assert::AreEqual(dst.x, src.x - 20);
 		Assert::AreEqual(dst.y, src.y - 10);
 		Assert::AreEqual(dst.width, src.width + 40);
 		Assert::AreEqual(dst.height, src.height + 20);
 
 		square = true;
-		Algorithm::paddingRect(src, dst, percent, square);
+		Algorithm::paddingRect(src, dst, percentage, square);
 		Assert::AreEqual(dst.x, src.x - 20);
 		Assert::AreEqual(dst.y, src.y - 20);
 		Assert::AreEqual(dst.width, src.width + 40);
 		Assert::AreEqual(dst.height, src.height + 40);
 
 		size = cv::Size(1000, 1000);
-		Algorithm::paddingRect(src, dst, percent, square, size);
+		Algorithm::paddingRect(src, dst, percentage, square, size);
 		Assert::AreEqual(dst.x, 0);
 		Assert::AreEqual(dst.y, 0);
 		Assert::AreEqual(dst.width, src.width + 40);
@@ -699,20 +699,20 @@ public:
 	{
 		cv::Mat src, dst, edges;
 		std::vector<cv::Point> largestContour;
-		float percent;
+		float percentage;
 
 		src = cv::Mat::zeros(100, 100, CV_16FC1);
 		edges = cv::Mat::zeros(100, 100, CV_16FC1);
 		Algorithm::roiContour(src, dst, largestContour, edges);
 		Assert::IsTrue(dst.empty());
 
-		Algorithm::roiContour(src, dst, largestContour, edges, percent);
+		Algorithm::roiContour(src, dst, largestContour, edges, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src = cv::Mat::zeros(100, 200, CV_8UC1);
 		edges = cv::Mat::zeros(200, 100, CV_8UC1);
-		percent = -1;
-		Algorithm::roiContour(src, dst, largestContour, edges, percent);
+		percentage = -1;
+		Algorithm::roiContour(src, dst, largestContour, edges, percentage);
 		Assert::IsTrue(dst.empty());
 	}
 
@@ -990,18 +990,18 @@ public:
 	{
 		cv::Mat src, dst;
 		std::vector<cv::Point2f> points;
-		float percent;
+		float percentage;
 
-		Algorithm::resizeToPoints(src, dst, points, percent);
+		Algorithm::resizeToPoints(src, dst, points, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src = cv::Mat::zeros(100, 100, CV_8UC1);
-		percent = -1;
-		Algorithm::resizeToPoints(src, dst, points, percent);
+		percentage = -1;
+		Algorithm::resizeToPoints(src, dst, points, percentage);
 		Assert::IsTrue(dst.empty());
 
 		points = std::vector<cv::Point2f>(4, cv::Point2f(0, 0));
-		Algorithm::resizeToPoints(src, dst, points, percent);
+		Algorithm::resizeToPoints(src, dst, points, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src = cv::Mat::zeros(100, 100, CV_16FC1);
@@ -1029,15 +1029,15 @@ public:
 	{
 		cv::Mat src, dst;
 		std::vector<cv::Point2f> quadrilateralCoordinates;
-		float percent;
+		float percentage;
 
-		Algorithm::geometricalTransformation(src, dst, quadrilateralCoordinates, percent);
+		Algorithm::geometricalTransformation(src, dst, quadrilateralCoordinates, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src = cv::Mat::zeros(100, 100, CV_8UC1);
 		quadrilateralCoordinates = std::vector<cv::Point2f>(4, cv::Point2f(0, 0));
-		percent = -1;
-		Algorithm::geometricalTransformation(src, dst, quadrilateralCoordinates, percent);
+		percentage = -1;
+		Algorithm::geometricalTransformation(src, dst, quadrilateralCoordinates, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src = cv::Mat::zeros(100, 100, CV_16FC1);
@@ -1190,14 +1190,14 @@ public:
 	TEST_METHOD(denoise_InvalidInput)
 	{
 		cv::Mat src, dst;
-		float percent;
+		float percentage;
 
-		Algorithm::denoise(src, dst, percent);
+		Algorithm::denoise(src, dst, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src = cv::Mat::zeros(100, 100, CV_8UC1);
-		percent = -1;
-		Algorithm::denoise(src, dst, percent);
+		percentage = -1;
+		Algorithm::denoise(src, dst, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src = cv::Mat::zeros(100, 100, CV_16FC1);
@@ -1208,7 +1208,7 @@ public:
 	TEST_METHOD(denoise_ValidInput)
 	{
 		cv::Mat src, dst, aux;
-		float percent = 0.15;
+		float percentage = 0.15;
 
 		src = cv::Mat::zeros(100, 100, CV_8UC1);
 
@@ -1227,7 +1227,7 @@ public:
 		cv::rectangle(aux, cv::Point(40, 50), cv::Point(60, 78), cv::Scalar(255), cv::FILLED);
 		cv::rectangle(aux, cv::Point(70, 50), cv::Point(90, 79), cv::Scalar(255), cv::FILLED);
 
-		Algorithm::denoise(src, dst, percent);
+		Algorithm::denoise(src, dst, percentage);
 		float error = RMS(dst, aux);
 		Assert::IsTrue(error < 0.01);
 	}
@@ -1299,26 +1299,26 @@ public:
 	{
 		std::vector<cv::Rect> src;
 		std::vector<cv::Rect> dst;
-		float percent;
+		float percentage;
 
-		Algorithm::paddingChars(src, dst, percent);
+		Algorithm::paddingChars(src, dst, percentage);
 		Assert::IsTrue(dst.empty());
 
 		src.push_back(cv::Rect(0, 0, 0, 0));
-		percent = -1;
-		Algorithm::paddingChars(src, dst, percent);
+		percentage = -1;
+		Algorithm::paddingChars(src, dst, percentage);
 		Assert::IsTrue(dst.empty());
 	}
 
 	TEST_METHOD(paddingChars_ValidInput)
 	{
 		std::vector<cv::Rect> src, dst;
-		float percent = 0.1;
+		float percentage = 0.1;
 
 		src.push_back(cv::Rect(10, 5, 30, 30));
 		src.push_back(cv::Rect(50, 5, 30, 30));
 
-		Algorithm::paddingChars(src, dst, percent);
+		Algorithm::paddingChars(src, dst, percentage);
 		Assert::IsTrue(dst[0] == cv::Rect(7, 2, 36, 36) && dst[1] == cv::Rect(47, 2, 36, 36));
 	}
 
@@ -1521,14 +1521,14 @@ public:
 	TEST_METHOD(matching_InvalidInput)
 	{
 		cv::Mat src;
-		float dice = 0, percent;
+		float dice = 0, percentage;
 
-		Algorithm::matching(src, dice, percent);
+		Algorithm::matching(src, dice, percentage);
 		Assert::IsTrue(!dice);
 
 		src = cv::Mat::zeros(100, 100, CV_8UC1);
-		percent = -1;
-		Algorithm::matching(src, dice, percent);
+		percentage = -1;
+		Algorithm::matching(src, dice, percentage);
 		Assert::IsTrue(!dice);
 
 		src = cv::Mat::zeros(100, 100, CV_16FC1);

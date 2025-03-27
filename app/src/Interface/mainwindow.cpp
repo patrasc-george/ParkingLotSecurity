@@ -42,6 +42,7 @@ void MainWindow::setupUI()
 	connect(historyLogListWidget, &QListWidget::itemClicked, this, &MainWindow::showImage);
 	connect(nameEdit, &QLineEdit::textChanged, this, &MainWindow::setName);
 	connect(parkingLotsEdit, &QLineEdit::textChanged, this, &MainWindow::setNumberParkingLots);
+	connect(reservedEdit, &QLineEdit::textChanged, this, &MainWindow::setNumberReserved);
 	connect(feeEdit, &QLineEdit::textChanged, this, &MainWindow::setFee);
 	connect(historyLogEdit, &QLineEdit::textChanged, this, &MainWindow::search);
 	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
@@ -117,6 +118,7 @@ void MainWindow::setupLayouts()
 
 	QLabel* nameLabel = new QLabel(tr("Name:"), this);
 	QLabel* parkingLotsLabel = new QLabel(tr("Capacity:"), this);
+	QLabel* reservedLabel = new QLabel(tr("Reserved:"), this);
 	QLabel* occupiedParkingLotsLabel = new QLabel(tr("Occupancy:"), this);
 	QLabel* feeLabel = new QLabel(tr("Fee:"), this);
 
@@ -125,6 +127,10 @@ void MainWindow::setupLayouts()
 	parkingLotsEdit = new QLineEdit(this);
 	parkingLotsEdit->setValidator(new QIntValidator(0, 1000000, this));
 	parkingLotsEdit->setText(QString::number(numberParkingLots));
+
+	reservedEdit = new QLineEdit(this);
+	reservedEdit->setValidator(new QIntValidator(0, 1000000, this));
+	reservedEdit->setText(QString::number(numberReserved));
 
 	occupiedParkingLotsEdit = new QLineEdit(this);
 	occupiedParkingLotsEdit->setReadOnly(true);
@@ -139,6 +145,8 @@ void MainWindow::setupLayouts()
 	topLayout->addWidget(nameEdit);
 	topLayout->addWidget(parkingLotsLabel);
 	topLayout->addWidget(parkingLotsEdit);
+	topLayout->addWidget(reservedLabel);
+	topLayout->addWidget(reservedEdit);
 	topLayout->addWidget(occupiedParkingLotsLabel);
 	topLayout->addWidget(occupiedParkingLotsEdit);
 	topLayout->addWidget(feeLabel);
@@ -379,6 +387,20 @@ void MainWindow::setName(const QString& name)
 void MainWindow::setNumberParkingLots(const QString& numberParkingLots)
 {
 	this->numberParkingLots = numberParkingLots.toInt();
+}
+
+void MainWindow::setNumberReserved(const QString& numberReserved)
+{
+	int freeParkingLots = this->numberParkingLots - (this->numberOccupiedParkingLots - this->numberReserved);
+
+	this->numberOccupiedParkingLots -= this->numberReserved;
+	if (numberReserved.toInt() <= freeParkingLots)
+		this->numberReserved = numberReserved.toInt();
+	else
+		this->numberReserved = 0;
+	this->numberOccupiedParkingLots += this->numberReserved;
+
+	occupiedParkingLotsEdit->setText(QString::number(this->numberOccupiedParkingLots));
 }
 
 void MainWindow::setFee(const QString& fee)

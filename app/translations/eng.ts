@@ -43,6 +43,10 @@
       <source>Occupancy:</source>
       <translation>Occupancy:</translation>
     </message>
+	<message>
+      <source>Reserved:</source>
+      <translation>Reserved:</translation>
+    </message>
     <message>
       <source>Fee:</source>
       <translation>Fee:</translation>

@@ -117,12 +117,12 @@ bool Algorithm::heightBBox(const cv::Rect& roi, const float& min, const float& m
 		roi.height < roi.width * max;
 }
 
-void Algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent, const bool& square, const cv::Size& size)
+void Algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percentage, const bool& square, const cv::Size& size)
 {
 	if (src.width <= 0 || src.height <= 0)
 		return;
 
-	if (percent < 0 || percent > 1)
+	if (percentage < 0 || percentage > 1)
 		return;
 
 	if (size.width < 0 || size.height < 0)
@@ -131,11 +131,11 @@ void Algorithm::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& per
 	if (size != cv::Size() && (src.x + src.width > size.width || src.y + src.height > size.height))
 		return;
 
-	int paddingX = src.width * percent;
+	int paddingX = src.width * percentage;
 	if (paddingX < 3)
 		paddingX = 3;
 
-	int paddingY = src.height * percent;
+	int paddingY = src.height * percentage;
 	if (paddingY < 3)
 		paddingY = 3;
 
@@ -472,12 +472,12 @@ void Algorithm::getLargestContour(const std::vector<std::vector<cv::Point>>& con
 	}
 }
 
-bool Algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const float& percent)
+bool Algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges, const float& percentage)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;
 
-	if (percent < 0 || percent > 1)
+	if (percentage < 0 || percentage > 1)
 		return false;
 
 	cv::Mat otsu;
@@ -504,7 +504,7 @@ bool Algorithm::roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Poi
 
 	cv::Rect bbox = cv::boundingRect(largestContour);
 
-	return bbox.width > src.cols * percent;
+	return bbox.width > src.cols * percentage;
 }
 
 void Algorithm::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
@@ -786,7 +786,7 @@ bool Algorithm::cornersCoordinates(const cv::Mat& src, std::vector<cv::Point2f>&
 	return true;
 }
 
-bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent)
+bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percentage)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;
@@ -794,7 +794,7 @@ bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv:
 	if (points.empty())
 		return false;
 
-	if (percent < 0 || percent > 1)
+	if (percentage < 0 || percentage > 1)
 		return false;
 
 	int minX = src.cols, minY = src.rows, maxX = 0, maxY = 0;
@@ -826,21 +826,21 @@ bool Algorithm::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv:
 
 	cv::copyMakeBorder(src, dst, paddingTop, paddingBottom, paddingLeft, paddingRight, cv::BORDER_CONSTANT);
 
-	if (dst.rows > src.rows + (src.rows * percent))
+	if (dst.rows > src.rows + (src.rows * percentage))
 		return false;
 
-	if (dst.cols > src.cols + (src.cols * percent))
+	if (dst.cols > src.cols + (src.cols * percentage))
 		return false;
 
 	return true;
 }
 
-bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent)
+bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percentage)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;
 
-	if (quadrilateralCoordinates.size() != 4 || percent < 0)
+	if (quadrilateralCoordinates.size() != 4 || percentage < 0)
 		return false;
 
 	int height = quadrilateralCoordinates[3].y - quadrilateralCoordinates[0].y;
@@ -849,7 +849,7 @@ bool Algorithm::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, cons
 	if (height < 0 || width < 0)
 		return false;
 
-	if (height < src.rows * percent)
+	if (height < src.rows * percentage)
 		return false;
 
 	std::vector<cv::Point2f> finalCoordinates;
@@ -914,12 +914,12 @@ int Algorithm::medianHeight(const std::vector<std::vector<cv::Point>>& contours)
 	return heights[heights.size() / 2];
 }
 
-bool Algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent)
+bool Algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percentage)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;
 
-	if (percent < 0 || percent > 1)
+	if (percentage < 0 || percentage > 1)
 		return false;
 
 	std::vector<std::vector<cv::Point>> contours;
@@ -934,7 +934,7 @@ bool Algorithm::denoise(const cv::Mat& src, cv::Mat& dst, const float& percent)
 	for (int i = 0; i < contours.size(); i++)
 	{
 		int height = getContourHeight(contours[i]);
-		if (abs(median - height) > median * percent)
+		if (abs(median - height) > median * percentage)
 		{
 			contours.erase(contours.begin() + i);
 			i--;
@@ -1033,18 +1033,18 @@ bool Algorithm::firstIndexes(const std::vector<cv::Rect>& chars, std::array<int,
 	return true;
 }
 
-void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent)
+void Algorithm::paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percentage)
 {
 	if (src.empty())
 		return;
 
-	if (percent < 0 || percent > 1)
+	if (percentage < 0 || percentage > 1)
 		return;
 
 	dst.resize(src.size());
 
 	for (int i = 0; i < src.size(); i++)
-		paddingRect(src[i], dst[i], percent, true);
+		paddingRect(src[i], dst[i], percentage, true);
 }
 
 void Algorithm::charsSpacing(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars)
@@ -1204,12 +1204,12 @@ void Algorithm::padding(const int& firstSize, const int& secondSize, int& firstP
 		secondPadding++;
 }
 
-bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percent)
+bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percentage)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;
 
-	if (percent < 0)
+	if (percentage < 0)
 		return false;
 
 	cv::Mat charTemplate = cv::imread("../../../assets/i.jpg", cv::IMREAD_GRAYSCALE);
@@ -1242,7 +1242,7 @@ bool Algorithm::matching(const cv::Mat& src, float& dice, const float& percent)
 
 	dice = (2.0 * cv::countNonZero(intersection)) / (cv::countNonZero(resizedSrc) + cv::countNonZero(resizedCharTemplate));
 
-	return dice > percent;
+	return dice > percentage;
 }
 
 bool Algorithm::applyTesseract(const cv::Mat& src, std::string& text, const std::vector<cv::Rect>& chars, std::vector<cv::Rect>& paddedChars, const bool& charType, float& confidence)

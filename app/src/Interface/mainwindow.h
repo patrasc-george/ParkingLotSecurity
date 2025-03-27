@@ -69,6 +69,14 @@ private slots:
 	void setNumberParkingLots(const QString& numberParkingLots);
 
 	/**
+	 * @brief Sets the number of reserved parking lots.
+	 * @details This function updates the number of reserved parking lots while ensuring it does not exceed the available free parking lots.
+	 * @param[in] numberReserved A string representing the number of reserved parking lots.
+	 * @return void
+	 */
+	void setNumberReserved(const QString& numberReserved);
+
+	/**
 	 * @brief Sets the fee for parking.
 	 * @details This function updates the parking fee based on the provided value.
 	 * @param[in] fee A string representing the parking fee to be set.
@@ -229,6 +237,7 @@ private:
 	QPushButton* statisticsButton;
 	QLineEdit* nameEdit;
 	QLineEdit* parkingLotsEdit;
+	QLineEdit* reservedEdit;
 	QLineEdit* occupiedParkingLotsEdit;
 	QLineEdit* feeEdit;
 	QLineEdit* historyLogEdit;
@@ -240,6 +249,7 @@ private:
 	bool isPassword;
 	bool pressedButton;
 	int numberParkingLots = 100;
+	int numberReserved = 0;
 	int numberOccupiedParkingLots = 0;
 	int fee = 1;
 };

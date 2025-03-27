@@ -92,18 +92,18 @@ class LICENSEPLATEDETECTION_API Algorithm
 
 	/**
 	 * @brief Adds padding to a rectangle and optionally enforces a square shape.
-	 * @details This function calculates padding for a given rectangle based on a specified percentage of its dimensions.
+	 * @details This function calculates padding for a given rectangle based on a specified percentageage of its dimensions.
 	 *          It ensures a minimum padding of 3 units if the calculated padding is less than that.
 	 *          The function can also adjust the padded rectangle to maintain a square shape based on the longest side.
 	 *          Additionally, it ensures the padded rectangle fits within an optional boundary size, adjusting its position and size if necessary.
 	 * @param src The source rectangle to which padding will be applied.
 	 * @param dst The destination rectangle with applied padding. It may be adjusted to maintain a square shape or fit within specified bounds.
-	 * @param percent The percentage of the rectangle's dimensions to calculate the padding thickness. Default is 0.
+	 * @param percentage The percentageage of the rectangle's dimensions to calculate the padding thickness. Default is 0.
 	 * @param square A boolean flag indicating whether to enforce a square shape for the destination rectangle. Default is false.
 	 * @param size An optional cv::Size representing boundary dimensions within which the destination rectangle must fit. Default is cv::Size(), implying no bounds.
 	 * @return void
 	 */
-	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percent = 0, const bool& square = 0, const cv::Size& size = cv::Size());
+	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percentage = 0, const bool& square = 0, const cv::Size& size = cv::Size());
 
 	/**
 	 * @brief Converts pixels within a specific blue range to black in the source image.
@@ -236,7 +236,7 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[out] largestContour The largest contour found in the source image.
 	 * @param[in] edges (Optional) An edge image that can be used to refine the ROI by excluding certain areas from the contour detection process.
 	 */
-	static bool roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const float& percent = 0);
+	static bool roiContour(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point>& largestContour, const cv::Mat& edges = cv::Mat(), const float& percentage = 0);
 
 	/**
 	 * @brief Calculates a line passing through a given point with a specified slope and direction.
@@ -320,17 +320,17 @@ class LICENSEPLATEDETECTION_API Algorithm
 	/**
 	 * @brief Resizes the source image based on specified points, adding padding as necessary.
 	 * @details This function adjusts the dimensions of the source image to ensure that specified points fit within it,
-	 *          optionally allowing for a percentage-based scaling.
+	 *          optionally allowing for a percentageage-based scaling.
 	 *          It calculates the minimum and maximum x and y coordinates among the given points and adds padding
 	 *          to the source image if these points extend beyond its borders.
 	 *          The function also adjusts the points to account for any added padding.
 	 * @param[in] src The original image to be resized.
 	 * @param[out] dst The destination image after resizing and padding.
 	 * @param[in,out] points A vector of points that should fit within the resized image; these are adjusted if padding is added to the image.
-	 * @param[in] percent (Optional) A percentage indicating how much larger the resulting image can be compared to the original, to accommodate the points.
-	 * @return A boolean value indicating whether the resizing was within the specified percentage limits. Returns true if the resizing meets the criteria, false otherwise.
+	 * @param[in] percentage (Optional) A percentageage indicating how much larger the resulting image can be compared to the original, to accommodate the points.
+	 * @return A boolean value indicating whether the resizing was within the specified percentageage limits. Returns true if the resizing meets the criteria, false otherwise.
 	 */
-	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percent = 0);
+	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& points, const float& percentage = 0);
 
 	/**
 	 * @brief Applies a geometrical transformation to the source image based on quadrilateral coordinates, adjusting its perspective.
@@ -341,11 +341,11 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 * @param[in] src The source image to transform.
 	 * @param[out] dst The destination image after the perspective transformation.
 	 * @param[in] quadrilateralCoordinates The coordinates of the quadrilateral corners in the source image, used to define the transformation.
-	 * @param[in] percent (Optional) A percentage that defines the minimum size of the resulting image relative to the source, as a constraint on the transformation.
+	 * @param[in] percentage (Optional) A percentageage that defines the minimum size of the resulting image relative to the source, as a constraint on the transformation.
 	 * @return A boolean value indicating the success of the transformation.
 	 *         Returns true if the transformation was applied successfully and the resulting image meets the size criteria; otherwise, it returns false.
 	 */
-	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percent = 0);
+	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& quadrilateralCoordinates, const float& percentage = 0);
 
 	/**
 	 * @brief Extracts inner contour of objects in an image.
@@ -386,19 +386,19 @@ class LICENSEPLATEDETECTION_API Algorithm
 	/**
 	 * @brief Reduces noise in the source image by selectively keeping contours based on their height relative to the median height of all contours.
 	 * @details This function identifies external contours in the source image, sorts them by area, and limits the number to a maximum of 8 based on their size.
-	 *          It then discards any contours whose height deviates significantly from the median height of the selected contours, based on a specified percentage.
+	 *          It then discards any contours whose height deviates significantly from the median height of the selected contours, based on a specified percentageage.
 	 *          The remaining contours are used to create a mask, which is then applied to the source image to isolate these contours.
 	 *          The function also cleans up the resulting image by ensuring no small, unwanted contours remain.
 	 *          The goal is to denoise the image by focusing on the main features.
 	 * @param[in] src The source image to denoise.
 	 * @param[out] dst The destination image after denoising.
-	 * @param[in] percent (Optional) The tolerance for height deviation from the median, expressed as a percentage.
-	 *                    Contours with a height deviating more than this percentage from the median are discarded.
+	 * @param[in] percentage (Optional) The tolerance for height deviation from the median, expressed as a percentageage.
+	 *                    Contours with a height deviating more than this percentageage from the median are discarded.
 	 * @return A boolean value indicating the success of the denoising process.
 	 *         Returns true if the resulting image has a non-zero number of pixels (indicating successful contour isolation),
 	 *         and false otherwise, suggesting inadequate contour selection or excessive noise removal.
 	 */
-	static bool denoise(const cv::Mat& src, cv::Mat& dst, const float& percent = 1);
+	static bool denoise(const cv::Mat& src, cv::Mat& dst, const float& percentage = 1);
 
 	/**
 	 * @brief Extracts bounding boxes for characters from the source image.
@@ -421,13 +421,13 @@ class LICENSEPLATEDETECTION_API Algorithm
 
 	/**
 	 * @brief Applies padding to character bounding boxes and adjusts positions to maintain layout.
-	 * @details Enlarges character bounding boxes based on a percentage and ensures they do not overlap by adjusting their positions accordingly.
+	 * @details Enlarges character bounding boxes based on a percentageage and ensures they do not overlap by adjusting their positions accordingly.
 	 * @param src Vector of original character bounding boxes.
 	 * @param dst Vector of padded and adjusted character bounding boxes.
-	 * @param percent Percentage of the original size to calculate padding.
+	 * @param percentage percentageage of the original size to calculate padding.
 	 * @return void
 	 */
-	static void paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percent = 0);
+	static void paddingChars(const std::vector<cv::Rect>& src, std::vector<cv::Rect>& dst, const float& percentage = 0);
 
 	/**
 	 * @brief Creates a single matrix with characters spaced according to their padded bounding boxes.
@@ -507,10 +507,10 @@ class LICENSEPLATEDETECTION_API Algorithm
 	 *          The Dice coefficient is calculated to measure the similarity between the two images, providing a basis for character recognition.
 	 * @param[in] src The source image to match against the character template.
 	 * @param[out] dice A reference to a float where the calculated Dice similarity coefficient will be stored.
-	 * @param[in] percent (Optional) The threshold percentage for the Dice coefficient to consider the match successful.
+	 * @param[in] percentage (Optional) The threshold percentageage for the Dice coefficient to consider the match successful.
 	 * @return Returns true if the Dice similarity coefficient is greater than the specified threshold, indicating a successful match; false otherwise.
 	 */
-	static bool matching(const cv::Mat& src, float& dice, const float& percent = 0);
+	static bool matching(const cv::Mat& src, float& dice, const float& percentage = 0);
 
 	/**
 	 * @brief Applies Tesseract OCR to recognize text in specified regions of an image, adjusting for character types and improving confidence.

@@ -1,10 +1,6 @@
 ﻿#include "qrcodedetection.h"
 
-#include <qrencode.h>
-#include <opencv2/opencv.hpp>
-#include <algorithm>
-
-void resize(const cv::Mat& src, cv::Mat& dst, const int& max)
+void QRCode::resize(const cv::Mat& src, cv::Mat& dst, const int& max)
 {
 	if (src.rows > src.cols && src.rows > max)
 	{
@@ -24,24 +20,7 @@ void resize(const cv::Mat& src, cv::Mat& dst, const int& max)
 		dst = src.clone();
 }
 
-cv::Size getKernelSize(const cv::Size& size, const float& percentage)
-{
-	cv::Size kernel = cv::Size(size.height * percentage, size.width * percentage);
-
-	if (kernel.height < 3)
-		kernel.height = 3;
-	if (kernel.width < 3)
-		kernel.width = 3;
-
-	if (kernel.height % 2 == 0)
-		kernel.height--;
-	if (kernel.width % 2 == 0)
-		kernel.width--;
-
-	return kernel;
-}
-
-void binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction)
+void QRCode::binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return;
@@ -62,7 +41,7 @@ void binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction)
 	cv::bitwise_and(normalizedMagnitude, binaryMagnitude, dst);
 }
 
-void nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& directions)
+void QRCode::nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& directions)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return;
@@ -115,13 +94,10 @@ void nonMaximumSuppression(const cv::Mat& src, cv::Mat& dst, const cv::Mat& dire
 		}
 }
 
-void edgeDetection(const cv::Mat& src, cv::Mat& dst)
+void QRCode::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return;
-
-	//cv::Mat gauss;
-	//cv::GaussianBlur(src, gauss, getKernelSize(src.size(), 0.015), 0);
 
 	dst = cv::Mat::zeros(src.size(), src.type());
 
@@ -131,7 +107,7 @@ void edgeDetection(const cv::Mat& src, cv::Mat& dst)
 	nonMaximumSuppression(sobel, dst, direction);
 }
 
-cv::Mat countTransitions(const cv::Mat& src, const bool& isVertical)
+cv::Mat QRCode::countTransitions(const cv::Mat& src, const bool& isVertical)
 {
 	cv::Mat counter = isVertical ? cv::Mat::zeros(1, src.cols, CV_16UC1) : cv::Mat::zeros(1, src.rows, CV_16UC1);
 
@@ -153,7 +129,7 @@ cv::Mat countTransitions(const cv::Mat& src, const bool& isVertical)
 	return counter;
 }
 
-cv::Mat drawHistogram(const cv::Mat& histogram)
+cv::Mat QRCode::drawHistogram(const cv::Mat& histogram)
 {
 	double minValue, maxValue;
 	cv::minMaxLoc(histogram, &minValue, &maxValue);
@@ -169,7 +145,7 @@ cv::Mat drawHistogram(const cv::Mat& histogram)
 	return image;
 }
 
-cv::Mat densestInterval(const cv::Mat& histogram, const float& percentage = 1.0, const float& gap = 0.0)
+cv::Mat QRCode::densestInterval(const cv::Mat& histogram, const float& percentage, const float& gap)
 {
 	std::vector<std::pair<int, int>> histogramPairs;
 	for (int i = 0; i < histogram.cols; ++i)
@@ -225,7 +201,7 @@ cv::Mat densestInterval(const cv::Mat& histogram, const float& percentage = 1.0,
 	return result;
 }
 
-void removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram)
+void QRCode::removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram)
 {
 	int width = cv::countNonZero(verticalHistogram);
 	cv::Mat firstImage = cv::Mat::zeros(src.rows, width, src.type());
@@ -256,12 +232,29 @@ void removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verti
 	}
 }
 
+cv::Size QRCode::getKernelSize(const cv::Size& size, const float& percentage)
+{
+	cv::Size kernel = cv::Size(size.height * percentage, size.width * percentage);
+
+	if (kernel.height < 3)
+		kernel.height = 3;
+	if (kernel.width < 3)
+		kernel.width = 3;
+
+	if (kernel.height % 2 == 0)
+		kernel.height--;
+	if (kernel.width % 2 == 0)
+		kernel.width--;
+
+	return kernel;
+}
+
 bool compareConnectedComponents(const std::pair<int, int>& a, const std::pair<int, int>& b)
 {
 	return a.second > b.second;
 }
 
-void getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize)
+void QRCode::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return;
@@ -278,7 +271,7 @@ void getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std:
 		areas.resize(newSize);
 }
 
-cv::Rect getRoi(const cv::Mat& stats, const int& label)
+cv::Rect QRCode::getRoi(const cv::Mat& stats, const int& label)
 {
 	if (stats.empty() || stats.type() != CV_32SC1)
 		return cv::Rect();
@@ -295,7 +288,7 @@ cv::Rect getRoi(const cv::Mat& stats, const int& label)
 	return roi;
 }
 
-bool ratioBBox(const cv::Rect& roi, const float& max)
+bool QRCode::ratioBBox(const cv::Rect& roi, const float& max)
 {
 	if (roi.size() == cv::Size(0, 0))
 		return false;
@@ -310,7 +303,7 @@ bool ratioBBox(const cv::Rect& roi, const float& max)
 	return ratio < max;
 }
 
-void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percentage, const cv::Size& size)
+void QRCode::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percentage, const cv::Size& size)
 {
 	if (src.width <= 0 || src.height <= 0)
 		return;
@@ -350,7 +343,7 @@ void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percentage, co
 	}
 }
 
-std::vector<cv::Point> getLargestContour(const std::vector<std::vector<cv::Point>>& contours)
+std::vector<cv::Point> QRCode::getLargestContour(const std::vector<std::vector<cv::Point>>& contours)
 {
 	std::vector<cv::Point> largestContour;
 
@@ -371,7 +364,7 @@ std::vector<cv::Point> getLargestContour(const std::vector<std::vector<cv::Point
 	return largestContour;
 }
 
-void lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
+void QRCode::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
 {
 	if (point.x < 0 || point.y < 0)
 		return;
@@ -407,7 +400,7 @@ void lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& poi
 	line = cv::Vec4f(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
 }
 
-void compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec4f& referenceLine)
+void QRCode::compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>& firstLines, std::vector<cv::Vec4i>& secondLines, const cv::Vec4f& referenceLine)
 {
 	if (lines.empty())
 		return;
@@ -432,7 +425,7 @@ void compareWithLine(const std::vector<cv::Vec4i>& lines, std::vector<cv::Vec4i>
 	}
 }
 
-cv::Vec4i initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction)
+cv::Vec4i QRCode::initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direction)
 {
 	if (lines.empty())
 		return cv::Vec4i();
@@ -468,9 +461,9 @@ cv::Vec4i initialTerminalPoints(std::vector<cv::Vec4i>& lines, const bool& direc
 }
 
 #ifdef _DEBUG
-bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, const cv::Mat& src)
+bool QRCode::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size, const cv::Mat& src)
 #else
-bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size)
+bool QRCode::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4i>& lines, const cv::Size& size)
 #endif
 {
 	if (lines.size() < 4)
@@ -579,7 +572,7 @@ bool lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<cv::Vec4
 	return true;
 }
 
-cv::Point2f intersection(const cv::Vec4i& firstLine, const cv::Vec4i& secondLine)
+cv::Point2f QRCode::intersection(const cv::Vec4i& firstLine, const cv::Vec4i& secondLine)
 {
 	if ((firstLine[0] == firstLine[2]) && (firstLine[1] == firstLine[3]))
 		return cv::Point2f();
@@ -606,7 +599,7 @@ cv::Point2f intersection(const cv::Vec4i& firstLine, const cv::Vec4i& secondLine
 	return cv::Point2f(x, y);
 }
 
-std::vector<cv::Point2f> rectificationCoordinates(const cv::Mat& src)
+std::vector<cv::Point2f> QRCode::rectificationCoordinates(const cv::Mat& src)
 {
 	std::vector<cv::Point2f> coordinates;
 
@@ -706,7 +699,7 @@ std::vector<cv::Point2f> rectificationCoordinates(const cv::Mat& src)
 	return coordinates;
 }
 
-bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& coordinates, const float& percentage)
+bool QRCode::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& coordinates, const float& percentage)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;
@@ -754,7 +747,7 @@ bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& 
 	return true;
 }
 
-bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const float& percentage)
+bool QRCode::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const float& percentage)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;

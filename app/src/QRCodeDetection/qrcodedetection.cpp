@@ -4,6 +4,29 @@
 #include <opencv2/opencv.hpp>
 #include <regex>
 
+std::string formatString(const std::string& str)
+{
+	std::string result;
+	bool firstNum = true, firstLetter = true;
+
+	for (int i = 0; i < str.size(); i++)
+	{
+		if (isdigit(str[i]) && firstNum)
+		{
+			result += ' ';
+			firstNum = false;
+		}
+		if (isalpha(str[i]) && !firstNum && firstLetter)
+		{
+			result += ' ';
+			firstLetter = false;
+		}
+		result += str[i];
+	}
+
+	return result;
+}
+
 void write(cv::Mat& image, int x, int& y, const int& margin, const std::string& leftText, const std::string& rightText, const float& fontScale, const int& thickness)
 {
 	cv::Size textSize;
@@ -81,7 +104,8 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 
 	y = y + qrSize + lineSpacing * 2;
 	x = width - margin;
-	write(ticket, x, y, margin, "License plate:", licensePlate, fontScale, thickness);
+	std::string formattedLicensePlate = formatString(licensePlate);
+	write(ticket, x, y, margin, "License plate:", formattedLicensePlate, fontScale, thickness);
 
 	y = y + lineSpacing;
 	write(ticket, x, y, margin, "Entered:", id, fontScale, thickness);
@@ -100,7 +124,18 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 		text += " exit.jpg";
 	}
 	else
+	{
+		y = y + lineSpacing;
+		write(ticket, x, y, margin, "", "", fontScale, thickness);
+
+		y = y + lineSpacing;
+		write(ticket, x, y, margin, "", "", fontScale, thickness);
+
+		y = y + lineSpacing;
+		write(ticket, x, y, margin, "", "", fontScale, thickness);
+
 		text += " entered.jpg";
+	}
 
 	y = y + lineSpacing;
 	cv::line(ticket, cv::Point(margin, y), cv::Point(width - margin, y), cv::Scalar(0), thickness);

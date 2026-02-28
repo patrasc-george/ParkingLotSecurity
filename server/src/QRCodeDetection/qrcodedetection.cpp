@@ -1,4 +1,20 @@
 ﻿#include "qrcodedetection.h"
+#include <opencv2/core/utils/logger.hpp>
+#include <ZXing/ReadBarcode.h>
+#include <ZXing/BarcodeFormat.h>
+#include <ZXing/DecodeHints.h>
+#include <ZXing/ImageView.h>
+
+QRCode::QRCode()
+{
+	cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_SILENT);
+
+#ifdef _DEBUG
+	aiModelPath = "../../../qrbitnet.onnx";
+#else
+	aiModelPath = "qrbitnet.onnx";
+#endif
+}
 
 void QRCode::resize(const cv::Mat& src, cv::Mat& dst, const int& max)
 {
@@ -599,7 +615,26 @@ cv::Point2f QRCode::intersection(const cv::Vec4i& firstLine, const cv::Vec4i& se
 	return cv::Point2f(x, y);
 }
 
-std::vector<cv::Point2f> QRCode::rectificationCoordinates(const cv::Mat& src)
+void QRCode::paddingCoordinates(std::vector<cv::Point2f>& coordinates, const float& percentage, const cv::Size& size)
+{
+	float padding = percentage * std::min(size.height, size.width);
+
+	cv::Point2f centroid(0, 0);
+	for (const auto& point : coordinates)
+		centroid += point;
+	centroid *= 0.25f;
+
+	for (auto& point : coordinates)
+	{
+		cv::Point2f vector = point - centroid;
+		float lenght = std::sqrt(vector.x * vector.x + vector.y * vector.y);
+
+		cv::Point2f direction = vector * (1.0f / lenght);
+		point += direction * padding;
+	}
+}
+
+std::vector<cv::Point2f> QRCode::rectificationCoordinates(const cv::Mat& src, const float& percentage)
 {
 	std::vector<cv::Point2f> coordinates;
 
@@ -684,6 +719,8 @@ std::vector<cv::Point2f> QRCode::rectificationCoordinates(const cv::Mat& src)
 		coordinates.push_back(point);
 	}
 	coordinates.push_back(intersection(firstLine, secondLine));
+
+	paddingCoordinates(coordinates, percentage, src.size());
 
 #ifdef _DEBUG
 	cv::Mat debug;
@@ -776,6 +813,41 @@ bool QRCode::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const s
 	return cv::countNonZero(dst);
 }
 
+bool QRCode::getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net aiModel)
+{
+	cv::Mat image;
+	cv::resize(src, image, cv::Size(210, 210), 0, 0, cv::INTER_NEAREST);
+
+	cv::Mat blob = cv::dnn::blobFromImage(image, 1.0 / 255.0);
+	aiModel.setInput(blob);
+	cv::Mat output = aiModel.forward();
+
+	int total = output.total();
+	int n = std::sqrt(total);
+	if (std::pow(n, 2) != total)
+		return false;
+
+	cv::Mat reshaped = output.reshape(1, n);
+	cv::threshold(reshaped, dst, 0.5, 255, cv::THRESH_BINARY);
+	dst.convertTo(dst, CV_8UC1);
+
+	return true;
+}
+
+bool getDateTime(const cv::Mat& src, std::string& dateTime)
+{
+	ZXing::ImageView imageView(src.data, src.cols, src.rows, ZXing::ImageFormat::Lum);
+	ZXing::DecodeHints hints;
+	hints.setFormats(ZXing::BarcodeFormat::QRCode);
+
+	auto result = ZXing::ReadBarcode(imageView, hints);
+	if (!result.isValid())
+		return false;
+
+	dateTime = result.text();
+	return !dateTime.empty();
+}
+
 std::string QRCode::decodeQR(const std::vector<unsigned char>& data)
 {
 	std::string dateTime = "";
@@ -821,7 +893,8 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& data)
 	cv::Mat debug;
 	cv::cvtColor(cropped, debug, cv::COLOR_GRAY2BGR);
 #endif
-	cv::Mat qrCode;
+
+	cv::dnn::Net aiModel = cv::dnn::readNetFromONNX(aiModelPath);
 	for (int i = 0; i < areas.size(); i++)
 	{
 		int label = areas[i].first;
@@ -837,7 +910,7 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& data)
 		paddingRect(roi, roi, 0.05, cropped.size());
 
 		cv::Mat grayConnectedComponent = cropped(roi);
-		std::vector<cv::Point2f> coordinates = rectificationCoordinates(grayConnectedComponent);
+		std::vector<cv::Point2f> coordinates = rectificationCoordinates(grayConnectedComponent, 0.02);
 
 		cv::Mat resizedConnectedComponent;
 		if (!resizeToPoints(grayConnectedComponent, resizedConnectedComponent, coordinates, 0.2))
@@ -847,11 +920,27 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& data)
 		if (!geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, coordinates, 0.2))
 			continue;
 
-		cv::threshold(transformedConnectedComponent, qrCode, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+		cv::Mat qrCode;
+		if (!getMatrixFromImage(transformedConnectedComponent, qrCode, aiModel))
+			continue;
 
 #ifdef _DEBUG
+		cv::Mat qrCodeUpscaled;
+		cv::resize(qrCode, qrCodeUpscaled, cv::Size(210, 210), 0, 0, cv::INTER_NEAREST);
 		cv::rectangle(debug, roi, cv::Scalar(0, 255, 0), 2);
 #endif
+
+		if (getDateTime(qrCode, dateTime))
+			break;
+
+		if (getDateTime(transformedConnectedComponent, dateTime))
+			break;
+
+		if (getDateTime(cropped, dateTime))
+			break;
+
+		if (getDateTime(gray, dateTime))
+			break;
 	}
 
 	return dateTime;

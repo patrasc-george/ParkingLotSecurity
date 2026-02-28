@@ -14,12 +14,15 @@
 
 #include <string>
 #include <vector>
-#include <qrencode.h>
 #include <opencv2/opencv.hpp>
 #include <algorithm>
 
 class QRCODEDETECTION_API QRCode
 {
+public:
+	QRCode();
+
+private:
 	static void resize(const cv::Mat& src, cv::Mat& dst, const int& max);
 
 	static void binarySobel(const cv::Mat& src, cv::Mat& dst, cv::Mat& direction);
@@ -62,12 +65,19 @@ class QRCODEDETECTION_API QRCode
 
 	static cv::Point2f intersection(const cv::Vec4i& firstLine, const cv::Vec4i& secondLine);
 
-	static std::vector<cv::Point2f> rectificationCoordinates(const cv::Mat& src);
+	static void paddingCoordinates(std::vector<cv::Point2f>& coordinates, const float& percentage = 0, const cv::Size& size = cv::Size());
+
+	static std::vector<cv::Point2f> rectificationCoordinates(const cv::Mat& src, const float& percentage = 0);
 
 	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& coordinates, const float& percentage = 0);
 
 	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const float& percentage = 0);
 
+	static bool getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net aiModel);
+
 public:
 	std::string decodeQR(const std::vector<unsigned char>& data);
+
+private:
+	std::string aiModelPath;
 };

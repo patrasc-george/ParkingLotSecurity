@@ -1,7 +1,7 @@
 ﻿#include "qrcodedetection.h"
 
-#include <qrencode.h>
 #include <opencv2/opencv.hpp>
+#include <opencv2/objdetect.hpp>
 #include <regex>
 
 std::string formatString(const std::string& str)
@@ -49,10 +49,15 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 	if (std::regex_match(id, match, pattern))
 		text = match[1].str() + match[2].str() + match[3].str().substr(2) + match[4].str() + match[5].str() + match[6].str();
 
-	QRcode* qr = QRcode_encodeString(text.c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
+	cv::QRCodeEncoder::Params params;
+	params.correction_level = cv::QRCodeEncoder::CorrectionLevel::CORRECT_LEVEL_L;
+	params.mode = cv::QRCodeEncoder::EncodeMode::MODE_AUTO;
+	cv::Ptr<cv::QRCodeEncoder> encoder = cv::QRCodeEncoder::create(params);
+	cv::Mat qr;
+	encoder->encode(text, qr);
 
 	int qrScale = 30;
-	int qrSize = qr->width * qrScale;
+	int qrSize = qr.cols * qrScale;
 	int width = qrSize * 2;
 	int height = qrSize * 4;
 	int margin = width * 0.1;
@@ -88,11 +93,11 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 	x = (width - qrSize) / 2;
 	y = y + lineSpacing * 2;
 
-	for (int j = 0; j < qr->width; j++)
+	for (int j = 0; j < qr.rows; j++)
 	{
-		for (int i = 0; i < qr->width; i++)
+		for (int i = 0; i < qr.cols; i++)
 		{
-			unsigned char bit = qr->data[j * qr->width + i] & 1;
+			bool bit = (qr.ptr<uchar>(j, i)[0] == 0);
 			cv::Rect roi(x + i * qrScale, y + j * qrScale, qrScale, qrScale);
 
 			if (bit)
@@ -152,8 +157,6 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 	std::replace(text.begin(), text.end(), ' ', '_');
 	std::string savePath = dataBasePath + "tickets/" + text;
 	cv::imwrite(savePath, ticket);
-
-	QRcode_free(qr);
 }
 
 std::string QRCode::decodeQR(const std::string& path)

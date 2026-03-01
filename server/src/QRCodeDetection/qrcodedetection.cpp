@@ -1,4 +1,5 @@
 ﻿#include "qrcodedetection.h"
+
 #include <opencv2/core/utils/logger.hpp>
 #include <ZXing/ReadBarcode.h>
 #include <ZXing/BarcodeFormat.h>
@@ -131,15 +132,15 @@ cv::Mat QRCode::countTransitions(const cv::Mat& src, const bool& isVertical)
 	{
 		for (int x = 0; x < src.cols; x++)
 			for (int y = 0; y < src.rows - 1; y++)
-				if (src.at<uchar>(y, x) != src.at<uchar>(y + 1, x))
-					counter.at<ushort>(0, x)++;
+				if (src.ptr<uchar>(y, x)[0] != src.ptr<uchar>(y + 1, x)[0])
+					counter.ptr<ushort>(0, x)[0]++;
 	}
 	else
 	{
 		for (int y = 0; y < src.rows; y++)
 			for (int x = 0; x < src.cols - 1; x++)
-				if (src.at<uchar>(y, x) != src.at<uchar>(y, x + 1))
-					counter.at<ushort>(0, y)++;
+				if (src.ptr<uchar>(y, x)[0] != src.ptr<uchar>(y, x + 1)[0])
+					counter.ptr<ushort>(0, y)[0]++;
 	}
 
 	return counter;
@@ -154,7 +155,7 @@ cv::Mat QRCode::drawHistogram(const cv::Mat& histogram)
 	cv::Mat image = cv::Mat::ones(height, histogram.cols, CV_8UC1) * 255;
 	for (int x = 0; x < histogram.cols; x++)
 	{
-		int value = height - cvRound(histogram.at<ushort>(0, x));
+		int value = height - cvRound(histogram.ptr<ushort>(0, x)[0]);
 		cv::line(image, cv::Point(x, height), cv::Point(x, value), cv::Scalar(0), 1);
 	}
 
@@ -164,7 +165,7 @@ cv::Mat QRCode::drawHistogram(const cv::Mat& histogram)
 cv::Mat QRCode::densestInterval(const cv::Mat& histogram, const float& percentage, const float& gap)
 {
 	std::vector<std::pair<int, int>> histogramPairs;
-	for (int i = 0; i < histogram.cols; ++i)
+	for (int i = 0; i < histogram.cols; i++)
 	{
 		int value = histogram.ptr<ushort>(0, i)[0];
 		histogramPairs.push_back(std::make_pair(i, value));
@@ -217,19 +218,20 @@ cv::Mat QRCode::densestInterval(const cv::Mat& histogram, const float& percentag
 	return result;
 }
 
-void QRCode::removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram)
+void QRCode::removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram, std::vector<int>& rowMap, std::vector<int>& columnMap)
 {
 	int width = cv::countNonZero(verticalHistogram);
 	cv::Mat firstImage = cv::Mat::zeros(src.rows, width, src.type());
 	int colIndex = 0;
 	for (int i = 0; i < verticalHistogram.cols; i++)
 	{
-		int value = verticalHistogram.at<ushort>(0, i);
+		int value = verticalHistogram.ptr<ushort>(0, i)[0];
 
 		if (value)
 		{
 			src.col(i).copyTo(firstImage.col(colIndex));
 			colIndex++;
+			columnMap.push_back(i);
 		}
 	}
 
@@ -244,6 +246,7 @@ void QRCode::removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Ma
 		{
 			firstImage.row(i).copyTo(dst.row(rowIndex));
 			rowIndex++;
+			rowMap.push_back(i);
 		}
 	}
 }
@@ -834,7 +837,7 @@ bool QRCode::getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net a
 	return true;
 }
 
-bool getDateTime(const cv::Mat& src, std::string& dateTime)
+bool QRCode::getDateTime(const cv::Mat& src, std::string& dateTime, ZXing::Position* position)
 {
 	ZXing::ImageView imageView(src.data, src.cols, src.rows, ZXing::ImageFormat::Lum);
 	ZXing::DecodeHints hints;
@@ -844,14 +847,103 @@ bool getDateTime(const cv::Mat& src, std::string& dateTime)
 	if (!result.isValid())
 		return false;
 
+	if (position)
+	{
+		*position = result.position();
+		if (position->empty())
+			return false;
+	}
+
+	//std::string raw = result.text();
+	//if (raw.length() != 12)
+	//	return false;
+
+	//std::string day = raw.substr(0, 2);
+	//std::string month = raw.substr(2, 2);
+	//std::string year = raw.substr(4, 2);
+	//std::string hour = raw.substr(6, 2);
+	//std::string minute = raw.substr(8, 2);
+	//std::string second = raw.substr(10, 2);
+	//std::string fullYear = "20" + year;
+
+	//dateTime = day + "-" + month + "-" + fullYear + " " +
+	//	hour + ":" + minute + ":" + second;
 	dateTime = result.text();
-	return !dateTime.empty();
+
+	return true;
 }
 
-std::string QRCode::decodeQR(const std::vector<unsigned char>& data)
+std::vector<cv::Point2f> QRCode::cvtPositionToCoordinates(const ZXing::Position& position)
+{
+	std::vector<cv::Point2f> coordinates;
+
+	for (const auto& coordinate : position)
+		coordinates.emplace_back(static_cast<float>(coordinate.x), static_cast<float>(coordinate.y));
+
+	return coordinates;
+}
+
+std::vector<cv::Point2f> QRCode::scaleCoordinates(const std::vector<cv::Point2f>& coordinates, const cv::Rect& roi)
+{
+	std::vector<cv::Point2f> scaledCoordinates;
+	for (const auto& coordinate : coordinates)
+	{
+		int x = std::lround(roi.x + coordinate.x);
+		int y = std::lround(roi.y + coordinate.y);
+
+		cv::Point2f coordinates(x, y);
+		scaledCoordinates.push_back(coordinates);
+	}
+
+	return scaledCoordinates;
+}
+
+std::vector<cv::Point2f> QRCode::getCoordinatesFromMap(const std::vector<cv::Point2f>& coordinates, const std::vector<int>& rowMap, const std::vector<int>& columnMap)
+{
+	std::vector<cv::Point2f> coordinatesFromMap;
+	for (const auto& coordinate : coordinates)
+	{
+		float x = columnMap[coordinate.x];
+		float y = rowMap[coordinate.y];
+
+		cv::Point2f coordinates(x, y);
+		coordinatesFromMap.push_back(coordinates);
+	}
+
+	return coordinatesFromMap;
+}
+
+void QRCode::drawCoordinates(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates)
+{
+	dst = src.clone();
+
+	std::vector<cv::Point2f> orderedCoordinates = coordinates;
+	cv::Point2f centroid(0, 0);
+	for (const auto& coordinate : orderedCoordinates)
+		centroid += coordinate;
+	centroid *= (1 / static_cast<float>(orderedCoordinates.size()));
+
+	std::sort(orderedCoordinates.begin(), orderedCoordinates.end(),
+		[&](const cv::Point2f& firstPoint, const cv::Point2f& secondPoint)
+		{
+			float firstAngle = std::atan2(firstPoint.y - centroid.y, firstPoint.x - centroid.x);
+			float secondAngle = std::atan2(secondPoint.y - centroid.y, secondPoint.x - centroid.x);
+			return firstAngle < secondAngle;
+		});
+
+	for (int i = 0; i < orderedCoordinates.size(); i++)
+	{
+		cv::Point2f firstCoordinate = orderedCoordinates[i];
+		cv::Point2f secondCoordinate = orderedCoordinates[(i + 1) % orderedCoordinates.size()];
+		cv::line(dst, firstCoordinate, secondCoordinate, cv::Scalar(0, 255, 0), 2);
+	}
+}
+
+std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<unsigned char>& dst)
 {
 	std::string dateTime = "";
-	cv::Mat image = cv::imdecode(data, cv::IMREAD_COLOR);
+	std::vector<cv::Point2f> qrCoordinates;
+	cv::Mat image = cv::imdecode(src, cv::IMREAD_COLOR);
 
 	cv::Mat resized;
 	resize(image, resized, 1080);
@@ -865,16 +957,21 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& data)
 	cv::Mat verticalHistogram = countTransitions(edges, true);
 	cv::Mat horizontalHistogram = countTransitions(edges, false);
 
-#ifdef _DEBUG
-	cv::Mat verticalHistogramImage = drawHistogram(verticalHistogram);
-	cv::Mat horizontalHistogramImage = drawHistogram(horizontalHistogram);
-#endif
-
 	cv::Mat densestVerticalInterval = densestInterval(verticalHistogram, 0.85, 0.1);
 	cv::Mat densestHorizontalInterval = densestInterval(horizontalHistogram, 0.85, 0.1);
 
+#ifdef _DEBUG
+	cv::Mat verticalHistogramImage = drawHistogram(verticalHistogram);
+	cv::Mat horizontalHistogramImage = drawHistogram(horizontalHistogram);
+
+	cv::Mat densestVerticalIntervalImage = drawHistogram(densestVerticalInterval);
+	cv::Mat densestHorizontalIntervalImage = drawHistogram(densestHorizontalInterval);
+#endif
+
 	cv::Mat cropped;
-	removeRowsAndColumns(gray, cropped, densestVerticalInterval, densestHorizontalInterval);
+	std::vector<int> rowMap;
+	std::vector<int> columnMap;
+	removeRowsAndColumns(gray, cropped, densestVerticalInterval, densestHorizontalInterval, rowMap, columnMap);
 
 	cv::Mat binary;
 	cv::threshold(cropped, binary, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
@@ -930,17 +1027,37 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& data)
 		cv::rectangle(debug, roi, cv::Scalar(0, 255, 0), 2);
 #endif
 
-		if (getDateTime(qrCode, dateTime))
-			break;
+		//if (getDateTime(qrCode, dateTime))
+		//{
+		//	std::vector<cv::Point2f> scaledCoordinates = scaleCoordinates(coordinates, roi);
+		//	qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
+		//	break;
+		//}
+		//else if (getDateTime(transformedConnectedComponent, dateTime))
+		//{
+		//	std::vector<cv::Point2f> scaledCoordinates = scaleCoordinates(coordinates, roi);
+		//	qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
+		//	break;
+		//}
+	}
 
-		if (getDateTime(transformedConnectedComponent, dateTime))
-			break;
+	if (dateTime.empty())
+	{
+		ZXing::Position position;
+		if (getDateTime(cropped, dateTime, &position))
+		{
+			std::vector<cv::Point2f> scaledCoordinates = cvtPositionToCoordinates(position);
+			qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
+		}
+		else if (getDateTime(gray, dateTime, &position))
+			qrCoordinates = cvtPositionToCoordinates(position);
+	}
 
-		if (getDateTime(cropped, dateTime))
-			break;
-
-		if (getDateTime(gray, dateTime))
-			break;
+	if (!dateTime.empty())
+	{
+		cv::Mat drawnCoordinates;
+		drawCoordinates(resized, drawnCoordinates, qrCoordinates);
+		cv::imencode(".png", drawnCoordinates, dst);
 	}
 
 	return dateTime;

@@ -56,7 +56,7 @@ std::string VehicleManager::timeParked()
 		}
 	}
 
-	if (!client->getIsPaid(curentVehicle.getLicensePlate()))
+	if (!client->getIsPaid(auxVehicle->getLicensePlate()))
 		return "unpaid";
 
 	if (auxVehicle->getLicensePlate() != "N/A")

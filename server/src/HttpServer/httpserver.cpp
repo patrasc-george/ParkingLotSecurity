@@ -386,10 +386,10 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	{
 		auto data = request.get_file_value("qrCodeImage");
 
-		std::vector<unsigned char> imageData(data.content.begin(), data.content.end());
-
+		std::vector<unsigned char> src(data.content.begin(), data.content.end());
+		std::vector<unsigned char> dst;
 		QRCode qr;
-		std::string ticket = qr.decodeQR(imageData);
+		std::string ticket = qr.decodeQR(src, dst);
 
 		if (!subscriptionManager.pay(ticket, licensePlate, dateTime, true))
 		{

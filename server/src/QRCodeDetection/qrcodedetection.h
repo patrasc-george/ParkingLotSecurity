@@ -16,6 +16,7 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include <algorithm>
+#include <ZXing/Result.h> 
 
 class QRCODEDETECTION_API QRCode
 {
@@ -37,7 +38,7 @@ private:
 
 	static cv::Mat densestInterval(const cv::Mat& histogram, const float& percentage = 1.0, const float& gap = 0.0);
 
-	static void removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram);
+	static void removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram, std::vector<int>& rowMap, std::vector<int>& columnMap);
 
 	static cv::Size getKernelSize(const cv::Size& size, const float& percentage = 0);
 
@@ -75,8 +76,18 @@ private:
 
 	static bool getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net aiModel);
 
+	static bool getDateTime(const cv::Mat& src, std::string& dateTime, ZXing::Position* position = nullptr);
+
+	std::vector<cv::Point2f> cvtPositionToCoordinates(const ZXing::Position& position);
+
+	std::vector<cv::Point2f> scaleCoordinates(const std::vector<cv::Point2f>& coordinates, const cv::Rect& roi);
+
+	std::vector<cv::Point2f> getCoordinatesFromMap(const std::vector<cv::Point2f>& coordinates, const std::vector<int>& rowMap, const std::vector<int>& columnMap);
+
+	void drawCoordinates(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates);
+
 public:
-	std::string decodeQR(const std::vector<unsigned char>& data);
+	std::string decodeQR(const std::vector<unsigned char>& src, std::vector<unsigned char>& dst);
 
 private:
 	std::string aiModelPath;

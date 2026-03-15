@@ -24,10 +24,12 @@ HttpServer::HttpServer() : logger(Logger::getInstance())
 
 				webSocketServer = std::make_unique<WebSocketServer>(ioContext, port);
 				webSocketServer->start();
+
+				ioContext.run();
 			}
 			catch (const std::exception& error)
 			{
-				std::cerr << "Error: " << error.what() << std::endl;
+				LOG_MESSAGE(CRITICAL) << "Error: " << error.what() << std::endl;
 			}
 		});
 
@@ -386,10 +388,11 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	{
 		auto data = request.get_file_value("qrCodeImage");
 
-		std::vector<unsigned char> src(data.content.begin(), data.content.end());
-		std::vector<unsigned char> dst;
 		QRCode qr;
-		std::string ticket = qr.decodeQR(src, dst);
+		std::vector<unsigned char> rawImage(data.content.begin(), data.content.end());
+		std::vector<unsigned char> processedImage;
+		std::string ticket = qr.decodeQR(rawImage, processedImage);
+		webSocketServer->sendTicket(processedImage);
 
 		if (!subscriptionManager.pay(ticket, licensePlate, dateTime, true))
 		{

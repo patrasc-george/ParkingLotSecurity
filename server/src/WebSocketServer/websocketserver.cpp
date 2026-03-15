@@ -1,213 +1,167 @@
 #include "websocketserver.h"
 
 #include <openssl/aes.h>
-#include <openssl/rand.h>
 #include <openssl/buffer.h>
-#include <bitset>
+#include <openssl/rand.h>
+#include <boost/asio/post.hpp>
+#include <boost/beast/core/buffers_to_string.hpp>
+#include <nlohmann/json.hpp>
+#include <atomic>
+#include <cstdlib>
+#include <string>
+#include <vector>
 
 std::string base64Encode(const std::string& text)
 {
-	Logger& logger = Logger::getInstance();
-
-	BIO* bio = BIO_new(BIO_f_base64());
-	if (!bio)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to create BIO for base64 encoding." << std::endl;
-		return "";
-	}
-
+	BIO* base64 = BIO_new(BIO_f_base64());
 	BIO* mem = BIO_new(BIO_s_mem());
-	if (!mem)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to create memory BIO." << std::endl;
-		BIO_free_all(bio);
-		return "";
-	}
 
-	bio = BIO_push(bio, mem);
-	BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
+	BIO_set_flags(base64, BIO_FLAGS_BASE64_NO_NL);
+	BIO_push(base64, mem);
 
-	BIO_write(bio, text.data(), text.size());
-	BIO_flush(bio);
+	BIO_write(base64, text.data(), text.size());
+	BIO_flush(base64);
 
-	BUF_MEM* buffer;
-	BIO_get_mem_ptr(bio, &buffer);
-	if (!buffer)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to get memory pointer from BIO." << std::endl;
-		BIO_free_all(bio);
-		return "";
-	}
+	BUF_MEM* buffer = nullptr;
+	BIO_get_mem_ptr(base64, &buffer);
 
 	std::string encoded(buffer->data, buffer->length);
-	BIO_free_all(bio);
+	BIO_free_all(base64);
+
 	return encoded;
+}
+
+std::string base64Decode(const std::string& text)
+{
+	BIO* base64 = BIO_new(BIO_f_base64());
+	BIO* mem = BIO_new_mem_buf(text.data(), text.size());
+
+	BIO_set_flags(base64, BIO_FLAGS_BASE64_NO_NL);
+	BIO_push(base64, mem);
+
+	std::string decoded(text.size(), '\0');
+	int size = BIO_read(base64, decoded.data(), decoded.size());
+	decoded.resize(size > 0 ? size : 0);
+
+	BIO_free_all(base64);
+	return decoded;
 }
 
 std::string encrypt(const std::string& text)
 {
-	Logger& logger = Logger::getInstance();
+	const char* env = std::getenv("POSTGRES_PASSWORD");
+	std::string password = env ? std::string(env) : std::string();
 
-	std::string password(std::getenv("POSTGRES_PASSWORD"));
-	if (password.empty() || password.size() != 32)
-	{
-		LOG_MESSAGE(CRITICAL) << "Invalid or missing password for encryption." << std::endl;
+	if (password.size() != 32)
 		return text;
-	}
 
-	const unsigned char* key = reinterpret_cast<const unsigned char*>(password.c_str());
+	const unsigned char* key = reinterpret_cast<const unsigned char*>(password.data());
 
-	AES_KEY encKey;
-	if (AES_set_encrypt_key(key, 256, &encKey) < 0)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to set encryption key." << std::endl;
-		return "";
-	}
+	AES_KEY encryptKey;
+	AES_set_encrypt_key(key, 256, &encryptKey);
 
 	int padding = 16 - (text.size() % 16);
-	std::string paddedText = text + std::string(padding, '\0');
+	std::string paddedText = text + std::string(padding, static_cast<char>(padding));
 
 	std::string cipherText;
-	try
+	cipherText.reserve(paddedText.size());
+	for (size_t i = 0; i < paddedText.size(); i += 16)
 	{
-		for (int i = 0; i < paddedText.size(); i += 16)
-		{
-			unsigned char block[16];
-			AES_encrypt(reinterpret_cast<const unsigned char*>(&paddedText[i]), block, &encKey);
-			cipherText.append(reinterpret_cast<const char*>(block), 16);
-		}
-	}
-	catch (const std::exception& e)
-	{
-		LOG_MESSAGE(CRITICAL) << "Error during encryption process: " << e.what() << std::endl;
-		return "";
+		unsigned char block[16];
+		AES_encrypt(reinterpret_cast<const unsigned char*>(paddedText.data() + i), block, &encryptKey);
+		cipherText.append(reinterpret_cast<const char*>(block), 16);
 	}
 
 	return base64Encode(cipherText);
 }
 
-std::string base64Decode(const std::string& text)
-{
-	Logger& logger = Logger::getInstance();
-
-	BIO* bio = BIO_new_mem_buf(text.data(), text.size());
-	if (!bio)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to create memory BIO for base64 decoding." << std::endl;
-		return "";
-	}
-
-	BIO* b64 = BIO_new(BIO_f_base64());
-	if (!b64)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to create BIO filter for base64 decoding." << std::endl;
-		BIO_free_all(bio);
-		return "";
-	}
-
-	bio = BIO_push(b64, bio);
-	BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
-
-	std::string decoded(text.size(), '\0');
-	int size = BIO_read(bio, &decoded[0], text.size());
-
-	if (size <= 0)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to read decoded data from BIO." << std::endl;
-		BIO_free_all(bio);
-		return "";
-	}
-
-	decoded.resize(size);
-
-	BIO_free_all(bio);
-	return decoded;
-}
-
 nlohmann::json decrypt(const std::string& text)
 {
-	Logger& logger = Logger::getInstance();
+	const char* env = std::getenv("POSTGRES_PASSWORD");
+	std::string password = env ? std::string(env) : std::string();
 
-	std::string password(std::getenv("POSTGRES_PASSWORD"));
-	if (password.empty() || password.size() != 32)
-	{
-		LOG_MESSAGE(CRITICAL) << "Invalid or missing password for decryption." << std::endl;
+	if (password.size() != 32)
 		return nlohmann::json();
-	}
 
-	const unsigned char* key = reinterpret_cast<const unsigned char*>(password.c_str());
+	const unsigned char* key = reinterpret_cast<const unsigned char*>(password.data());
 
-	AES_KEY dec_key;
-	if (AES_set_decrypt_key(key, 256, &dec_key) < 0)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to set decryption key." << std::endl;
-		return nlohmann::json();
-	}
+	AES_KEY decryptKey;
+	AES_set_decrypt_key(key, 256, &decryptKey);
 
 	std::string decodedCipherText = base64Decode(text);
-	std::vector<unsigned char> cipherText(decodedCipherText.begin(), decodedCipherText.end());
+	if (decodedCipherText.empty() || decodedCipherText.size() % 16 != 0)
+		return nlohmann::json();
 
-	std::string decryptedText;
-	decryptedText.resize(cipherText.size());
+	std::string decryptedText(decodedCipherText.size(), '\0');
+	for (size_t i = 0; i < decodedCipherText.size(); i += 16)
+	{
+		AES_decrypt(
+			reinterpret_cast<const unsigned char*>(decodedCipherText.data() + i),
+			reinterpret_cast<unsigned char*>(decryptedText.data() + i),
+			&decryptKey);
+	}
 
-	for (int i = 0; i < cipherText.size(); i += 16)
-		AES_decrypt(&cipherText[i], reinterpret_cast<unsigned char*>(&decryptedText[i]), &dec_key);
+	int padding = static_cast<unsigned char>(decryptedText.back());
+	if (padding <= 0 || padding > 16 || static_cast<size_t>(padding) > decryptedText.size())
+		return nlohmann::json();
 
-	int padding = decryptedText[decryptedText.size() - 1];
 	decryptedText.resize(decryptedText.size() - padding);
 
-	try
-	{
-		return nlohmann::json::parse(decryptedText);
-	}
-	catch (const nlohmann::json::parse_error& e)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to parse decrypted text into JSON: " << e.what() << std::endl;
-		return nlohmann::json();
-	}
+	return nlohmann::json::parse(decryptedText);
 }
 
-void WebSocketSession::start()
+WebSocketSession::WebSocketSession(boost::beast::websocket::stream<boost::asio::ip::tcp::socket>&& webSocket, const std::function<void()>& onClose)
+	: webSocketStream(std::move(webSocket)),
+	onClose(std::move(onClose)),
+	closing(false),
+	dataBaseManager(DatabaseManager::getInstance()),
+	logger(Logger::getInstance())
 {
-	doRead();
 }
 
-void WebSocketSession::doRead()
+void WebSocketSession::onRead(const boost::beast::error_code& errorCode, const std::size_t&)
 {
-	boost::beast::error_code errorCode;
-	webSocket.binary(true);
-	webSocket.read(buffer, errorCode);
-
 	if (errorCode)
+	{
+		closeSession();
 		return;
+	}
 
 	std::string message = boost::beast::buffers_to_string(buffer.data());
-	nlohmann::json decryptMessage = decrypt(message);
 	buffer.consume(buffer.size());
 
-	std::string command = decryptMessage["command"];
+	nlohmann::json decrypted = decrypt(message);
+	std::string command = decrypted.value("command", "");
+	std::uint64_t requestId = decrypted.value("requestId", 0ULL);
+
 	nlohmann::json response;
+	response["type"] = "response";
+	response["command"] = command;
+	response["requestId"] = requestId;
+
 	if (command == "getVehicles")
 	{
-		std::vector<std::string> vehicles = this->dataBaseManager.getVehicles();
-		response["vehicles"] = vehicles;
+		response["vehicles"] = dataBaseManager.getVehicles();
+		response["status"] = "success";
 	}
 	else if (command == "addVehicle")
 	{
-		std::string licensePlate = decryptMessage["licensePlate"];
-		std::string dateTime = decryptMessage["dateTime"];
-		std::string ticket = decryptMessage["ticket"];
-		float totalAmount = decryptMessage["totalAmount"];
+		std::string licensePlate = decrypted.value("licensePlate", "");
+		std::string dateTime = decrypted.value("dateTime", "");
+		std::string ticket = decrypted.value("ticket", "");
+		float totalAmount = decrypted.value("totalAmount", 0);
 
-		this->dataBaseManager.addVehicle(licensePlate, dateTime, ticket, totalAmount);
+		dataBaseManager.addVehicle(licensePlate, dateTime, ticket, totalAmount);
 
 		response["status"] = "success";
 		response["message"] = "Vehicle added " + licensePlate;
 	}
 	else if (command == "getIsPaid")
 	{
-		std::string licensePlate = decryptMessage["licensePlate"];
-		response["isPaid"] = this->dataBaseManager.getIsPaid(licensePlate);
+		std::string licensePlate = decrypted.value("licensePlate", "");
+
+		response["isPaid"] = dataBaseManager.getIsPaid(licensePlate);
+		response["status"] = "success";
 	}
 	else
 	{
@@ -215,33 +169,214 @@ void WebSocketSession::doRead()
 		response["message"] = "Unknown command";
 	}
 
-	doWrite(response.dump());
-
+	enqueueWrite(encrypt(response.dump()));
 	doRead();
 }
-void WebSocketSession::doWrite(const std::string& message)
+
+
+void WebSocketSession::doRead()
 {
-	if (!webSocket.is_open())
-	{
-		LOG_MESSAGE(CRITICAL) << "WebSocket is not open. Cannot send message." << std::endl;
-		return;
-	}
+	auto self = shared_from_this();
 
-	if (message.empty())
-	{
-		LOG_MESSAGE(WARNING) << "Attempted to send an empty message." << std::endl;
-		return;
-	}
+	webSocketStream.async_read(
+		buffer,
+		boost::asio::bind_executor(
+			webSocketStream.get_executor(),
+			[self](const boost::beast::error_code& errorCode, const std::size_t& bytesTransferred)
+			{
+				self->onRead(errorCode, bytesTransferred);
+			}));
+}
 
-	std::string encryptMessage = encrypt(message);
-	boost::beast::error_code errorCode;
-	webSocket.write(boost::asio::buffer(encryptMessage.data(), encryptMessage.size()), errorCode);
+void WebSocketSession::start()
+{
+	webSocketStream.text(true);
+	doRead();
+}
 
+void WebSocketSession::onWrite(const boost::beast::error_code& errorCode, const std::size_t&)
+{
 	if (errorCode)
 	{
-		LOG_MESSAGE(CRITICAL) << "Failed to send message: " << errorCode.message() << std::endl;
+		closeSession();
 		return;
 	}
+
+	writeQueue.pop_front();
+	if (!writeQueue.empty())
+		doWrite();
+}
+
+void WebSocketSession::doWrite()
+{
+	auto self = shared_from_this();
+
+	webSocketStream.async_write(
+		boost::asio::buffer(writeQueue.front()),
+		boost::asio::bind_executor(
+			webSocketStream.get_executor(),
+			[self](const boost::beast::error_code& errorCode, const std::size_t& bytesTransferred)
+			{
+				self->onWrite(errorCode, bytesTransferred);
+			}));
+}
+
+void WebSocketSession::enqueueWrite(const std::string& message)
+{
+	auto self = shared_from_this();
+
+	boost::asio::post(
+		webSocketStream.get_executor(),
+		[self, message = std::move(message)]() mutable
+		{
+			bool writeInProgress = !self->writeQueue.empty();
+			self->writeQueue.push_back(std::move(message));
+
+			if (!writeInProgress)
+				self->doWrite();
+		});
+}
+
+void WebSocketSession::sendTicket(const std::vector<unsigned char>& image)
+{
+	static std::atomic<uint64_t> ticketSequence{ 0 };
+	uint64_t ticketId = ticketSequence++;
+	std::string base64Image = base64Encode(std::string(image.begin(), image.end()));
+
+	nlohmann::json payload = {
+		{"type", "ticket"},
+		{"ticketId", ticketId},
+		{"image", base64Image}
+	};
+
+	enqueueWrite(encrypt(payload.dump()));
+}
+
+void WebSocketSession::closeSession()
+{
+	if (closing)
+		return;
+
+	closing = true;
+	writeQueue.clear();
+	boost::beast::error_code ignored;
+	webSocketStream.next_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored);
+	webSocketStream.next_layer().close(ignored);
+
+	if (onClose)
+		onClose();
+}
+
+WebSocketServer::WebSocketServer()
+	: acceptor(*static_cast<boost::asio::io_context*>(nullptr)),
+	logger(Logger::getInstance())
+{
+}
+
+WebSocketServer::WebSocketServer(boost::asio::io_context& ioContext, const unsigned short& port)
+	: acceptor(ioContext, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
+	logger(Logger::getInstance())
+{
+}
+
+std::string WebSocketServer::extractTokenFromTarget(const boost::beast::string_view& target)
+{
+	std::string targetSring(target.begin(), target.end());
+
+	auto position = targetSring.find("token=");
+	if (position == std::string::npos)
+		return {};
+
+	auto endPosition = targetSring.find('&', position);
+	if (endPosition == std::string::npos)
+		return targetSring.substr(position + 6);
+
+	return targetSring.substr(position + 6, endPosition - (position + 6));
+}
+
+bool WebSocketServer::isValidToken(const std::string& token)
+{
+#ifdef _DEBUG
+	const char* env = std::getenv("POSTGRES_PASSWORD_DEBUG");
+#else
+	const char* env = std::getenv("POSTGRES_PASSWORD");
+#endif
+
+	std::string expectedToken = env ? std::string(env) : std::string();
+	return token == expectedToken;
+}
+
+void WebSocketServer::doAccept()
+{
+	acceptor.async_accept(
+		[this](const boost::beast::error_code& errorCode, boost::asio::ip::tcp::socket socket) mutable
+		{
+			if (errorCode)
+			{
+				doAccept();
+				return;
+			}
+
+			if (session)
+			{
+				boost::beast::error_code ignored;
+				socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored);
+				socket.close(ignored);
+
+				doAccept();
+				return;
+			}
+
+			auto sharedSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(socket));
+			auto sharedBuffer = std::make_shared<boost::beast::flat_buffer>();
+			auto sharedRequest = std::make_shared<boost::beast::http::request<boost::beast::http::string_body>>();
+
+			boost::beast::http::async_read(
+				*sharedSocket,
+				*sharedBuffer,
+				*sharedRequest,
+				[this, sharedSocket, sharedBuffer, sharedRequest](const boost::beast::error_code& errorCode, const std::size_t&) mutable
+				{
+					if (errorCode)
+					{
+						doAccept();
+						return;
+					}
+
+					std::string token = extractTokenFromTarget(sharedRequest->target());
+					boost::beast::websocket::stream<boost::asio::ip::tcp::socket> webSocket(std::move(*sharedSocket));
+					if (!isValidToken(token))
+					{
+						boost::beast::error_code ignored;
+						webSocket.next_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored);
+						webSocket.next_layer().close(ignored);
+
+						doAccept();
+						return;
+					}
+
+					auto sharedWebSocket = std::make_shared<boost::beast::websocket::stream<boost::asio::ip::tcp::socket>>(std::move(webSocket));
+					sharedWebSocket->async_accept(
+						*sharedRequest,
+						[this, sharedWebSocket](const boost::beast::error_code& errorCode) mutable
+						{
+							if (errorCode)
+							{
+								doAccept();
+								return;
+							}
+
+							session = std::make_shared<WebSocketSession>(
+								std::move(*sharedWebSocket),
+								[this]()
+								{
+									session.reset();
+								});
+							session->start();
+							doAccept();
+						});
+				});
+		});
 }
 
 void WebSocketServer::start()
@@ -249,81 +384,8 @@ void WebSocketServer::start()
 	doAccept();
 }
 
-bool isValidToken(const std::string& token)
+void WebSocketServer::sendTicket(const std::vector<unsigned char>& image)
 {
-	Logger& logger = Logger::getInstance();
-
-	std::string expectedToken;
-#ifdef _DEBUG
-	expectedToken = std::getenv("POSTGRES_PASSWORD_DEBUG");
-#else
-	expectedToken = std::getenv("POSTGRES_PASSWORD");
-#endif
-
-	if (token != expectedToken)
-	{
-		LOG_MESSAGE(CRITICAL) << "Invalid token: " << token << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
-void WebSocketServer::doAccept()
-{
-	boost::beast::error_code errorCode;
-	boost::asio::ip::tcp::socket socket(ioContext);
-
-	acceptor.accept(socket, errorCode);
-
-	if (errorCode)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to accept connection: " << errorCode.message() << std::endl;
-		return;
-	}
-
-	boost::beast::flat_buffer buffer;
-	boost::beast::http::request<boost::beast::http::string_body> req;
-	boost::beast::http::read(socket, buffer, req, errorCode);
-
-	if (errorCode)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to read HTTP request: " << errorCode.message() << std::endl;
-		return;
-	}
-
-	boost::beast::websocket::stream<boost::asio::ip::tcp::socket> stream(std::move(socket));
-
-	stream.accept(req, errorCode);
-
-	if (errorCode)
-	{
-		LOG_MESSAGE(CRITICAL) << "Failed to accept WebSocket connection: " << errorCode.message() << std::endl;
-		return;
-	}
-
-	std::string target(req.target().begin(), req.target().end());
-
-	std::string token;
-	std::size_t pos = target.find("token=");
-	if (pos != std::string::npos)
-	{
-		std::size_t endPos = target.find("&", pos);
-		token = target.substr(pos + 6, endPos - pos - 6);
-	}
-
-	if (!isValidToken(token))
-	{
-		stream.close(boost::beast::websocket::close_code::policy_error, errorCode);
-
-		LOG_MESSAGE(CRITICAL) << "Invalid token. Closing connection." << std::endl;
-		return;
-	}
-	else
-		LOG_MESSAGE(INFO) << "Accepted a new WebSocket connection." << std::endl;
-
-	auto session = std::make_shared<WebSocketSession>(std::move(stream));
-	session->start();
-
-	doAccept();
+	if (session)
+		session->sendTicket(image);
 }

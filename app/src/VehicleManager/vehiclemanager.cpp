@@ -18,6 +18,14 @@ VehicleManager::VehicleManager()
 	dataBasePath = "database/";
 #endif
 
+	client->setTicketCallback(
+		[this](const std::string& id, const std::string& path, const std::string& licensePlate, const std::string& dateTime)
+		{
+			tickets[id] = Ticket(id, path, licensePlate, dateTime);
+			if (ticketCallback)
+				ticketCallback(id);
+		});
+
 	client->connect();
 }
 
@@ -39,6 +47,11 @@ inline std::vector<std::string> split(const std::string& string, const std::stri
 
 	substrings.push_back(string.substr(start));
 	return substrings;
+}
+
+void VehicleManager::setTicketCallback(const std::function<void(const std::string&)>& callback)
+{
+	ticketCallback = std::move(callback);
 }
 
 std::string VehicleManager::timeParked()
@@ -123,6 +136,15 @@ void VehicleManager::uploadDataBase(std::vector<std::string>& entranceDateTimes,
 
 		vehicles.push_back(curentVehicle);
 	}
+
+	std::vector<std::string> ticketsData = client->getTickets();
+	for (const auto& ticketData : ticketsData)
+	{
+		std::vector<std::string> data = split(ticketData, ", ");
+		std::string path = dataBasePath + "websiteTickets/" + data[0] + ".jpg";
+
+		tickets[data[0]] = (Ticket(data[0], path, data[1], data[2]));
+	}
 }
 
 void VehicleManager::uploadVehicles(std::map<int, std::string>& entriesList, std::map<int, std::string>& exitsList)
@@ -147,6 +169,12 @@ void VehicleManager::uploadVehicles(std::map<int, std::string>& entriesList, std
 			vehiclesStatus[curentVehicle.getTicket()] = false;
 		}
 	}
+}
+
+void VehicleManager::uploadTickets(std::map<std::string, std::string>& list)
+{
+	for (const auto& ticket : tickets)
+		list[ticket.second.getId()] = ticket.second.getId() + "\n" + ticket.second.getLicensePlate() + "\n" + ticket.second.getDateTime();;
 }
 
 void VehicleManager::setNumberOccupiedParkingLots(int& numberOccupiedParkingLots)
@@ -380,4 +408,11 @@ std::vector<std::vector<int>> VehicleManager::getEntranceStatistics() const
 std::vector<std::vector<int>> VehicleManager::getExitStatistics() const
 {
 	return exitStatistics;
+}
+
+void VehicleManager::getTicket(const std::string& id, std::string& path, std::string& licensePlate, std::string& dateTime)
+{
+	path = tickets[id].getPath();
+	licensePlate = tickets[id].getLicensePlate();
+	dateTime = tickets[id].getDateTime();
 }

@@ -325,6 +325,10 @@ public:
 	 */
 	void deleteLicensePlate(const std::string& email, const std::string& name, const std::string& licensePlate);
 
+	void addTicket(const std::string& id, const std::string& licensePlate, const std::string& dateTime);
+
+	std::vector<std::string> getTickets();
+
 private:
 	PGconn* conn;
 	Logger& logger;

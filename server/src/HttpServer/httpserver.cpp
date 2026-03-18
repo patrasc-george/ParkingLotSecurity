@@ -349,6 +349,8 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	nlohmann::json responseJson;
 	std::string licensePlate;
 	std::string dateTime;
+	std::vector<unsigned char> ticketImage;
+	std::string id;
 	std::string requestKey;
 
 	if (request.has_param("key"))
@@ -390,11 +392,18 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 
 		QRCode qr;
 		std::vector<unsigned char> rawImage(data.content.begin(), data.content.end());
-		std::vector<unsigned char> processedImage;
-		std::string ticket = qr.decodeQR(rawImage, processedImage);
-		webSocketServer->sendTicket(processedImage);
+		id = qr.decodeQR(rawImage, ticketImage);
 
-		if (!subscriptionManager.pay(ticket, licensePlate, dateTime, true))
+		std::string day = id.substr(0, 2);
+		std::string month = id.substr(2, 2);
+		std::string year = id.substr(4, 2);
+		std::string hour = id.substr(6, 2);
+		std::string minute = id.substr(8, 2);
+		std::string second = id.substr(10, 2);
+		std::string fullYear = "20" + year;
+		std::string ticketDateTime = day + "-" + month + "-" + fullYear + " " + hour + ":" + minute + ":" + second;
+
+		if (!subscriptionManager.pay(ticketDateTime, licensePlate, dateTime, true))
 		{
 			responseJson = {
 				{"success", false},
@@ -408,6 +417,16 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 
 	if (!licensePlate.empty() && !dateTime.empty())
 	{
+		if (!id.empty())
+		{
+			auto now = std::chrono::system_clock::now();
+			auto toTimeT = std::chrono::system_clock::to_time_t(now);
+			std::stringstream stringStream;
+			stringStream << std::put_time(std::localtime(&toTimeT), "%d-%m-%Y %X");
+
+			webSocketServer->sendTicket(ticketImage, id, licensePlate, stringStream.str());
+		}
+
 		responseJson = {
 			{"success", true},
 			{"message", "The vehicle with license plate number " + licensePlate + " was found. The parking fee has been paid. The vehicle entered the parking lot on " + dateTime + "."},

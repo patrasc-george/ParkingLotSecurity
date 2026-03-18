@@ -76,7 +76,7 @@ private:
 
 	static bool getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net aiModel);
 
-	static bool getDateTime(const cv::Mat& src, std::string& dateTime, ZXing::Position* position = nullptr);
+	static bool getID(const cv::Mat& src, std::string& id, ZXing::Position* position = nullptr);
 
 	std::vector<cv::Point2f> cvtPositionToCoordinates(const ZXing::Position& position);
 
@@ -84,7 +84,7 @@ private:
 
 	std::vector<cv::Point2f> getCoordinatesFromMap(const std::vector<cv::Point2f>& coordinates, const std::vector<int>& rowMap, const std::vector<int>& columnMap);
 
-	void drawCoordinates(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates);
+	void drawBBox(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const std::string& id);
 
 public:
 	std::string decodeQR(const std::vector<unsigned char>& src, std::vector<unsigned char>& dst);

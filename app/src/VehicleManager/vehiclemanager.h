@@ -7,12 +7,14 @@
 #endif
 
 #include "vehicle.h"
+#include "ticket.h"
 #include "licenseplatedetection.h"
 #include "qrcodedetection.h"
 #include "websocketclient.h"
 
 #include <fstream>
 #include <vector>
+#include <map>
 
 /**
  * @class VehicleManager
@@ -33,6 +35,9 @@ public:
 	 *          and establishes the connection. Sets the database path accordingly.
 	 */
 	VehicleManager();
+
+public:
+	void setTicketCallback(const std::function<void(const std::string&)>& callback);
 
 public:
 	/**
@@ -63,6 +68,8 @@ public:
 	 * @return void
 	 */
 	void uploadVehicles(std::map<int, std::string>& entriesList, std::map<int, std::string>& exitsList);
+
+	void uploadTickets(std::map<std::string, std::string>& list);
 
 	/**
 	 * @brief Sets the number of currently occupied parking lots.
@@ -218,6 +225,8 @@ public:
 	 */
 	std::vector<std::vector<int>> getExitStatistics() const;
 
+	void getTicket(const std::string& id, std::string& path, std::string& licensePlate, std::string& dateTime);
+
 private:
 	Vehicle curentVehicle;
 	std::vector<Vehicle> vehicles;
@@ -231,4 +240,6 @@ private:
 	std::vector<std::vector<int>> entranceStatistics;
 	std::vector<std::vector<int>> exitStatistics;
 	std::unordered_map<std::string, bool> vehiclesStatus;
+	std::map<std::string, Ticket> tickets;
+	std::function<void(const std::string&)> ticketCallback;
 };

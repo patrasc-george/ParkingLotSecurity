@@ -176,6 +176,8 @@ private:
 	 */
 	void uploadDataBase();
 
+	void setupTicketCallback();
+
 	/**
 	 * @brief Verifies the parking lot capacity before allowing vehicle entry or exit.
 	 * @details This function checks whether there is space available in the parking lot for entry or whether

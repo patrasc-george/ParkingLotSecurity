@@ -163,6 +163,11 @@ void WebSocketSession::onRead(const boost::beast::error_code& errorCode, const s
 		response["isPaid"] = dataBaseManager.getIsPaid(licensePlate);
 		response["status"] = "success";
 	}
+	else if (command == "getTickets")
+	{
+		response["tickets"] = dataBaseManager.getTickets();
+		response["status"] = "success";
+	}
 	else
 	{
 		response["status"] = "error";
@@ -237,8 +242,10 @@ void WebSocketSession::enqueueWrite(const std::string& message)
 		});
 }
 
-void WebSocketSession::sendTicket(const std::vector<unsigned char>& image)
+void WebSocketSession::sendTicket(const std::vector<unsigned char>& image, const std::string& id, const std::string& licensePlate, const std::string& dateTime)
 {
+	dataBaseManager.addTicket(id, licensePlate, dateTime);
+
 	static std::atomic<uint64_t> ticketSequence{ 0 };
 	uint64_t ticketId = ticketSequence++;
 	std::string base64Image = base64Encode(std::string(image.begin(), image.end()));
@@ -246,9 +253,11 @@ void WebSocketSession::sendTicket(const std::vector<unsigned char>& image)
 	nlohmann::json payload = {
 		{"type", "ticket"},
 		{"ticketId", ticketId},
-		{"image", base64Image}
+		{"image", base64Image},
+		{"id", id},
+		{"licensePlate", licensePlate},
+		{"dateTime", dateTime}
 	};
-
 	enqueueWrite(encrypt(payload.dump()));
 }
 
@@ -384,8 +393,8 @@ void WebSocketServer::start()
 	doAccept();
 }
 
-void WebSocketServer::sendTicket(const std::vector<unsigned char>& image)
+void WebSocketServer::sendTicket(const std::vector<unsigned char>& image, const std::string& id, const std::string& licensePlate, const std::string& dateTime)
 {
 	if (session)
-		session->sendTicket(image);
+		session->sendTicket(image, id, licensePlate, dateTime);
 }

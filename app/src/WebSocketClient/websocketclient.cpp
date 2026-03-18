@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <fstream>
 
 std::string base64Encode(const std::string& text)
 {
@@ -139,6 +140,12 @@ WebSocketClient::WebSocketClient(boost::asio::io_context& ioContext_, const std:
 	nextRequestId(1),
 	listeningStarted(false)
 {
+#ifdef _DEBUG
+	dataBasePath = "../../../database/";
+#else
+	dataBasePath = "database/";
+#endif
+
 	auto position = uri.find("://");
 	auto address = uri.substr(position + 3);
 	auto colonPosition = address.find(':');
@@ -175,6 +182,11 @@ void WebSocketClient::connect()
 	startListening();
 }
 
+void WebSocketClient::setTicketCallback(const std::function<void(const std::string&, const std::string&, const std::string&, const std::string&)>& callback)
+{
+	ticketCallback = std::move(callback);
+}
+
 void WebSocketClient::handleIncomingMessage(const std::string& message)
 {
 	nlohmann::json decrypted = decrypt(message);
@@ -182,11 +194,25 @@ void WebSocketClient::handleIncomingMessage(const std::string& message)
 
 	if (type == "ticket")
 	{
+		std::string id = decrypted.value("id", "");
+		std::string licensePlate = decrypted.value("licensePlate", "");
+		std::string dateTime = decrypted.value("dateTime", "");
 		std::string binaryString = decrypted.value("image", "");
 		std::string decoded = base64Decode(binaryString);
 		std::vector<unsigned char> imageData(decoded.begin(), decoded.end());
 
-		std::cout << imageData.size() << std::endl;
+		if (ticketCallback)
+		{
+			std::string savePath = dataBasePath + "websiteTickets/" + id + ".jpg";
+			std::ofstream file(savePath, std::ios::binary);
+			if (file.is_open())
+			{
+				file.write(reinterpret_cast<const char*>(imageData.data()), imageData.size());
+				file.close();
+			}
+
+			ticketCallback(id, savePath, licensePlate, dateTime);
+		}
 
 		return;
 	}
@@ -369,6 +395,21 @@ bool WebSocketClient::getIsPaid(const std::string& licensePlate)
 		return response["isPaid"].get<bool>();
 
 	return false;
+}
+
+std::vector<std::string> WebSocketClient::getTickets()
+{
+	nlohmann::json request = {
+		{"command", "getTickets"}
+	};
+	nlohmann::json response = sendRequestAndWait(request);
+
+	std::vector<std::string> tickets;
+	if (response.contains("tickets"))
+		for (const auto& vehicle : response["tickets"])
+			tickets.push_back(vehicle.get<std::string>());
+
+	return tickets;
 }
 
 WebSocketClient::~WebSocketClient()

@@ -837,7 +837,7 @@ bool QRCode::getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net a
 	return true;
 }
 
-bool QRCode::getDateTime(const cv::Mat& src, std::string& dateTime, ZXing::Position* position)
+bool QRCode::getID(const cv::Mat& src, std::string& id, ZXing::Position* position)
 {
 	ZXing::ImageView imageView(src.data, src.cols, src.rows, ZXing::ImageFormat::Lum);
 	ZXing::DecodeHints hints;
@@ -854,21 +854,7 @@ bool QRCode::getDateTime(const cv::Mat& src, std::string& dateTime, ZXing::Posit
 			return false;
 	}
 
-	//std::string raw = result.text();
-	//if (raw.length() != 12)
-	//	return false;
-
-	//std::string day = raw.substr(0, 2);
-	//std::string month = raw.substr(2, 2);
-	//std::string year = raw.substr(4, 2);
-	//std::string hour = raw.substr(6, 2);
-	//std::string minute = raw.substr(8, 2);
-	//std::string second = raw.substr(10, 2);
-	//std::string fullYear = "20" + year;
-
-	//dateTime = day + "-" + month + "-" + fullYear + " " +
-	//	hour + ":" + minute + ":" + second;
-	dateTime = result.text();
+	id = result.text();
 
 	return true;
 }
@@ -886,42 +872,45 @@ std::vector<cv::Point2f> QRCode::cvtPositionToCoordinates(const ZXing::Position&
 std::vector<cv::Point2f> QRCode::scaleCoordinates(const std::vector<cv::Point2f>& coordinates, const cv::Rect& roi)
 {
 	std::vector<cv::Point2f> scaledCoordinates;
+	scaledCoordinates.reserve(coordinates.size());
+
 	for (const auto& coordinate : coordinates)
 	{
-		int x = std::lround(roi.x + coordinate.x);
-		int y = std::lround(roi.y + coordinate.y);
+		float x = roi.x + coordinate.x;
+		float y = roi.y + coordinate.y;
 
-		cv::Point2f coordinates(x, y);
-		scaledCoordinates.push_back(coordinates);
+		scaledCoordinates.emplace_back(x, y);
 	}
 
 	return scaledCoordinates;
 }
-
 std::vector<cv::Point2f> QRCode::getCoordinatesFromMap(const std::vector<cv::Point2f>& coordinates, const std::vector<int>& rowMap, const std::vector<int>& columnMap)
 {
 	std::vector<cv::Point2f> coordinatesFromMap;
+	coordinatesFromMap.reserve(coordinates.size());
+
+	if (rowMap.empty() || columnMap.empty())
+		return coordinatesFromMap;
+
 	for (const auto& coordinate : coordinates)
 	{
-		float x = columnMap[coordinate.x];
-		float y = rowMap[coordinate.y];
-
-		cv::Point2f coordinates(x, y);
-		coordinatesFromMap.push_back(coordinates);
+		int x = std::clamp(static_cast<int>(std::lround(coordinate.x)), 0, static_cast<int>(columnMap.size()) - 1);
+		int y = std::clamp(static_cast<int>(std::lround(coordinate.y)), 0, static_cast<int>(rowMap.size()) - 1);
+		coordinatesFromMap.emplace_back(columnMap[x], rowMap[y]);
 	}
 
 	return coordinatesFromMap;
 }
 
-void QRCode::drawCoordinates(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates)
+void QRCode::drawBBox(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const std::string& id)
 {
 	dst = src.clone();
-
 	std::vector<cv::Point2f> orderedCoordinates = coordinates;
+
 	cv::Point2f centroid(0, 0);
 	for (const auto& coordinate : orderedCoordinates)
 		centroid += coordinate;
-	centroid *= (1 / static_cast<float>(orderedCoordinates.size()));
+	centroid *= (1.0 / orderedCoordinates.size());
 
 	std::sort(orderedCoordinates.begin(), orderedCoordinates.end(),
 		[&](const cv::Point2f& firstPoint, const cv::Point2f& secondPoint)
@@ -937,11 +926,32 @@ void QRCode::drawCoordinates(const cv::Mat& src, cv::Mat& dst, const std::vector
 		cv::Point2f secondCoordinate = orderedCoordinates[(i + 1) % orderedCoordinates.size()];
 		cv::line(dst, firstCoordinate, secondCoordinate, cv::Scalar(0, 255, 0), 2);
 	}
+
+	auto now = std::chrono::system_clock::now();
+	auto toTimeT = std::chrono::system_clock::to_time_t(now);
+	std::stringstream stringStream;
+	stringStream << std::put_time(std::localtime(&toTimeT), "%d-%m-%Y %X");
+
+	std::string text = stringStream.str() + " / " + id;
+
+	int baseline = 0;
+	int fontFace = cv::FONT_HERSHEY_SIMPLEX;
+	int thickness = 2;
+	float fontScale = 1.0;
+	float targetWidth = dst.cols - 2;
+
+	cv::Size textSize = cv::getTextSize(text, fontFace, fontScale, thickness, &baseline);
+	fontScale *= targetWidth / textSize.width;
+	textSize = cv::getTextSize(text, fontFace, fontScale, thickness, &baseline);
+	cv::Point textPosition(1, dst.rows - baseline);
+
+	cv::putText(dst, text, textPosition, fontFace, fontScale, cv::Scalar(0, 0, 0), thickness * 2, cv::LINE_AA);
+	cv::putText(dst, text, textPosition, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness, cv::LINE_AA);
 }
 
 std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<unsigned char>& dst)
 {
-	std::string dateTime = "";
+	std::string id;
 	std::vector<cv::Point2f> qrCoordinates;
 	cv::Mat image = cv::imdecode(src, cv::IMREAD_COLOR);
 
@@ -1027,38 +1037,40 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 		cv::rectangle(debug, roi, cv::Scalar(0, 255, 0), 2);
 #endif
 
-		//if (getDateTime(qrCode, dateTime))
-		//{
-		//	std::vector<cv::Point2f> scaledCoordinates = scaleCoordinates(coordinates, roi);
-		//	qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
-		//	break;
-		//}
-		//else if (getDateTime(transformedConnectedComponent, dateTime))
-		//{
-		//	std::vector<cv::Point2f> scaledCoordinates = scaleCoordinates(coordinates, roi);
-		//	qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
-		//	break;
-		//}
+		if (getID(qrCode, id))
+		{
+			std::vector<cv::Point2f> scaledCoordinates = scaleCoordinates(coordinates, roi);
+			qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
+			break;
+		}
+		else if (getID(transformedConnectedComponent, id))
+		{
+			std::vector<cv::Point2f> scaledCoordinates = scaleCoordinates(coordinates, roi);
+			qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
+			break;
+		}
 	}
 
-	if (dateTime.empty())
+	if (id.empty())
 	{
 		ZXing::Position position;
-		if (getDateTime(cropped, dateTime, &position))
+		if (getID(cropped, id, &position))
 		{
 			std::vector<cv::Point2f> scaledCoordinates = cvtPositionToCoordinates(position);
 			qrCoordinates = getCoordinatesFromMap(scaledCoordinates, rowMap, columnMap);
 		}
-		else if (getDateTime(gray, dateTime, &position))
+		else if (getID(gray, id, &position))
 			qrCoordinates = cvtPositionToCoordinates(position);
 	}
 
-	if (!dateTime.empty())
+	if (!id.empty())
 	{
 		cv::Mat drawnCoordinates;
-		drawCoordinates(resized, drawnCoordinates, qrCoordinates);
+		drawBBox(resized, drawnCoordinates, qrCoordinates, id);
 		cv::imencode(".png", drawnCoordinates, dst);
+
+		return id;
 	}
 
-	return dateTime;
+	return "";
 }

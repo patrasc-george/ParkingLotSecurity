@@ -18,6 +18,7 @@ QTranslator translator;
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
 	setupUI();
+	setupTicketCallback();
 }
 
 void MainWindow::setupUI()
@@ -237,8 +238,29 @@ void MainWindow::uploadDataBase()
 		exitsListWidget->addItem(item);
 	}
 
+	std::map<std::string, std::string> ticketsList;
+	vehicleManager.uploadTickets(ticketsList);
+	for (const auto& pair : ticketsList)
+	{
+		std::cout << pair.second << std::endl;
+	}
+
 	vehicleManager.setNumberOccupiedParkingLots(numberOccupiedParkingLots);
 	occupiedParkingLotsEdit->setText(QString::number(numberOccupiedParkingLots));
+}
+
+void MainWindow::setupTicketCallback()
+{
+	vehicleManager.setTicketCallback(
+		[this](const std::string& id)
+		{
+			std::string path;
+			std::string licensePlate;
+			std::string dateTime;
+
+			vehicleManager.getTicket(id, path, licensePlate, dateTime);
+			std::cout << id << " " << path << " " << licensePlate << " " << dateTime << std::endl;
+		});
 }
 
 bool MainWindow::verifyCapacity()

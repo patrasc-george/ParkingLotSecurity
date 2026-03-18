@@ -107,6 +107,13 @@ bool DatabaseManager::initializeDatabase()
 			id SERIAL PRIMARY KEY,
 			email TEXT UNIQUE NOT NULL
 		);
+
+		CREATE TABLE IF NOT EXISTS tickets (
+			id SERIAL PRIMARY KEY,
+			ticket_id TEXT NOT NULL,
+			license_plate TEXT NOT NULL,
+			date_time TIMESTAMP NOT NULL
+		);
 	)";
 
 	PGresult* result = PQexec(conn, sqlCreateTables);
@@ -926,6 +933,65 @@ void DatabaseManager::deleteLicensePlate(const std::string& email, const std::st
 
 		PQclear(result);
 	}
+}
+
+void DatabaseManager::addTicket(const std::string& id, const std::string& licensePlate, const std::string& dateTime)
+{
+	const char* sqlInsert = R"(
+        INSERT INTO tickets (ticket_id, license_plate, date_time)
+        VALUES ($1, $2, $3);
+    )";
+
+	const char* insertParams[] = {
+		id.c_str(),
+		licensePlate.c_str(),
+		dateTime.c_str(),
+	};
+
+	PGresult* insertResult = PQexecParams(conn, sqlInsert, 3, nullptr, insertParams, nullptr, nullptr, 0);
+
+	if (PQresultStatus(insertResult) != PGRES_COMMAND_OK)
+	{
+		LOG_MESSAGE(CRITICAL) << "Error inserting ticket with id: " << id << std::endl;
+		PQclear(insertResult);
+		throw std::runtime_error("Error inserting ticket into database");
+	}
+
+	PQclear(insertResult);
+}
+
+std::vector<std::string> DatabaseManager::getTickets()
+{
+	std::vector<std::string> tickets;
+
+	const char* sql = "SELECT ticket_id, license_plate, TO_CHAR(date_time, 'DD-MM-YYYY HH24:MI:SS') FROM tickets;";
+
+	PGresult* result = PQexec(conn, sql);
+
+	if (PQresultStatus(result) != PGRES_TUPLES_OK)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to fetch tickets from the database." << std::endl;
+		PQclear(result);
+		return tickets;
+	}
+
+	int numRows = PQntuples(result);
+	for (int i = 0; i < numRows; i++)
+	{
+		std::string ticketId = PQgetvalue(result, i, 0);
+		std::string licensePlate = PQgetvalue(result, i, 1);
+		std::string dateTime = PQgetvalue(result, i, 2);
+
+		std::string ticketInfo =
+			ticketId + ", " +
+			licensePlate + ", " +
+			dateTime;
+
+		tickets.push_back(ticketInfo);
+	}
+
+	PQclear(result);
+	return tickets;
 }
 
 DatabaseManager::~DatabaseManager()

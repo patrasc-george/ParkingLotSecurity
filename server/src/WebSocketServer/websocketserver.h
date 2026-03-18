@@ -21,7 +21,7 @@ public:
 public:
 	void start();
 
-	void sendTicket(const std::vector<unsigned char>& image);
+	void sendTicket(const std::vector<unsigned char>& image, const std::string& id, const std::string& licensePlate, const std::string& dateTime);
 
 private:
 	void onRead(const boost::beast::error_code& errorCode, const std::size_t& bytesTransferred);
@@ -56,7 +56,7 @@ public:
 public:
 	void start();
 
-	void sendTicket(const std::vector<unsigned char>& image);
+	void sendTicket(const std::vector<unsigned char>& image, const std::string& id, const std::string& licensePlate, const std::string& dateTime);
 
 private:
 	std::string extractTokenFromTarget(const boost::beast::string_view& target);

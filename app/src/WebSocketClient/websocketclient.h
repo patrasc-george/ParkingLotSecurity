@@ -41,6 +41,9 @@ public:
 	~WebSocketClient();
 
 public:
+	void setTicketCallback(const std::function<void(const std::string&, const std::string&, const std::string&, const std::string&)>& callback);
+
+public:
 	void connect();
 
 	void startListening();
@@ -50,6 +53,8 @@ public:
 	void addVehicle(const std::string& licensePlate, const std::string& dateTime, const std::string& ticket, const float& totalAmount);
 
 	bool getIsPaid(const std::string& licensePlate);
+
+	std::vector<std::string> getTickets();
 
 private:
 	void handleIncomingMessage(const std::string& message);
@@ -82,4 +87,6 @@ private:
 	std::mutex pendingMutex;
 	std::unordered_map<uint64_t, std::shared_ptr<PendingRequest>> pendingRequests;
 	std::deque<std::string> writeQueue;
+	std::string dataBasePath;
+	std::function<void(const std::string&, const std::string&, const std::string&, const std::string&)> ticketCallback;
 };

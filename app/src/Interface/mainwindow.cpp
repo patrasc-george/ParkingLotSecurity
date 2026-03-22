@@ -30,22 +30,44 @@ void MainWindow::setupUI()
 	pixmapItem = new QGraphicsPixmapItem();
 	scene->addItem(pixmapItem);
 
+	graphicsView->setStyleSheet("background: transparent");
+	graphicsView->setFrameShape(QFrame::NoFrame);
+	graphicsView->setAttribute(Qt::WA_TranslucentBackground);
+	scene->setBackgroundBrush(Qt::transparent);
+
+	ticketGraphicsView = new QGraphicsView(this);
+	ticketScene = new QGraphicsScene(this);
+	ticketGraphicsView->setScene(ticketScene);
+
+	ticketPixmapItem = new QGraphicsPixmapItem();
+	ticketScene->addItem(ticketPixmapItem);
+
+	ticketGraphicsView->setStyleSheet("background: transparent");
+	ticketGraphicsView->setFrameShape(QFrame::NoFrame);
+	ticketGraphicsView->setAttribute(Qt::WA_TranslucentBackground);
+	ticketScene->setBackgroundBrush(Qt::transparent);
+
 	isDevelopment();
 
 	setupButtons();
 	setupLayouts();
-	centerWindow();
+
+	this->setMinimumSize(1400, 700);
+	showMaximized();
 
 	connect(enterButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
 	connect(exitButton, &QPushButton::clicked, this, &MainWindow::uploadImage);
 	connect(entriesListWidget, &QListWidget::itemClicked, this, &MainWindow::showImage);
 	connect(exitsListWidget, &QListWidget::itemClicked, this, &MainWindow::showImage);
 	connect(historyLogListWidget, &QListWidget::itemClicked, this, &MainWindow::showImage);
+	connect(ticketsListWidget, &QListWidget::itemClicked, this, &MainWindow::showTicketImage);
+	connect(ticketsHistoryLogListWidget, &QListWidget::itemClicked, this, &MainWindow::showTicketImage);
 	connect(nameEdit, &QLineEdit::textChanged, this, &MainWindow::setName);
 	connect(parkingLotsEdit, &QLineEdit::textChanged, this, &MainWindow::setNumberParkingLots);
 	connect(reservedEdit, &QLineEdit::textChanged, this, &MainWindow::setNumberReserved);
 	connect(feeEdit, &QLineEdit::textChanged, this, &MainWindow::setFee);
 	connect(historyLogEdit, &QLineEdit::textChanged, this, &MainWindow::search);
+	connect(ticketsHistoryLogEdit, &QLineEdit::textChanged, this, &MainWindow::searchTickets);
 	connect(statisticsButton, &QPushButton::clicked, this, &MainWindow::showStatistics);
 	connect(chooseLanguage, &QComboBox::currentIndexChanged, this, &MainWindow::setLanguage);
 
@@ -117,6 +139,15 @@ void MainWindow::setupLayouts()
 	historyLogLabel->setAlignment(Qt::AlignCenter);
 	historyLogEdit = new QLineEdit(this);
 
+	ticketsListWidget = new QListWidget(this);
+	QLabel* ticketsLabel = new QLabel(tr("Tickets"), this);
+	ticketsLabel->setAlignment(Qt::AlignCenter);
+
+	ticketsHistoryLogListWidget = new QListWidget(this);
+	QLabel* ticketsHistoryLogLabel = new QLabel(tr("History Log"), this);
+	ticketsHistoryLogLabel->setAlignment(Qt::AlignCenter);
+	ticketsHistoryLogEdit = new QLineEdit(this);
+
 	QLabel* nameLabel = new QLabel(tr("Name:"), this);
 	QLabel* parkingLotsLabel = new QLabel(tr("Capacity:"), this);
 	QLabel* reservedLabel = new QLabel(tr("Reserved:"), this);
@@ -153,9 +184,8 @@ void MainWindow::setupLayouts()
 	topLayout->addWidget(feeLabel);
 	topLayout->addWidget(feeEdit);
 
-	QVBoxLayout* leftLayout = new QVBoxLayout();
-	leftLayout->addLayout(topLayout);
-	leftLayout->addWidget(graphicsView);
+	QVBoxLayout* vehiclesLeftLayout = new QVBoxLayout();
+	vehiclesLeftLayout->addWidget(graphicsView);
 
 	QVBoxLayout* entriesLayout = new QVBoxLayout();
 	entriesLayout->addWidget(entriesLabel);
@@ -165,39 +195,63 @@ void MainWindow::setupLayouts()
 	exitsLayout->addWidget(exitsLabel);
 	exitsLayout->addWidget(exitsListWidget);
 
-	QVBoxLayout* historyLogLayout = new QVBoxLayout();
-	historyLogLayout->addWidget(historyLogLabel);
-	historyLogLayout->addWidget(historyLogEdit);
-	historyLogLayout->addWidget(historyLogListWidget);
+	QVBoxLayout* vehiclesHistoryLogLayout = new QVBoxLayout();
+	vehiclesHistoryLogLayout->addWidget(historyLogLabel);
+	vehiclesHistoryLogLayout->addWidget(historyLogEdit);
+	vehiclesHistoryLogLayout->addWidget(historyLogListWidget);
 
-	QHBoxLayout* listsLayout = new QHBoxLayout();
-	listsLayout->addLayout(entriesLayout);
-	listsLayout->addLayout(exitsLayout);
-	listsLayout->addLayout(historyLogLayout);
+	QHBoxLayout* vehiclesListsLayout = new QHBoxLayout();
+	vehiclesListsLayout->addLayout(entriesLayout);
+	vehiclesListsLayout->addLayout(exitsLayout);
+	vehiclesListsLayout->addLayout(vehiclesHistoryLogLayout);
 
-	QVBoxLayout* rightLayout = new QVBoxLayout();
-	rightLayout->addLayout(listsLayout);
-	rightLayout->addLayout(buttonLayout);
+	QVBoxLayout* vehiclesRightLayout = new QVBoxLayout();
+	vehiclesRightLayout->addLayout(vehiclesListsLayout);
+	vehiclesRightLayout->addLayout(buttonLayout);
 
-	QHBoxLayout* mainLayout = new QHBoxLayout();
-	mainLayout->addLayout(leftLayout, 2);
-	mainLayout->addLayout(rightLayout, 1.5);
+	QHBoxLayout* vehiclesMainLayout = new QHBoxLayout();
+	vehiclesMainLayout->addLayout(vehiclesLeftLayout, 2);
+	vehiclesMainLayout->addLayout(vehiclesRightLayout, 1.5);
+
+	QWidget* vehiclesTab = new QWidget(this);
+	vehiclesTab->setLayout(vehiclesMainLayout);
+
+	QVBoxLayout* ticketsLeftLayout = new QVBoxLayout();
+	ticketsLeftLayout->addWidget(ticketGraphicsView);
+
+	QVBoxLayout* ticketsLayout = new QVBoxLayout();
+	ticketsLayout->addWidget(ticketsLabel);
+	ticketsLayout->addWidget(ticketsListWidget);
+
+	QVBoxLayout* ticketsHistoryLogLayout = new QVBoxLayout();
+	ticketsHistoryLogLayout->addWidget(ticketsHistoryLogLabel);
+	ticketsHistoryLogLayout->addWidget(ticketsHistoryLogEdit);
+	ticketsHistoryLogLayout->addWidget(ticketsHistoryLogListWidget);
+
+	QHBoxLayout* ticketsRightLayout = new QHBoxLayout();
+	ticketsRightLayout->addLayout(ticketsLayout);
+	ticketsRightLayout->addLayout(ticketsHistoryLogLayout);
+
+	QHBoxLayout* ticketsMainLayout = new QHBoxLayout();
+	ticketsMainLayout->addLayout(ticketsLeftLayout, 2);
+	ticketsMainLayout->addLayout(ticketsRightLayout, 1.5);
+
+	QWidget* ticketsTab = new QWidget(this);
+	ticketsTab->setLayout(ticketsMainLayout);
+
+	tabWidget = new QTabWidget(this);
+	tabWidget->addTab(vehiclesTab, tr("Vehicles"));
+	tabWidget->addTab(ticketsTab, tr("Tickets"));
+	tabWidget->setCurrentIndex(0);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->addLayout(topLayout);
+	mainLayout->addWidget(tabWidget);
 
 	QWidget* centralWidget = new QWidget(this);
 	centralWidget->setLayout(mainLayout);
 
 	setCentralWidget(centralWidget);
-}
-
-void MainWindow::centerWindow()
-{
-	setFixedSize(1400, 700);
-
-	QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
-	int x = (screenGeometry.width() - width()) / 2;
-	int y = (screenGeometry.height() - height()) / 2;
-
-	move(x, y);
 }
 
 void MainWindow::updateStatistics(const std::string& dateTime, const bool& statistics)
@@ -242,7 +296,9 @@ void MainWindow::uploadDataBase()
 	vehicleManager.uploadTickets(ticketsList);
 	for (const auto& pair : ticketsList)
 	{
-		std::cout << pair.second << std::endl;
+		QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(pair.second));
+		item->setData(Qt::UserRole, QString::fromStdString(pair.first));
+		ticketsListWidget->addItem(item);
 	}
 
 	vehicleManager.setNumberOccupiedParkingLots(numberOccupiedParkingLots);
@@ -254,12 +310,10 @@ void MainWindow::setupTicketCallback()
 	vehicleManager.setTicketCallback(
 		[this](const std::string& id)
 		{
-			std::string path;
-			std::string licensePlate;
-			std::string dateTime;
-
-			vehicleManager.getTicket(id, path, licensePlate, dateTime);
-			std::cout << id << " " << path << " " << licensePlate << " " << dateTime << std::endl;
+			std::string displayText = vehicleManager.processTicket(id);
+			QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(displayText));
+			item->setData(Qt::UserRole, QString::fromStdString(id));
+			ticketsListWidget->addItem(item);
 		});
 }
 
@@ -338,35 +392,35 @@ void MainWindow::processLastVehicle(const QString& QRPath)
 	else
 		entriesListWidget->addItem(item);
 
-	clearPreviousItems();
-	createNewPixmapItem();
-	setGraphicsViewProperties();
+	clearPreviousItems(scene);
+	createNewPixmapItem(scene, pixmapItem, image);
+	setGraphicsViewProperties(graphicsView, pixmapItem);
 }
 
-void MainWindow::clearPreviousItems()
+void MainWindow::clearPreviousItems(QGraphicsScene* targetScene)
 {
-	QList<QGraphicsItem*> items = scene->items();
+	QList<QGraphicsItem*> items = targetScene->items();
 
 	for (QGraphicsItem* item : items)
 	{
-		scene->removeItem(item);
+		targetScene->removeItem(item);
 		delete item;
 	}
 }
 
-void MainWindow::createNewPixmapItem()
+void MainWindow::createNewPixmapItem(QGraphicsScene* targetScene, QGraphicsPixmapItem*& targetPixmapItem, const QImage& targetImage)
 {
-	pixmapItem = new QGraphicsPixmapItem(QPixmap::fromImage(image));
-	scene->addItem(pixmapItem);
+	targetPixmapItem = new QGraphicsPixmapItem(QPixmap::fromImage(targetImage));
+	targetScene->addItem(targetPixmapItem);
 }
 
-void MainWindow::setGraphicsViewProperties()
+void MainWindow::setGraphicsViewProperties(QGraphicsView* targetGraphicsView, QGraphicsPixmapItem* targetPixmapItem)
 {
-	graphicsView->setAlignment(Qt::AlignCenter);
+	targetGraphicsView->setAlignment(Qt::AlignCenter);
 
-	QRectF imageRect = pixmapItem->boundingRect();
-	graphicsView->setSceneRect(imageRect);
-	graphicsView->fitInView(imageRect, Qt::KeepAspectRatio);
+	QRectF imageRect = targetPixmapItem->boundingRect();
+	targetGraphicsView->setSceneRect(imageRect);
+	targetGraphicsView->fitInView(imageRect, Qt::KeepAspectRatio);
 }
 
 void MainWindow::uploadImage()
@@ -379,7 +433,7 @@ void MainWindow::uploadImage()
 	if (!verifyCapacity())
 		return;
 
-	QString imagePath = QFileDialog::getOpenFileName(this, "Upload Image", "", "Images (*.png *.jpg *.bmp *.gif)");
+	QString imagePath = QFileDialog::getOpenFileName(this, tr("Upload Image"), "", "Images (*.png *.jpg *.bmp *.gif)");
 
 	if (imagePath.isEmpty())
 		return;
@@ -396,9 +450,9 @@ void MainWindow::showImage(QListWidgetItem* item)
 	int id = item->data(Qt::UserRole).toInt();
 	image.load(QString::fromStdString(vehicleManager.getImagePath(id)));
 
-	clearPreviousItems();
-	createNewPixmapItem();
-	setGraphicsViewProperties();
+	clearPreviousItems(scene);
+	createNewPixmapItem(scene, pixmapItem, image);
+	setGraphicsViewProperties(graphicsView, pixmapItem);
 }
 
 void MainWindow::setName(const QString& name)
@@ -490,4 +544,29 @@ void MainWindow::setLanguage(const int& choise)
 	this->close();
 	setupUI();
 	this->show();
+}
+
+void MainWindow::showTicketImage(QListWidgetItem* item)
+{
+	QString id = item->data(Qt::UserRole).toString();
+	ticketImage.load(QString::fromStdString(vehicleManager.getTicketPath(id.toStdString())));
+
+	clearPreviousItems(ticketScene);
+	createNewPixmapItem(ticketScene, ticketPixmapItem, ticketImage);
+	setGraphicsViewProperties(ticketGraphicsView, ticketPixmapItem);
+}
+
+void MainWindow::searchTickets(QString text)
+{
+	std::unordered_map<std::string, std::string> ticketsHistoryLogList;
+	vehicleManager.searchTickets(text.toStdString(), ticketsHistoryLogList);
+
+	ticketsHistoryLogListWidget->clear();
+
+	for (const auto& pair : ticketsHistoryLogList)
+	{
+		QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(pair.second));
+		item->setData(Qt::UserRole, QString::fromStdString(pair.first));
+		ticketsHistoryLogListWidget->addItem(item);
+	}
 }

@@ -51,6 +51,10 @@
       <source>Fee:</source>
       <translation>Fee:</translation>
     </message>
+	<message>
+		<source>Upload Image</source>
+		<translation>Upload Image</translation>
+	</message>
     <message>
       <source>Parking Full</source>
       <translation>Parking Full</translation>
@@ -67,6 +71,14 @@
       <source>There are no vehicles in the parking lot.</source>
       <translation>There are no vehicles in the parking lot.</translation>
     </message>
+	<message>
+		<source>Tickets</source>
+		<translation>Tickets</translation>
+	</message>
+	<message>
+		<source>Vehicles</source>
+		<translation>Vehicles</translation>
+	</message>
   </context>
 
   <context>

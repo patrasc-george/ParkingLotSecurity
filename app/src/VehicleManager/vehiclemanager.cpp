@@ -171,10 +171,15 @@ void VehicleManager::uploadVehicles(std::map<int, std::string>& entriesList, std
 	}
 }
 
+std::string VehicleManager::processTicket(const std::string& id)
+{
+	return id + "\n" + tickets[id].getLicensePlate() + "\n" + tickets[id].getDateTime();
+}
+
 void VehicleManager::uploadTickets(std::map<std::string, std::string>& list)
 {
 	for (const auto& ticket : tickets)
-		list[ticket.second.getId()] = ticket.second.getId() + "\n" + ticket.second.getLicensePlate() + "\n" + ticket.second.getDateTime();;
+		list[ticket.second.getId()] = processTicket(ticket.second.getId());;
 }
 
 void VehicleManager::setNumberOccupiedParkingLots(int& numberOccupiedParkingLots)
@@ -370,6 +375,21 @@ void VehicleManager::calculateOccupancyStatistics()
 		}
 }
 
+void VehicleManager::searchTickets(std::string text, std::unordered_map<std::string, std::string>& historyLogList)
+{
+	if (text.empty())
+		return;
+
+	std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return std::toupper(c); });
+
+	for (const auto& ticket : tickets)
+		if (ticket.first.find(text) != std::string::npos)
+		{
+			std::string displayText = processTicket(ticket.first);
+			historyLogList[ticket.first] = displayText;
+		}
+}
+
 std::string VehicleManager::getImagePath(const int& id) const
 {
 	return vehicles[id].getPath();
@@ -410,9 +430,7 @@ std::vector<std::vector<int>> VehicleManager::getExitStatistics() const
 	return exitStatistics;
 }
 
-void VehicleManager::getTicket(const std::string& id, std::string& path, std::string& licensePlate, std::string& dateTime)
+std::string VehicleManager::getTicketPath(const std::string& id)
 {
-	path = tickets[id].getPath();
-	licensePlate = tickets[id].getLicensePlate();
-	dateTime = tickets[id].getDateTime();
+	return tickets[id].getPath();
 }

@@ -69,6 +69,8 @@ public:
 	 */
 	void uploadVehicles(std::map<int, std::string>& entriesList, std::map<int, std::string>& exitsList);
 
+	std::string processTicket(const std::string& id);
+
 	void uploadTickets(std::map<std::string, std::string>& list);
 
 	/**
@@ -153,6 +155,8 @@ public:
 	 */
 	void calculateOccupancyStatistics();
 
+	void searchTickets(std::string text, std::unordered_map<std::string, std::string>& historyLogList);
+
 public:
 	/**
 	 * @brief Returns the file path of the vehicle's image.
@@ -225,7 +229,7 @@ public:
 	 */
 	std::vector<std::vector<int>> getExitStatistics() const;
 
-	void getTicket(const std::string& id, std::string& path, std::string& licensePlate, std::string& dateTime);
+	std::string getTicketPath(const std::string& id);
 
 private:
 	Vehicle curentVehicle;

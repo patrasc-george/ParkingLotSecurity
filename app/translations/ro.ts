@@ -51,6 +51,10 @@
       <source>Fee:</source>
       <translation>Taxa:</translation>
     </message>
+	<message>
+		<source>Upload Image</source>
+		<translation>Încarcă imagine</translation>
+	</message>
     <message>
       <source>Parking Full</source>
       <translation>Parcarea este plină</translation>
@@ -67,6 +71,14 @@
       <source>There are no vehicles in the parking lot.</source>
       <translation>Nu există niciun vehicul în parcare.</translation>
     </message>
+	<message>
+		<source>Tickets</source>
+		<translation>Tichete</translation>
+	</message>
+	<message>
+		<source>Vehicles</source>
+		<translation>Vehicule</translation>
+	</message>
   </context>
 
   <context>

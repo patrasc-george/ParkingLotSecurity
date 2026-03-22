@@ -12,6 +12,7 @@
 #include <QGraphicsPixmapItem>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QTabWidget>
 
 /**
  * @class MainWindow
@@ -152,13 +153,6 @@ private:
 	void setupLayouts();
 
 	/**
-	 * @brief Centers the main window on the screen.
-	 * @details This function calculates the appropriate position on the screen to place the window in the center.
-	 * @return void
-	 */
-	void centerWindow();
-
-	/**
 	 * @brief Updates the parking statistics based on the provided date and time.
 	 * @details This function updates the vehicle entrance or exit statistics, categorizing them by the day of the
 	 *          week and the hour of the day based on the provided timestamp.
@@ -206,26 +200,15 @@ private:
 	 */
 	void processLastVehicle(const QString& QRPath = "");
 
-	/**
-	 * @brief Clears all previous items from the scene.
-	 * @details This function removes all the current items from the scene and deletes them to prepare for new items.
-	 * @return void
-	 */
-	void clearPreviousItems();
+	void clearPreviousItems(QGraphicsScene* targetScene);
 
-	/**
-	 * @brief Creates a new pixmap item and adds it to the scene.
-	 * @details This function creates a new pixmap item from the loaded image and adds it to the scene to be displayed.
-	 * @return void
-	 */
-	void createNewPixmapItem();
+	void createNewPixmapItem(QGraphicsScene* targetScene, QGraphicsPixmapItem*& targetPixmapItem, const QImage& targetImage);
 
-	/**
-	 * @brief Sets the properties of the graphics view for displaying the image.
-	 * @details This function sets the alignment, scene rectangle, and adjusts the view to fit the image with aspect ratio maintained.
-	 * @return void
-	 */
-	void setGraphicsViewProperties();
+	void setGraphicsViewProperties(QGraphicsView* targetGraphicsView, QGraphicsPixmapItem* targetPixmapItem);
+
+	void showTicketImage(QListWidgetItem* item);
+
+	void searchTickets(QString text);
 
 private:
 	QGraphicsView* graphicsView;
@@ -245,6 +228,14 @@ private:
 	QLineEdit* historyLogEdit;
 	QComboBox* chooseLanguage;
 	QImage image;
+	QTabWidget* tabWidget;
+	QGraphicsView* ticketGraphicsView;
+	QGraphicsScene* ticketScene;
+	QGraphicsPixmapItem* ticketPixmapItem;
+	QImage ticketImage;
+	QListWidget* ticketsListWidget;
+	QLineEdit* ticketsHistoryLogEdit;
+	QListWidget* ticketsHistoryLogListWidget;
 	VehicleManager vehicleManager;
 	std::string assetsPath;
 	std::string translationsPath;

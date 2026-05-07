@@ -237,7 +237,7 @@ int VehicleManager::calculateTotalAmount(const std::string& time, const int& fee
 	return hours * fee + fee;
 }
 
-int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::string& displayText, const int& fee, const bool& pressedButton, const std::string& QRPath)
+int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::string& displayText, std::string& ticketPath, const int& fee, const bool& pressedButton, const std::string& QRPath)
 {
 	id = curentVehicle.getId();
 	dateTime = curentVehicle.getDateTime();
@@ -272,14 +272,12 @@ int VehicleManager::processLastVehicle(int& id, std::string& dateTime, std::stri
 
 		curentVehicle.setTimeParked(time);
 		curentVehicle.setTotalAmount(totalAmount);
-
-		qr.generateQR(curentVehicle.getTicket(), name, curentVehicle.getLicensePlate(), dataBasePath, assetsPath, curentVehicle.getDateTime(), time, totalAmount);
+		qr.generateQR(curentVehicle.getTicket(), name, curentVehicle.getLicensePlate(), dataBasePath, assetsPath, ticketPath, curentVehicle.getDateTime(), time, totalAmount);
 	}
 	else
 	{
 		curentVehicle.setTicket(dateTime);
-
-		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), dataBasePath, assetsPath);
+		qr.generateQR(dateTime, name, curentVehicle.getLicensePlate(), dataBasePath, assetsPath, ticketPath);
 	}
 	client->addVehicle(curentVehicle.getLicensePlate(), curentVehicle.getDateTime(), curentVehicle.getTicket(), curentVehicle.getTotalAmount());
 	vehicles.push_back(curentVehicle);

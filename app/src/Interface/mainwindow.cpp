@@ -2,6 +2,7 @@
 #include "statisticswindow.h"
 #include "uploadqrwindow.h"
 #include "unpaidwindow.h"
+#include "ticketprinter.h"
 
 #include <QFileDialog>
 #include <QVBoxLayout>
@@ -373,10 +374,12 @@ void MainWindow::processLastVehicle(const QString& QRPath)
 	int id, result;
 	std::string dateTime;
 	std::string displayText;
+	std::string ticketPath;
 
-	if (!checkResult(vehicleManager.processLastVehicle(id, dateTime, displayText, fee, pressedButton, QRPath.toStdString())))
+	if (!checkResult(vehicleManager.processLastVehicle(id, dateTime, displayText, ticketPath, fee, pressedButton, QRPath.toStdString())))
 		return;
 
+	TicketPrinter::printTicket(QString::fromStdString(ticketPath));
 	updateStatistics(dateTime, pressedButton);
 
 	if (pressedButton)

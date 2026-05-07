@@ -16,7 +16,7 @@ add_library(${PROJECT_NAME} STATIC ${INTERFACE_FILES})
 
 add_dependencies(${PROJECT_NAME} VehicleManager)
 
-find_package(Qt6 REQUIRED COMPONENTS Gui Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Gui Core Widgets PrintSupport)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     "${CMAKE_SOURCE_DIR}/src/VehicleManager"
@@ -25,8 +25,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME}
     VehicleManager
-    Qt6::Widgets 
+    Qt6::Widgets
     Qt6::Core
+    Qt6::PrintSupport
 )
+
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} winspool)
+endif()
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

@@ -132,7 +132,7 @@ public:
 	 *         2 - The vehicle was not detected,
 	 *         0 - The process was successful.
 	 */
-	int processLastVehicle(int& id, std::string& dateTime, std::string& displayText, const int& fee, const bool& pressedButton, const std::string& QRPath = "");
+	int processLastVehicle(int& id, std::string& dateTime, std::string& displayText, std::string& ticketPath, const int& fee, const bool& pressedButton, const std::string& QRPath = "");
 
 	/**
 	 * @brief Searches for vehicles based on the provided text (typically license plate).

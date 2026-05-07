@@ -57,7 +57,7 @@ void write(cv::Mat& image, int x, int& y, const int& margin, const std::string& 
 	cv::putText(image, rightText, cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, fontScale, cv::Scalar(0), thickness);
 }
 
-void QRCode::generateQR(const std::string& id, const std::string& name, const std::string& licensePlate, const std::string& dataBasePath, const std::string& assetsPath, const std::string& dateTime, const std::string& timeParked, const int& totalAmount)
+void QRCode::generateQR(const std::string& id, const std::string& name, const std::string& licensePlate, const std::string& dataBasePath, const std::string& assetsPath, std::string& savePath, const std::string& dateTime, const std::string& timeParked, const int& totalAmount)
 {
 	std::regex pattern(R"((\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2}))");
 	std::smatch match;
@@ -178,7 +178,7 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 	std::replace(text.begin(), text.end(), ':', '-');
 	std::replace(text.begin(), text.end(), ' ', '_');
 
-	std::string savePath = dataBasePath + "tickets/" + text;
+	savePath = dataBasePath + "tickets/" + text;
 	cv::imwrite(savePath, ticket);
 }
 

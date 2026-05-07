@@ -31,11 +31,13 @@ std::string formatString(const std::string& str)
 			result += ' ';
 			firstNum = false;
 		}
+
 		if (isalpha(str[i]) && !firstNum && firstLetter)
 		{
 			result += ' ';
 			firstLetter = false;
 		}
+
 		result += str[i];
 	}
 
@@ -68,14 +70,18 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 	params.correction_level = cv::QRCodeEncoder::CorrectionLevel::CORRECT_LEVEL_L;
 	params.mode = cv::QRCodeEncoder::EncodeMode::MODE_AUTO;
 	cv::Ptr<cv::QRCodeEncoder> encoder = cv::QRCodeEncoder::create(params);
+
 	cv::Mat qr;
 	encoder->encode(text, qr);
 
-	int qrScale = 30;
+	int margin = 10;
+
+	int qrScale = 40;
 	int qrSize = qr.cols * qrScale;
-	int width = qrSize * 2;
+
+	int width = qrSize + margin * 2;
 	int height = qrSize * 4;
-	int margin = width * 0.1;
+
 	int textScale = 20;
 	int lineSpacing = textScale * 3;
 	float fontScale = textScale / 10.0;
@@ -105,7 +111,7 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 	y = y + lineSpacing;
 	cv::line(ticket, cv::Point(margin, y), cv::Point(width - margin, y), cv::Scalar(0), thickness);
 
-	x = (width - qrSize) / 2;
+	x = margin;
 	y = y + lineSpacing * 2;
 
 	for (int j = 0; j < qr.rows; j++)
@@ -124,6 +130,7 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 
 	y = y + qrSize + lineSpacing * 2;
 	x = width - margin;
+
 	std::string formattedLicensePlate = formatString(licensePlate);
 	write(ticket, x, y, margin, "License plate:", formattedLicensePlate, fontScale, thickness);
 
@@ -170,6 +177,7 @@ void QRCode::generateQR(const std::string& id, const std::string& name, const st
 
 	std::replace(text.begin(), text.end(), ':', '-');
 	std::replace(text.begin(), text.end(), ' ', '_');
+
 	std::string savePath = dataBasePath + "tickets/" + text;
 	cv::imwrite(savePath, ticket);
 }

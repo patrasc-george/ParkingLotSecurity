@@ -52,7 +52,7 @@ static bool feedPaperRaw(const QString& printerName, const int& lines)
 
 bool TicketPrinter::printTicket(const QString& imagePath)
 {
-	QString printerName = "POS-80 (copy 1)";
+	QString printerName = "POS-80";
 	QImage image(imagePath);
 	if (image.isNull())
 		return false;

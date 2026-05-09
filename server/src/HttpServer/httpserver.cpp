@@ -394,14 +394,18 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 		std::vector<unsigned char> rawImage(data.content.begin(), data.content.end());
 		id = qr.decodeQR(rawImage, ticketImage);
 
-		std::string day = id.substr(0, 2);
-		std::string month = id.substr(2, 2);
-		std::string year = id.substr(4, 2);
-		std::string hour = id.substr(6, 2);
-		std::string minute = id.substr(8, 2);
-		std::string second = id.substr(10, 2);
-		std::string fullYear = "20" + year;
-		std::string ticketDateTime = day + "-" + month + "-" + fullYear + " " + hour + ":" + minute + ":" + second;
+		std::string ticketDateTime;
+		if (!id.empty())
+		{
+			std::string day = id.substr(0, 2);
+			std::string month = id.substr(2, 2);
+			std::string year = id.substr(4, 2);
+			std::string hour = id.substr(6, 2);
+			std::string minute = id.substr(8, 2);
+			std::string second = id.substr(10, 2);
+			std::string fullYear = "20" + year;
+			ticketDateTime = day + "-" + month + "-" + fullYear + " " + hour + ":" + minute + ":" + second;
+		}
 
 		if (!subscriptionManager.pay(ticketDateTime, licensePlate, dateTime, true))
 		{

@@ -32,25 +32,15 @@ private:
 
 	static void edgeDetection(const cv::Mat& src, cv::Mat& dst);
 
-	static cv::Mat countTransitions(const cv::Mat& src, const bool& isVertical = false);
+	static bool isQuadrilateral(const std::vector<cv::Point>& contour);
 
-	static cv::Mat drawHistogram(const cv::Mat& histogram);
+	static bool detectQRAnchors(const cv::Mat& binary, std::vector<std::vector<cv::Point>>& anchors);
 
-	static cv::Mat densestInterval(const cv::Mat& histogram, const float& percentage = 1.0, const float& gap = 0.0);
+	static cv::Point2f getContourCentroid(const std::vector<cv::Point>& contour);
 
-	static void removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram, std::vector<int>& rowMap, std::vector<int>& columnMap);
+	static void sortAnchors(std::vector<std::vector<cv::Point>>& anchors);
 
-	static cv::Size getKernelSize(const cv::Size& size, const float& percentage = 0);
-
-	static void getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize);
-
-	static cv::Rect getRoi(const cv::Mat& stats, const int& label);
-
-	static bool ratioBBox(const cv::Rect& roi, const float& max);
-
-	static void paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percentage = 0, const cv::Size& size = cv::Size());
-
-	static std::vector<cv::Point> getLargestContour(const std::vector<std::vector<cv::Point>>& contours);
+	static void drawAnchor(const cv::Mat& src, cv::Mat& dst, const std::vector<std::vector<cv::Point>>& contours);
 
 	static void lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction);
 
@@ -66,9 +56,9 @@ private:
 
 	static cv::Point2f intersection(const cv::Vec4i& firstLine, const cv::Vec4i& secondLine);
 
-	static void paddingCoordinates(std::vector<cv::Point2f>& coordinates, const float& percentage = 0, const cv::Size& size = cv::Size());
+	static void paddingCoordinates(std::vector<cv::Point2f>& coordinates, const float& percentage = 0);
 
-	static std::vector<cv::Point2f> rectificationCoordinates(const cv::Mat& src, const float& percentage = 0);
+	static std::vector<cv::Point2f> rectificationCoordinates(const std::vector<std::vector<cv::Point>>& anchors, const float& percentage);
 
 	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& coordinates, const float& percentage = 0);
 
@@ -78,13 +68,9 @@ private:
 
 	static bool getID(const cv::Mat& src, std::string& id, ZXing::Position* position = nullptr);
 
-	std::vector<cv::Point2f> cvtPositionToCoordinates(const ZXing::Position& position);
+	static std::vector<cv::Point2f> cvtPositionToCoordinates(const ZXing::Position& position);
 
-	std::vector<cv::Point2f> scaleCoordinates(const std::vector<cv::Point2f>& coordinates, const cv::Rect& roi);
-
-	std::vector<cv::Point2f> getCoordinatesFromMap(const std::vector<cv::Point2f>& coordinates, const std::vector<int>& rowMap, const std::vector<int>& columnMap);
-
-	void drawBBox(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const std::string& id);
+	static void drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const std::vector<cv::Point2f>& coordinates, const std::string& id);
 
 public:
 	std::string decodeQR(const std::vector<unsigned char>& src, std::vector<unsigned char>& dst);

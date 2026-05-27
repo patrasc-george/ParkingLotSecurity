@@ -76,5 +76,5 @@ public:
 	std::string decodeQR(const std::vector<unsigned char>& src, std::vector<unsigned char>& dst);
 
 private:
-	std::string aiModelPath;
+	cv::dnn::Net aiModel;
 };

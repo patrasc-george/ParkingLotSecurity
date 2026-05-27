@@ -11,9 +11,9 @@ QRCode::QRCode()
 	cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_SILENT);
 
 #ifdef _DEBUG
-	aiModelPath = "../../../qrbitnet.onnx";
+	aiModel = cv::dnn::readNetFromONNX("../../../qrbitnet.onnx");
 #else
-	aiModelPath = "qrbitnet.onnx";
+	aiModel = cv::dnn::readNetFromONNX("qrbitnet.onnx");
 #endif
 }
 
@@ -219,20 +219,8 @@ cv::Point2f QRCode::getContourCentroid(const std::vector<cv::Point>& contour)
 
 void QRCode::sortAnchors(std::vector<std::vector<cv::Point>>& anchors)
 {
-	std::sort(anchors.begin(), anchors.end(),
-		[](const auto& a, const auto& b)
-		{
-			cv::Point2f centroidA = getContourCentroid(a);
-			cv::Point2f centroidB = getContourCentroid(b);
-
-			float sumA = centroidA.x + centroidA.y;
-			float sumB = centroidB.x + centroidB.y;
-
-			return sumA < sumB;
-		}
-	);
-
 	std::vector<cv::Point2f> centroids;
+
 	for (const auto& anchor : anchors)
 		centroids.push_back(getContourCentroid(anchor));
 
@@ -246,8 +234,9 @@ void QRCode::sortAnchors(std::vector<std::vector<cv::Point>>& anchors)
 
 	for (int i = 0; i < 3; i++)
 	{
-		float sum = centroids[i].x + centroids[i].y;
-		float difference = centroids[i].x - centroids[i].y;
+		cv::Point2f centroid = centroids[i];
+		float sum = centroid.x + centroid.y;
+		float difference = centroid.x - centroid.y;
 
 		if (sum < minSum)
 		{
@@ -268,12 +257,12 @@ void QRCode::sortAnchors(std::vector<std::vector<cv::Point>>& anchors)
 		}
 	}
 
-	std::vector<std::vector<cv::Point>> sorted(3);
-	sorted[0] = anchors[topLeft];
-	sorted[1] = anchors[topRight];
-	sorted[2] = anchors[bottomLeft];
-
-	anchors = sorted;
+	anchors =
+	{
+		anchors[topLeft],
+		anchors[topRight],
+		anchors[bottomLeft]
+	};
 }
 
 void QRCode::drawAnchor(const cv::Mat& src, cv::Mat& dst, const std::vector<std::vector<cv::Point>>& contours)
@@ -541,9 +530,9 @@ void QRCode::paddingCoordinates(std::vector<cv::Point2f>& coordinates, const flo
 	for (auto& point : coordinates)
 	{
 		cv::Point2f vector = point - centroid;
-		float lenght = std::sqrt(vector.x * vector.x + vector.y * vector.y);
+		float length = std::sqrt(vector.x * vector.x + vector.y * vector.y);
 
-		cv::Point2f direction = vector * (1.0f / lenght);
+		cv::Point2f direction = vector * (1.0f / length);
 		point += direction * padding;
 	}
 }
@@ -571,21 +560,21 @@ std::vector<cv::Point2f> QRCode::rectificationCoordinates(const std::vector<std:
 		cv::Mat paddedContour;
 		cv::copyMakeBorder(contour, paddedContour, paddingY, paddingY, paddingX, paddingX, cv::BORDER_CONSTANT, cv::Scalar(0));
 
-		float minLineLenght = bbox.height * 0.8;
+		float minLineLength = bbox.height * 0.8;
 		float maxLineGap = bbox.height * 0.05;
 
 		std::vector<cv::Vec4i> lines;
 		std::vector<cv::Vec4i> sortedLines;
 		do {
-			cv::HoughLinesP(paddedContour, lines, 1, CV_PI / 180, 10, minLineLenght, maxLineGap);
-			minLineLenght--;
+			cv::HoughLinesP(paddedContour, lines, 1, CV_PI / 180, 10, minLineLength, maxLineGap);
+			minLineLength--;
 		}
 #ifdef _DEBUG
-		while (!lineSorting(sortedLines, lines, paddedContour.size(), paddedContour) && minLineLenght > 0);
+		while (!lineSorting(sortedLines, lines, paddedContour.size(), paddedContour) && minLineLength > 0);
 #else
-		while (!lineSorting(sortedLines, lines, size) && minLineLenght > 0);
+		while (!lineSorting(sortedLines, lines, size) && minLineLength > 0);
 #endif
-		if (minLineLenght <= 0)
+		if (minLineLength <= 0)
 			return std::vector<cv::Point2f>();
 
 		cv::Point2f point;
@@ -639,6 +628,7 @@ bool QRCode::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Po
 
 	for (const auto& point : coordinates)
 	{
+		minX = std::min(minX, static_cast<int>(point.x));
 		minY = std::min(minY, static_cast<int>(point.y));
 		maxX = std::max(maxX, static_cast<int>(point.x));
 		maxY = std::max(maxY, static_cast<int>(point.y));
@@ -783,8 +773,14 @@ void QRCode::drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const
 	{
 		auto now = std::chrono::system_clock::now();
 		auto toTimeT = std::chrono::system_clock::to_time_t(now);
+		std::tm timeInfo{};
+#ifdef _WIN32
+		localtime_s(&timeInfo, &toTimeT);
+#else
+		localtime_r(&toTimeT, &timeInfo);
+#endif
 		std::stringstream stringStream;
-		stringStream << std::put_time(std::localtime(&toTimeT), "%d-%m-%Y %X");
+		stringStream << std::put_time(&timeInfo, "%d-%m-%Y %X");
 
 		std::string text = stringStream.str() + " / " + id;
 
@@ -819,6 +815,10 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 
 	cv::Mat gray;
 	cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
+
+	//cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+	//cv::Mat enhanced;
+	//clahe->apply(gray, enhanced);
 
 	cv::Mat edges;
 	edgeDetection(gray, edges);
@@ -862,7 +862,6 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 	}
 
 	cv::Mat qrCode;
-	cv::dnn::Net aiModel = cv::dnn::readNetFromONNX(aiModelPath);
 	if (!getMatrixFromImage(transformedConnectedComponent, qrCode, aiModel))
 	{
 		if (!getID(transformedConnectedComponent, id))

@@ -839,7 +839,7 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 	//#endif
 
 	sortAnchors(anchors);
-	coordinates = rectificationCoordinates(anchors, 0.05);
+	coordinates = rectificationCoordinates(anchors, 0.07);
 
 	cv::Mat resizedConnectedComponent;
 	if (!resizeToPoints(gray, resizedConnectedComponent, coordinates, 0.2))

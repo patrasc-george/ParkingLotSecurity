@@ -12,9 +12,11 @@ find_package(ZXing CONFIG REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
     ${OpenCV_INCLUDE_DIRS}
+	"${CMAKE_SOURCE_DIR}/src/Logger"
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC 
     ${OpenCV_LIBS}
-	ZXing::ZXing
+	ZXing::ZXing	
+	Logger
 )

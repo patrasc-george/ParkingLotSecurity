@@ -356,11 +356,16 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	if (request.has_param("key"))
 		requestKey = request.get_param_value("key");
 
+	if (request.has_file("key"))
+		requestKey = request.get_file_value("key").content;
+
 	if (requestKey != key)
 	{
 		LOG_MESSAGE(CRITICAL) << "Invalid API key received." << std::endl;
+
 		responseJson = {
-			{"success", false}
+			{"success", false},
+			{"message", "Invalid API key."}
 		};
 
 		response.set_content(responseJson.dump(), "application/json");
@@ -388,26 +393,26 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 	}
 	else if (request.has_file("qrCodeImage"))
 	{
-		auto data = request.get_file_value("qrCodeImage");
-
-		QRCode qr;
-		std::vector<unsigned char> rawImage(data.content.begin(), data.content.end());
-		id = qr.decodeQR(rawImage, ticketImage);
-
-		std::string ticketDateTime;
-		if (!id.empty())
+		try
 		{
-			std::string day = id.substr(0, 2);
-			std::string month = id.substr(2, 2);
-			std::string year = id.substr(4, 2);
-			std::string hour = id.substr(6, 2);
-			std::string minute = id.substr(8, 2);
-			std::string second = id.substr(10, 2);
-			std::string fullYear = "20" + year;
-			ticketDateTime = day + "-" + month + "-" + fullYear + " " + hour + ":" + minute + ":" + second;
+			auto data = request.get_file_value("qrCodeImage");
+			std::vector<unsigned char> rawImage(data.content.begin(), data.content.end());
+
+			QRCode qr;
+			id = qr.decodeQR(rawImage, ticketImage);
+		}
+		catch (...)
+		{
+			responseJson = {
+				{"success", false},
+				{"message", "Unknown internal error while decoding QR code."}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
+			return;
 		}
 
-		if (!subscriptionManager.pay(ticketDateTime, licensePlate, dateTime, true))
+		if (id.empty())
 		{
 			responseJson = {
 				{"success", false},
@@ -417,6 +422,48 @@ void HttpServer::post(const httplib::Request& request, httplib::Response& respon
 			response.set_content(responseJson.dump(), "application/json");
 			return;
 		}
+
+		if (id.size() < 12)
+		{
+			responseJson = {
+				{"success", false},
+				{"message", "The vehicle was not found. Please upload the QR code again."}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
+			return;
+		}
+
+		std::string day = id.substr(0, 2);
+		std::string month = id.substr(2, 2);
+		std::string year = id.substr(4, 2);
+		std::string hour = id.substr(6, 2);
+		std::string minute = id.substr(8, 2);
+		std::string second = id.substr(10, 2);
+		std::string fullYear = "20" + year;
+		std::string ticketDateTime = day + "-" + month + "-" + fullYear + " " + hour + ":" + minute + ":" + second;
+
+		bool found = subscriptionManager.pay(ticketDateTime, licensePlate, dateTime, true);
+		if (!found)
+		{
+			responseJson = {
+				{"success", false},
+				{"message", "The vehicle was not found. Please upload the QR code again."}
+			};
+
+			response.set_content(responseJson.dump(), "application/json");
+			return;
+		}
+	}
+	else
+	{
+		responseJson = {
+			{"success", false},
+			{"message", "Please enter a license plate number or upload a QR code."}
+		};
+
+		response.set_content(responseJson.dump(), "application/json");
+		return;
 	}
 
 	if (!licensePlate.empty() && !dateTime.empty())
@@ -459,7 +506,6 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 	std::string email;
 	std::string password;
 	std::string phone;
-	std::string captchaToken;
 
 	if (!request.has_param("key") || request.get_param_value("key") != key)
 	{
@@ -481,41 +527,6 @@ void HttpServer::createAccount(const httplib::Request& request, httplib::Respons
 		password = request.get_param_value("password");
 	if (request.has_param("phone"))
 		phone = request.get_param_value("phone");
-	if (request.has_param("captchaToken"))
-		captchaToken = request.get_param_value("captchaToken");
-
-	httplib::SSLClient recaptchaClient("www.google.com");
-	std::string secretKey(std::getenv("RECAPTCHA_KEY"));
-	std::string payload = "secret=" + secretKey + "&response=" + captchaToken;
-
-	auto recaptchaResponse = recaptchaClient.Post("/recaptcha/api/siteverify", payload, "application/x-www-form-urlencoded");
-	if (!recaptchaResponse || recaptchaResponse->status != 200)
-	{
-		std::string statusMessage = (recaptchaResponse != nullptr) ? std::to_string(recaptchaResponse->status) : "null response";
-		LOG_MESSAGE(CRITICAL) << "Failed to verify captcha with status: " << statusMessage << std::endl;
-		responseJson = {
-			{"success", false}
-		};
-
-		response.set_content(responseJson.dump(), "application/json");
-		return;
-	}
-
-	auto recaptchaBody = recaptchaResponse->body;
-	Poco::JSON::Parser parser;
-	auto recaptchaJson = parser.parse(recaptchaBody).extract<Poco::JSON::Object::Ptr>();
-	bool captchaSuccess = recaptchaJson->getValue<bool>("success");
-
-	if (!captchaSuccess)
-	{
-		LOG_MESSAGE(CRITICAL) << "Captcha verification failed." << std::endl;
-		responseJson = {
-			{"success", false}
-		};
-
-		response.set_content(responseJson.dump(), "application/json");
-		return;
-	}
 
 	if (subscriptionManager.getAccountByEmail(email) != nullptr)
 	{

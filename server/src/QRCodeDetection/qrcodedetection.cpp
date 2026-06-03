@@ -572,7 +572,7 @@ std::vector<cv::Point2f> QRCode::rectificationCoordinates(const std::vector<std:
 #ifdef _DEBUG
 		while (!lineSorting(sortedLines, lines, paddedContour.size(), paddedContour) && minLineLength > 0);
 #else
-		while (!lineSorting(sortedLines, lines, size) && minLineLength > 0);
+		while (!lineSorting(sortedLines, lines, paddedContour.size()) && minLineLength > 0);
 #endif
 		if (minLineLength <= 0)
 			return std::vector<cv::Point2f>();
@@ -741,9 +741,24 @@ std::vector<cv::Point2f> QRCode::cvtPositionToCoordinates(const ZXing::Position&
 	return coordinates;
 }
 
-void QRCode::drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const std::vector<cv::Point2f>& coordinates, const std::string& id)
+void QRCode::drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const std::vector<std::vector<cv::Point>>& contours, const std::vector<cv::Point2f>& coordinates, const std::string& id)
 {
 	cv::Mat drawnCoordinates = src.clone();
+
+	if (!contours.empty())
+	{
+		std::vector<cv::Scalar> colors = {
+			cv::Scalar(255, 0, 0),
+			cv::Scalar(0, 0, 255),
+			cv::Scalar(0, 255, 255)
+		};
+
+		for (int i = 0; i < contours.size(); i++)
+		{
+			cv::Scalar color = colors[i % colors.size()];
+			cv::drawContours(drawnCoordinates, contours, i, color, 2);
+		}
+	}
 
 	if (!coordinates.empty())
 	{
@@ -816,10 +831,6 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 	cv::Mat gray;
 	cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
 
-	//cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
-	//cv::Mat enhanced;
-	//clahe->apply(gray, enhanced);
-
 	cv::Mat edges;
 	edgeDetection(gray, edges);
 
@@ -832,11 +843,6 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 		drawBBox(resized, dst, coordinates, id);
 		return id;
 	}
-
-	//#ifdef _DEBUG
-	//	cv::Mat anchorsImage;
-	//	drawAnchor(edges, anchorsImage, anchors);
-	//#endif
 
 	sortAnchors(anchors);
 	coordinates = rectificationCoordinates(anchors, 0.07);
@@ -873,28 +879,6 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 		drawBBox(resized, dst, coordinates, id);
 		return id;
 	}
-
-	//#ifdef _DEBUG
-	//	cv::Mat qrCodeUpscaled;
-	//	cv::resize(qrCode, qrCodeUpscaled, cv::Size(210, 210), 0, 0, cv::INTER_NEAREST);
-	//
-	//	std::srand((unsigned int)std::time(nullptr));
-	//
-	//	auto saveDebugImage = [](const std::string& prefix, const cv::Mat& img)
-	//		{
-	//			std::string filename =
-	//				"images/" +
-	//				prefix +
-	//				"_" +
-	//				std::to_string(std::rand()) +
-	//				".png";
-	//
-	//			cv::imwrite(filename, img);
-	//		};
-	//
-	//	saveDebugImage("anchors", anchorsImage);
-	//	saveDebugImage("transformed", transformedConnectedComponent);
-	//#endif
 
 	if (!getID(qrCode, id))
 		if (!getID(transformedConnectedComponent, id))

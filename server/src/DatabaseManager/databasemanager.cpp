@@ -63,6 +63,16 @@ bool DatabaseManager::initializeDatabase()
 		return false;
 	}
 
+	PGresult* styleResult = PQexec(conn, "SET datestyle TO 'ISO, DMY';");
+	if (PQresultStatus(styleResult) != PGRES_COMMAND_OK)
+	{
+		LOG_MESSAGE(CRITICAL) << "Failed to set database datestyle." << std::endl;
+		PQclear(styleResult);
+		PQfinish(conn);
+		return false;
+	}
+	PQclear(styleResult);
+
 	const char* sqlCreateTables = R"(
 		CREATE TABLE IF NOT EXISTS vehicles (
 			id SERIAL PRIMARY KEY,

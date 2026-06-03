@@ -70,7 +70,7 @@ private:
 
 	static std::vector<cv::Point2f> cvtPositionToCoordinates(const ZXing::Position& position);
 
-	static void drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const std::vector<cv::Point2f>& coordinates, const std::string& id);
+	static void drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const std::vector<std::vector<cv::Point>>& contours, const std::vector<cv::Point2f>& coordinates, const std::string& id);
 
 public:
 	std::string decodeQR(const std::vector<unsigned char>& src, std::vector<unsigned char>& dst);

@@ -5,10 +5,9 @@ WORKDIR /app
 COPY package*.json ./
 COPY . .
 
-COPY ./generate-environments.sh ./
-RUN chmod +x ./generate-environments.sh
+RUN sed -i 's/\r$//' /app/generate-environments.sh && chmod +x /app/generate-environments.sh
 
-RUN ./generate-environments.sh
+RUN /bin/sh /app/generate-environments.sh
 
 RUN npm install --legacy-peer-deps
 RUN npm run build --configuration=production
@@ -16,13 +15,9 @@ RUN npm run build --configuration=production
 FROM nginx:stable-alpine
 
 COPY --from=build-angular /app/dist/website/browser /usr/share/nginx/html
-
 COPY ./replace-env-vars.sh /usr/share/nginx/html/
 
-RUN chmod +x /usr/share/nginx/html/replace-env-vars.sh
-
-ENV API_URL=${API_URL}
-ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+RUN sed -i 's/\r$//' /usr/share/nginx/html/replace-env-vars.sh && chmod +x /usr/share/nginx/html/replace-env-vars.sh
 
 EXPOSE 80
 

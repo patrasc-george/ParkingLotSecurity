@@ -20,6 +20,8 @@ set(DELIVERY_DIR "${CMAKE_SOURCE_DIR}/../deliverypack")
 install(TARGETS ${PROJECT_NAME} DESTINATION "${DELIVERY_DIR}")
 install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> DESTINATION "${DELIVERY_DIR}")
 
+install(FILES "${CMAKE_SOURCE_DIR}/qrbitnet.onnx" DESTINATION "${DELIVERY_DIR}")
+
 set(Qt6_DLLS "${Qt6_DIR}/../../../plugins")
 install(DIRECTORY ${Qt6_DLLS} DESTINATION "${DELIVERY_DIR}" USE_SOURCE_PERMISSIONS)
 
@@ -38,9 +40,11 @@ install(FILES ${ASSETS} DESTINATION "${DELIVERY_DIR}/assets")
 
 file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/tickets")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/websiteTickets")
 
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/tickets")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/websiteTickets")
 
 file(GLOB TRANSLATIONS "${CMAKE_SOURCE_DIR}/translations/*.qm")
 install(FILES ${TRANSLATIONS} DESTINATION "${DELIVERY_DIR}/translations")

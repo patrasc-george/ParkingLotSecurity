@@ -1,7 +1,6 @@
 ﻿#include "qrcodedetection.h"
 
 #include <opencv2/core/utils/logger.hpp>
-#include <opencv2/objdetect.hpp>
 #include <ZXing/ReadBarcode.h>
 #include <ZXing/BarcodeFormat.h>
 #include <ZXing/DecodeHints.h>
@@ -13,9 +12,9 @@ QRCode::QRCode()
 	cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_SILENT);
 
 #ifdef _DEBUG
-	aiModelPath = "../../../qrbitnet.onnx";
+	aiModel = cv::dnn::readNetFromONNX("../../../qrbitnet.onnx");
 #else
-	aiModelPath = "qrbitnet.onnx";
+	aiModel = cv::dnn::readNetFromONNX("qrbitnet.onnx");
 #endif
 }
 
@@ -289,261 +288,162 @@ void QRCode::edgeDetection(const cv::Mat& src, cv::Mat& dst)
 	nonMaximumSuppression(sobel, dst, direction);
 }
 
-cv::Mat QRCode::countTransitions(const cv::Mat& src, const bool& isVertical)
+bool QRCode::isQuadrilateral(const std::vector<cv::Point>& contour)
 {
-	cv::Mat counter = isVertical ? cv::Mat::zeros(1, src.cols, CV_16UC1) : cv::Mat::zeros(1, src.rows, CV_16UC1);
+	if (cv::contourArea(contour) < 10.0)
+		return false;
 
-	if (isVertical)
-	{
-		for (int x = 0; x < src.cols; x++)
-			for (int y = 0; y < src.rows - 1; y++)
-				if (src.ptr<uchar>(y, x)[0] != src.ptr<uchar>(y + 1, x)[0])
-					counter.ptr<ushort>(0, x)[0]++;
-	}
-	else
-	{
-		for (int y = 0; y < src.rows; y++)
-			for (int x = 0; x < src.cols - 1; x++)
-				if (src.ptr<uchar>(y, x)[0] != src.ptr<uchar>(y, x + 1)[0])
-					counter.ptr<ushort>(0, y)[0]++;
-	}
+	std::vector<cv::Point> approx;
+	double perimeter = cv::arcLength(contour, true);
+	cv::approxPolyDP(contour, approx, 0.02 * perimeter, true);
 
-	return counter;
+	return approx.size() == 4;
 }
 
-cv::Mat QRCode::drawHistogram(const cv::Mat& histogram)
+bool QRCode::detectQRAnchors(const cv::Mat& binary, std::vector<std::vector<cv::Point>>& anchors)
 {
-	double minValue, maxValue;
-	cv::minMaxLoc(histogram, &minValue, &maxValue);
-	int height = static_cast<int>(maxValue);
+	cv::Mat dilated;
+	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+	cv::morphologyEx(binary, dilated, cv::MORPH_CLOSE, kernel);
 
-	cv::Mat image = cv::Mat::ones(height, histogram.cols, CV_8UC1) * 255;
-	for (int x = 0; x < histogram.cols; x++)
+	std::vector<std::vector<cv::Point>> contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(dilated, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+	std::vector<std::pair<float, int>> scores;
+	for (int i = 0; i < contours.size(); i++)
 	{
-		int value = height - cvRound(histogram.ptr<ushort>(0, x)[0]);
-		cv::line(image, cv::Point(x, height), cv::Point(x, value), cv::Scalar(0), 1);
-	}
+		if (hierarchy[i][3] != -1)
+			continue;
 
-	return image;
-}
+		if (!isQuadrilateral(contours[i]))
+			continue;
 
-cv::Mat QRCode::densestInterval(const cv::Mat& histogram, const float& percentage, const float& gap)
-{
-	std::vector<std::pair<int, int>> histogramPairs;
-	for (int i = 0; i < histogram.cols; i++)
-	{
-		int value = histogram.ptr<ushort>(0, i)[0];
-		histogramPairs.push_back(std::make_pair(i, value));
-	}
-
-	std::sort(histogramPairs.begin(), histogramPairs.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-		return a.second > b.second;
-		});
-
-	cv::Mat normalizedHistogram = histogram.clone();
-	int threshold = cv::sum(normalizedHistogram)[0] * percentage;
-	int cumulativeSum = 0;
-	int lastIndex = 0;
-	for (int i = 0; i < histogramPairs.size(); i++)
-	{
-		cumulativeSum += histogramPairs[i].second;
-		if (cumulativeSum >= threshold)
+		float sum = 0;
+		int comparisons = 0;
+		int current = i;
+		int depth = 0;
+		while (current != -1)
 		{
-			lastIndex = i;
-			break;
-		}
-	}
-
-	cv::Mat result = normalizedHistogram.clone();
-	for (int i = lastIndex + 1; i < histogramPairs.size(); i++)
-		result.ptr<ushort>(0, histogramPairs[i].first)[0] = 0;
-
-	int maxGap = result.cols * gap;
-	int currentGap = 0;
-	for (int i = 0; i < result.cols; i++)
-	{
-		if (result.ptr<ushort>(0, i)[0])
-		{
-			if (currentGap < maxGap)
+			int child = hierarchy[current][2];
+			int bestChild = -1;
+			float bestArea = -1;
+			while (child != -1)
 			{
-				int index = i - currentGap;
-				for (int j = index; j < index + currentGap; j++)
-					if (normalizedHistogram.ptr<ushort>(0, j)[0])
-						result.ptr<ushort>(0, j)[0] = normalizedHistogram.ptr<ushort>(0, j)[0];
-					else
-						result.ptr<ushort>(0, j)[0] = 1;
+				float areaChild = cv::contourArea(contours[child]);
+				if (areaChild > bestArea)
+				{
+					bestArea = areaChild;
+					bestChild = child;
+				}
+				child = hierarchy[child][0];
 			}
 
-			currentGap = 0;
+			if (bestChild != -1)
+			{
+				float similarity = cv::matchShapes(contours[current], contours[bestChild], cv::CONTOURS_MATCH_I2, 0);
+				sum += similarity;
+				comparisons++;
+			}
+
+			current = bestChild;
+			depth++;
 		}
-		else
-			currentGap++;
+
+		if (depth < 3)
+			continue;
+
+		float mean = comparisons > 0 ? sum / comparisons : DBL_MAX;
+		scores.push_back({ mean, i });
 	}
 
-	return result;
-}
-
-void QRCode::removeRowsAndColumns(const cv::Mat& src, cv::Mat& dst, const cv::Mat& verticalHistogram, const cv::Mat& horizontalHistogram)
-{
-	int width = cv::countNonZero(verticalHistogram);
-	cv::Mat firstImage = cv::Mat::zeros(src.rows, width, src.type());
-	int colIndex = 0;
-	for (int i = 0; i < verticalHistogram.cols; i++)
-	{
-		int value = verticalHistogram.ptr<ushort>(0, i)[0];
-
-		if (value)
-		{
-			src.col(i).copyTo(firstImage.col(colIndex));
-			colIndex++;
-		}
-	}
-
-	int height = cv::countNonZero(horizontalHistogram);
-	dst = cv::Mat::zeros(height, firstImage.cols, firstImage.type());
-	int rowIndex = 0;
-	for (int i = 0; i < horizontalHistogram.cols; i++)
-	{
-		int value = horizontalHistogram.ptr<ushort>(0, i)[0];
-
-		if (value)
-		{
-			firstImage.row(i).copyTo(dst.row(rowIndex));
-			rowIndex++;
-		}
-	}
-}
-
-cv::Size QRCode::getKernelSize(const cv::Size& size, const float& percentage)
-{
-	cv::Size kernel = cv::Size(size.height * percentage, size.width * percentage);
-
-	if (kernel.height < 3)
-		kernel.height = 3;
-	if (kernel.width < 3)
-		kernel.width = 3;
-
-	if (kernel.height % 2 == 0)
-		kernel.height--;
-	if (kernel.width % 2 == 0)
-		kernel.width--;
-
-	return kernel;
-}
-
-bool compareConnectedComponents(const std::pair<int, int>& a, const std::pair<int, int>& b)
-{
-	return a.second > b.second;
-}
-
-void QRCode::getConnectedComponents(const cv::Mat& src, cv::Mat& stats, std::vector<std::pair<int, int>>& areas, const int& newSize)
-{
-	if (src.empty() || src.type() != CV_8UC1)
-		return;
-
-	cv::Mat labels, cendtroids;
-	int size = cv::connectedComponentsWithStats(src, labels, stats, cendtroids);
-
-	for (int i = 1; i < size; i++)
-		areas.push_back(std::make_pair(i, stats.ptr<int>(i, cv::CC_STAT_AREA)[0]));
-
-	std::sort(areas.begin(), areas.end(), compareConnectedComponents);
-
-	if (newSize && areas.size() > newSize)
-		areas.resize(newSize);
-}
-
-cv::Rect QRCode::getRoi(const cv::Mat& stats, const int& label)
-{
-	if (stats.empty() || stats.type() != CV_32SC1)
-		return cv::Rect();
-
-	if (label < 0 || label > stats.size().height)
-		return cv::Rect();
-
-	cv::Rect roi;
-	roi.x = stats.ptr<int>(label, cv::CC_STAT_LEFT)[0];
-	roi.y = stats.ptr<int>(label, cv::CC_STAT_TOP)[0];
-	roi.width = stats.ptr<int>(label, cv::CC_STAT_WIDTH)[0];
-	roi.height = stats.ptr<int>(label, cv::CC_STAT_HEIGHT)[0];
-
-	return roi;
-}
-
-bool QRCode::ratioBBox(const cv::Rect& roi, const float& max)
-{
-	if (roi.size() == cv::Size(0, 0))
+	if (scores.size() < 3)
 		return false;
 
-	if (max < 1)
-		return false;
+	std::sort(scores.begin(), scores.end());
 
-	float maxSize = std::max(roi.height, roi.width);
-	float minSize = std::min(roi.height, roi.width);
-	float ratio = maxSize / minSize;
-
-	return ratio < max;
-}
-
-void QRCode::paddingRect(const cv::Rect& src, cv::Rect& dst, const float& percentage, const cv::Size& size)
-{
-	if (src.width <= 0 || src.height <= 0)
-		return;
-
-	if (percentage < 0 || percentage > 1)
-		return;
-
-	if (size.width < 0 || size.height < 0)
-		return;
-
-	if (size != cv::Size() && (src.x + src.width > size.width || src.y + src.height > size.height))
-		return;
-
-	int paddingX = src.width * percentage;
-	if (paddingX < 3)
-		paddingX = 3;
-
-	int paddingY = src.height * percentage;
-	if (paddingY < 3)
-		paddingY = 3;
-
-	dst.x = src.x - paddingX;
-	dst.y = src.y - paddingY;
-	dst.width = src.width + paddingX * 2;
-	dst.height = src.height + paddingY * 2;
-
-	if (size.width && size.height)
+	for (int i = 0; i < 3; i++)
 	{
-		if (dst.x < 0)
-			dst.x = 0;
-		if (dst.y < 0)
-			dst.y = 0;
-		if (dst.x + dst.width > size.width)
-			dst.width = size.width - dst.x;
-		if (dst.y + dst.height > size.height)
-			dst.height = size.height - dst.y;
+		int index = scores[i].second;
+		anchors.push_back(contours[index]);
 	}
+
+	return true;
 }
 
-std::vector<cv::Point> QRCode::getLargestContour(const std::vector<std::vector<cv::Point>>& contours)
+cv::Point2f QRCode::getContourCentroid(const std::vector<cv::Point>& contour)
 {
-	std::vector<cv::Point> largestContour;
+	cv::Moments moments = cv::moments(contour);
 
-	if (contours.empty())
-		return std::vector<cv::Point>();
+	if (std::abs(moments.m00) < std::numeric_limits<double>::epsilon())
+		return cv::Point2f();
 
-	double maxArea = 0;
-	for (const auto& contour : contours)
+	return cv::Point2f(static_cast<float>(moments.m10 / moments.m00), static_cast<float>(moments.m01 / moments.m00));
+}
+
+void QRCode::sortAnchors(std::vector<std::vector<cv::Point>>& anchors)
+{
+	std::vector<cv::Point2f> centroids;
+
+	for (const auto& anchor : anchors)
+		centroids.push_back(getContourCentroid(anchor));
+
+	int topLeft = 0;
+	int topRight = 0;
+	int bottomLeft = 0;
+
+	float minSum = FLT_MAX;
+	float maxDifference = -FLT_MAX;
+	float minDifference = FLT_MAX;
+
+	for (int i = 0; i < 3; i++)
 	{
-		double area = cv::contourArea(contour);
-		if (area > maxArea)
+		cv::Point2f centroid = centroids[i];
+		float sum = centroid.x + centroid.y;
+		float difference = centroid.x - centroid.y;
+
+		if (sum < minSum)
 		{
-			maxArea = area;
-			largestContour = contour;
+			minSum = sum;
+			topLeft = i;
+		}
+
+		if (difference > maxDifference)
+		{
+			maxDifference = difference;
+			topRight = i;
+		}
+
+		if (difference < minDifference)
+		{
+			minDifference = difference;
+			bottomLeft = i;
 		}
 	}
 
-	return largestContour;
+	anchors =
+	{
+		anchors[topLeft],
+		anchors[topRight],
+		anchors[bottomLeft]
+	};
+}
+
+void QRCode::drawAnchor(const cv::Mat& src, cv::Mat& dst, const std::vector<std::vector<cv::Point>>& contours)
+{
+	cv::cvtColor(src, dst, cv::COLOR_GRAY2BGR);
+
+	std::vector<cv::Scalar> colors = {
+		cv::Scalar(0, 255, 0),
+		cv::Scalar(255, 0, 0),
+		cv::Scalar(0, 0, 255)
+	};
+
+	for (int i = 0; i < contours.size(); i++)
+	{
+		cv::Scalar color = colors[i % colors.size()];
+		cv::drawContours(dst, contours, i, color, 2);
+	}
 }
 
 void QRCode::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
@@ -762,28 +662,29 @@ cv::Point2f QRCode::intersection(const cv::Vec4i& firstLine, const cv::Vec4i& se
 	if ((secondLine[0] == secondLine[2]) && (secondLine[1] == secondLine[3]))
 		return cv::Point2f();
 
-	int A1 = firstLine[3] - firstLine[1];
-	int B1 = firstLine[0] - firstLine[2];
-	int C1 = A1 * firstLine[0] + B1 * firstLine[1];
+	int a1 = firstLine[3] - firstLine[1];
+	int b1 = firstLine[0] - firstLine[2];
+	int c1 = a1 * firstLine[0] + b1 * firstLine[1];
 
-	int A2 = secondLine[3] - secondLine[1];
-	int B2 = secondLine[0] - secondLine[2];
-	int C2 = A2 * secondLine[0] + B2 * secondLine[1];
+	int a2 = secondLine[3] - secondLine[1];
+	int b2 = secondLine[0] - secondLine[2];
+	int c2 = a2 * secondLine[0] + b2 * secondLine[1];
 
-	int determinant = A1 * B2 - A2 * B1;
+	int determinant = a1 * b2 - a2 * b1;
 
 	if (!determinant)
 		return cv::Point2f();
 
-	float x = (B2 * C1 - B1 * C2) / determinant;
-	float y = (A1 * C2 - A2 * C1) / determinant;
+	float x = (b2 * c1 - b1 * c2) / determinant;
+	float y = (a1 * c2 - a2 * c1) / determinant;
 
 	return cv::Point2f(x, y);
 }
 
-void QRCode::paddingCoordinates(std::vector<cv::Point2f>& coordinates, const float& percentage, const cv::Size& size)
+void QRCode::paddingCoordinates(std::vector<cv::Point2f>& coordinates, const float& percentage)
 {
-	float padding = percentage * std::min(size.height, size.width);
+	cv::Rect2f bbox = cv::boundingRect(coordinates);
+	float padding = percentage * std::min(bbox.height, bbox.width);
 
 	cv::Point2f centroid(0, 0);
 	for (const auto& point : coordinates)
@@ -793,63 +694,51 @@ void QRCode::paddingCoordinates(std::vector<cv::Point2f>& coordinates, const flo
 	for (auto& point : coordinates)
 	{
 		cv::Point2f vector = point - centroid;
-		float lenght = std::sqrt(vector.x * vector.x + vector.y * vector.y);
+		float length = std::sqrt(vector.x * vector.x + vector.y * vector.y);
 
-		cv::Point2f direction = vector * (1.0f / lenght);
+		cv::Point2f direction = vector * (1.0f / length);
 		point += direction * padding;
 	}
 }
 
-std::vector<cv::Point2f> QRCode::rectificationCoordinates(const cv::Mat& src, const float& percentage)
+std::vector<cv::Point2f> QRCode::rectificationCoordinates(const std::vector<std::vector<cv::Point>>& anchors, const float& percentage)
 {
 	std::vector<cv::Point2f> coordinates;
-
-	cv::Mat binary;
-	cv::threshold(src, binary, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-	binary = 255 - binary;
-
-	std::vector<cv::Rect> subImages;
-	subImages.push_back(cv::Rect(0, 0, binary.cols / 2, binary.rows / 2));
-	subImages.push_back(cv::Rect(binary.cols / 2, 0, binary.cols / 2, binary.rows / 2));
-	subImages.push_back(cv::Rect(0, binary.rows / 2, binary.cols / 2, binary.rows / 2));
-
-	std::vector<cv::Point2f> corners;
 	cv::Vec4i firstLine, secondLine;
-	for (int i = 0; i < subImages.size(); i++)
+	for (int i = 0; i < 3; i++)
 	{
-		cv::Mat subImage = binary(subImages[i]);
+		std::vector<cv::Point> anchor = anchors[i];
+		cv::Rect bbox = cv::boundingRect(anchor);
 
-		std::vector<std::vector<cv::Point>> contours;
-		cv::findContours(subImage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+		std::vector<cv::Point> localContour;
+		localContour.reserve(anchor.size());
 
-		if (contours.size() < 2)
-			return std::vector<cv::Point2f>();
+		for (const auto& p : anchor)
+			localContour.emplace_back(p.x - bbox.x, p.y - bbox.y);
 
-		std::vector<cv::Point> largestContour = getLargestContour(contours);
-		cv::Rect bbox = cv::boundingRect(largestContour);
+		cv::Mat contour = cv::Mat::zeros(bbox.size(), CV_8UC1);
+		cv::drawContours(contour, std::vector<std::vector<cv::Point>>{ localContour }, 0, cv::Scalar(255), 1);
 
-		cv::Mat contour = cv::Mat::zeros(subImage.size(), subImage.type());
-		cv::drawContours(contour, std::vector<std::vector<cv::Point>>{largestContour}, 0, cv::Scalar(255), 1);
-		contour = contour(bbox);
-
+		int paddingY = static_cast<int>(bbox.height * 0.4);
+		int paddingX = static_cast<int>(bbox.width * 0.4);
 		cv::Mat paddedContour;
-		cv::copyMakeBorder(contour, paddedContour, bbox.height * 0.4, bbox.height * 0.4, bbox.width * 0.4, bbox.width * 0.4, cv::BORDER_CONSTANT, cv::Scalar(0));
+		cv::copyMakeBorder(contour, paddedContour, paddingY, paddingY, paddingX, paddingX, cv::BORDER_CONSTANT, cv::Scalar(0));
 
-		float minLineLenght = bbox.height * 0.8;
+		float minLineLength = bbox.height * 0.8;
 		float maxLineGap = bbox.height * 0.05;
 
 		std::vector<cv::Vec4i> lines;
 		std::vector<cv::Vec4i> sortedLines;
 		do {
-			cv::HoughLinesP(paddedContour, lines, 1, CV_PI / 180, 10, minLineLenght, maxLineGap);
-			minLineLenght--;
+			cv::HoughLinesP(paddedContour, lines, 1, CV_PI / 180, 10, minLineLength, maxLineGap);
+			minLineLength--;
 		}
 #ifdef _DEBUG
-		while (!lineSorting(sortedLines, lines, paddedContour.size(), paddedContour) && minLineLenght > 0);
+		while (!lineSorting(sortedLines, lines, paddedContour.size(), paddedContour) && minLineLength > 0);
 #else
-		while (!lineSorting(sortedLines, lines, src.size()) && minLineLenght > 0);
+		while (!lineSorting(sortedLines, lines, paddedContour.size()) && minLineLength > 0);
 #endif
-		if (minLineLenght <= 0)
+		if (minLineLength <= 0)
 			return std::vector<cv::Point2f>();
 
 		cv::Point2f point;
@@ -860,45 +749,31 @@ std::vector<cv::Point2f> QRCode::rectificationCoordinates(const cv::Mat& src, co
 		else if (i == 1)
 		{
 			point = intersection(sortedLines[1], sortedLines[2]);
-			point.x += subImages[0].width;
 
 			firstLine = sortedLines[2];
-			firstLine[0] = firstLine[0] - bbox.width * 0.4 + bbox.x + subImages[0].width;
-			firstLine[1] = firstLine[1] - bbox.height * 0.4 + bbox.y;
-			firstLine[2] = firstLine[2] - bbox.width * 0.4 + bbox.x + subImages[0].width;
-			firstLine[3] = firstLine[3] - bbox.height * 0.4 + bbox.y;
+			firstLine[0] = firstLine[0] - paddingX + bbox.x;
+			firstLine[1] = firstLine[1] - paddingY + bbox.y;
+			firstLine[2] = firstLine[2] - paddingX + bbox.x;
+			firstLine[3] = firstLine[3] - paddingY + bbox.y;
 		}
 		else if (i == 2)
 		{
 			point = intersection(sortedLines[0], sortedLines[3]);
-			point.y += subImages[0].height;
 
 			secondLine = sortedLines[3];
-			secondLine[0] = secondLine[0] - bbox.width * 0.4 + bbox.x;
-			secondLine[1] = secondLine[1] - bbox.height * 0.4 + bbox.y + subImages[0].height;
-			secondLine[2] = secondLine[2] - bbox.width * 0.4 + bbox.x;
-			secondLine[3] = secondLine[3] - bbox.height * 0.4 + bbox.y + subImages[0].height;
+			secondLine[0] = secondLine[0] - paddingX + bbox.x;
+			secondLine[1] = secondLine[1] - paddingY + bbox.y;
+			secondLine[2] = secondLine[2] - paddingX + bbox.x;
+			secondLine[3] = secondLine[3] - paddingY + bbox.y;
 		}
 
-		point.x = point.x - bbox.width * 0.4 + bbox.x;
-		point.y = point.y - bbox.height * 0.4 + bbox.y;
+		point.x = point.x - paddingX + bbox.x;
+		point.y = point.y - paddingY + bbox.y;
 		coordinates.push_back(point);
 	}
 	coordinates.push_back(intersection(firstLine, secondLine));
 
-	paddingCoordinates(coordinates, percentage, src.size());
-
-#ifdef _DEBUG
-	cv::Mat debug;
-	cv::cvtColor(binary, debug, cv::COLOR_GRAY2BGR);
-
-	for (const auto& point : coordinates)
-		cv::circle(debug, point, 2, cv::Scalar(0, 0, 255), -1);
-
-	cv::line(debug, cv::Point(firstLine[0], firstLine[1]), cv::Point(firstLine[2], firstLine[3]), cv::Scalar(0, 255, 0), 2);
-	cv::line(debug, cv::Point(secondLine[0], secondLine[1]), cv::Point(secondLine[2], secondLine[3]), cv::Scalar(0, 255, 0), 2);
-#endif
-
+	paddingCoordinates(coordinates, percentage);
 	return coordinates;
 }
 
@@ -917,6 +792,7 @@ bool QRCode::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Po
 
 	for (const auto& point : coordinates)
 	{
+		minX = std::min(minX, static_cast<int>(point.x));
 		minY = std::min(minY, static_cast<int>(point.y));
 		maxX = std::max(maxX, static_cast<int>(point.x));
 		maxY = std::max(maxY, static_cast<int>(point.y));
@@ -964,9 +840,6 @@ bool QRCode::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const s
 	if (height < 0 || width < 0)
 		return false;
 
-	if (height < src.rows * percentage)
-		return false;
-
 	std::vector<cv::Point2f> finalCoordinates;
 	finalCoordinates.push_back(cv::Point2f(0, 0));
 	finalCoordinates.push_back(cv::Point2f(width - 1, 0));
@@ -1000,7 +873,7 @@ bool QRCode::getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net a
 	return true;
 }
 
-bool getDateTime(const cv::Mat& src, std::string& dateTime)
+bool QRCode::getID(const cv::Mat& src, std::string& id, ZXing::Position* position)
 {
 	ZXing::ImageView imageView(src.data, src.cols, src.rows, ZXing::ImageFormat::Lum);
 	ZXing::DecodeHints hints;
@@ -1010,27 +883,33 @@ bool getDateTime(const cv::Mat& src, std::string& dateTime)
 	if (!result.isValid())
 		return false;
 
-	std::string raw = result.text();
-	if (raw.length() != 12)
-		return false;
+	if (position)
+	{
+		*position = result.position();
+		if (position->empty())
+			return false;
+	}
 
-	std::string day = raw.substr(0, 2);
-	std::string month = raw.substr(2, 2);
-	std::string year = raw.substr(4, 2);
-	std::string hour = raw.substr(6, 2);
-	std::string minute = raw.substr(8, 2);
-	std::string second = raw.substr(10, 2);
-	std::string fullYear = "20" + year;
-
-	dateTime = day + "-" + month + "-" + fullYear + " " +
-		hour + ":" + minute + ":" + second;
+	id = result.text();
 
 	return true;
 }
 
+std::vector<cv::Point2f> QRCode::cvtPositionToCoordinates(const ZXing::Position& position)
+{
+	std::vector<cv::Point2f> coordinates;
+
+	for (const auto& coordinate : position)
+		coordinates.emplace_back(static_cast<float>(coordinate.x), static_cast<float>(coordinate.y));
+
+	return coordinates;
+}
+
 std::string QRCode::decodeQR(const std::string& path)
 {
-	std::string dateTime = "";
+	std::string id;
+	std::vector<cv::Point2f> coordinates;
+	ZXing::Position position;
 	cv::Mat image = cv::imread(path, cv::IMREAD_COLOR);
 
 	cv::Mat resized;
@@ -1042,89 +921,51 @@ std::string QRCode::decodeQR(const std::string& path)
 	cv::Mat edges;
 	edgeDetection(gray, edges);
 
-	cv::Mat verticalHistogram = countTransitions(edges, true);
-	cv::Mat horizontalHistogram = countTransitions(edges, false);
-
-	cv::Mat densestVerticalInterval = densestInterval(verticalHistogram, 0.9, 0.1);
-	cv::Mat densestHorizontalInterval = densestInterval(horizontalHistogram, 0.9, 0.1);
-
-#ifdef _DEBUG
-	cv::Mat verticalHistogramImage = drawHistogram(verticalHistogram);
-	cv::Mat horizontalHistogramImage = drawHistogram(horizontalHistogram);
-
-	cv::Mat densestVerticalIntervalImage = drawHistogram(densestVerticalInterval);
-	cv::Mat densestHorizontalIntervalImage = drawHistogram(densestHorizontalInterval);
-#endif
-
-	cv::Mat cropped;
-	removeRowsAndColumns(gray, cropped, densestVerticalInterval, densestHorizontalInterval);
-
-	cv::Mat binary;
-	cv::threshold(cropped, binary, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-	binary = 255 - binary;
-
-	cv::Mat closed;
-	cv::Size kernelSize = getKernelSize(binary.size(), 0.05);
-	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(kernelSize.width, 3));
-	cv::morphologyEx(binary, closed, cv::MORPH_CLOSE, kernel);
-
-	cv::Mat stats;
-	std::vector<std::pair<int, int>> areas;
-	getConnectedComponents(closed, stats, areas, 10);
-
-#ifdef _DEBUG
-	cv::Mat debug;
-	cv::cvtColor(cropped, debug, cv::COLOR_GRAY2BGR);
-#endif
-
-	cv::dnn::Net aiModel = cv::dnn::readNetFromONNX(aiModelPath);
-	for (int i = 0; i < areas.size(); i++)
+	std::vector<std::vector<cv::Point>> anchors;
+	if (!detectQRAnchors(edges, anchors))
 	{
-		int label = areas[i].first;
-		cv::Rect roi = getRoi(stats, label);
+		if (getID(gray, id, &position))
+			coordinates = cvtPositionToCoordinates(position);
 
-#ifdef _DEBUG
-		cv::Mat colorConnectedComponent = debug(roi);
-#endif
-
-		if (!ratioBBox(roi, 1.3))
-			continue;
-
-		paddingRect(roi, roi, 0.05, cropped.size());
-
-		cv::Mat grayConnectedComponent = cropped(roi);
-		std::vector<cv::Point2f> coordinates = rectificationCoordinates(grayConnectedComponent, 0.02);
-
-		cv::Mat resizedConnectedComponent;
-		if (!resizeToPoints(grayConnectedComponent, resizedConnectedComponent, coordinates, 0.2))
-			continue;
-
-		cv::Mat transformedConnectedComponent;
-		if (!geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, coordinates, 0.2))
-			continue;
-
-		cv::Mat qrCode;
-		if (!getMatrixFromImage(transformedConnectedComponent, qrCode, aiModel))
-			continue;
-
-#ifdef _DEBUG
-		cv::Mat qrCodeUpscaled;
-		cv::resize(qrCode, qrCodeUpscaled, cv::Size(210, 210), 0, 0, cv::INTER_NEAREST);
-		cv::rectangle(debug, roi, cv::Scalar(0, 255, 0), 2);
-#endif
-
-		if (getDateTime(qrCode, dateTime))
-			break;
-
-		if (getDateTime(transformedConnectedComponent, dateTime))
-			break;
-
-		if (getDateTime(cropped, dateTime))
-			break;
-
-		if (getDateTime(gray, dateTime))
-			break;
+		return id;
 	}
 
-	return dateTime;
+	sortAnchors(anchors);
+	coordinates = rectificationCoordinates(anchors, 0.07);
+
+	cv::Mat resizedConnectedComponent;
+	if (!resizeToPoints(gray, resizedConnectedComponent, coordinates, 0.2))
+	{
+		if (getID(gray, id, &position))
+			coordinates = cvtPositionToCoordinates(position);
+
+		return id;
+	}
+
+	cv::Mat transformedConnectedComponent;
+	if (!geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, coordinates, 0.2))
+	{
+		if (getID(gray, id, &position))
+			coordinates = cvtPositionToCoordinates(position);
+
+		return id;
+	}
+
+	cv::Mat qrCode;
+	if (!getMatrixFromImage(transformedConnectedComponent, qrCode, aiModel))
+	{
+		if (!getID(transformedConnectedComponent, id))
+		{
+			if (getID(gray, id, &position))
+				coordinates = cvtPositionToCoordinates(position);
+		}
+
+		return id;
+	}
+
+	if (!getID(qrCode, id))
+		if (!getID(transformedConnectedComponent, id))
+			getID(gray, id);
+
+	return id;
 }

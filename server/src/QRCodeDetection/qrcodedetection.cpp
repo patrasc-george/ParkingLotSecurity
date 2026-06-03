@@ -840,7 +840,7 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 		if (getID(gray, id, &position))
 			coordinates = cvtPositionToCoordinates(position);
 
-		drawBBox(resized, dst, coordinates, id);
+		drawBBox(resized, dst, anchors, coordinates, id);
 		return id;
 	}
 
@@ -853,7 +853,7 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 		if (getID(gray, id, &position))
 			coordinates = cvtPositionToCoordinates(position);
 
-		drawBBox(resized, dst, coordinates, id);
+		drawBBox(resized, dst, anchors, coordinates, id);
 		return id;
 	}
 
@@ -863,7 +863,7 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 		if (getID(gray, id, &position))
 			coordinates = cvtPositionToCoordinates(position);
 
-		drawBBox(resized, dst, coordinates, id);
+		drawBBox(resized, dst, anchors, coordinates, id);
 		return id;
 	}
 
@@ -876,7 +876,7 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 				coordinates = cvtPositionToCoordinates(position);
 		}
 
-		drawBBox(resized, dst, coordinates, id);
+		drawBBox(resized, dst, anchors, coordinates, id);
 		return id;
 	}
 
@@ -884,6 +884,6 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 		if (!getID(transformedConnectedComponent, id))
 			getID(gray, id);
 
-	drawBBox(resized, dst, coordinates, id);
+	drawBBox(resized, dst, anchors, coordinates, id);
 	return id;
 }

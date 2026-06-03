@@ -265,23 +265,6 @@ void QRCode::sortAnchors(std::vector<std::vector<cv::Point>>& anchors)
 	};
 }
 
-void QRCode::drawAnchor(const cv::Mat& src, cv::Mat& dst, const std::vector<std::vector<cv::Point>>& contours)
-{
-	cv::cvtColor(src, dst, cv::COLOR_GRAY2BGR);
-
-	std::vector<cv::Scalar> colors = {
-		cv::Scalar(0, 255, 0),
-		cv::Scalar(255, 0, 0),
-		cv::Scalar(0, 0, 255)
-	};
-
-	for (int i = 0; i < contours.size(); i++)
-	{
-		cv::Scalar color = colors[i % colors.size()];
-		cv::drawContours(dst, contours, i, color, 2);
-	}
-}
-
 void QRCode::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
 {
 	if (point.x < 0 || point.y < 0)
@@ -415,7 +398,7 @@ bool QRCode::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<
 			horizontalLines.push_back(line);
 			horizontalSlope += slope;
 		}
-	}
+}
 	horizontalSlope /= horizontalLines.size();
 
 	cv::Vec2i centroid = cv::Vec2i(size.width / 2, size.height / 2);
@@ -756,7 +739,7 @@ void QRCode::drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const
 		for (int i = 0; i < contours.size(); i++)
 		{
 			cv::Scalar color = colors[i % colors.size()];
-			cv::drawContours(drawnCoordinates, contours, i, color, 2);
+			cv::drawContours(drawnCoordinates, contours, i, color, 4);
 		}
 	}
 
@@ -780,7 +763,7 @@ void QRCode::drawBBox(const cv::Mat& src, std::vector<unsigned char>& dst, const
 		{
 			cv::Point2f firstCoordinate = orderedCoordinates[i];
 			cv::Point2f secondCoordinate = orderedCoordinates[(i + 1) % orderedCoordinates.size()];
-			cv::line(drawnCoordinates, firstCoordinate, secondCoordinate, cv::Scalar(0, 255, 0), 2);
+			cv::line(drawnCoordinates, firstCoordinate, secondCoordinate, cv::Scalar(0, 255, 0), 4);
 		}
 	}
 

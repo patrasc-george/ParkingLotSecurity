@@ -429,23 +429,6 @@ void QRCode::sortAnchors(std::vector<std::vector<cv::Point>>& anchors)
 	};
 }
 
-void QRCode::drawAnchor(const cv::Mat& src, cv::Mat& dst, const std::vector<std::vector<cv::Point>>& contours)
-{
-	cv::cvtColor(src, dst, cv::COLOR_GRAY2BGR);
-
-	std::vector<cv::Scalar> colors = {
-		cv::Scalar(0, 255, 0),
-		cv::Scalar(255, 0, 0),
-		cv::Scalar(0, 0, 255)
-	};
-
-	for (int i = 0; i < contours.size(); i++)
-	{
-		cv::Scalar color = colors[i % colors.size()];
-		cv::drawContours(dst, contours, i, color, 2);
-	}
-}
-
 void QRCode::lineThroughPoint(cv::Vec4f& line, const double& slope, const cv::Point& point, const bool& direction)
 {
 	if (point.x < 0 || point.y < 0)

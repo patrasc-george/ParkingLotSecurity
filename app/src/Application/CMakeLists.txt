@@ -40,7 +40,7 @@ install(FILES ${ASSETS} DESTINATION "${DELIVERY_DIR}/assets")
 
 file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/tickets")
-file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/websiteTickets")
+file(MAKE_DIRECTORY "${DELIVERY_DIR}/database/websiteTickets")
 
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/vehicles")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/database/tickets")

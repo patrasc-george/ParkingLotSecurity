@@ -86,7 +86,11 @@ RUN cmake . \
 
 FROM ubuntu:22.04
 
+ENV TZ=Europe/Bucharest
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
+    tzdata \
     libstdc++6 \
     libgcc-s1 \
     libpq5 \
@@ -98,6 +102,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     ca-certificates \
     libssl3 \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-server /app/server /app/server

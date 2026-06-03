@@ -9,24 +9,21 @@
 #include <memory>
 #include <thread>
 #include <iostream>
-#include <Poco/Net/SMTPClientSession.h>
-#include <Poco/Net/MailMessage.h>
-#include <Poco/Net/SSLManager.h>
-#include <Poco/Net/ConsoleCertificateHandler.h>
-#include <Poco/Net/AcceptCertificateHandler.h>
-#include <Poco/Net/SecureStreamSocket.h>
-#include <Poco/Net/SecureSMTPClientSession.h>
-#include <Poco/Net/DNS.h>
-#include <Poco/Net/MailMessage.h>
-#include <Poco/AutoPtr.h>
+#include <cstdlib>
+#include <iterator>
+
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Timespan.h>
+
 #include <Poco/UUIDGenerator.h>
 #include <Poco/DigestEngine.h>
 #include <Poco/SHA1Engine.h>
 #include <Poco/Random.h>
 #include <Poco/RandomStream.h>
-#include <Poco/JSON/Parser.h>
-#include <Poco/Dynamic/Var.h>
-#include <Poco/JSON/Object.h>
+
+#include <nlohmann/json.hpp>
 
 /**
  * @class HttpServer

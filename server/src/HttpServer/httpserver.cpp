@@ -273,38 +273,55 @@ std::string HttpServer::generateToken()
 
 bool HttpServer::sendEmail(const std::string& email, const std::string& subject, const std::string& content)
 {
-	std::string pocoEmail(std::getenv("POCO_EMAIL"));
-	std::string pocoPassword(std::getenv("POCO_PASSWORD"));
+	const char* brevoApiKey = std::getenv("BREVO_API_KEY");
+	const char* brevoSenderEmail = std::getenv("BREVO_SENDER_EMAIL");
+	const char* brevoSenderName = std::getenv("BREVO_SENDER_NAME");
 
-	if (pocoEmail.empty() || pocoPassword.empty())
+	if (!brevoApiKey || !brevoSenderEmail || !brevoSenderName)
 	{
-		LOG_MESSAGE(CRITICAL) << "Missing POCO email credentials." << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Missing Brevo email configuration." << std::endl;
 		return false;
 	}
 
-	try
-	{
-		Poco::Net::MailMessage message;
-		message.setSender(pocoEmail);
-		message.addRecipient(Poco::Net::MailRecipient(Poco::Net::MailRecipient::PRIMARY_RECIPIENT, email));
-		message.setSubject("ParkPass: " + subject);
-		message.setContent(content);
-		message.setContentType("text/plain; charset=UTF-8");
+	std::string apiKey(brevoApiKey);
+	std::string senderEmail(brevoSenderEmail);
+	std::string senderName(brevoSenderName);
 
-		Poco::Net::SecureSMTPClientSession session("smtp.mail.yahoo.com", 587);
-		Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCert = new Poco::Net::AcceptCertificateHandler(false);
-		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_RELAXED);
-		Poco::Net::SSLManager::instance().initializeClient(0, pCert, pContext);
+	nlohmann::json body = {
+		{"sender", {
+			{"name", senderName},
+			{"email", senderEmail}
+		}},
+		{"to", nlohmann::json::array({
+			{
+				{"email", email}
+			}
+		})},
+		{"subject", "ParkPass: " + subject},
+		{"textContent", content}
+	};
 
-		session.open();
-		session.startTLS();
-		session.login(Poco::Net::SMTPClientSession::AUTH_PLAIN, pocoEmail, pocoPassword);
-		session.sendMessage(message);
-		session.close();
-	}
-	catch (const Poco::Exception& ex)
+	std::string bodyString = body.dump();
+
+	Poco::Net::HTTPSClientSession session("api.brevo.com", 443);
+	session.setTimeout(Poco::Timespan(10, 0));
+
+	Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, "/v3/smtp/email", Poco::Net::HTTPMessage::HTTP_1_1);
+
+	request.setContentType("application/json");
+	request.setContentLength(bodyString.size());
+	request.set("accept", "application/json");
+	request.set("api-key", apiKey);
+
+	std::ostream& requestStream = session.sendRequest(request);
+	requestStream << bodyString;
+
+	Poco::Net::HTTPResponse response;
+	std::istream& responseStream = session.receiveResponse(response);
+
+	if (response.getStatus() < 200 || response.getStatus() >= 300)
 	{
-		LOG_MESSAGE(CRITICAL) << "Failed to send email to: " << email << ". Exception: " << ex.displayText() << std::endl;
+		LOG_MESSAGE(CRITICAL) << "Failed to send email to: " << email << std::endl;
 		return false;
 	}
 

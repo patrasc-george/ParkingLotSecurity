@@ -398,7 +398,7 @@ bool QRCode::lineSorting(std::vector<cv::Vec4i>& sortedLines, const std::vector<
 			horizontalLines.push_back(line);
 			horizontalSlope += slope;
 		}
-}
+	}
 	horizontalSlope /= horizontalLines.size();
 
 	cv::Vec2i centroid = cv::Vec2i(size.width / 2, size.height / 2);
@@ -645,12 +645,12 @@ bool QRCode::resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Po
 	return true;
 }
 
-bool QRCode::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const float& percentage)
+bool QRCode::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates)
 {
 	if (src.empty() || src.type() != CV_8UC1)
 		return false;
 
-	if (coordinates.size() != 4 || percentage < 0)
+	if (coordinates.size() != 4)
 		return false;
 
 	int height = coordinates[3].y - coordinates[0].y;
@@ -671,22 +671,25 @@ bool QRCode::geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const s
 	return cv::countNonZero(dst);
 }
 
-bool QRCode::getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net aiModel)
+bool QRCode::getMatrixFromImage(const cv::Mat& src, cv::Mat& dst)
 {
 	cv::Mat image;
 	cv::resize(src, image, cv::Size(210, 210), 0, 0, cv::INTER_NEAREST);
 
-	cv::Mat blob = cv::dnn::blobFromImage(image, 1.0 / 255.0);
-	aiModel.setInput(blob);
-	cv::Mat output = aiModel.forward();
+	if (image.channels() == 3)
+		cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
 
-	int total = output.total();
-	int n = std::sqrt(total);
-	if (std::pow(n, 2) != total)
+	cv::Mat blob = cv::dnn::blobFromImage(image, 1.0 / 255.0);
+
+	aiModel.setInput(blob);
+
+	cv::Mat bits = aiModel.forward();
+
+	if (bits.total() != 21 * 21)
 		return false;
 
-	cv::Mat reshaped = output.reshape(1, n);
-	cv::threshold(reshaped, dst, 0.5, 255, cv::THRESH_BINARY);
+	cv::Mat reshaped = bits.reshape(1, 21);
+	cv::threshold(reshaped, dst, 0.5, 255, cv::THRESH_BINARY_INV);
 	dst.convertTo(dst, CV_8UC1);
 
 	return true;
@@ -712,6 +715,58 @@ bool QRCode::getID(const cv::Mat& src, std::string& id, ZXing::Position* positio
 	id = result.text();
 
 	return true;
+}
+
+bool QRCode::tryDecode(const cv::Mat& src, cv::Mat& dst, std::string& id)
+{
+	if (!getMatrixFromImage(src, dst))
+		return false;
+
+	if (!getID(dst, id))
+		return false;
+
+	return true;
+}
+
+bool QRCode::getIdWithPadding(const cv::Mat& src, cv::Mat& dst, std::string& id)
+{
+	if (src.empty() || src.type() != CV_8UC1)
+		return false;
+
+	if (tryDecode(src, dst, id))
+		return true;
+
+	float max = 0.05f;
+	float step = 0.01f;
+
+	for (float padding = step; padding <= max + 0.0001f; padding += step)
+	{
+		int paddingX = static_cast<int>(src.cols * padding);
+		int paddingY = static_cast<int>(src.rows * padding);
+
+		cv::Mat padded;
+		cv::copyMakeBorder(src, padded, paddingY, paddingY, paddingX, paddingX, cv::BORDER_REPLICATE);
+
+		if (tryDecode(padded, dst, id))
+			return true;
+	}
+
+	for (float crop = step; crop <= max + 0.0001f; crop += step)
+	{
+		int cropX = static_cast<int>(src.cols * crop);
+		int cropY = static_cast<int>(src.rows * crop);
+
+		if (cropX * 2 >= src.cols || cropY * 2 >= src.rows)
+			continue;
+
+		cv::Rect roi(cropX, cropY, src.cols - cropX * 2, src.rows - cropY * 2);
+		cv::Mat cropped = src(roi).clone();
+
+		if (tryDecode(cropped, dst, id))
+			return true;
+	}
+
+	return false;
 }
 
 std::vector<cv::Point2f> QRCode::cvtPositionToCoordinates(const ZXing::Position& position)
@@ -841,7 +896,7 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 	}
 
 	cv::Mat transformedConnectedComponent;
-	if (!geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, coordinates, 0.2))
+	if (!geometricalTransformation(resizedConnectedComponent, transformedConnectedComponent, coordinates))
 	{
 		if (getID(gray, id, &position))
 			coordinates = cvtPositionToCoordinates(position);
@@ -851,21 +906,10 @@ std::string QRCode::decodeQR(const std::vector<unsigned char>& src, std::vector<
 	}
 
 	cv::Mat qrCode;
-	if (!getMatrixFromImage(transformedConnectedComponent, qrCode, aiModel))
-	{
+	if (!getIdWithPadding(transformedConnectedComponent, qrCode, id))
 		if (!getID(transformedConnectedComponent, id))
-		{
 			if (getID(gray, id, &position))
 				coordinates = cvtPositionToCoordinates(position);
-		}
-
-		drawBBox(resized, dst, anchors, coordinates, id);
-		return id;
-	}
-
-	if (!getID(qrCode, id))
-		if (!getID(transformedConnectedComponent, id))
-			getID(gray, id);
 
 	drawBBox(resized, dst, anchors, coordinates, id);
 	return id;

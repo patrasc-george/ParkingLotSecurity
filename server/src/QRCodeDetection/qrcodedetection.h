@@ -60,11 +60,15 @@ private:
 
 	static bool resizeToPoints(const cv::Mat& src, cv::Mat& dst, std::vector<cv::Point2f>& coordinates, const float& percentage = 0);
 
-	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates, const float& percentage = 0);
+	static bool geometricalTransformation(const cv::Mat& src, cv::Mat& dst, const std::vector<cv::Point2f>& coordinates);
 
-	static bool getMatrixFromImage(const cv::Mat& src, cv::Mat& dst, cv::dnn::Net aiModel);
+	bool getMatrixFromImage(const cv::Mat& src, cv::Mat& dst);
 
 	static bool getID(const cv::Mat& src, std::string& id, ZXing::Position* position = nullptr);
+
+	bool tryDecode(const cv::Mat& image, cv::Mat& dst, std::string& id);
+
+	bool getIdWithPadding(const cv::Mat& src, cv::Mat& matrix, std::string& id);
 
 	static std::vector<cv::Point2f> cvtPositionToCoordinates(const ZXing::Position& position);
 

@@ -1,0 +1,291 @@
+\chapter{Tehnologii utilizate}
+
+\section{Limbaje de programare}
+
+\subsection*{C++}
+
+C++ este un limbaj de programare de nivel înalt, cu scop general, creat de Bjarne Stroustrup ca o extensie a limbajului C. De-a lungul timpului, limbajul a evoluat semnificativ, integrînd paradigme multiple de programare, precum programarea procedurala, orientata pe obiecte și generica. Datorita performanței ridicate, controlului fin asupra memoriei și suportului extins pentru dezvoltarea aplicațiilor complexe, C++ este utilizat frecvent în dezvoltarea sistemelor software critice, aplicațiilor desktop, sistemelor embedded și aplicațiilor care necesita procesare intensiva.
+
+Unul dintre avantajele majore ale limbajului C++ îl reprezinta posibilitatea de a combina abstracțiile de nivel înalt cu accesul eficient la resursele hardware. Astfel, limbajul permite dezvoltarea unor aplicații performante, fara a sacrifica flexibilitatea și modularitatea codului. în plus, ecosistemul bogat de biblioteci disponibile pentru C++ îl face potrivit pentru proiecte care implica procesare de imagini, comunicații de rețea, interfețe grafice și acces la baze de date.
+
+în cadrul acestei lucrari, C++ reprezinta limbajul principal utilizat pentru implementarea aplicației. Alegerea sa a fost determinata de necesitatea obținerii unei performanțe ridicate în procesarea imaginilor captate la intrarea și ieșirea vehiculelor din parcare, precum și de necesitatea integrarii eficiente a mai multor componente software într-un sistem unitar. Cu ajutorul acestui limbaj au fost dezvoltate modulele responsabile de procesarea imaginilor, recunoașterea numerelor de înmatriculare, comunicarea prin protocoale HTTP și WebSocket, precum și interacțiunea cu baza de date.
+
+De asemenea, C++ ofera suport foarte bun pentru dezvoltarea aplicațiilor multi-threaded și pentru utilizarea bibliotecilor externe specializate. în cadrul proiectului, aceste avantaje au permis construirea unei soluții robuste, capabile sa gestioneze fluxuri de date în timp real și sa raspunda eficient cerințelor unui sistem inteligent de monitorizare și administrare a accesului într-o parcare.
+
+\subsection*{Python}
+
+Python este un limbaj de programare interpretat, de nivel înalt, cunoscut pentru sintaxa sa clara și pentru viteza mare de dezvoltare pe care o ofera. Acesta suporta mai multe paradigme de programare și dispune de un ecosistem extins de biblioteci dedicate procesarii numerice, analizei datelor, inteligenței artificiale și îînvățării automate.
+
+Popularitatea limbajului Python în domeniul cercetarii și dezvoltarii aplicațiilor inteligente se datoreaza în special simplității de utilizare și integrarii facile cu biblioteci specializate precum NumPy, PyTorch sau OpenCV. Aceste instrumente permit implementarea rapida a prototipurilor, testarea algoritmilor și antrenarea modelelor de învățare automata într-un mod eficient și flexibil.
+
+în cadrul acestei lucrari, Python a fost utilizat în special pentru experimentele legate de procesarea datelor și de dezvoltarea componentelor bazate pe învățare automata. Folosirea acestui limbaj a permis testarea rapida a mai multor abordari pentru interpretarea informației vizuale și validarea unor soluții înainte de integrarea lor în aplicația principala.
+
+Prin urmare, daca C++ a fost utilizat pentru implementarea componentei software finale, Python a avut un rol important în etapa de cercetare, prototipare și validare experimentala. Complementaritatea dintre cele doua limbaje a contribuit la dezvoltarea unei soluții eficiente, atât din punct de vedere al performanței, cât și al flexibilității procesului de dezvoltare.
+
+\section{Paradigme și concepte de programare}
+
+\subsection*{Programarea orientata pe obiecte}
+
+Programarea orientata pe obiecte reprezinta o paradigma de programare bazata pe organizarea aplicațiilor în jurul conceptului de obiect. Un obiect poate fi privit ca o entitate care combina date și comportamente, fiind definit pe baza unei clase. O clasa descrie structura și funcționalitatea comuna unui set de obiecte, iar obiectele reprezinta instanțe concrete ale acesteia.
+
+La baza programarii orientate pe obiecte se afla patru principii fundamentale: abstractizarea, încapsularea, moștenirea și polimorfismul. Abstractizarea permite modelarea entităților relevante dintr-un sistem prin evidențierea caracteristicilor esențiale și ascunderea detaliilor nerelevante. încapsularea presupune gruparea datelor și a metodelor care opereaza asupra lor într-o singura unitate logica și controlul accesului la acestea. moștenirea permite definirea unor clase noi pornind de la clase existente, favorizînd reutilizarea codului, iar polimorfismul ofera posibilitatea utilizarii unei interfețe comune pentru obiecte care pot avea implementari diferite.
+
+în limbajul C++, programarea orientata pe obiecte ocupa un rol central, limbajul oferind suport pentru clase, constructori, destructori, funcții virtuale, clase abstracte și alte mecanisme specifice. Un avantaj important al C++ îl reprezinta faptul ca permite combinarea programarii orientate pe obiecte cu eficiența executarii și controlul asupra resurselor sistemului.
+
+în cadrul acestei lucrari, paradigma orientata pe obiecte a fost utilizata pentru structurarea aplicației în componente bine definite, fiecare avînd responsabilitași clare. Astfel, modulele responsabile de procesarea imaginilor, gestionarea comunicației, accesul la baza de date și interfața aplicației au fost organizate în clase și obiecte care faciliteaza modularitatea, reutilizarea codului și mentenanța aplicației. Aceasta abordare a permis dezvoltarea unui sistem mai ușor de extins și de adaptat la noi cerințe funcționale.
+
+\subsection*{Programarea concurenta și multithreading}
+
+Programarea concurenta reprezinta o abordare de dezvoltare software prin care mai multe activitași pot fi executate într-un mod suprapus în timp. Aceasta este esențiala în aplicațiile moderne care trebuie sa raspunda simultan la mai multe evenimente, sa prelucreze volume mari de date sau sa menține o interfața reactiva în timp ce executa operații costisitoare.
+
+Un concept important în cadrul programarii concurente este multithreading-ul, care presupune executarea mai multor fire de execuție în interiorul aceluiași proces. Fiecare fir de execuție poate rula independent, partajînd totodata resursele procesului din care face parte. Utilizarea mai multor thread-uri permite exploatarea mai eficienta a procesoarelor moderne și îmbunătățirea performanței generale a aplicațiilor.
+
+Programarea concurenta aduce însa și provocari importante, precum sincronizarea accesului la resurse comune, evitarea condițiilor de cursa, prevenirea blocajelor și gestionarea corecta a ordinii de execuție. Pentru rezolvarea acestor probleme sunt utilizate mecanisme precum mutex-uri, semafoare, variabile condiționale și alte primitive de sincronizare.
+
+în contextul aplicației dezvoltate în cadrul acestei lucrari, programarea concurenta este importanta deoarece sistemul trebuie sa gestioneze simultan prelucrarea imaginilor, comunicația cu alte componente software și interacțiunea cu utilizatorul. De exemplu, capturarea și procesarea cadrelor video, actualizarea interfeței grafice și transmiterea informațiilor catre server sau aplicația web trebuie realizate fara blocarea întregului sistem. Utilizarea multithreading-ului contribuie astfel la menținerea unei funcționări fluide și la asigurarea unei reacții rapide a aplicației în condiții de utilizare reala.
+
+\subsection*{Biblioteci dinamice (Dynamic Link Libraries -- DLL)}
+
+O biblioteca dinamica, cunoscuta în sistemele Windows sub denumirea de Dynamic Link Library (DLL), reprezinta un fișier care conține cod executabil, date sau resurse ce pot fi utilizate de mai multe aplicații în timpul execuției. Spre deosebire de bibliotecile statice, care sunt incluse în executabil în momentul compilarii, bibliotecile dinamice sunt încarcate la rulare, ceea ce permite reutilizarea codului și reducerea dimensiunii executabilelor.
+
+Utilizarea bibliotecilor dinamice ofera mai multe avantaje. în primul rînd, permite separarea funcționalităților în module independente, ceea ce favorizeaza dezvoltarea modulara și îîntreținerea mai ușoară a aplicațiilor. în al doilea rînd, aceeași biblioteca poate fi folosita de mai multe programe, reducînd duplicarea codului. De asemenea, actualizarea unei componente implementate într-un DLL se poate realiza fara recompilarea întregii aplicații, atâta timp cât interfața expusa ramîne compatibila.
+
+Pe de alta parte, utilizarea bibliotecilor dinamice poate introduce și dificultași, cum ar fi dependențele de versiune sau incompatibilitățile dintre diferite variante ale aceleiași biblioteci. în mediul Windows, aceste probleme sunt adesea asociate cu situații cunoscute sub numele de \textit{DLL Hell}, în care aplicațiile nu mai funcționează corect din cauza încarcarii unei versiuni nepotrivite a unei biblioteci.
+
+în cadrul acestui proiect, bibliotecile dinamice au un rol important deoarece numeroase componente externe utilizate de aplicație sunt distribuite sub aceasta forma. Biblioteci precum OpenCV, Qt, Tesseract, Boost sau alte dependințe necesare comunicarii și procesarii imaginilor pot fi integrate în aplicație prin legare dinamica. Acest mod de organizare contribuie la structurarea eficienta a proiectului și la separarea clara între aplicația principala și funcționalitățile oferite de bibliotecile externe.
+
+\subsection*{Testarea unitara}
+
+Testarea unitara reprezinta o metoda de verificare a corectitudinii aplicațiilor software prin testarea individuala a celor mai mici componente logice ale sistemului, precum funcții, metode sau clase. Scopul principal al testarii unitare este validarea faptului ca fiecare unitate software se comporta conform specificațiilor și produce rezultatele așteptate pentru un set de date de intrare bine definit.
+
+Un avantaj important al testarii unitare îl reprezinta detectarea timpurie a erorilor. Prin verificarea componentelor în mod izolat, problemele pot fi identificate înainte ca acestea sa se propage în etapele de integrare sau la nivelul întregului sistem. în plus, testele unitare contribuie la creșterea încrederii în cod, faciliteaza refactorizarea și ofera o forma suplimentara de documentare a comportamentului așteptat.
+
+Testarea automata este deosebit de utila în proiectele software de dimensiuni mari sau medii, unde modificarile frecvente pot afecta funcționalitași deja implementate. Prin rularea repetata a testelor dupa fiecare modificare, se poate verifica rapid daca schimbarile introduse au generat regresii sau comportamente neprevazute.
+
+în cadrul acestei lucrari, testarea unitara are rolul de a valida corectitudinea unor componente esențiale ale aplicației, precum metodele de procesare a imaginilor, funcțiile de manipulare a datelor și anumite module logice ale sistemului. Utilizarea testelor unitare contribuie la creșterea robusteții aplicației și la menținerea unui nivel ridicat de calitate a codului, aspect important mai ales în cazul unui sistem care proceseaza date în timp real și integreaza multiple componente software.
+
+\section{Biblioteci pentru procesare și analiza de date}
+
+\subsection*{OpenCV pentru procesare de imagini}
+
+OpenCV (Open Source Computer Vision Library) este una dintre cele mai utilizate biblioteci open-source pentru procesare de imagini și viziune computerizata. Biblioteca ofera un numar mare de algoritmi și funcții optimizate pentru prelucrarea imaginilor, detecția obiectelor, transformari geometrice, filtrare, segmentare, analiza de contururi și procesare video în timp real. Datorita implementarii eficiente în C++ și suportului extins pentru multiple platforme, OpenCV este frecvent utilizata în aplicații care necesita performanța ridicata și timp de raspuns redus.
+
+Un avantaj important al bibliotecii OpenCV este varietatea mare de operații disponibile pentru preprocesarea datelor vizuale. Aceasta include transformari între spații de culoare, operații de binarizare, filtrare liniara și neliniara, detecție de muchii, extragere de componente conexe, operații morfologice și transformari de perspectiva. Aceste funcționalitași sunt esențiale în sistemele de analiza vizuala, unde calitatea etapelor de preprocesare influențează direct performanța etapelor ulterioare de detecție și recunoaștere.
+
+în cadrul acestei lucrari, OpenCV reprezinta una dintre bibliotecile centrale ale aplicației. Ea este utilizata atât în pipeline-ul de detecție și recunoaștere a numerelor de înmatriculare, cât și în procesarea imaginilor ce conțin coduri QR. Cu ajutorul acestei biblioteci sunt realizate operații precum conversia imaginilor, filtrarea zgomotului, binarizarea, extragerea componentelor relevante, rectificarea geometrica și pregatirea regiunilor de interes pentru etapele de recunoaștere. în plus, în partea recenta a sistemului, OpenCV este utilizata și pentru inferența unui model exportat în format ONNX, integrat în pipeline-ul de procesare a codurilor QR.
+
+Astfel, OpenCV contribuie atât la eficiența implementarii, cât și la robustețea sistemului, oferind instrumentele necesare pentru tratarea imaginilor captate în condiții reale, afectate de zgomot, perspectiva variabila și iluminare neuniforma.
+
+\subsection*{NumPy pentru procesare numerica}
+
+NumPy este una dintre cele mai importante biblioteci din ecosistemul Python pentru calcul numeric și manipularea eficienta a tablourilor multidimensionale. Aceasta ofera structuri de date optimizate pentru reprezentarea vectorilor, matricilor și tensorilor, precum și un set extins de operații matematice și statistice aplicabile asupra acestora. Datorita implementarii eficiente și a integrarii cu alte biblioteci științifice, NumPy este utilizata pe scara larga în procesarea datelor, analiza numerica și dezvoltarea modelelor de învățare automata.
+
+Principalul avantaj al bibliotecii NumPy îl reprezinta capacitatea de a efectua operații vectorizate într-un mod mult mai eficient decât folosirea structurilor standard ale limbajului Python. Astfel, prelucrarile asupra datelor de intrare pot fi realizate rapid și clar, ceea ce face biblioteca foarte potrivita pentru prototipare și experimentare în aplicații ce implica imagini și seturi mari de date.
+
+în cadrul acestei lucrari, NumPy a fost utilizata în special în etapa de cercetare și dezvoltare a componentelor bazate pe învățare automata. Biblioteca a avut un rol important în manipularea numerica a imaginilor utilizate pentru generarea dataset-ului sintetic și pentru pregatirea datelor de antrenare ale modelului destinat procesarii codurilor QR. Prin folosirea acestei biblioteci, imaginile au putut fi convertite și normalizate într-o forma adecvata pentru procesarea ulterioara în cadrul modelelor dezvoltate.
+
+Prin urmare, deși NumPy nu reprezinta componenta principala a aplicației finale implementate în C++, aceasta are un rol semnificativ în etapa experimentala și în dezvoltarea infrastructurii necesare pentru construirea și validarea modelelor de învățare automata utilizate în proiect.
+
+\subsection*{PyTorch pentru modele de învățare automata}
+
+PyTorch este un framework open-source dedicat dezvoltarii și antrenarii modelelor de învățare automata și rețelelor neuronale profunde. Acesta ofera suport pentru construcția flexibila a modelelor, definirea funcțiilor de pierdere, optimizarea parametrilor și rularea eficienta pe CPU sau GPU. Un avantaj important al framework-ului este flexibilitatea ridicata și integrarea naturala cu limbajul Python, ceea ce îl face foarte potrivit pentru cercetare, prototipare și dezvoltarea rapida a modelelor experimentale.
+
+PyTorch pune la dispoziție componente esențiale pentru construirea unui pipeline complet de învățare automata, precum definirea dataset-urilor personalizate, încarcarea mini-batch-urilor prin DataLoader, utilizarea optimizatorilor, calculul automat al gradientului și exportul modelelor pentru utilizare ulterioara în alte medii de execuție. Aceste caracteristici permit dezvoltarea și evaluarea eficienta a modelelor în scenarii aplicate.
+
+în cadrul acestei lucrari, PyTorch a fost utilizat pentru dezvoltarea și antrenarea unui model propriu destinat procesarii codurilor QR. în folderul de antrenare al proiectului este definit modelul de tip \texttt{QRBitNet}, împreună cu mecanismele necesare pentru antrenare, evaluare, salvarea checkpoint-urilor și exportul modelului în format ONNX. Aceasta abordare a permis dezvoltarea unei componente bazate pe învățare automata care poate fi antrenata în Python, iar ulterior integrata în aplicația finala implementata în C++.
+
+Utilizarea PyTorch a contribuit astfel la extinderea sistemului cu o componenta inteligenta capabila sa îmbunătățească procesarea codurilor QR în condiții dificile. Rolul sau în proiect este unul esențial în etapa de cercetare și dezvoltare a modelului, chiar daca inferența finala este realizata ulterior în aplicația principala prin intermediul unui model exportat.
+
+\subsection*{Tesseract OCR pentru recunoașterea textului}
+
+recunoașterea optica a caracterelor, cunoscuta sub numele de OCR (Optical Character Recognition), reprezinta procesul de transformare a textului din imagini în date textuale care pot fi prelucrate digital. OCR este utilizat într-un numar foarte mare de aplicații, de la digitizarea documentelor pîna la citirea automata a informațiilor din imagini de scena, panouri, formulare sau etichete.
+
+Tesseract OCR este unul dintre cele mai cunoscute motoare OCR open-source, fiind apreciat pentru flexibilitate, suportul pentru mai multe limbi și posibilitatea de antrenare sau adaptare pentru cazuri specifice. Pentru obținerea unor rezultate bune, imaginile de intrare trebuie în general preprocesate prin operații precum rectificare, binarizare, eliminarea zgomotului și segmentarea regiunilor de interes. Calitatea acestor etape influențează direct performanța procesului de recunoaștere.
+
+în cadrul acestei lucrari, Tesseract OCR este folosit pentru recunoașterea caracterelor din numerele de înmatriculare detectate în imaginile captate la punctele de acces în parcare. Dupa identificarea și segmentarea regiunilor relevante din imagine, textul este extras cu ajutorul acestui motor OCR, fiind utilizat mai departe în procesele de monitorizare, validare și stocare în baza de date. în plus, proiectul include și resurse dedicate pentru antrenarea sau adaptarea modelului OCR, ceea ce indica o abordare orientata spre particularizarea recunoașterii pentru tipul de caractere întîlnit în contextul aplicației.
+
+Prin integrarea Tesseract OCR, sistemul obține capacitatea de a transforma informația vizuala conținută în imaginile numerelor de înmatriculare în date textuale utilizabile automat, ceea ce reprezinta una dintre funcționalitățile esențiale ale întregii aplicații.
+
+\subsection*{ZXing pentru procesarea codurilor QR}
+
+ZXing (Zebra Crossing) este o biblioteca open-source specializata în detectarea și decodarea codurilor de bare și a codurilor bidimensionale, inclusiv coduri QR. Biblioteca ofera funcționalitași pentru identificarea informației codificate în imagini și este utilizata frecvent în aplicații ce necesita citirea automata a biletelor, tichetelor, etichetelor sau altor forme de codificare vizuala.
+
+Un avantaj important al bibliotecii ZXing este specializarea sa pe procesul de decodare, oferind un mecanism eficient pentru extragerea conținutului logic al codului odata ce imaginea acestuia a fost adusa într-o forma suficient de clara. Astfel, ZXing poate fi integrata foarte bine într-un pipeline mai larg, în care etapele de localizare, rectificare și îmbunătățire a imaginii sunt realizate de alte componente, iar decodarea propriu-zisa este delegata unei biblioteci specializate.
+
+în cadrul acestui proiect, ZXing este utilizata în componenta de procesare a codurilor QR din partea de server. în versiunea actuala a pipeline-ului, imaginea codului QR este mai întși prelucrata și rectificata cu ajutorul OpenCV, iar apoi este utilizat un model bazat pe învățare automata pentru obținerea matricei codului. în etapa finala, ZXing este folosita pentru decodarea efectiva a informației conținute în codul QR. Aceasta combinație între preprocesare clasica, inferența bazata pe model și decodare specializata ofera o soluție robusta pentru tratarea imaginilor afectate de zgomot, deformari sau condiții de captura dificile.
+
+Prin urmare, ZXing completeaza arhitectura sistemului prin furnizarea unei componente dedicate decodarii codurilor QR, integrata într-un flux de procesare mai complex și mai performant decât o abordare exclusiv tradițională.
+
+\section{interfețe grafice}
+
+\subsection*{Framework-ul Qt pentru dezvoltarea aplicațiilor desktop}
+
+Qt este un framework multiplatforma utilizat pentru dezvoltarea aplicațiilor desktop și embedded, oferind un set extins de biblioteci pentru construirea interfețelor grafice, gestionarea evenimentelor, lucrul cu rețele, baze de date și threading. Scris în C++, Qt permite dezvoltarea aplicațiilor cu performanța ridicata și ofera o abstractizare consistenta asupra sistemului de operare, facilitînd portabilitatea între platforme.
+
+Unul dintre conceptele fundamentale ale Qt este mecanismul de \textit{semnale și sloturi}, care permite comunicarea eficienta între obiecte într-un mod decuplat. Acest mecanism este utilizat pentru implementarea interacțiunilor din interfața grafica, precum reacția la acțiunile utilizatorului sau actualizarea dinamica a datelor afișate. De asemenea, Qt ofera suport pentru dezvoltarea aplicațiilor multi-threaded, ceea ce permite menținerea unei interfețe responsive chiar și în cazul unor operații costisitoare.
+
+Framework-ul include mai multe module esențiale, precum Qt Core pentru funcționalitași de baza, Qt Widgets pentru interfețe grafice clasice, Qt Network pentru comunicații și Qt SQL pentru integrarea bazelor de date. în plus, Qt ofera unelte dedicate precum Qt Designer pentru construirea interfețelor grafice și Qt Creator pentru dezvoltare și depanare.
+
+în cadrul acestei lucrari, Qt este utilizat pentru dezvoltarea aplicației desktop care reprezinta componenta principala de interacțiune cu sistemul la nivel local. interfața permite afișarea în timp real a imaginilor captate, vizualizarea numerelor de înmatriculare recunoscute și monitorizarea evenimentelor de intrare și ieșire din parcare. De asemenea, aplicația desktop integreaza componentele de procesare a imaginilor și comunica cu serverul prin protocoale de rețea.
+
+Utilizarea Qt a permis dezvoltarea unei interfețe grafice intuitive și responsive, capabile sa gestioneze fluxuri de date în timp real și sa ofere utilizatorului o experiența coerenta. în plus, integrarea naturala cu limbajul C++ și cu celelalte biblioteci utilizate în proiect a contribuit la realizarea unei aplicații stabile și eficiente.
+
+\subsection*{Framework-ul Angular pentru dezvoltarea aplicațiilor web}
+
+Angular este un framework open-source dezvoltat de Google pentru construirea aplicațiilor web moderne de tip single-page application (SPA). Acesta utilizeaza limbajul TypeScript și ofera un set complet de instrumente pentru dezvoltarea interfețelor dinamice, gestionarea starii aplicației, comunicarea cu serverul și organizarea codului în module reutilizabile.
+
+Unul dintre avantajele principale ale Angular este arhitectura bazata pe componente, care permite împărțirea aplicației în unitași independente, ușor de dezvoltat și îîntreținut. Fiecare componenta conține logica, template-ul și stilurile asociate, facilitînd reutilizarea și organizarea eficienta a codului. De asemenea, Angular ofera suport pentru data binding bidirecțional, care permite sincronizarea automata între modelul de date și interfața utilizatorului.
+
+Framework-ul include și servicii pentru gestionarea comunicației cu backend-ul prin HTTP, precum și mecanisme pentru gestionarea rutarii între diferite pagini ale aplicației. în plus, Angular permite integrarea facila cu API-uri externe și servicii web, fiind potrivit pentru dezvoltarea aplicațiilor distribuite.
+
+în cadrul acestui proiect, Angular este utilizat pentru dezvoltarea aplicației web care ofera utilizatorilor acces la funcționalitățile sistemului prin intermediul unui browser. interfața web permite realizarea unor operațiuni precum plata taxelor de parcare, gestionarea abonamentelor și vizualizarea istoricului vehiculelor. De asemenea, aplicația comunica în timp real cu backend-ul, asigurînd actualizarea rapida a informațiilor afișate.
+
+Integrarea aplicației web cu componenta desktop și cu baza de date permite realizarea unui sistem distribuit complet, în care utilizatorii pot interacționa cu datele din orice locație. Utilizarea Angular contribuie astfel la creșterea accesibilității și scalabilității sistemului, oferind o interfața moderna și ușor de utilizat.
+
+\section{Comunicarea și procesarea securizata a datelor}
+
+\subsection*{Implementarea arhitecturii client-server HTTP folosind biblioteca cpp-httplib}
+
+Arhitectura client-server reprezinta un model fundamental în dezvoltarea aplicațiilor distribuite, în care funcționalitățile sistemului sunt împărțite între componente care solicita servicii (clienși) și componente care furnizeaza aceste servicii (servere). Comunicarea dintre aceste componente se realizeaza de regula prin intermediul protocolului HTTP, care permite transmiterea de date structurate între aplicații aflate pe sisteme diferite.
+
+Protocolul HTTP (HyperText Transfer Protocol) este un protocol de nivel aplicație, bazat pe modelul cerere-raspuns. Un client trimite o cerere catre server, iar serverul proceseaza cererea și returneaza un raspuns care conține datele solicitate sau informații despre starea operației. Datorita simplității și interoperabilității sale, HTTP este utilizat pe scara larga în dezvoltarea serviciilor web și a aplicațiilor distribuite.
+
+în cadrul lucrarii, comunicarea HTTP este implementata utilizînd biblioteca \texttt{cpp-httplib}, o biblioteca C++ header-only care ofera suport pentru dezvoltarea rapida a serverelor și clienților HTTP. Aceasta permite definirea ușoară a endpoint-urilor și gestionarea cererilor într-un mod eficient, fara a introduce dependențe complexe.
+
+Componenta server a aplicației expune endpoint-uri HTTP prin care sunt gestionate operații precum transmiterea datelor procesate, interogarea bazei de date sau inițierea unor acțiuni din interfața web. aplicația web dezvoltata în Angular acționează ca un client HTTP, trimițînd cereri catre server și afișînd rezultatele primite.
+
+Utilizarea bibliotecii \texttt{cpp-httplib} a permis implementarea rapida și eficienta a unei interfețe de comunicație între componentele sistemului, contribuind la realizarea unei arhitecturi distribuite clare și ușor de extins.
+
+\subsection*{Implementarea comunicației WebSocket folosind biblioteca Boost}
+
+în aplicațiile moderne, unde este necesara transmiterea de date în timp real, modelul clasic HTTP bazat pe cerere-raspuns poate deveni limitativ. în acest context, protocolul WebSocket ofera o soluție eficienta, permițînd stabilirea unei conexiuni persistente bidirecționale între client și server.
+
+WebSocket este un protocol de comunicație care funcționează peste TCP și permite schimbul de mesaje în ambele direcții, fara a fi necesara inițierea unei noi conexiuni pentru fiecare transfer de date. Aceasta caracteristica îl face ideal pentru aplicații care necesita actualizari în timp real, precum monitorizarea sistemelor sau notificarile instantanee.
+
+în cadrul acestei lucrari, comunicația WebSocket este implementata utilizînd biblioteca Boost, în special modulele Boost.Asio și Boost.Beast, care ofera suport pentru operații de rețea asincrone și pentru implementarea protocoalelor de nivel superior. Aceste biblioteci permit dezvoltarea unor aplicații performante, capabile sa gestioneze multiple conexiuni simultane.
+
+WebSocket este utilizat pentru transmiterea în timp real a datelor între aplicația desktop și aplicația web. Astfel, evenimentele generate de sistem, precum detectarea unui vehicul sau recunoașterea unui numar de înmatriculare, pot fi propagate instantaneu catre interfața utilizatorului. Aceasta abordare contribuie la creșterea gradului de interactivitate și la îmbunătățirea experienței utilizatorului.
+
+Prin utilizarea bibliotecilor Boost, aplicația beneficiaza de un mecanism robust și eficient pentru implementarea comunicației asincrone, esențial în contextul unui sistem distribuit care opereaza în timp real.
+
+\subsection*{Implementarea mecanismelor de securizare și criptare a mesajelor folosind biblioteca OpenSSL}
+
+în cadrul aplicațiilor distribuite, securitatea comunicației reprezinta un aspect esențial, în special atunci cînd sunt transmise date sensibile sau informații critice. Criptarea datelor și autentificarea entităților implicate în comunicare sunt necesare pentru a preveni interceptarea, modificarea sau accesul neautorizat la informații.
+
+OpenSSL este o biblioteca open-source utilizata pe scara larga pentru implementarea protocoalelor criptografice și pentru securizarea comunicațiilor. Aceasta ofera suport pentru algoritmi de criptare simetrica și asimetrica, funcții hash, certificate digitale și implementari ale protocoalelor SSL/TLS.
+
+în cadrul acestei lucrari, biblioteca OpenSSL este utilizata pentru implementarea mecanismelor de securizare a comunicației între componentele sistemului. Prin utilizarea protocoalelor securizate, datele transmise între aplicația desktop, server și aplicația web sunt protejate împotriva accesului neautorizat.
+
+Integrarea OpenSSL contribuie la creșterea nivelului de securitate al aplicației, asigurînd confidențialitatea și integritatea datelor. Acest aspect este deosebit de important în contextul unui sistem care gestioneaza informații despre utilizatori, vehicule și tranzacții.
+
+\subsection*{Implementarea persistenței datelor folosind PostgreSQL și biblioteca libpq}
+
+persistența datelor reprezinta un element esențial în aplicațiile software moderne, permițînd stocarea și gestionarea informațiilor pe termen lung. Sistemele de gestiune a bazelor de date relaționale (RDBMS) ofera mecanisme eficiente pentru organizarea, interogarea și menținerea integrității datelor.
+
+PostgreSQL este un sistem de gestiune a bazelor de date relaționale open-source, recunoscut pentru robustețea, performanța și conformitatea sa cu standardele SQL. Acesta ofera suport pentru tranzacții, integritate referențiala, indexare avansata și extensibilitate, fiind potrivit pentru aplicații complexe și scalabile.
+
+în cadrul acestei lucrari, PostgreSQL este utilizat pentru stocarea informațiilor legate de vehicule, accesul în parcare, istoricul evenimentelor și datele utilizatorilor. interacțiunea cu baza de date este realizata prin intermediul bibliotecii \texttt{libpq}, care reprezinta interfața oficiala C pentru PostgreSQL.
+
+Biblioteca \texttt{libpq} permite trimiterea de interogari SQL catre baza de date și preluarea rezultatelor într-un mod eficient. Aceasta ofera suport pentru conexiuni persistente, gestionarea erorilor și execuția tranzacțiilor.
+
+Prin utilizarea PostgreSQL și \texttt{libpq}, sistemul beneficiaza de un mecanism sigur și performant de stocare a datelor, esențial pentru funcționarea corecta a aplicației și pentru asigurarea consistenței informațiilor în cadrul întregului sistem distribuit.
+
+\section{Infrastructura, livrarea și gestionarea proiectului}
+
+\subsection*{Sistemul de build CMake}
+
+în dezvoltarea aplicațiilor software complexe, gestionarea procesului de compilare și a dependențelor reprezinta un aspect esențial. CMake este un instrument open-source multiplatforma utilizat pentru generarea fișierelor de build, permițînd compilarea aplicațiilor în mod independent de compilator sau mediul de dezvoltare utilizat.
+
+CMake nu este un sistem de build propriu-zis, ci un generator de configurații care produce fișiere compatibile cu diferite sisteme de build, precum Make, Ninja sau proiecte pentru medii de dezvoltare precum Visual Studio. Configurarea proiectului se realizeaza prin intermediul fișierelor \texttt{CMakeLists.txt}, în care sunt definite sursele, bibliotecile utilizate și opțiunile de compilare.
+
+Un avantaj important al utilizarii CMake îl reprezinta suportul pentru organizarea modulara a proiectului și gestionarea dependențelor externe. De asemenea, permite utilizarea unui arbore de build separat de codul sursa, facilitînd gestionarea mai multor configurații de compilare.
+
+în cadrul acestui proiect, CMake este utilizat pentru construirea aplicației C++ și pentru integrarea bibliotecilor externe precum OpenCV, Boost, Qt sau Tesseract. Aceasta abordare permite configurarea rapida a mediului de dezvoltare și generarea proiectelor pentru diferite platforme, contribuind la portabilitatea și scalabilitatea aplicației.
+
+\subsection*{Containerizare cu Docker}
+
+Containerizarea reprezinta o tehnica moderna de distribuire și rulare a aplicațiilor, care permite izolarea acestora într-un mediu controlat, independent de sistemul de operare gazda. Docker este una dintre cele mai populare platforme pentru containerizare, oferind un mod eficient de a crea, distribui și rula aplicații în containere.
+
+Un container Docker include toate dependențele necesare pentru rularea aplicației, precum biblioteci, configurații și fișiere executabile. Acest lucru asigura consistența mediului de execuție și elimina problemele legate de diferențele dintre sistemele de dezvoltare și cele de producție.
+
+în cadrul acestui proiect, Docker este utilizat pentru containerizarea componentelor aplicației, în special pentru partea de backend și pentru serviciile asociate, precum baza de date. Aceasta abordare permite rularea rapida a întregului sistem într-un mediu controlat și faciliteaza distribuirea și testarea aplicației.
+
+Utilizarea Docker contribuie la creșterea portabilității și la simplificarea procesului de deployment, permițînd rularea aplicației pe diferite sisteme fara modificari suplimentare.
+
+\subsection*{Sistemul de control al versiunilor GitHub}
+
+Gestionarea codului sursa și a istoricului modificarilor reprezinta un element esențial în dezvoltarea software. Git este un sistem de control al versiunilor distribuit, care permite urmarirea modificarilor, colaborarea între dezvoltatori și gestionarea eficienta a diferitelor versiuni ale unui proiect.
+
+GitHub este o platforma bazata pe Git care ofera funcționalitași suplimentare pentru colaborare, gestionarea repository-urilor și integrarea cu alte servicii. Aceasta permite organizarea codului sursa, urmarirea problemelor și gestionarea contribuțiilor într-un mod structurat.
+
+în cadrul acestui proiect, GitHub este utilizat pentru versionarea codului sursa și pentru gestionarea evoluției aplicației. Repository-ul conține toate componentele sistemului, inclusiv aplicația C++, partea web, scripturile de antrenare și documentația asociata.
+
+Utilizarea unui sistem de control al versiunilor a permis urmarirea modificarilor, testarea diferitelor abordari și revenirea la versiuni anterioare atunci cînd a fost necesar. De asemenea, a facilitat organizarea proiectului și menținerea unei structuri clare a codului.
+
+\subsection*{Documentarea codului utilizînd Doxygen}
+
+Documentarea codului reprezinta un aspect important în dezvoltarea aplicațiilor software, contribuind la îînțelegerea și mentenanța acestora. Doxygen este un instrument utilizat pentru generarea automata a documentației pe baza comentariilor din codul sursa.
+
+Doxygen analizeaza fișierele sursa și extrage informații despre clase, funcții, structuri și relațiile dintre acestea, generînd documentație în formate precum HTML sau PDF. De asemenea, poate genera diagrame de dependența și grafuri de relații între clase, utilizînd instrumente precum Graphviz.
+
+în cadrul acestui proiect, Doxygen este utilizat pentru documentarea codului aplicației C++. Comentariile adaugate în cod sunt procesate pentru a genera o documentație tehnica detaliata, care faciliteaza îînțelegerea structurii și funcționalităților sistemului.
+
+Utilizarea Doxygen contribuie la creșterea calității codului și la ușurarea procesului de mentenanța, oferind o referința clara pentru dezvoltarea ulterioara a aplicației.
+
+\section{Servicii externe și integrari}
+
+\subsection*{Biblioteca POCO pentru servicii de rețea și email}
+
+POCO (Portable Components) este o biblioteca C++ open-source care ofera un set extins de clase pentru dezvoltarea aplicațiilor de rețea și pentru lucrul cu protocoale de comunicație. Aceasta include module pentru HTTP, FTP, SMTP, criptografie, manipularea fișierelor și gestionarea configurațiilor, fiind utilizata frecvent în dezvoltarea aplicațiilor distribuite.
+
+Un avantaj important al bibliotecii POCO este portabilitatea și designul modular, care permite integrarea facila a diferitelor funcționalitași fara a depinde de platforma de execuție. în plus, POCO ofera o interfața simplificata pentru lucrul cu protocoale complexe, reducînd efortul necesar implementarii acestora.
+
+în cadrul proiectului, biblioteca POCO este utilizata pentru implementarea funcționalităților de comunicare prin email. Aceasta permite trimiterea notificarilor catre utilizatori, cum ar fi confirmari de plata, notificari legate de accesul în parcare sau alte evenimente relevante generate de sistem.
+
+Integrarea POCO contribuie la extinderea funcționalităților aplicației prin introducerea unui mecanism de notificare asincrona, care îmbunătățește interacțiunea cu utilizatorii și crește utilitatea sistemului în scenarii reale.
+
+\subsection*{Integrarea serviciului Twilio pentru trimiterea de SMS-uri}
+
+Twilio este o platforma cloud care ofera servicii de comunicație programabile, permițînd trimiterea și primirea de mesaje SMS, efectuarea apelurilor telefonice și integrarea altor funcționalitași de comunicare în aplicații software.
+
+Unul dintre principalele avantaje ale serviciului Twilio este ușurința de integrare prin API-uri REST, care permit dezvoltatorilor sa utilizeze funcționalitățile de comunicație fara a implementa infrastructura necesara de la zero. De asemenea, Twilio ofera scalabilitate și fiabilitate, fiind capabil sa gestioneze volume mari de mesaje.
+
+în cadrul acestui proiect, Twilio este utilizat pentru trimiterea de notificari SMS catre utilizatori. Aceste notificari pot include informații despre accesul vehiculelor în parcare, confirmarea plăților sau alte evenimente importante generate de sistem.
+
+Integrarea serviciului Twilio contribuie la creșterea gradului de interactivitate și la o mai buna experiența a utilizatorului, oferind un canal suplimentar de comunicare rapid și eficient. Astfel, utilizatorii pot primi informații relevante în timp real, chiar și în afara aplicației web.
+
+\subsection*{Integrarea serviciului Google reCAPTCHA}
+
+Google reCAPTCHA este un serviciu de securitate utilizat pentru protejarea aplicațiilor web împotriva accesului automatizat realizat de roboși. Acesta permite diferențierea între utilizatori reali și scripturi automate, contribuind la prevenirea atacurilor de tip spam, brute-force sau alte forme de abuz.
+
+reCAPTCHA funcționează prin analizarea comportamentului utilizatorului și, în funcție de nivelul de risc detectat, poate solicita rezolvarea unor provocari simple sau poate valida automat utilizatorul fara interacțiune suplimentara. Versiunile moderne, precum reCAPTCHA v2 și v3, ofera mecanisme avansate de analiza bazate pe machine learning.
+
+în cadrul acestui proiect, serviciul Google reCAPTCHA este integrat în aplicația web dezvoltata cu Angular, în special în formularele care implica autentificare sau introducerea de date sensibile. Aceasta integrare are rolul de a preveni utilizarea abuziva a aplicației și de a proteja sistemul împotriva accesului neautorizat.
+
+Prin utilizarea reCAPTCHA, aplicația beneficiaza de un nivel suplimentar de securitate, contribuind la protejarea datelor utilizatorilor și la menținerea integrității sistemului în fața atacurilor automate.
+
+\section{Medii de dezvoltare}
+
+\subsection*{Visual Studio}
+
+Visual Studio este un mediu de dezvoltare integrat (IDE) dezvoltat de Microsoft, utilizat pentru dezvoltarea aplicațiilor software complexe. Acesta ofera un set complet de instrumente pentru scrierea codului, compilare, depanare și analiza, fiind unul dintre cele mai utilizate medii pentru dezvoltarea aplicațiilor în limbajul C++ pe platforma Windows.
+
+Unul dintre avantajele principale ale Visual Studio este integrarea strînsa a tuturor etapelor procesului de dezvoltare într-un singur mediu. IDE-ul ofera suport pentru evidențierea sintaxei, completarea automata a codului (IntelliSense), refactorizare, gestionarea proiectelor și un debugger performant care permite analiza execuției pas cu pas.
+
+De asemenea, Visual Studio ofera integrare nativa cu sistemele de build generate de CMake, facilitînd configurarea și compilarea proiectelor complexe. Suportul pentru biblioteci externe, precum OpenCV, Qt sau Boost, este bine integrat, ceea ce permite dezvoltarea eficienta a aplicațiilor care utilizeaza multiple dependențe.
+
+în cadrul acestui proiect, Visual Studio a fost utilizat pentru dezvoltarea aplicației principale în C++, inclusiv pentru implementarea modulelor de procesare a imaginilor, comunicare și interfața grafica. funcționalitățile avansate de debugging au fost esențiale pentru identificarea și rezolvarea problemelor aparute în timpul dezvoltarii.
+
+Prin utilizarea Visual Studio, procesul de dezvoltare a fost eficientizat, iar integrarea diferitelor componente ale sistemului a fost realizata într-un mod organizat și controlat.
+
+\subsection*{Visual Studio Code}
+
+Visual Studio Code este un editor de cod sursa open-source, dezvoltat de Microsoft, care ofera suport extins pentru multiple limbaje de programare și framework-uri. Deși este mai ușor decât un IDE complet, acesta poate fi extins printr-un numar mare de extensii care adauga funcționalitași precum debugging, completare inteligenta a codului și integrare cu sisteme de control al versiunilor.
+
+Un avantaj important al Visual Studio Code este flexibilitatea și viteza de utilizare. Editorul permite configurarea unui mediu de dezvoltare personalizat, adaptat nevoilor proiectului, fiind utilizat frecvent pentru dezvoltarea aplicațiilor web și pentru lucrul cu limbaje precum JavaScript, TypeScript sau Python.
+
+în cadrul acestui proiect, Visual Studio Code a fost utilizat în principal pentru dezvoltarea aplicației web realizate cu Angular, precum și pentru lucrul cu scripturile Python utilizate în etapa de antrenare și testare a modelelor de învățare automata. Extensiile dedicate Angular și TypeScript au facilitat dezvoltarea interfeței web și integrarea acesteia cu backend-ul aplicației.
+
+De asemenea, editorul a fost utilizat pentru gestionarea fișierelor de configurare, scripturilor Docker și altor componente auxiliare ale proiectului. Integrarea cu Git a permis gestionarea eficienta a versiunilor și sincronizarea codului sursa.
+
+Prin utilizarea Visual Studio Code, dezvoltarea componentelor web și a celor auxiliare a fost realizata într-un mod flexibil și eficient, completînd mediul principal de dezvoltare utilizat pentru aplicația C++.

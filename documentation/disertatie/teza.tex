@@ -1,0 +1,888 @@
+\documentclass[12pt, a4paper, oneside, romanian]{teza-upb}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\usepackage[romanian]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{url}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{longtable}
+
+\usepackage{placeins}
+\usepackage{setspace}
+
+\usepackage[
+    bookmarks,
+    bookmarksopen=true,
+    pdftitle={Dizertatie},
+    linktocpage
+]{hyperref}
+
+% Map custom TOC entry used by teza-upb.cls to a known bookmark level.
+\makeatletter
+\providecommand*{\toclevel@unnumberedsection}{0}
+\makeatother
+
+% Global, non-invasive line-breaking relaxations to reduce box warnings.
+\setlength{\emergencystretch}{2em}
+\setlength{\hfuzz}{1pt}
+\hbadness=3000
+\Urlmuskip=0mu plus 2mu\relax
+
+\DeclareUnicodeCharacter{2212}{-}
+\DeclareUnicodeCharacter{00B0}{\ensuremath{^\circ}}
+\DeclareUnicodeCharacter{FFFD}{?}
+
+\singlespacing
+
+\usepackage{listings}
+
+\definecolor{codegreen}{rgb}{0, 0.6, 0}
+\definecolor{codegray}{rgb}{0.5, 0.5, 0.5}
+\definecolor{codepurple}{rgb}{0.58, 0, 0.82}
+\definecolor{backcolour}{rgb}{0.95, 0.95, 0.92}
+
+\lstdefinestyle{mystyle}{
+    language=Matlab,
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+
+\nocite{szeliski2010}
+\nocite{gonzalez2018}
+\nocite{bradski2008}
+\nocite{goodfellow2016}
+\nocite{bishop2006}
+\nocite{haykin2009}
+\nocite{chollet2017}
+
+\nocite{he2016resnet}
+\nocite{otsu1979}
+\nocite{canny1986}
+\nocite{tesseract}
+
+\nocite{opencvdocs}
+\nocite{pytorchdocs}
+\nocite{qt}
+\nocite{cmake}
+\nocite{docker}
+\nocite{postgresql}
+\nocite{boost}
+\nocite{openssl}
+\nocite{angular}
+
+\author{George Daniel Patrașc}
+\title{Sistem inteligent pentru extracția și interpretarea informației vizuale din imagini în condiții de zgomot și incertitudine}
+
+\facultatea{Facultatea de Electronica, Telecomunicații și Tehnologia Informației}
+\tiplucrare{dizertație}
+\domeniu{Electronica, Telecomunicații și Tehnologia Informației}
+\catedra{Calculatoare și Tehnologia Informației}
+\campus{Leu}
+\program{SIVA}
+\titlulobtinut{Master}
+\director{Conf. Dr. Ing. Daniela Faur}
+
+\submissionmonth{Iunie}
+\submissionyear{2026}
+
+\beforepreface
+
+\afterpreface
+
+\input{chapter1}
+\input{chapter2}
+\input{chapter3}
+\input{chapter4}
+\input{chapter5}
+
+\nocite{*}
+\bibliographystyle{ieeetr}
+\bibliography{bibliografie}
+
+\chapter{Anexă}
+
+\setlength{\tabcolsep}{4pt}
+
+\begin{longtable}{|m{0.6cm}|m{2.5cm}|m{2.9cm}|m{2.9cm}|m{1.6cm}|}
+    \hline
+    Nr. &
+    Imagine de \newline intrare &
+    Regiune \newline segmentată &
+    Cod QR extras &
+    Rezultat corect \\ \hline
+    \endhead
+
+    1 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image0.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped0.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr0.png} &
+    Da \\ \hline
+
+    2 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image1.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped1.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr1.png} &
+    Da \\ \hline
+
+    3 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image2.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped2.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr2.png} &
+    Da \\ \hline
+
+    4 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image3.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped3.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr3.png} &
+    Da \\ \hline
+
+    5 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image4.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped4.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr4.png} &
+    Da \\ \hline
+
+    6 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image5.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped5.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr5.png} &
+    Da \\ \hline
+
+    7 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image6.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped6.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr6.png} &
+    Da \\ \hline
+
+    8 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image7.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped7.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr7.png} &
+    Da \\ \hline
+
+    9 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image8.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped8.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr8.png} &
+    Da \\ \hline
+
+    10 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image9.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped9.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr9.png} &
+    Da \\ \hline
+
+    11 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image10.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped10.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr10.png} &
+    Da \\ \hline
+
+    12 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image11.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped11.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr11.png} &
+    Da \\ \hline
+
+    13 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image12.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped12.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr12.png} &
+    Da \\ \hline
+
+    14 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image13.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped13.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr13.png} &
+    Da \\ \hline
+
+    15 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image14.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped14.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr14.png} &
+    Da \\ \hline
+
+    16 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image15.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped15.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr15.png} &
+    Da \\ \hline
+
+    17 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image16.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped16.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr16.png} &
+    Da \\ \hline
+
+    18 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image17.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped17.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr17.png} &
+    Da \\ \hline
+
+    19 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image18.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped18.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr18.png} &
+    Da \\ \hline
+
+    20 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image19.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped19.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr19.png} &
+    Da \\ \hline
+
+    21 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image20.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped20.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr20.png} &
+    Da \\ \hline
+
+    22 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image21.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped21.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr21.png} &
+    Da \\ \hline
+
+    23 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image22.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped22.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr22.png} &
+    Da \\ \hline
+
+    24 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image23.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped23.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr23.png} &
+    Nu \\ \hline
+
+    25 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image24.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped24.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr24.png} &
+    Da \\ \hline
+
+    26 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image25.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped25.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr25.png} &
+    Nu \\ \hline
+
+    27 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image26.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped26.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr26.png} &
+    Nu \\ \hline
+
+    28 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image27.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped27.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr27.png} &
+    Da \\ \hline
+
+    29 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image28.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped28.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr28.png} &
+    Da \\ \hline
+
+    30 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image29.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped29.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr29.png} &
+    Nu \\ \hline
+
+    31 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image30.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped30.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr30.png} &
+    Da \\ \hline
+
+    32 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image31.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped31.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr31.png} &
+    Da \\ \hline
+
+    33 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image32.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped32.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr32.png} &
+    Da \\ \hline
+
+    34 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image33.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped33.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr33.png} &
+    Da \\ \hline
+
+    35 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image34.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped34.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr34.png} &
+    Da \\ \hline
+
+    36 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image35.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped35.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr35.png} &
+    Da \\ \hline
+
+    37 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image36.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped36.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr36.png} &
+    Nu \\ \hline
+
+    38 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image37.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped37.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr37.png} &
+    Nu \\ \hline
+
+    39 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image38.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped38.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr38.png} &
+    Nu \\ \hline
+
+    40 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image39.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped39.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr39.png} &
+    Da \\ \hline
+
+    41 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image40.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped40.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr40.png} &
+    Da \\ \hline
+
+    42 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image41.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped41.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr41.png} &
+    Nu \\ \hline
+
+    43 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image42.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped42.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr42.png} &
+    Da \\ \hline
+
+    44 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image43.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped43.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr43.png} &
+    Da \\ \hline
+
+    45 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image44.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped44.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr44.png} &
+    Nu \\ \hline
+
+    46 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image45.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped45.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr45.png} &
+    Nu \\ \hline
+
+    47 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image46.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped46.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr46.png} &
+    Da \\ \hline
+
+    48 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image47.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped47.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr47.png} &
+    Nu \\ \hline
+
+    49 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image48.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped48.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr48.png} &
+    Nu \\ \hline
+
+    50 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image49.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped49.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr49.png} &
+    Nu \\ \hline
+
+    51 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image50.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped50.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr50.png} &
+    Nu \\ \hline
+
+    52 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image51.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped51.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr51.png} &
+    Da \\ \hline
+
+    53 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image52.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped52.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr52.png} &
+    Nu \\ \hline
+
+    54 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image53.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped53.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr53.png} &
+    Da \\ \hline
+
+    55 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image54.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped54.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr54.png} &
+    Da \\ \hline
+
+    56 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image55.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped55.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr55.png} &
+    Da \\ \hline
+
+    57 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image56.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped56.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr56.png} &
+    Nu \\ \hline
+
+    58 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image57.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped57.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr57.png} &
+    Nu \\ \hline
+
+    59 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image58.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped58.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr58.png} &
+    Nu \\ \hline
+
+    60 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image59.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped59.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr59.png} &
+    Da \\ \hline
+
+    61 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image60.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped60.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr60.png} &
+    Da \\ \hline
+
+    62 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image61.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped61.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr61.png} &
+    Da \\ \hline
+
+    63 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image62.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped62.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr62.png} &
+    Da \\ \hline
+
+    64 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image63.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped63.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr63.png} &
+    Da \\ \hline
+
+    65 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image64.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped64.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr64.png} &
+    Da \\ \hline
+
+    66 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image65.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped65.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr65.png} &
+    Da \\ \hline
+
+    67 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image66.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped66.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr66.png} &
+    Da \\ \hline
+
+    68 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image67.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped67.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr67.png} &
+    Da \\ \hline
+
+    69 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image68.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped68.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr68.png} &
+    Da \\ \hline
+
+    70 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image69.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped69.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr69.png} &
+    Da \\ \hline
+
+    71 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image70.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped70.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr70.png} &
+    Da \\ \hline
+
+    72 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image71.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped71.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr71.png} &
+    Da \\ \hline
+
+    73 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image72.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped72.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr72.png} &
+    Da \\ \hline
+
+    74 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image73.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped73.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr73.png} &
+    Da \\ \hline
+
+    75 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image74.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped74.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr74.png} &
+    Da \\ \hline
+
+    76 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image75.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped75.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr75.png} &
+    Da \\ \hline
+
+    77 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image76.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped76.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr76.png} &
+    Da \\ \hline
+
+    78 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image77.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped77.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr77.png} &
+    Nu \\ \hline
+
+    79 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image78.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped78.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr78.png} &
+    Da \\ \hline
+
+    80 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image79.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped79.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr79.png} &
+    Da \\ \hline
+
+    81 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image80.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped80.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr80.png} &
+    Da \\ \hline
+
+    82 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image81.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped81.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr81.png} &
+    Da \\ \hline
+
+    83 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image82.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped82.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr82.png} &
+    Da \\ \hline
+
+    84 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image83.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped83.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr83.png} &
+    Da \\ \hline
+
+    85 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image84.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped84.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr84.png} &
+    Da \\ \hline
+
+    86 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image85.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped85.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr85.png} &
+    Da \\ \hline
+
+    87 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image86.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped86.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr86.png} &
+    Da \\ \hline
+
+    88 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image87.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped87.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr87.png} &
+    Da \\ \hline
+
+    89 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image88.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped88.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr88.png} &
+    Da \\ \hline
+
+    90 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image89.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped89.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr89.png} &
+    Da \\ \hline
+
+    91 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image90.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped90.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr90.png} &
+    Da \\ \hline
+
+    92 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image91.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped91.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr91.png} &
+    Da \\ \hline
+
+    93 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image92.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped92.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr92.png} &
+    Da \\ \hline
+
+    94 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image93.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped93.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr93.png} &
+    Da \\ \hline
+
+    95 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image94.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped94.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr94.png} &
+    Da \\ \hline
+
+    96 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image95.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped95.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr95.png} &
+    Da \\ \hline
+
+    97 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image96.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped96.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr96.png} &
+    Da \\ \hline
+
+    98 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image97.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped97.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr97.png} &
+    Nu \\ \hline
+
+    99 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image98.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped98.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr98.png} &
+    Nu \\ \hline
+
+    100 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image99.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped99.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr99.png} &
+    Da \\ \hline
+
+    101 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image100.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped100.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr100.png} &
+    Da \\ \hline
+
+    102 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image101.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped101.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr101.png} &
+    Da \\ \hline
+
+    103 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image102.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped102.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr102.png} &
+    Da \\ \hline
+
+    104 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image103.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped103.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr103.png} &
+    Da \\ \hline
+
+    105 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image104.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped104.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr104.png} &
+    Da \\ \hline
+
+    106 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image105.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped105.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr105.png} &
+    Nu \\ \hline
+
+    107 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image106.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped106.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr106.png} &
+    Nu \\ \hline
+
+    108 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image107.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped107.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr107.png} &
+    Nu \\ \hline
+
+    109 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image108.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped108.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr108.png} &
+    Da \\ \hline
+
+    110 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image109.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped109.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr109.png} &
+    Da \\ \hline
+
+    111 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image110.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped110.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr110.png} &
+    Da \\ \hline
+
+    112 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image111.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped111.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr111.png} &
+    Da \\ \hline
+
+    113 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image112.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped112.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr112.png} &
+    Nu \\ \hline
+
+    114 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image113.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped113.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr113.png} &
+    Nu \\ \hline
+
+    115 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image114.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped114.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr114.png} &
+    Da \\ \hline
+
+    116 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image115.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped115.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr115.png} &
+    Nu \\ \hline
+
+    117 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image116.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped116.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr116.png} &
+    Da \\ \hline
+
+    118 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image117.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped117.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr117.png} &
+    Da \\ \hline
+
+    119 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image118.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped118.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr118.png} &
+    Nu \\ \hline
+
+    120 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image119.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped119.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr119.png} &
+    Da \\ \hline
+
+    121 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image120.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped120.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr120.png} &
+    Da \\ \hline
+
+    122 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image121.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped121.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr121.png} &
+    Da \\ \hline
+
+    123 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image122.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped122.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr122.png} &
+    Da \\ \hline
+
+    124 &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/image123.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/cropped123.png} &
+    \includegraphics[height=2.9cm,keepaspectratio]{dataset/qr123.png} &
+    Da \\ \hline
+
+\end{longtable}
+
+\setlength{\tabcolsep}{12pt}
+
+\end{document}

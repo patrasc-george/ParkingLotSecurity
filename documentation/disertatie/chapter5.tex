@@ -2,11 +2,11 @@
 
 \section{Rezultate experimentale}
 
-Pentru evaluarea modelului AI, au fost realizate mai multe experimente controlate asupra problemei de reconstrucție binară a matricei unui cod QR. Scopul acestor experimente a fost verificarea capacității modelului de a transforma o imagine QR, de dimensiune $210 \times 210$, într-o matrice binară de dimensiune $21 \times 21$, unde fiecare element reprezintă un modul al codului QR.
+Pentru evaluarea modelului de inteligență artificială, au fost realizate mai multe experimente controlate asupra problemei de reconstrucție binară a matricei unui cod QR. Scopul acestor experimente a fost verificarea capacității modelului de a transforma o imagine QR, cu dimensiunea $210 \times 210$, într-o matrice binară de dimensiune $21 \times 21$, în care fiecare element reprezintă un modul al codului QR.
 
-Setul de date utilizat conține $10000$ de imagini, iar împărțirea a fost realizată în două subseturi: $8000$ imagini pentru antrenare și $2000$ imagini pentru validare. Nu a mai fost folosit un set de test separat, deoarece scopul principal al experimentelor a fost compararea controlată a configurațiilor pe același set de validare. Împărțirea a fost realizată folosind un seed fix, egal cu $42$, pentru ca rezultatele să poată fi reproduse.
+Setul de date utilizat conține $10000$ de imagini, iar împărțirea a fost realizată în două submulțimi: $8000$ de imagini pentru antrenare și $2000$ de imagini pentru validare. Nu a fost folosită o submulțime separată pentru testare, deoarece scopul principal al experimentelor a fost compararea controlată a variantelor pe aceeași submulțime de validare.
 
-Deoarece fiecare cod QR are $21 \times 21 = 441$ module, setul de validare conține în total:
+Deoarece fiecare cod QR are $21 \times 21 = 441$ de module, submulțimea de validare conține în total:
 
 \[
     2000 \times 441 = 882000
@@ -14,27 +14,29 @@ Deoarece fiecare cod QR are $21 \times 21 = 441$ module, setul de validare conț
 
 predicții binare la nivel de modul QR.
 
-Pentru evaluare s-au folosit mai multe metrici, însă comparația principală dintre experimente a fost realizată pe baza ratei erorii la nivel de bit pe setul de validare. Această metrică măsoară proporția modulelor QR prezise greșit. În mod echivalent, acuratețea la nivel de bit este complementul acesteia.
+Pentru evaluare au fost folosite mai multe măsuri de performanță, însă comparația principală dintre experimente a fost realizată pe baza ratei erorii la nivel de bit, calculată pe submulțimea de validare. Această măsură exprimă proporția modulelor QR pentru care predicția binară diferă de valoarea reală. Cu alte cuvinte, ea arată câte module au fost reconstruite greșit din totalul modulelor evaluate.
 
 \[
     BER = \frac{FP + FN}{TP + TN + FP + FN}
 \]
 
+Acuratețea la nivel de bit este complementul acestei erori. Astfel, cu cât rata erorii este mai mică, cu atât acuratețea reconstrucției binare este mai mare.
+
 \[
     BitAccuracy = 1 - BER
 \]
 
-A fost urmărită și acuratețea exactă la nivel de cod QR, care consideră o imagine corectă doar dacă toate cele $441$ de module ale sale au fost prezise corect. Această metrică este mult mai strictă, deoarece o singură eroare de bit face ca întreaga reconstrucție QR să fie considerată greșită.
+A fost urmărită și acuratețea exactă la nivel de cod QR, care consideră o imagine corectă doar dacă toate cele $441$ de module ale sale au fost prezise corect. Această măsură este mult mai strictă, deoarece o singură eroare de bit face ca întreaga reconstrucție QR să fie considerată greșită.
 
 \[
     ExactAccuracy = \frac{N_{QR\ corecte}}{N_{QR\ total}}
 \]
 
-În cadrul experimentelor au fost rulate $11$ configurații, fiecare timp de $30$ de epoci. Nu a fost realizată o căutare full factorial, ci o serie de experimente controlate, grupate în patru categorii. Modelul de bază a folosit arhitectura cu batch size $32$, rata de învățare $10^{-4}$, weight decay $10^{-4}$ și dropout fix $0.04$.
+În cadrul experimentelor au fost rulate $11$ variante, fiecare timp de $30$ de epoci. Nu a fost realizată o căutare factorială completă, ci o serie de experimente controlate, grupate în patru categorii. Varianta de referință a folosit o arhitectură de dimensiune medie, loturi de câte $32$ de imagini, rata de învățare $10^{-4}$, regularizare de tip scădere a greutăților cu valoarea $10^{-4}$ și dezactivare aleatorie fixă de $0.04$.
 
-Experimentele au fost următoarele: 2 experimente pentru batch size, 3 experimente pentru learning rate, 3 experimente pentru weight decay, 3 experimente pentru comparația arhitecturilor. Astfel, numărul total de experimente a fost 11.
+Experimentele au vizat patru direcții principale: influența dimensiunii lotului, influența ratei de învățare, influența regularizării și comparația dintre arhitecturi cu dimensiuni diferite.
 
-Valorile testate pentru batch size au fost:
+Valorile testate pentru dimensiunea lotului au fost:
 
 \[
     batchSize \in \{16, 32\}
@@ -52,30 +54,30 @@ Valorile testate pentru regularizare au fost:
     weightDecay \in \{0, 10^{-4}, 10^{-3}\}
 \]
 
-Pentru arhitectură au fost comparate trei variante: \textit{arch\_small}, \textit{arch\_baseline} și \textit{arch\_large}. Varianta \textit{arch\_small} a folosit $546001$ parametri, varianta \textit{arch\_baseline} a folosit $2769313$ parametri, iar varianta \textit{arch\_large} a folosit $3360161$ parametri.
+Pentru arhitectură au fost comparate trei variante: una redusă, una de referință și una extinsă. Varianta redusă a folosit $546001$ de parametri, varianta de referință a folosit $2769313$ parametri, iar varianta extinsă a folosit $3360161$ parametri.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/01_all_experiments_val_ber_by_epoch.png}
-    \caption{Evoluția ratei erorii la nivel de bit pe setul de validare pentru toate cele 11 experimente}
+    \includegraphics[width=0.7\textwidth]{images/01_all_experiments_val_ber_by_epoch.png}
+    \caption{Evoluția ratei erorii la nivel de bit pe submulțimea de validare pentru toate cele 11 experimente}
 \end{figure}
 \FloatBarrier
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/02_all_experiments_best_so_far_val_ber_by_epoch.png}
-    \caption{Evoluția celui mai bun BER obținut până la fiecare epocă pentru toate experimentele}
+    \includegraphics[width=0.7\textwidth]{images/02_all_experiments_best_so_far_val_ber_by_epoch.png}
+    \caption{Evoluția celei mai mici erori obținute până la fiecare epocă pentru toate experimentele}
 \end{figure}
 \FloatBarrier
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/03_all_experiments_train_loss_by_epoch.png}
-    \caption{Evoluția funcției de pierdere pe setul de antrenare pentru toate experimentele}
+    \includegraphics[width=0.7\textwidth]{images/03_all_experiments_train_loss_by_epoch.png}
+    \caption{Evoluția funcției de pierdere pe submulțimea de antrenare pentru toate experimentele}
 \end{figure}
 \FloatBarrier
 
-Rezultatele principale obținute pentru cele $11$ experimente sunt prezentate în tabelul următor. Configurațiile sunt ordonate după cea mai mică valoare a metricii $val\_ber$ obținută în timpul celor $30$ de epoci.
+Rezultatele principale obținute pentru cele $11$ experimente sunt prezentate în tabelul următor. Variantele sunt ordonate crescător după cea mai mică rată a erorii la nivel de bit obținută pe submulțimea de validare în timpul celor $30$ de epoci.
 
 \begin{table}[htbp]
     \centering
@@ -109,11 +111,11 @@ Rezultatele principale obținute pentru cele $11$ experimente sunt prezentate î
         \hline
     \end{tabular}
     }
-    \caption{Comparația celor 11 experimente ordonate după cel mai bun BER pe setul de validare}
+    \caption{Comparația celor 11 experimente ordonate după cel mai bun BER pe submulțimea de validare}
 \end{table}
 \FloatBarrier
 
-Modelul cu cea mai bună performanță globală a fost \textit{batch\_sweep\_\_base\_\_batch\_16}. Acesta a folosit arhitectura \textit{arch\_baseline}, batch size $16$, rata de învățare $10^{-4}$, weight decay $10^{-4}$ și dropout $0.04$. Cel mai bun rezultat a fost obținut la epoca $26$, unde modelul a atins un $val\_ber$ egal cu $0.00045465$.
+Cea mai bună performanță globală a fost obținută de varianta care folosește arhitectura de referință, loturi de câte $16$ imagini, rata de învățare $10^{-4}$, regularizare de tip scădere a greutăților cu valoarea $10^{-4}$ și dezactivare aleatorie de $0.04$. Cel mai bun rezultat a fost obținut la epoca $26$, unde rata erorii la nivel de bit pe submulțimea de validare a fost egală cu $0.00045465$.
 
 \[
     BER_{best} = 0.00045465
@@ -123,13 +125,13 @@ Modelul cu cea mai bună performanță globală a fost \textit{batch\_sweep\_\_b
     BitAccuracy_{best} = 1 - 0.00045465 = 0.99954535
 \]
 
-Prin urmare, acuratețea la nivel de bit pentru cea mai bună configurație a fost aproximativ:
+Prin urmare, acuratețea la nivel de bit pentru cea mai bună variantă a fost aproximativ:
 
 \[
     BitAccuracy_{best} \approx 99.9545\%
 \]
 
-Raportat la cele $882000$ de module QR evaluate pe setul de validare, valoarea $BER = 0.00045465$ corespunde unui număr aproximativ de:
+Raportat la cele $882000$ de module QR evaluate pe submulțimea de validare, această rată a erorii corespunde unui număr aproximativ de:
 
 \[
     882000 \times 0.00045465 \approx 401
@@ -141,12 +143,12 @@ module prezise greșit. În medie, acest lucru înseamnă:
     \overline{erori}_{QR} = 0.2005
 \]
 
-erori de bit pentru fiecare cod QR din setul de validare. Acest rezultat arată că modelul reconstruiește foarte bine structura locală a codurilor QR, numărul mediu de erori pe imagine fiind mult sub un bit.
+erori de bit pentru fiecare cod QR din submulțimea de validare. Acest rezultat arată că modelul reconstruiește foarte bine structura locală a codurilor QR, numărul mediu de erori pe imagine fiind mult sub un bit.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{images/08_ranking_best_val_ber.png}
-    \caption{Clasamentul experimentelor după cel mai bun BER obținut pe setul de validare}
+    \caption{Clasamentul experimentelor după cea mai mică rată a erorii la nivel de bit pe submulțimea de validare}
 \end{figure}
 \FloatBarrier
 
@@ -157,7 +159,7 @@ erori de bit pentru fiecare cod QR din setul de validare. Acest rezultat arată 
 \end{figure}
 \FloatBarrier
 
-În analiza dimensiunii batch-ului, batch size $16$ a obținut cel mai bun rezultat. Comparativ cu batch size $32$, acesta a redus cel mai bun $val\_ber$ de la $0.000678$ la $0.000455$. De asemenea, numărul mediu de erori pe cod QR a scăzut de la $0.2990$ la $0.2005$.
+În analiza dimensiunii lotului, loturile de câte $16$ imagini au dus la cel mai bun rezultat. Comparativ cu loturile de câte $32$ de imagini, eroarea minimă pe validare a scăzut de la $0.000678$ la $0.000455$. De asemenea, numărul mediu de erori pe cod QR a scăzut de la $0.2990$ la $0.2005$.
 
 \[
     BER_{batch=16} = 0.000455
@@ -167,25 +169,25 @@ erori de bit pentru fiecare cod QR din setul de validare. Acest rezultat arată 
     BER_{batch=32} = 0.000678
 \]
 
-Această diferență sugerează că batch-ul mai mic a oferit o generalizare ușor mai bună pentru această problemă. În același timp, batch size $16$ a avut și un timp total de training mai mic, de $92.75$ minute, comparativ cu $117.49$ minute pentru batch size $32$.
+Această diferență sugerează că lotul mai mic a oferit o generalizare ușor mai bună pentru această problemă. În același timp, varianta cu loturi de câte $16$ imagini a avut și un timp total de antrenare mai mic, de $92.75$ minute, comparativ cu $117.49$ minute pentru varianta cu loturi de câte $32$ de imagini.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/05_batch-sweep_val_ber_by_epoch.png}
-        \caption{Influența dimensiunii batch-ului asupra BER-ului pe validare}
+        \caption{Influența dimensiunii lotului asupra erorii pe validare}
     \end{minipage}
-    \hspace{0.03\textwidth}
-    \begin{minipage}{0.48\textwidth}
+    \hspace{0.05\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/06_batch-sweep_train_loss_by_epoch.png}
-        \caption{Influența dimensiunii batch-ului asupra pierderii pe antrenare}
+        \caption{Influența dimensiunii lotului asupra pierderii pe antrenare}
     \end{minipage}
 \end{figure}
 \FloatBarrier
 
-În analiza ratei de învățare, cea mai bună valoare a fost $5 \cdot 10^{-4}$. Această configurație a obținut un $val\_ber$ minim de $0.000485$, foarte apropiat de cel mai bun rezultat global. Rata de învățare $10^{-4}$ a obținut $0.000732$, iar rata de învățare $5 \cdot 10^{-5}$ a obținut $0.000935$.
+În analiza ratei de învățare, cea mai bună valoare a fost $5 \cdot 10^{-4}$. Această variantă a obținut o eroare minimă pe validare egală cu $0.000485$, foarte apropiată de cel mai bun rezultat global. Pentru valoarea $10^{-4}$ s-a obținut o eroare de $0.000732$, iar pentru valoarea $5 \cdot 10^{-5}$ s-a obținut o eroare de $0.000935$.
 
 \[
     BER_{lr=5 \cdot 10^{-4}} = 0.000485
@@ -199,17 +201,17 @@ Această diferență sugerează că batch-ul mai mic a oferit o generalizare uș
     BER_{lr=5 \cdot 10^{-5}} = 0.000935
 \]
 
-Rezultatele indică faptul că rata de învățare mai mare a accelerat convergența și a permis obținerea unei erori mai mici pe setul de validare. Totuși, configurația cu $lr = 5 \cdot 10^{-4}$ a avut o pierdere finală pe antrenare mai mare decât alte configurații, ceea ce sugerează un comportament mai puțin stabil în ultimele epoci, chiar dacă performanța pe validare a fost foarte bună.
+Rezultatele indică faptul că o rată de învățare mai mare a accelerat convergența și a permis obținerea unei erori mai mici pe submulțimea de validare. Totuși, varianta cu rata de învățare $5 \cdot 10^{-4}$ a avut o pierdere finală pe antrenare mai mare decât alte variante, ceea ce sugerează un comportament mai puțin stabil în ultimele epoci, chiar dacă performanța pe validare a fost foarte bună.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/05_lr-sweep_val_ber_by_epoch.png}
-        \caption{Influența ratei de învățare asupra BER-ului pe validare}
+        \caption{Influența ratei de învățare asupra erorii pe validare}
     \end{minipage}
-    \hspace{0.03\textwidth}
-    \begin{minipage}{0.48\textwidth}
+    \hspace{0.05\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/06_lr-sweep_train_loss_by_epoch.png}
         \caption{Influența ratei de învățare asupra pierderii pe antrenare}
@@ -217,7 +219,7 @@ Rezultatele indică faptul că rata de învățare mai mare a accelerat converge
 \end{figure}
 \FloatBarrier
 
-În analiza regularizării, cele trei valori testate pentru weight decay au produs rezultate apropiate. Cea mai bună configurație din această categorie a fost cea cu $weightDecay = 10^{-4}$, care a obținut $val\_ber = 0.000740$. Fără regularizare, modelul a obținut $0.000778$, iar pentru $weightDecay = 10^{-3}$ a obținut $0.000780$.
+În analiza regularizării, cele trei valori testate pentru scăderea greutăților au produs rezultate apropiate. Cea mai bună variantă din această categorie a fost cea cu valoarea $10^{-4}$, care a obținut o eroare minimă pe validare egală cu $0.000740$. Fără această formă de regularizare, modelul a obținut $0.000778$, iar pentru valoarea $10^{-3}$ a obținut $0.000780$.
 
 \[
     BER_{wd=10^{-4}} = 0.000740
@@ -231,17 +233,17 @@ Rezultatele indică faptul că rata de învățare mai mare a accelerat converge
     BER_{wd=10^{-3}} = 0.000780
 \]
 
-Diferențele sunt mici, ceea ce arată că modelul nu este extrem de sensibil la această valoare în intervalul testat. Totuși, regularizarea $10^{-4}$ a oferit cel mai bun compromis în cadrul acestui grup de experimente.
+Diferențele sunt mici, ceea ce arată că modelul nu este foarte sensibil la această valoare în intervalul testat. Totuși, regularizarea cu valoarea $10^{-4}$ a oferit cel mai bun compromis în cadrul acestui grup de experimente.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/05_wd-sweep_val_ber_by_epoch.png}
-        \caption{Influența regularizării asupra BER-ului pe validare}
+        \caption{Influența regularizării asupra erorii pe validare}
     \end{minipage}
-    \hspace{0.03\textwidth}
-    \begin{minipage}{0.48\textwidth}
+    \hspace{0.05\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/06_wd-sweep_train_loss_by_epoch.png}
         \caption{Influența regularizării asupra pierderii pe antrenare}
@@ -249,7 +251,7 @@ Diferențele sunt mici, ceea ce arată că modelul nu este extrem de sensibil la
 \end{figure}
 \FloatBarrier
 
-În comparația arhitecturilor, varianta \textit{arch\_large} a obținut cel mai bun rezultat, cu $val\_ber = 0.000618$. Varianta \textit{arch\_baseline} a fost foarte apropiată, cu $val\_ber = 0.000654$, în timp ce varianta \textit{arch\_small} a obținut $val\_ber = 0.001595$.
+În comparația arhitecturilor, varianta extinsă a obținut cel mai bun rezultat, cu o eroare minimă pe validare egală cu $0.000618$. Varianta de referință a fost foarte apropiată, cu o eroare de $0.000654$, în timp ce varianta redusă a obținut o eroare de $0.001595$.
 
 \[
     BER_{large} = 0.000618
@@ -263,7 +265,7 @@ Diferențele sunt mici, ceea ce arată că modelul nu este extrem de sensibil la
     BER_{small} = 0.001595
 \]
 
-Rezultatul obținut de arhitectura mare arată că adăugarea de adâncime poate îmbunătăți performanța, dar câștigul față de arhitectura de bază este redus. În schimb, modelul mic are o eroare semnificativ mai mare, deși este mult mai eficient din punct de vedere al timpului de antrenare și al numărului de parametri.
+Rezultatul obținut de arhitectura extinsă arată că adăugarea de profunzime poate îmbunătăți performanța, dar câștigul față de arhitectura de referință este redus. În schimb, modelul redus are o eroare semnificativ mai mare, deși este mult mai eficient din punct de vedere al timpului de antrenare și al numărului de parametri.
 
 \[
     Parametri_{small} = 546001
@@ -277,17 +279,17 @@ Rezultatul obținut de arhitectura mare arată că adăugarea de adâncime poate
     Parametri_{large} = 3360161
 \]
 
-Modelul \textit{arch\_small} a avut cel mai mic timp mediu pe epocă, egal cu $94.21$ secunde, și cel mai mic timp total de training, egal cu $47.10$ minute. Cu toate acestea, eroarea sa medie a fost de $0.7035$ biți pe cod QR, comparativ cu $0.2005$ biți pentru cel mai bun model global. Astfel, arhitectura mică este avantajoasă ca viteză, dar nu oferă aceeași precizie.
+Varianta redusă a avut cel mai mic timp mediu pe epocă, egal cu $94.21$ secunde, și cel mai mic timp total de antrenare, egal cu $47.10$ minute. Cu toate acestea, eroarea sa medie a fost de $0.7035$ biți pe cod QR, comparativ cu $0.2005$ biți pentru cea mai bună variantă globală. Astfel, arhitectura redusă este avantajoasă ca viteză, dar nu oferă aceeași precizie.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/05_arch-compare_val_ber_by_epoch.png}
-        \caption{Comparația arhitecturilor după BER-ul pe validare}
+        \caption{Comparația arhitecturilor după eroarea pe validare}
     \end{minipage}
-    \hspace{0.03\textwidth}
-    \begin{minipage}{0.48\textwidth}
+    \hspace{0.05\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/06_arch-compare_train_loss_by_epoch.png}
         \caption{Comparația arhitecturilor după pierderea pe antrenare}
@@ -295,17 +297,17 @@ Modelul \textit{arch\_small} a avut cel mai mic timp mediu pe epocă, egal cu $9
 \end{figure}
 \FloatBarrier
 
-Pentru analiza costului de antrenare, au fost urmărite timpul total de training și timpul mediu pe epocă. Cel mai rapid model a fost \textit{arch\_small}, cu $94.21$ secunde pe epocă. Cel mai bun model global, \textit{batch\_sweep\_\_base\_\_batch\_16}, a avut un timp mediu de $185.51$ secunde pe epocă și un timp total de $92.75$ minute. Modelul \textit{arch\_large} a avut un timp mediu de $255.01$ secunde pe epocă și un timp total de $127.50$ minute.
+Pentru analiza costului de antrenare, au fost urmărite timpul total de antrenare și timpul mediu pe epocă. Cea mai rapidă variantă a fost cea cu arhitectură redusă, cu $94.21$ secunde pe epocă. Cea mai bună variantă globală a avut un timp mediu de $185.51$ secunde pe epocă și un timp total de $92.75$ minute. Varianta cu arhitectură extinsă a avut un timp mediu de $255.01$ secunde pe epocă și un timp total de $127.50$ minute.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/11_total_training_minutes_by_experiment.png}
         \caption{Timpul total de antrenare pentru fiecare experiment}
     \end{minipage}
-    \hspace{0.03\textwidth}
-    \begin{minipage}{0.48\textwidth}
+    \hspace{0.05\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/12_avg_epoch_seconds_by_experiment.png}
         \caption{Timpul mediu pe epocă pentru fiecare experiment}
@@ -313,24 +315,24 @@ Pentru analiza costului de antrenare, au fost urmărite timpul total de training
 \end{figure}
 \FloatBarrier
 
-Relația dintre performanță și cost poate fi observată mai clar în graficele de tip scatter. Acestea compară cel mai bun $val\_ber$ cu timpul total de antrenare, numărul de parametri și timpul mediu pe epocă. Din aceste grafice se observă că modelul cu batch size $16$ oferă cel mai bun rezultat general, fără a avea cel mai mare cost de antrenare. În schimb, modelul mic este cel mai eficient, dar pierde din precizie, iar modelul mare oferă o îmbunătățire față de baseline, însă cu un cost mai ridicat.
+Relația dintre performanță și cost poate fi observată mai clar în graficele de dispersie. Acestea compară cea mai mică eroare pe validare cu timpul total de antrenare, numărul de parametri și timpul mediu pe epocă. Din aceste grafice se observă că varianta cu loturi de câte $16$ imagini oferă cel mai bun rezultat general, fără a avea cel mai mare cost de antrenare. În schimb, varianta redusă este cea mai eficientă, dar pierde din precizie, iar varianta extinsă oferă o îmbunătățire față de varianta de referință, însă cu un cost mai ridicat.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.75\textwidth]{images/13_scatter_best_val_ber_vs_total_training_minutes.png}
+    \includegraphics[width=0.6\textwidth]{images/13_scatter_best_val_ber_vs_total_training_minutes.png}
     \caption{Relația dintre BER-ul minim și timpul total de antrenare}
 \end{figure}
 \FloatBarrier
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/14_scatter_best_val_ber_vs_parameters.png}
         \caption{Relația dintre BER-ul minim și numărul de parametri}
     \end{minipage}
-    \hspace{0.03\textwidth}
-    \begin{minipage}{0.48\textwidth}
+    \hspace{0.05\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/15_scatter_best_val_ber_vs_avg_epoch_seconds.png}
         \caption{Relația dintre BER-ul minim și timpul mediu pe epocă}
@@ -338,19 +340,19 @@ Relația dintre performanță și cost poate fi observată mai clar în graficel
 \end{figure}
 \FloatBarrier
 
-A fost analizată și stabilitatea antrenării. Pentru fiecare experiment s-a comparat valoarea finală a metricii $val\_ber$ cu cea mai bună valoare obținută în timpul antrenării. O diferență mică între aceste două valori indică faptul că modelul rămâne stabil până la finalul celor $30$ de epoci. Unele configurații au obținut cel mai bun rezultat chiar în ultima epocă, de exemplu $lr = 5 \cdot 10^{-5}$, $weightDecay = 10^{-4}$, $weightDecay = 10^{-3}$ și \textit{arch\_small}. Totuși, acestea nu au fost cele mai bune configurații ca performanță absolută.
+A fost analizată și stabilitatea antrenării. Pentru fiecare experiment s-a comparat eroarea finală pe validare cu cea mai mică eroare obținută în timpul antrenării. O diferență mică între aceste două valori indică faptul că modelul rămâne stabil până la finalul celor $30$ de epoci. Unele variante au obținut cel mai bun rezultat chiar în ultima epocă, de exemplu cele cu o rată de învățare mai mică, cu regularizare diferită sau cu arhitectură redusă. Totuși, acestea nu au fost cele mai bune variante ca performanță absolută.
 
-Cel mai stabil experiment pe ultimele $5$ epoci a fost configurația fără weight decay, care a avut o deviație standard a $val\_ber$ egală cu $0.00008770$. Aceasta nu a fost însă configurația cu cel mai mic BER, ceea ce arată că stabilitatea finală și performanța maximă nu coincid întotdeauna.
+Cel mai stabil experiment pe ultimele $5$ epoci a fost cel fără regularizare de tip scădere a greutăților, care a avut o deviație standard a erorii pe validare egală cu $0.00008770$. Aceasta nu a fost însă varianta cu cea mai mică eroare, ceea ce arată că stabilitatea finală și performanța maximă nu coincid întotdeauna.
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/16_best_epoch_by_experiment.png}
         \caption{Epoca la care fiecare experiment atinge cel mai bun BER}
     \end{minipage}
     \hspace{0.03\textwidth}
-    \begin{minipage}{0.48\textwidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=1\textwidth]{images/17_final_minus_best_val_ber.png}
         \caption{Diferența dintre BER-ul final și cel mai bun BER obținut}
@@ -360,16 +362,12 @@ Cel mai stabil experiment pe ultimele $5$ epoci a fost configurația fără weig
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\textwidth]{images/18_last_5_val_ber_std.png}
+    \includegraphics[width=0.9\textwidth]{images/18_last_5_val_ber_std.png}
     \caption{Deviația standard a BER-ului pe ultimele 5 epoci}
 \end{figure}
 \FloatBarrier
 
-În urma experimentelor, configurația aleasă ca model final este \textit{batch\_sweep\_\_base\_\_batch\_16}, deoarece a obținut cea mai mică rată a erorii la nivel de bit pe setul de validare. Deși configurația cu $lr = 5 \cdot 10^{-4}$ a fost foarte apropiată, diferența de BER favorizează modelul cu batch size $16$.
-
-\[
-    Experiment_{final} = batch\_sweep\_\_base\_\_batch\_16
-\]
+În urma experimentelor, varianta aleasă ca model final este cea care folosește arhitectura de referință, loturi de câte $16$ imagini, rata de învățare $10^{-4}$, regularizare de tip scădere a greutăților cu valoarea $10^{-4}$ și dezactivare aleatorie de $0.04$. Aceasta a fost aleasă deoarece a obținut cea mai mică rată a erorii la nivel de bit pe submulțimea de validare. Deși varianta cu rata de învățare $5 \cdot 10^{-4}$ a fost foarte apropiată, diferența de eroare favorizează modelul cu loturi mai mici.
 
 \[
     BER_{final} = 0.00045465
@@ -383,9 +381,7 @@ Cel mai stabil experiment pe ultimele $5$ epoci a fost configurația fără weig
     \overline{erori}_{QR} = 0.2005
 \]
 
-Aceste rezultate arată că modelul QRBitNet reușește să reconstruiască matricea QR cu o acuratețe foarte ridicată la nivel de modul. Față de rezultatele anterioare, noua configurație experimentală folosește un set de date mai mare, o arhitectură mai complexă și o comparație mai clară între hiperparametri. Cel mai bun model greșește, în medie, aproximativ un bit la fiecare cinci coduri QR din setul de validare, ceea ce indică o capacitate foarte bună de reconstrucție binară.
-
-Totuși, trebuie menționat că aceste rezultate sunt raportate pe setul de validare, nu pe un set de test separat. Prin urmare, ele sunt potrivite pentru compararea configurațiilor și alegerea modelului final, dar performanța finală a sistemului ar trebui confirmată ulterior și pe un set de test independent. Chiar și în aceste condiții, valorile obținute pentru $val\_ber$ și pentru numărul mediu de erori pe cod QR demonstrează că modelul învață structura codurilor QR și poate produce matrici binare foarte apropiate de cele reale.
+Aceste rezultate arată că modelul CNN reușește să reconstruiască matricea QR cu o acuratețe foarte ridicată la nivel de modul, folosind un set de date mare, o arhitectură complexă și o comparație clară între hiperparametri. Cel mai bun model greșește, în medie, aproximativ un bit la fiecare cinci coduri QR din submulțimea de validare, ceea ce indică o capacitate foarte bună de reconstrucție binară. Rata erorii la nivel de bit și numărul mediu de erori pe cod QR demonstrează că modelul învață structura codurilor QR și poate produce matrici binare foarte apropiate de cele reale.
 
 \section{Concluzii}
 

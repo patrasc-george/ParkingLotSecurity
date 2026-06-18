@@ -1,55 +1,51 @@
-## Table of Contents
+# Parking Lots Security
 
-1. [About](#about)  
-2. [Build Requirements](#build-requirements)  
-3. [Installation](#installation)  
-4. [Website](#website)  
-5. [Poster](#poster)  
+Parking Lots Security is a parking management system focused on **Computer Vision, Image Processing and Machine Learning**. The core of the project is represented by the automatic interpretation of visual data from parking lots: detecting and recognizing license plates from vehicle images, detecting QR codes from parking tickets images, and using a machine learning model to reconstruct and decode damaged or distorted QR codes.
 
-## About
+Around these visual recognition pipelines, the project includes a local C++ desktop application, an Angular web application, a deployed server and a cloud-hosted database. The desktop application is used locally by the parking operator and communicates with the server in real time, sending vehicle and ticket information and receiving updates from the rest of the system. The website is deployed on a public domain and allows users to manage their accounts, vehicles, subscriptions and parking payments online.
 
-The application, written in C++, aims to obtain information related to the entry and exit of vehicles in parking lots. Using various image processing techniques, the license plate number is identified in the image, segmented, rectified, read with the help of an AI model, and stored in database. A website was also implemented using Angular, which is hosted online and communicates in real-time with the desktop application and database, intended for users to pay parking fees and manage subscriptions. 
+## System Architecture
 
-## Build Requirements
+The project is organized around three main components:
 
-* C++ 17
-* CMake 3.16.0
-* PostgreSQL 13.0
-* cpp-httplib 0.18.0
-* POCO 1.5.1
-* Boost 1.75.0
-* nlohmann/json 3.10.0
-* Qt 6.2.4
-* OpenCV 4.5.0
-* Tesseract 5.4.1
-* libqrencode 4.1.1
+1. **Desktop application** - a local C++/Qt application used in the parking lot for vehicle entry and exit management. It communicates with the server in real time and includes the computer vision pipeline for license plate detection and recognition.
+2. **Web application** - an Angular website used by clients to manage accounts, subscriptions, vehicles and parking payments. It also includes the QR code identification pipeline and uses the AI model to decode the detected QR code for ticket validation.
+3. **Server and database** - the deployed backend layer that connects the desktop application, the website and the database. It stores all the data and keeps the whole ecosystem synchronized. It exposes HTTP endpoints for the website and uses real-time communication for operational updates between the server and the desktop application.
 
-## Installation
+![System architecture](documentation/UML.png)
 
-1. Install [CMake](https://cmake.org/download/) (at least version 3.16.0)
-2. Install [PostgreSQL](https://www.postgresql.org/download/) (at least version 13.0)
-3. Install [cpp-httplib](https://github.com/yhirose/cpp-httplib) (at least version 0.18.0)
-4. Install [POCO](https://github.com/pocoproject/poco) (at least version 1.5.1)
-5. Install [Boost](https://www.boost.org/users/download/) (at least version 1.75.0)
-6. Install [nlohmann/json](https://github.com/nlohmann/json) (at least version 3.10.0)
-7. Install [Qt](https://www.qt.io/download) (at least version 6.2.4)
-8. Install [OpenCV](https://opencv.org/releases/) (at least version 4.5.0)
-9. Install [Tesseract](https://tesseract-ocr.github.io/tessdoc/Compiling.html) (at least version 5.4.1)
-10. Install [libqrencode](https://github.com/fukuchi/libqrencode) (at least version 4.1.1)
-11. Clone this repository
-12. Build the project by running the `build.bat` file
-13. Run the project generated in the `build` folder (e.g. `build\ParkingLotsSecurity.sln` for Visual Studio)
+## Desktop Application
 
-## Website
+The desktop application is the local component used by the parking operator. It allows the operator to process vehicle entries and exits, view detected license plates, manage tickets, check parking occupancy and access parking statistics.
 
-The page for paying the parking fee. Users can make the payment either by entering the license plate number (if detected) or by uploading an image of the parking ticket to extract and decode the QR code.
+The interface is built with Qt and is designed around the operational flow of a parking lot: loading vehicle images, detecting the license plate, validating the vehicle status and updating the parking records.
 
-![Parking fee payment page – input fields for license plate and ticket upload](./documentation/website1.png)  
+![Desktop application UI](documentation/gui.png)
 
-The subscription management page. The displayed subscription includes two vehicles, one of which is currently in the parking lot and has its history expanded for viewing.
+The application also includes a license plate recognition pipeline. The image is processed in multiple stages so the license plate can be detected, segmented, rectified and prepared for character recognition. The final result is used by the application to identify the vehicle and send the relevant information to the server.
 
-![Subscription management page – list of vehicles with expanded history for one](./documentation/website2.png)  
+![License plate recognition pipeline](documentation/license_plate_detection.png)
 
-## Poster
+## Web Application
 
-![AFCO 2024 Poster](./documentation/poster_afco_2024.jpg)
+The web application is the user-facing part of the system. It allows users to create accounts, log in, manage their profile, add vehicles, manage parking subscriptions and view parking history. It is developed in Angular and communicates with the server through HTTP requests.
+
+![Web application](documentation/web4.png)
+
+The website is also connected to the QR-based ticket validation flow. QR codes are used as part of the parking payment and ticket validation process, allowing the system to identify and validate parking sessions when needed. For this step, the system uses an image processing pipeline that detects the QR code region, identifies its position in the image and rectifies it before decoding.
+
+![QR code detection pipeline](documentation/qr_pipeline.png)
+
+After the QR code is detected and rectified, a CNN-based model is used to reconstruct the QR matrix before the final decoding step. This makes the QR flow more robust when the input image is affected by perspective, blur, noise or imperfect lighting.
+
+![QR decoding CNN architecture](documentation/arhitecture.png)
+
+## Server and Database
+
+The server is the central component that connects the entire ecosystem. It handles requests from the website, receives operational data from the desktop application, validates parking information, communicates with the database and encrypts exchanged messages.
+
+The database stores the main system data, including accounts, vehicles, subscriptions, tickets, payments and parking history. Since the backend and database are deployed online, the desktop application and the website can share the same data source and remain synchronized.
+
+![Database diagram](documentation/db.png)
+
+Through this architecture, the system separates local parking operations from user-facing web features, while keeping all components connected through a centralized backend.

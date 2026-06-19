@@ -12,7 +12,7 @@ The project is organized around three main components:
 2. **Web application** - an Angular website used by clients to manage accounts, subscriptions, vehicles and parking payments. It also includes the QR code identification pipeline and uses the AI model to decode the detected QR code for ticket validation.
 3. **Server and database** - the deployed backend layer that connects the desktop application, the website and the database. It stores all the data and keeps the whole ecosystem synchronized. It exposes HTTP endpoints for the website and uses real-time communication for operational updates between the server and the desktop application.
 
-![System architecture](documentation/UML.png)
+![System architecture](documentation/uml.png)
 
 ## Desktop Application
 

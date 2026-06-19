@@ -46,6 +46,6 @@ The server is the central component that connects the entire ecosystem. It handl
 
 The database stores the main system data, including accounts, vehicles, subscriptions, tickets, payments and parking history. Since the backend and database are deployed online, the desktop application and the website can share the same data source and remain synchronized.
 
-![Database diagram](documentation/db.png)
+![Database diagram](documentation/bd.png)
 
 Through this architecture, the system separates local parking operations from user-facing web features, while keeping all components connected through a centralized backend.

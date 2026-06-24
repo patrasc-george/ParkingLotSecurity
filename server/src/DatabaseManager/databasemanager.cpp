@@ -151,8 +151,8 @@ DatabaseManager& DatabaseManager::getInstance()
 std::vector<std::string> DatabaseManager::getVehicles()
 {
 	std::vector<std::string> vehicles;
-	const char* sql = "SELECT id, license_plate, TO_CHAR(date_time, 'DD-MM-YYYY HH24:MI:SS'), TO_CHAR(ticket, 'DD-MM-YYYY HH24:MI:SS'), total_amount, is_paid FROM vehicles;";
-
+	const char* sql = "SELECT id, license_plate, TO_CHAR(date_time, 'DD-MM-YYYY HH24:MI:SS'), TO_CHAR(ticket, 'DD-MM-YYYY HH24:MI:SS'), total_amount, is_paid FROM vehicles ORDER BY id ASC;";
+	
 	PGresult* result = PQexec(conn, sql);
 
 	if (PQresultStatus(result) != PGRES_TUPLES_OK)
@@ -974,7 +974,7 @@ std::vector<std::string> DatabaseManager::getTickets()
 {
 	std::vector<std::string> tickets;
 
-	const char* sql = "SELECT ticket_id, license_plate, TO_CHAR(date_time, 'DD-MM-YYYY HH24:MI:SS') FROM tickets;";
+	const char* sql = "SELECT ticket_id, license_plate, TO_CHAR(date_time, 'DD-MM-YYYY HH24:MI:SS') FROM tickets ORDER BY id ASC;";
 
 	PGresult* result = PQexec(conn, sql);
 
